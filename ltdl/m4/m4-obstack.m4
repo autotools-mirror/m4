@@ -30,7 +30,7 @@ AC_DEFUN([M4_OBSTACK],
 AC_BEFORE([gl_OBSTACK], [M4_OBSTACK])
 AC_ARG_WITH([included-obstack],
     [AS_HELP_STRING([--with-included-obstack],
-		    [use the obstack implementation included here])])
+                    [use the obstack implementation included here])])
 
 AC_CHECK_HEADERS([obstack.h], [], [], [AC_INCLUDES_DEFAULT])
 

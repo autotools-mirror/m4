@@ -80,7 +80,7 @@ BEGIN {
   if ($0 ~ /^@example$/)
     {
       if (seq == 0)
-	new_group(node);
+        new_group(node);
       seq++;
       printf ("echo \"$at_srcdir/%s:%d:\"\n", FILENAME, NR)
       next;
@@ -89,20 +89,20 @@ BEGIN {
   if ($0 ~ /^@end example$/)
     {
       if (file != "")
-	{
-	  if (output || error)
-	    {
-	      fatal("while getting file " file      \
-		    " found output = " output ","  \
-		    " found error = " error);
-	    }
-	  input = normalize(input);
-	  printf ("AT_DATA([[%s]],\n[[%s]])\n\n", file, input);
-	}
+        {
+          if (output || error)
+            {
+              fatal("while getting file " file      \
+                    " found output = " output ","  \
+                    " found error = " error);
+            }
+          input = normalize(input);
+          printf ("AT_DATA([[%s]],\n[[%s]])\n\n", file, input);
+        }
       else
-	{
-	  new_test(input, status, output, error, options, xfail, examples);
-	}
+        {
+          new_test(input, status, output, error, options, xfail, examples);
+        }
       status = xfail = examples = 0;
       file = input = output = error = options = "";
       next;
@@ -183,11 +183,11 @@ function new_test(input, status, output, error, options, xfail, examples) {
       printf ("$SED -e \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
       printf ("  < expout1 > expout\n\n");
       if (error)
-	{
-	  printf ("AT_DATA([experr1],\n[[%s]])\n", error);
-	  printf ("$SED \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
-	  printf ("  < experr1 > experr\n\n");
-	}
+        {
+          printf ("AT_DATA([experr1],\n[[%s]])\n", error);
+          printf ("$SED \"s|examples|$abs_top_srcdir/examples|g\" \\\n");
+          printf ("  < experr1 > experr\n\n");
+        }
       options = options " -I\"$abs_top_srcdir/examples\"";
     }
 

@@ -84,13 +84,13 @@
 
 static const char*  module_dlerror (void);
 static int	    module_remove  (m4 *context, m4_module *module,
-				    m4_obstack *obs);
+                                    m4_obstack *obs);
 
 static void	    install_builtin_table (m4*, m4_module *);
 static void	    install_macro_table   (m4*, m4_module *);
 
 static int	    m4__module_interface	(lt_dlhandle handle,
-						 const char *id_string);
+                                                 const char *id_string);
 
 static lt_dlinterface_id iface_id = NULL;
 
@@ -108,7 +108,7 @@ m4_get_module_name (const m4_module *module)
 
 void *
 m4_module_import (m4 *context, const char *module_name,
-		  const char *symbol_name, m4_obstack *obs)
+                  const char *symbol_name, m4_obstack *obs)
 {
   m4_module *	module		= m4__module_find (module_name);
   void *	symbol_address	= NULL;
@@ -125,9 +125,9 @@ m4_module_import (m4 *context, const char *module_name,
       symbol_address = lt_dlsym (module->handle, symbol_name);
 
       if (!symbol_address)
-	m4_error (context, 0, 0, NULL,
-		  _("cannot load symbol `%s' from module `%s'"),
-		  symbol_name, module_name);
+        m4_error (context, 0, 0, NULL,
+                  _("cannot load symbol `%s' from module `%s'"),
+                  symbol_name, module_name);
     }
 
   return symbol_address;
@@ -147,17 +147,17 @@ install_builtin_table (m4 *context, m4_module *module)
 
       m4__set_symbol_value_builtin (value, &module->builtins[i]);
       if (m4_get_prefix_builtins_opt (context))
-	name = xasprintf ("m4_%s", name);
+        name = xasprintf ("m4_%s", name);
 
       m4_symbol_pushdef (M4SYMTAB, name, strlen (name), value);
 
       if (m4_get_prefix_builtins_opt (context))
-	free ((char *) name);
+        free ((char *) name);
     }
   if (i)
     m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-		      _("module %s: builtins loaded"),
-		      m4_get_module_name (module));
+                      _("module %s: builtins loaded"),
+                      m4_get_module_name (module));
 }
 
 static void
@@ -173,24 +173,24 @@ install_macro_table (m4 *context, m4_module *module)
   if (mp)
     {
       for (; mp->name != NULL; mp++)
-	{
-	  m4_symbol_value *value = m4_symbol_value_create ();
-	  size_t len = strlen (mp->value);
+        {
+          m4_symbol_value *value = m4_symbol_value_create ();
+          size_t len = strlen (mp->value);
 
-	  /* Sanity check that builtins meet the required interface.  */
-	  assert (mp->min_args <= mp->max_args);
+          /* Sanity check that builtins meet the required interface.  */
+          assert (mp->min_args <= mp->max_args);
 
-	  m4_set_symbol_value_text (value, xmemdup0 (mp->value, len), len, 0);
-	  VALUE_MODULE (value) = module;
-	  VALUE_MIN_ARGS (value) = mp->min_args;
-	  VALUE_MAX_ARGS (value) = mp->max_args;
+          m4_set_symbol_value_text (value, xmemdup0 (mp->value, len), len, 0);
+          VALUE_MODULE (value) = module;
+          VALUE_MIN_ARGS (value) = mp->min_args;
+          VALUE_MAX_ARGS (value) = mp->max_args;
 
-	  m4_symbol_pushdef (M4SYMTAB, mp->name, strlen (mp->name), value);
-	}
+          m4_symbol_pushdef (M4SYMTAB, mp->name, strlen (mp->name), value);
+        }
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: macros loaded"),
-			m4_get_module_name (module));
+                        _("module %s: macros loaded"),
+                        m4_get_module_name (module));
     }
 }
 
@@ -242,8 +242,8 @@ m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
   if (errors)
     {
       m4_error (context, EXIT_FAILURE, 0, NULL,
-		_("cannot unload module `%s': %s"),
-		name ? name : MODULE_SELF_NAME, module_dlerror ());
+                _("cannot unload module `%s': %s"),
+                name ? name : MODULE_SELF_NAME, module_dlerror ());
     }
 }
 
@@ -261,9 +261,9 @@ m4__module_interface (lt_dlhandle handle, const char *id_string)
 
   /* A valid m4 module must provide at least one of these symbols.  */
   return !(lt_dlsym (handle, INIT_SYMBOL)
-	   || lt_dlsym (handle, FINISH_SYMBOL)
-	   || lt_dlsym (handle, BUILTIN_SYMBOL)
-	   || lt_dlsym (handle, MACRO_SYMBOL));
+           || lt_dlsym (handle, FINISH_SYMBOL)
+           || lt_dlsym (handle, BUILTIN_SYMBOL)
+           || lt_dlsym (handle, MACRO_SYMBOL));
 }
 
 
@@ -281,7 +281,7 @@ m4__module_next (m4_module *module)
     {
       handle = lt_dlhandle_iterate (iface_id, handle);
       if (!handle)
-	return NULL;
+        return NULL;
       module = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
     }
   while (!module);
@@ -322,7 +322,7 @@ m4__module_init (m4 *context)
   if (iface_id)
     {
       m4_error (context, 0, 0, NULL,
-		_("multiple module loader initializations"));
+                _("multiple module loader initializations"));
       return;
     }
 
@@ -335,16 +335,16 @@ m4__module_init (m4 *context)
       iface_id = lt_dlinterface_register ("m4 libm4", m4__module_interface);
 
       if (!iface_id)
-	{
-	  const char *error_msg = _("libltdl client registration failed");
+        {
+          const char *error_msg = _("libltdl client registration failed");
 
-	  lt_dlseterror (lt_dladderror (error_msg));
+          lt_dlseterror (lt_dladderror (error_msg));
 
-	  /* No need to check error statuses from the calls above -- If
-	     either fails for some reason, a diagnostic will be set for
-	     lt_dlerror() anyway.  */
-	  ++errors;
-	}
+          /* No need to check error statuses from the calls above -- If
+             either fails for some reason, a diagnostic will be set for
+             lt_dlerror() anyway.  */
+          ++errors;
+        }
     }
 
   if (!errors)
@@ -357,13 +357,13 @@ m4__module_init (m4 *context)
       char *path = getenv (USER_MODULE_PATH_ENV);
 
       if (path)
-	errors = lt_dlinsertsearchdir (lt_dlgetsearchpath (), path);
+        errors = lt_dlinsertsearchdir (lt_dlgetsearchpath (), path);
     }
 
   /* Couldn't initialize the module system; diagnose and exit.  */
   if (errors)
     m4_error (context, EXIT_FAILURE, 0, NULL,
-	      _("failed to initialize module loader: %s"), module_dlerror ());
+              _("failed to initialize module loader: %s"), module_dlerror ());
 
 #ifdef DEBUG_MODULES
   fputs ("Module loader initialized.\n", stderr);
@@ -406,103 +406,103 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 
 #ifdef DEBUG_MODULES
       if (info->ref_count > 1)
-	{
-	  xfprintf (stderr, "module %s: now has %d libtool references.",
-		    name, info->ref_count);
-	}
+        {
+          xfprintf (stderr, "module %s: now has %d libtool references.",
+                    name, info->ref_count);
+        }
 #endif /* DEBUG_MODULES */
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: opening file %s"),
-			name ? name : MODULE_SELF_NAME,
-			quotearg_style (locale_quoting_style, info->filename));
+                        _("module %s: opening file %s"),
+                        name ? name : MODULE_SELF_NAME,
+                        quotearg_style (locale_quoting_style, info->filename));
 
       /* Provide the m4_module corresponding to the lt_dlhandle, if
-	 not yet created.  */
+         not yet created.  */
       module = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
       if (!module)
-	{
-	  void *old;
-	  const char *err;
-	  const m4_builtin *bp;
+        {
+          void *old;
+          const char *err;
+          const m4_builtin *bp;
 
-	  module = (m4_module *) xzalloc (sizeof *module);
-	  module->handle = handle;
+          module = (m4_module *) xzalloc (sizeof *module);
+          module->handle = handle;
 
-	  /* TODO - change module interface to return function pointer
-	     that supplies both table and length of table, rather than
-	     returning data pointer that must have a sentinel
-	     entry?  */
-	  bp = (m4_builtin *) lt_dlsym (module->handle, BUILTIN_SYMBOL);
-	  if (bp)
-	    {
-	      const m4_builtin *tmp;
-	      m4__builtin *builtin;
-	      for (tmp = bp; tmp->name; tmp++)
-		module->builtins_len++;
-	      module->builtins =
-		(m4__builtin *) xnmalloc (module->builtins_len,
-					  sizeof *module->builtins);
-	      for (builtin = module->builtins; bp->name != NULL;
-		   bp++, builtin++)
-		{
-		  /* Sanity check that builtins meet the required
-		     interface.  */
-		  assert (bp->min_args <= bp->max_args);
-		  assert (bp->min_args > 0
-			  || (bp->flags & (M4_BUILTIN_BLIND
-					   | M4_BUILTIN_SIDE_EFFECT)) == 0);
-		  assert (bp->max_args
-			  || (bp->flags & M4_BUILTIN_FLATTEN_ARGS) == 0);
-		  assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
+          /* TODO - change module interface to return function pointer
+             that supplies both table and length of table, rather than
+             returning data pointer that must have a sentinel
+             entry?  */
+          bp = (m4_builtin *) lt_dlsym (module->handle, BUILTIN_SYMBOL);
+          if (bp)
+            {
+              const m4_builtin *tmp;
+              m4__builtin *builtin;
+              for (tmp = bp; tmp->name; tmp++)
+                module->builtins_len++;
+              module->builtins =
+                (m4__builtin *) xnmalloc (module->builtins_len,
+                                          sizeof *module->builtins);
+              for (builtin = module->builtins; bp->name != NULL;
+                   bp++, builtin++)
+                {
+                  /* Sanity check that builtins meet the required
+                     interface.  */
+                  assert (bp->min_args <= bp->max_args);
+                  assert (bp->min_args > 0
+                          || (bp->flags & (M4_BUILTIN_BLIND
+                                           | M4_BUILTIN_SIDE_EFFECT)) == 0);
+                  assert (bp->max_args
+                          || (bp->flags & M4_BUILTIN_FLATTEN_ARGS) == 0);
+                  assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
 
-		  memcpy (&builtin->builtin, bp, sizeof *bp);
-		  builtin->builtin.name = xstrdup (bp->name);
-		  builtin->module = module;
-		}
-	    }
-	  qsort (module->builtins, module->builtins_len,
-		 sizeof *module->builtins, compare_builtin_CB);
+                  memcpy (&builtin->builtin, bp, sizeof *bp);
+                  builtin->builtin.name = xstrdup (bp->name);
+                  builtin->module = module;
+                }
+            }
+          qsort (module->builtins, module->builtins_len,
+                 sizeof *module->builtins, compare_builtin_CB);
 
-	  /* clear out any stale errors, since we have to use
-	     lt_dlerror to distinguish between success and
-	     failure.  */
-	  lt_dlerror ();
-	  old = lt_dlcaller_set_data (iface_id, handle, module);
-	  assert (!old);
-	  err = lt_dlerror ();
-	  if (err)
-	    m4_error (context, EXIT_FAILURE, 0, NULL,
-		      _("unable to load module `%s': %s"), name, err);
-	}
+          /* clear out any stale errors, since we have to use
+             lt_dlerror to distinguish between success and
+             failure.  */
+          lt_dlerror ();
+          old = lt_dlcaller_set_data (iface_id, handle, module);
+          assert (!old);
+          err = lt_dlerror ();
+          if (err)
+            m4_error (context, EXIT_FAILURE, 0, NULL,
+                      _("unable to load module `%s': %s"), name, err);
+        }
 
       /* Find and run any initializing function in the opened module,
-	 each time the module is opened.  */
+         each time the module is opened.  */
       module->refcount++;
       init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
       if (init_func)
-	{
-	  init_func (context, module, obs);
+        {
+          init_func (context, module, obs);
 
-	  m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			    _("module %s: init hook called"), name);
-	}
+          m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+                            _("module %s: init hook called"), name);
+        }
       else if (!lt_dlsym (handle, FINISH_SYMBOL)
-	       && !lt_dlsym (handle, BUILTIN_SYMBOL)
-	       && !lt_dlsym (handle, MACRO_SYMBOL))
-	{
-	  m4_error (context, EXIT_FAILURE, 0, NULL,
-		    _("module `%s' has no entry points"), name);
-	}
+               && !lt_dlsym (handle, BUILTIN_SYMBOL)
+               && !lt_dlsym (handle, MACRO_SYMBOL))
+        {
+          m4_error (context, EXIT_FAILURE, 0, NULL,
+                    _("module `%s' has no entry points"), name);
+        }
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: opened"), name);
+                        _("module %s: opened"), name);
     }
   else
     {
       /* Couldn't open the module; diagnose and exit. */
       m4_error (context, EXIT_FAILURE, 0, NULL,
-		_("cannot open module `%s': %s"), name, module_dlerror ());
+                _("cannot open module `%s': %s"), name, module_dlerror ());
     }
 
   return module;
@@ -519,9 +519,9 @@ m4__module_exit (m4 *context)
       m4_module *      pending	= module;
 
       /* If we are about to unload the final reference, move on to the
-	 next module before we unload the current one.  */
+         next module before we unload the current one.  */
       if (pending->refcount <= 1)
-	module = m4__module_next (module);
+        module = m4__module_next (module);
 
       errors = module_remove (context, pending, NULL);
     }
@@ -536,7 +536,7 @@ m4__module_exit (m4 *context)
   if (errors)
     {
       m4_error (context, EXIT_FAILURE, 0, NULL,
-		_("cannot unload all modules: %s"), module_dlerror ());
+                _("cannot unload all modules: %s"), module_dlerror ());
     }
 }
 
@@ -585,20 +585,20 @@ module_remove (m4 *context, m4_module *module, m4_obstack *obs)
   if (info->ref_count > 1)
     {
       xfprintf (stderr, "module %s: now has %d libtool references.",
-		name, info->ref_count - 1);
+                name, info->ref_count - 1);
     }
 #endif /* DEBUG_MODULES */
 
   if (module->refcount-- == 1)
     {
       /* Remove the table references only when ref_count is *exactly*
-	 equal to 1.  If module_close is called again on a
-	 resident module after the references have already been
-	 removed, we needn't try to remove them again!  */
+         equal to 1.  If module_close is called again on a
+         resident module after the references have already been
+         removed, we needn't try to remove them again!  */
       m4__symtab_remove_module_references (M4SYMTAB, module);
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: symbols unloaded"), name);
+                        _("module %s: symbols unloaded"), name);
       last_reference = true;
     }
 
@@ -608,48 +608,48 @@ module_remove (m4 *context, m4_module *module, m4_obstack *obs)
       finish_func (context, module, obs);
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: finish hook called"), name);
+                        _("module %s: finish hook called"), name);
     }
 
   if (last_reference && resident)
     {
       /* Special case when closing last reference to resident module -
-	 we need to remove the association of the m4_module wrapper
-	 with the dlhandle, because we are about to free the wrapper,
-	 but the module will still show up in lt_dlhandle_iterate.
-	 Still call lt_dlclose to reduce the ref count, but ignore the
-	 failure about not closing a resident module.  */
+         we need to remove the association of the m4_module wrapper
+         with the dlhandle, because we are about to free the wrapper,
+         but the module will still show up in lt_dlhandle_iterate.
+         Still call lt_dlclose to reduce the ref count, but ignore the
+         failure about not closing a resident module.  */
       void *old = lt_dlcaller_set_data (iface_id, handle, NULL);
       if (!old)
-	m4_error (context, EXIT_FAILURE, 0, NULL,
-		  _("unable to close module `%s': %s"), name,
-		  module_dlerror());
+        m4_error (context, EXIT_FAILURE, 0, NULL,
+                  _("unable to close module `%s': %s"), name,
+                  module_dlerror());
       assert (old == module);
       lt_dlclose (handle);
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			_("module %s: resident module not closed"), name);
+                        _("module %s: resident module not closed"), name);
     }
   else
     {
       errors = lt_dlclose (handle);
       /* Ignore the error expected if the module was resident.  */
       if (resident)
-	errors = 0;
+        errors = 0;
       if (!errors)
-	{
-	  m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-			    _("module %s: closed"), name);
-	}
+        {
+          m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+                            _("module %s: closed"), name);
+        }
     }
 
   if (errors)
     m4_error (context, EXIT_FAILURE, 0, NULL,
-	      _("cannot close module `%s': %s"), name, module_dlerror ());
+              _("cannot close module `%s': %s"), name, module_dlerror ());
   if (last_reference)
     {
       size_t i;
       for (i = 0; i < module->builtins_len; i++)
-	free ((char *) module->builtins[i].builtin.name);
+        free ((char *) module->builtins[i].builtin.name);
       free (module->builtins);
       free (module);
     }

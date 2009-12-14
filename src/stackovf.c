@@ -36,7 +36,7 @@
       1. The siginfo parameter (with siginfo.h, i.e., SVR4).
 
       2. 4th "addr" parameter (assumed if struct sigcontext is defined,
-	 i.e., SunOS 4.x/BSD).
+         i.e., SunOS 4.x/BSD).
 
       3. None (if no method is available).  This case just prints a
       message before aborting with a core dump.  That way the user at
@@ -168,8 +168,8 @@ process_sigsegv (int signo, const char *p)
     char buf[200];
 
     sprintf (buf,
-	     "process_sigsegv: p=%p stackend=%p diff=%" PRIdPTR "bot=%p\n",
-	     p, stackend, diff, stackbot);
+             "process_sigsegv: p=%p stackend=%p diff=%" PRIdPTR "bot=%p\n",
+             p, stackend, diff, stackbot);
     write (2, buf, strlen (buf));
   }
 #endif
@@ -177,42 +177,42 @@ process_sigsegv (int signo, const char *p)
   if (p != PARAM_NOSTACKOVF)
     {
       if ((long) sbrk (8192) == (long) -1)
-	{
-	  const char *cp;
+        {
+          const char *cp;
 
-	  /* sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
-	     if the stack limit has not been reached.  */
+          /* sbrk failed.  Assume the RLIMIT_VMEM prevents expansion even
+             if the stack limit has not been reached.  */
 
-	  /* FIXME - calling gettext inside a signal handler is
-	     dangerous, since it can call malloc, which is not signal
-	     safe.  We can sort of justify it by the fact that this
-	     handler is designed to exit() the program, but it could
-	     really use a better fix.  */
-	  cp = _("VMEM limit exceeded?\n");
-	  write (2, cp, strlen (cp));
-	  p = PARAM_STACKOVF;
-	}
+          /* FIXME - calling gettext inside a signal handler is
+             dangerous, since it can call malloc, which is not signal
+             safe.  We can sort of justify it by the fact that this
+             handler is designed to exit() the program, but it could
+             really use a better fix.  */
+          cp = _("VMEM limit exceeded?\n");
+          write (2, cp, strlen (cp));
+          p = PARAM_STACKOVF;
+        }
       if (diff >= -STACKOVF_DETECT && diff <= STACKOVF_DETECT)
-	{
+        {
 
-	  /* The fault address is "sufficiently close" to the stack lim.  */
+          /* The fault address is "sufficiently close" to the stack lim.  */
 
-	  p = PARAM_STACKOVF;
-	}
+          p = PARAM_STACKOVF;
+        }
       if (p == PARAM_STACKOVF)
-	{
+        {
 
-	  /* We have determined that this is indeed a stack overflow.  */
+          /* We have determined that this is indeed a stack overflow.  */
 
-	  (*stackovf_handler) ();	/* should call exit() */
-	}
+          (*stackovf_handler) ();	/* should call exit() */
+        }
     }
   if (p == NULL)
     {
       const char *cp;
 
       /* FIXME - calling gettext inside a signal handler is dangerous,
-	 since it can call malloc, which is not signal safe.  */
+         since it can call malloc, which is not signal safe.  */
       cp = _("\
 Memory bounds violation detected (SIGSEGV).  Either a stack overflow\n\
 occurred, or there is a bug in ");
@@ -237,7 +237,7 @@ sigsegv_handler (int signo, siginfo_t *ip, void *context)
 {
   process_sigsegv
     (signo, (ip != NULL
-	     && ip->si_signo == SIGSEGV ? (char *) ip->si_addr : NULL));
+             && ip->si_signo == SIGSEGV ? (char *) ip->si_addr : NULL));
 }
 
 #elif HAVE_SIGINFO_T
@@ -249,7 +249,7 @@ sigsegv_handler (int signo, siginfo_t *ip)
 {
   process_sigsegv
     (signo, (ip != NULL
-	     && ip->si_signo == SIGSEGV ? (char *) ip->si_addr : NULL));
+             && ip->si_signo == SIGSEGV ? (char *) ip->si_addr : NULL));
 }
 
 #elif HAVE_SIGCONTEXT
@@ -323,17 +323,17 @@ Error - Do not know how to set up stack-ovf trap handler...
       /* Grows toward increasing addresses.  */
 
       for (v = argv; (p = (char *) *v) != NULL; v++)
-	{
-	  if (p < stackbot)
-	    stackbot = p;
-	}
+        {
+          if (p < stackbot)
+            stackbot = p;
+        }
       if ((char *) envp < stackbot)
-	stackbot = (char *) envp;
+        stackbot = (char *) envp;
       for (v = envp; (p = (char *) *v) != NULL; v++)
-	{
-	  if (p < stackbot)
-	    stackbot = p;
-	}
+        {
+          if (p < stackbot)
+            stackbot = p;
+        }
       stackend = stackbot + stack_len;
     }
   else
@@ -342,17 +342,17 @@ Error - Do not know how to set up stack-ovf trap handler...
       /* The stack grows "downward" (toward decreasing addresses).  */
 
       for (v = argv; (p = (char *) *v) != NULL; v++)
-	{
-	  if (p > stackbot)
-	    stackbot = p;
-	}
+        {
+          if (p > stackbot)
+            stackbot = p;
+        }
       if ((char *) envp > stackbot)
-	stackbot = (char *) envp;
+        stackbot = (char *) envp;
       for (v = envp; (p = (char *) *v) != NULL; v++)
-	{
-	  if (p > stackbot)
-	    stackbot = p;
-	}
+        {
+          if (p > stackbot)
+            stackbot = p;
+        }
       stackend = stackbot - stack_len;
     }
 
@@ -378,15 +378,15 @@ Error - Do not know how to set up stack-ovf trap handler...
     ss.ss_flags = 0;
     if (sigaltstack (&ss, NULL) < 0)
       {
-	/* Oops - sigstack exists but doesn't work.  We can't install
-	   the overflow detector, but should gracefully treat it as
-	   though sigstack doesn't exist.  For example, this happens
-	   when compiled with Linux 2.1 headers but run against Linux
-	   2.0 kernel.  */
-	free (stackbuf);
-	if (errno == ENOSYS)
-	  return;
-	error (EXIT_FAILURE, errno, "sigaltstack");
+        /* Oops - sigstack exists but doesn't work.  We can't install
+           the overflow detector, but should gracefully treat it as
+           though sigstack doesn't exist.  For example, this happens
+           when compiled with Linux 2.1 headers but run against Linux
+           2.0 kernel.  */
+        free (stackbuf);
+        if (errno == ENOSYS)
+          return;
+        error (EXIT_FAILURE, errno, "sigaltstack");
       }
   }
 
@@ -400,15 +400,15 @@ Error - Do not know how to set up stack-ovf trap handler...
     ss.ss_onstack = 0;
     if (sigstack (&ss, NULL) < 0)
       {
-	/* Oops - sigstack exists but doesn't work.  We can't install
-	   the overflow detector, but should gracefully treat it as
-	   though sigstack doesn't exist.  For example, this happens
-	   when compiled with Linux 2.1 headers but run against Linux
-	   2.0 kernel.  */
-	free (stackbuf);
-	if (errno == ENOSYS)
-	  return;
-	error (EXIT_FAILURE, errno, "sigstack");
+        /* Oops - sigstack exists but doesn't work.  We can't install
+           the overflow detector, but should gracefully treat it as
+           though sigstack doesn't exist.  For example, this happens
+           when compiled with Linux 2.1 headers but run against Linux
+           2.0 kernel.  */
+        free (stackbuf);
+        if (errno == ENOSYS)
+          return;
+        error (EXIT_FAILURE, errno, "sigstack");
       }
   }
 

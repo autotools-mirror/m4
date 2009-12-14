@@ -50,15 +50,15 @@
 extern void m4_set_sysval    (int);
 extern void m4_sysval_flush  (m4 *, bool);
 extern void m4_dump_symbols  (m4 *, m4_dump_symbol_data *, size_t,
-			      m4_macro_args *, bool);
+                              m4_macro_args *, bool);
 extern const char *m4_expand_ranges (const char *, size_t *, m4_obstack *);
 extern void m4_make_temp     (m4 *, m4_obstack *, const m4_call_info *,
-			      const char *, size_t, bool);
+                              const char *, size_t, bool);
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-	   function	macros	blind	side	minargs	maxargs */
+           function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
   BUILTIN (changecom,	false,	false,	false,	0,	2  )	\
   BUILTIN (changequote,	false,	false,	false,	0,	2  )	\
@@ -99,13 +99,13 @@ typedef intmax_t number;
 typedef uintmax_t unumber;
 
 static void	include		(m4 *context, int argc, m4_macro_args *argv,
-				 bool silent);
+                                 bool silent);
 static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
 static void *	dump_symbol_CB  (m4_symbol_table *, const char *, size_t,
-				 m4_symbol *symbol, void *userdata);
+                                 m4_symbol *symbol, void *userdata);
 static const char *ntoa		(number value, int radix);
 static void	numb_obstack	(m4_obstack *obs, number value,
-				 int radix, int min);
+                                 int radix, int min);
 
 
 /* Generate prototypes for each builtin handler function. */
@@ -136,7 +136,7 @@ M4INIT_HANDLER (m4)
   const char *err = m4_module_makeresident (module);
   if (err)
     m4_error (context, 0, 0, NULL, _("cannot make module `%s' resident: %s"),
-	      m4_get_module_name (module), err);
+              m4_get_module_name (module), err);
 }
 
 
@@ -144,7 +144,7 @@ M4INIT_HANDLER (m4)
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
 
-	void builtin_MACRONAME (m4_obstack *obs, int argc, char *argv[]);
+        void builtin_MACRONAME (m4_obstack *obs, int argc, char *argv[]);
 
    The function are expected to leave their expansion on the obstack OBS,
    as an unfinished object.  ARGV is a table of ARGC pointers to the
@@ -160,7 +160,7 @@ M4BUILTIN_HANDLER (define)
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (m4_symbol_value_copy (context, value, m4_arg_symbol (argv, 2)))
-	m4_warn (context, 0, me, _("cannot concatenate builtins"));
+        m4_warn (context, 0, me, _("cannot concatenate builtins"));
       m4_symbol_define (M4SYMTAB, M4ARG (1), M4ARGLEN (1), value);
     }
   else
@@ -184,7 +184,7 @@ M4BUILTIN_HANDLER (pushdef)
       m4_symbol_value *value = m4_symbol_value_create ();
 
       if (m4_symbol_value_copy (context, value, m4_arg_symbol (argv, 2)))
-	m4_warn (context, 0, me, _("cannot concatenate builtins"));
+        m4_warn (context, 0, me, _("cannot concatenate builtins"));
       m4_symbol_pushdef (M4SYMTAB, M4ARG (1), M4ARGLEN (1), value);
     }
   else
@@ -207,7 +207,7 @@ M4BUILTIN_HANDLER (popdef)
 M4BUILTIN_HANDLER (ifdef)
 {
   m4_push_arg (context, obs, argv,
-	       m4_symbol_value_lookup (context, argv, 1, false) ? 2 : 3);
+               m4_symbol_value_lookup (context, argv, 1, false) ? 2 : 3);
 }
 
 M4BUILTIN_HANDLER (ifelse)
@@ -229,24 +229,24 @@ M4BUILTIN_HANDLER (ifelse)
   while (true)
     {
       if (m4_arg_equal (context, argv, i, i + 1))
-	{
-	  m4_push_arg (context, obs, argv, i + 2);
-	  return;
-	}
+        {
+          m4_push_arg (context, obs, argv, i + 2);
+          return;
+        }
       switch (argc)
-	{
-	case 3:
-	  return;
+        {
+        case 3:
+          return;
 
-	case 4:
-	case 5:
-	  m4_push_arg (context, obs, argv, i + 3);
-	  return;
+        case 4:
+        case 5:
+          m4_push_arg (context, obs, argv, i + 3);
+          return;
 
-	default:
-	  argc -= 3;
-	  i += 3;
-	}
+        default:
+          argc -= 3;
+          i += 3;
+        }
     }
 }
 
@@ -264,7 +264,7 @@ dumpdef_cmp_CB (const void *s1, const void *s2)
    table of all defined symbol names.  */
 static void *
 dump_symbol_CB (m4_symbol_table *ignored M4_GNUC_UNUSED, const char *name,
-		size_t len, m4_symbol *symbol, void *userdata)
+                size_t len, m4_symbol *symbol, void *userdata)
 {
   m4_dump_symbol_data *symbol_data = (m4_dump_symbol_data *) userdata;
   m4_string *key;
@@ -279,7 +279,7 @@ dump_symbol_CB (m4_symbol_table *ignored M4_GNUC_UNUSED, const char *name,
       size_t offset = obstack_object_size (symbol_data->obs);
       obstack_blank (symbol_data->obs, sizeof *symbol_data->base);
       symbol_data->size = (obstack_room (symbol_data->obs)
-			   / sizeof *symbol_data->base);
+                           / sizeof *symbol_data->base);
       base = (char *) obstack_base (symbol_data->obs) + offset;
       symbol_data->base = (m4_string *) base;
     }
@@ -300,7 +300,7 @@ dump_symbol_CB (m4_symbol_table *ignored M4_GNUC_UNUSED, const char *name,
    symbols, otherwise, only the specified symbols.  */
 void
 m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
-		 m4_macro_args *argv, bool complain)
+                 m4_macro_args *argv, bool complain)
 {
   assert (obstack_object_size (data->obs) == 0);
   data->size = obstack_room (data->obs) / sizeof *data->base;
@@ -314,18 +314,18 @@ m4_dump_symbols (m4 *context, m4_dump_symbol_data *data, size_t argc,
       m4_symbol *symbol;
 
       for (i = 1; i < argc; i++)
-	{
-	  symbol = m4_symbol_value_lookup (context, argv, i, complain);
-	  if (symbol)
-	    dump_symbol_CB (NULL, M4ARG (i), M4ARGLEN (i), symbol, data);
-	}
+        {
+          symbol = m4_symbol_value_lookup (context, argv, i, complain);
+          if (symbol)
+            dump_symbol_CB (NULL, M4ARG (i), M4ARGLEN (i), symbol, data);
+        }
     }
 
   data->size = obstack_object_size (data->obs) / sizeof *data->base;
   data->base = (m4_string *) obstack_finish (data->obs);
   /* Safe to cast away const, since we don't modify entries.  */
   qsort ((m4_string *) data->base, data->size, sizeof *data->base,
-	 dumpdef_cmp_CB);
+         dumpdef_cmp_CB);
 }
 
 
@@ -339,7 +339,7 @@ M4BUILTIN_HANDLER (dumpdef)
   size_t arg_length = m4_get_max_debug_arg_length_opt (context);
   bool module = m4_is_debug_bit (context, M4_DEBUG_TRACE_MODULE);
   FILE *output = (m4_is_debug_bit (context, M4_DEBUG_TRACE_OUTPUT_DUMPDEF)
-		  ? stderr : m4_get_debug_file (context));
+                  ? stderr : m4_get_debug_file (context));
 
   if (!output)
     return;
@@ -352,7 +352,7 @@ M4BUILTIN_HANDLER (dumpdef)
   for (; data.size > 0; --data.size, data.base++)
     {
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, data.base->str,
-					    data.base->len);
+                                            data.base->len);
       char *value;
       size_t len;
       assert (symbol);
@@ -362,7 +362,7 @@ M4BUILTIN_HANDLER (dumpdef)
       obstack_1grow (obs, ':');
       obstack_1grow (obs, '\t');
       m4_symbol_print (context, symbol, obs, quotes, stack, arg_length,
-		       module);
+                       module);
       obstack_1grow (obs, '\n');
       len = obstack_object_size (obs);
       value = (char *) obstack_finish (obs);
@@ -384,23 +384,23 @@ M4BUILTIN_HANDLER (defn)
       m4_symbol *symbol = m4_symbol_value_lookup (context, argv, i, true);
 
       if (!symbol)
-	;
+        ;
       else if (m4_is_symbol_text (symbol))
-	m4_shipout_string (context, obs, m4_get_symbol_text (symbol),
-			   m4_get_symbol_len (symbol), true);
+        m4_shipout_string (context, obs, m4_get_symbol_text (symbol),
+                           m4_get_symbol_len (symbol), true);
       else if (m4_is_symbol_func (symbol))
-	m4_push_builtin (context, obs, m4_get_symbol_value (symbol));
+        m4_push_builtin (context, obs, m4_get_symbol_value (symbol));
       else if (m4_is_symbol_placeholder (symbol))
-	m4_warn (context, 0, me,
-		 _("%s: builtin %s requested by frozen file not found"),
-		 quotearg_n_mem (2, M4ARG (i), M4ARGLEN (i)),
-		 quotearg_style (locale_quoting_style,
-				 m4_get_symbol_placeholder (symbol)));
+        m4_warn (context, 0, me,
+                 _("%s: builtin %s requested by frozen file not found"),
+                 quotearg_n_mem (2, M4ARG (i), M4ARGLEN (i)),
+                 quotearg_style (locale_quoting_style,
+                                 m4_get_symbol_placeholder (symbol)));
       else
-	{
-	  assert (!"Bad token data type in m4_defn");
-	  abort ();
-	}
+        {
+          assert (!"Bad token data type in m4_defn");
+          abort ();
+        }
     }
 }
 
@@ -487,7 +487,7 @@ M4BUILTIN_HANDLER (syscmd)
     }
   if (strlen (cmd) != len)
     m4_warn (context, 0, me, _("argument %s truncated"),
-	     quotearg_style_mem (locale_quoting_style, cmd, len));
+             quotearg_style_mem (locale_quoting_style, cmd, len));
 
   /* Optimize the empty command.  */
   if (!*cmd)
@@ -506,7 +506,7 @@ M4BUILTIN_HANDLER (syscmd)
   prog_args[2] = cmd;
   errno = 0;
   status = execute (m4_info_name (me), M4_SYSCMD_SHELL, (char **) prog_args,
-		    false, false, false, false, true, false, &sig_status);
+                    false, false, false, false, true, false, &sig_status);
   if (sig_status)
     {
       assert (status == 127);
@@ -515,8 +515,8 @@ M4BUILTIN_HANDLER (syscmd)
   else
     {
       if (status == 127 && errno)
-	m4_warn (context, errno, me, _("cannot run command %s"),
-		 quotearg_style (locale_quoting_style, cmd));
+        m4_warn (context, errno, me, _("cannot run command %s"),
+                 quotearg_style (locale_quoting_style, cmd));
       m4_sysval = status;
     }
 }
@@ -533,7 +533,7 @@ M4BUILTIN_HANDLER (incr)
   int value;
 
   if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		       &value))
+                       &value))
     return;
 
   m4_shipout_int (obs, value + 1);
@@ -544,7 +544,7 @@ M4BUILTIN_HANDLER (decr)
   int value;
 
   if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		       &value))
+                       &value))
     return;
 
   m4_shipout_int (obs, value - 1);
@@ -561,11 +561,11 @@ M4BUILTIN_HANDLER (divert)
   int i = 0;
 
   if (argc >= 2 && !m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1),
-				    M4ARGLEN (1), &i))
+                                    M4ARGLEN (1), &i))
     return;
   m4_make_diversion (context, i);
   m4_divert_text (context, NULL, M4ARG (2), M4ARGLEN (2),
-		  m4_get_current_line (context));
+                  m4_get_current_line (context));
 }
 
 /* Expand to the current diversion number.  */
@@ -589,32 +589,32 @@ M4BUILTIN_HANDLER (undivert)
   else
     for (i = 1; i < argc; i++)
       {
-	const char *str = M4ARG (i);
-	size_t len = M4ARGLEN (i);
-	char *endp;
-	int diversion = strtol (str, &endp, 10);
-	if (endp - str == len && !isspace ((unsigned char) *str))
-	  m4_insert_diversion (context, diversion);
-	else if (m4_get_posixly_correct_opt (context))
-	  m4_warn (context, 0, me, _("non-numeric argument %s"),
-		   quotearg_style_mem (locale_quoting_style, str, len));
-	else if (strlen (str) != len)
-	  m4_warn (context, 0, me, _("invalid file name %s"),
-		   quotearg_style_mem (locale_quoting_style, str, len));
-	else
-	  {
-	    FILE *fp = m4_path_search (context, str, NULL);
-	    if (fp != NULL)
-	      {
-		m4_insert_file (context, fp);
-		if (fclose (fp) == EOF)
-		  m4_error (context, 0, errno, me, _("error undiverting %s"),
-			    quotearg_style (locale_quoting_style, str));
-	      }
-	    else
-	      m4_error (context, 0, errno, me, _("cannot undivert %s"),
-			quotearg_style (locale_quoting_style, str));
-	  }
+        const char *str = M4ARG (i);
+        size_t len = M4ARGLEN (i);
+        char *endp;
+        int diversion = strtol (str, &endp, 10);
+        if (endp - str == len && !isspace ((unsigned char) *str))
+          m4_insert_diversion (context, diversion);
+        else if (m4_get_posixly_correct_opt (context))
+          m4_warn (context, 0, me, _("non-numeric argument %s"),
+                   quotearg_style_mem (locale_quoting_style, str, len));
+        else if (strlen (str) != len)
+          m4_warn (context, 0, me, _("invalid file name %s"),
+                   quotearg_style_mem (locale_quoting_style, str, len));
+        else
+          {
+            FILE *fp = m4_path_search (context, str, NULL);
+            if (fp != NULL)
+              {
+                m4_insert_file (context, fp);
+                if (fclose (fp) == EOF)
+                  m4_error (context, 0, errno, me, _("error undiverting %s"),
+                            quotearg_style (locale_quoting_style, str));
+              }
+            else
+              m4_error (context, 0, errno, me, _("cannot undivert %s"),
+                        quotearg_style (locale_quoting_style, str));
+          }
       }
 }
 
@@ -642,8 +642,8 @@ M4BUILTIN_HANDLER (shift)
 M4BUILTIN_HANDLER (changequote)
 {
   m4_set_quotes (M4SYNTAX,
-		 (argc >= 2) ? M4ARG (1) : NULL, M4ARGLEN (1),
-		 (argc >= 3) ? M4ARG (2) : NULL, M4ARGLEN (2));
+                 (argc >= 2) ? M4ARG (1) : NULL, M4ARGLEN (1),
+                 (argc >= 3) ? M4ARG (2) : NULL, M4ARGLEN (2));
 }
 
 /* Change the current comment delimiters.  The function set_comment ()
@@ -651,8 +651,8 @@ M4BUILTIN_HANDLER (changequote)
 M4BUILTIN_HANDLER (changecom)
 {
   m4_set_comment (M4SYNTAX,
-		  (argc >= 2) ? M4ARG (1) : NULL, M4ARGLEN (1),
-		  (argc >= 3) ? M4ARG (2) : NULL, M4ARGLEN (2));
+                  (argc >= 2) ? M4ARG (1) : NULL, M4ARGLEN (1),
+                  (argc >= 3) ? M4ARG (2) : NULL, M4ARGLEN (2));
 }
 
 
@@ -674,13 +674,13 @@ include (m4 *context, int argc, m4_macro_args *argv, bool silent)
 
   if (strlen (arg) != len)
     m4_warn (context, 0, me, _("argument %s truncated"),
-	     quotearg_style_mem (locale_quoting_style, arg, len));
+             quotearg_style_mem (locale_quoting_style, arg, len));
   fp = m4_path_search (context, arg, &name);
   if (fp == NULL)
     {
       if (!silent)
-	m4_error (context, 0, errno, m4_arg_info (argv), _("cannot open %s"),
-		  quotearg_style (locale_quoting_style, arg));
+        m4_error (context, 0, errno, m4_arg_info (argv), _("cannot open %s"),
+                  quotearg_style (locale_quoting_style, arg));
       return;
     }
 
@@ -709,7 +709,7 @@ M4BUILTIN_HANDLER (sinclude)
    successful, output the quoted resulting name on OBS.  */
 void
 m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
-	      const char *pattern, size_t len, bool dir)
+              const char *pattern, size_t len, bool dir)
 {
   int fd;
   int i;
@@ -730,7 +730,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
   if (strlen (pattern) < len)
     {
       m4_warn (context, 0, caller, _("argument %s truncated"),
-	       quotearg_style_mem (locale_quoting_style, pattern, len));
+               quotearg_style_mem (locale_quoting_style, pattern, len));
       len = strlen (pattern);
     }
   obstack_grow (obs, pattern, len);
@@ -746,18 +746,18 @@ m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
   if (fd < 0)
     {
       /* This use of _() will need to change if xgettext ever changes
-	 its undocumented behavior of parsing both string options.  */
+         its undocumented behavior of parsing both string options.  */
 
       m4_warn (context, errno, caller,
-	       _(dir ? "cannot create directory from template %s"
-		 : "cannot create file from template %s"),
-	       quotearg_style (locale_quoting_style, pattern));
+               _(dir ? "cannot create directory from template %s"
+                 : "cannot create file from template %s"),
+               quotearg_style (locale_quoting_style, pattern));
       obstack_free (obs, obstack_finish (obs));
     }
   else
     {
       if (!dir)
-	close (fd);
+        close (fd);
       /* Remove NUL, then finish quote.  */
       obstack_blank (obs, -1);
       obstack_grow (obs, quotes->str2, quotes->len2);
@@ -772,31 +772,31 @@ M4BUILTIN_HANDLER (maketemp)
   if (m4_get_posixly_correct_opt (context))
     {
       /* POSIX states "any trailing 'X' characters [are] replaced with
-	 the current process ID as a string", without referencing the
-	 file system.  Horribly insecure, but we have to do it.
+         the current process ID as a string", without referencing the
+         file system.  Horribly insecure, but we have to do it.
 
-	 For reference, Solaris m4 does:
-	   maketemp() -> `'
-	   maketemp(X) -> `X'
-	   maketemp(XX) -> `Xn', where n is last digit of pid
-	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
+         For reference, Solaris m4 does:
+           maketemp() -> `'
+           maketemp(X) -> `X'
+           maketemp(XX) -> `Xn', where n is last digit of pid
+           maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
       */
       const char *str = M4ARG (1);
       size_t len = M4ARGLEN (1);
       size_t i;
       m4_obstack *scratch = m4_arg_scratch (context);
       size_t pid_len = obstack_printf (scratch, "%lu",
-				       (unsigned long) getpid ());
+                                       (unsigned long) getpid ());
       char *pid = (char *) obstack_copy0 (scratch, "", 0);
 
       for (i = len; i > 1; i--)
-	if (str[i - 1] != 'X')
-	  break;
+        if (str[i - 1] != 'X')
+          break;
       obstack_grow (obs, str, i);
       if (len - i < pid_len)
-	obstack_grow (obs, pid + pid_len - (len - i), len - i);
+        obstack_grow (obs, pid + pid_len - (len - i), len - i);
       else
-	obstack_printf (obs, "%.*d%s", len - i - pid_len, 0, pid);
+        obstack_printf (obs, "%.*d%s", len - i - pid_len, 0, pid);
     }
   else
     m4_make_temp (context, obs, me, M4ARG (1), M4ARGLEN (1), false);
@@ -806,7 +806,7 @@ M4BUILTIN_HANDLER (maketemp)
 M4BUILTIN_HANDLER (mkstemp)
 {
   m4_make_temp (context, obs, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		false);
+                false);
 }
 
 /* Print all arguments on standard error.  */
@@ -840,7 +840,7 @@ M4BUILTIN_HANDLER (m4exit)
 
   /* Warn on bad arguments, but still exit.  */
   if (argc >= 2 && !m4_numeric_arg (context, me, M4ARG (1), M4ARGLEN (1),
-				    &exit_code))
+                                    &exit_code))
     exit_code = EXIT_FAILURE;
   if (exit_code < 0 || exit_code > 255)
     {
@@ -885,13 +885,13 @@ M4BUILTIN_HANDLER (traceon)
 
   if (argc == 1)
     m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)
-				      | M4_DEBUG_TRACE_ALL));
+                                      | M4_DEBUG_TRACE_ALL));
   else
     for (i = 1; i < argc; i++)
       if (m4_is_arg_text (argv, i))
-	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), M4ARGLEN (i), true);
+        m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), M4ARGLEN (i), true);
       else
-	m4_warn (context, 0, me, _("invalid macro name ignored"));
+        m4_warn (context, 0, me, _("invalid macro name ignored"));
 }
 
 /* Disable tracing of all specified macros, or all, if none is specified.  */
@@ -902,13 +902,13 @@ M4BUILTIN_HANDLER (traceoff)
 
   if (argc == 1)
     m4_set_debug_level_opt (context, (m4_get_debug_level_opt (context)
-				      & ~M4_DEBUG_TRACE_ALL));
+                                      & ~M4_DEBUG_TRACE_ALL));
   else
     for (i = 1; i < argc; i++)
       if (m4_is_arg_text (argv, i))
-	m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), M4ARGLEN (i), false);
+        m4_set_symbol_name_traced (M4SYMTAB, M4ARG (i), M4ARGLEN (i), false);
       else
-	m4_warn (context, 0, me, _("invalid macro name ignored"));
+        m4_warn (context, 0, me, _("invalid macro name ignored"));
 }
 
 
@@ -935,14 +935,14 @@ M4BUILTIN_HANDLER (index)
   int retval = -1;
 
   if (!m4_arg_empty (argv, 3) && !m4_numeric_arg (context, m4_arg_info (argv),
-						  M4ARG (3), M4ARGLEN (3),
-						  &offset))
+                                                  M4ARG (3), M4ARGLEN (3),
+                                                  &offset))
     return;
   if (offset < 0)
     {
       offset += haystack_len;
       if (offset < 0)
-	offset = 0;
+        offset = 0;
     }
   else if (haystack_len < offset)
     {
@@ -953,7 +953,7 @@ M4BUILTIN_HANDLER (index)
   /* Rely on the optimizations guaranteed by gnulib's memmem
      module.  */
   result = (char *) memmem (haystack + offset, haystack_len - offset, needle,
-			    M4ARGLEN (2));
+                            M4ARGLEN (2));
   if (result)
     retval = result - haystack;
 
@@ -994,27 +994,27 @@ M4BUILTIN_HANDLER (substr)
   else
     {
       if (!m4_numeric_arg (context, me, M4ARG (3), M4ARGLEN (3), &end))
-	return;
+        return;
       if (end < 0)
-	end += length;
+        end += length;
       else
-	end += start;
+        end += start;
     }
 
   if (5 <= argc)
     {
       /* Replacement text provided.  */
       if (end < start)
-	end = start;
+        end = start;
       if (end < 0 || length < start)
-	{
-	  m4_warn (context, 0, me, _("substring out of range"));
-	  return;
-	}
+        {
+          m4_warn (context, 0, me, _("substring out of range"));
+          return;
+        }
       if (start < 0)
-	start = 0;
+        start = 0;
       if (length < end)
-	end = length;
+        end = length;
       obstack_grow (obs, str, start);
       m4_push_arg (context, obs, argv, 4);
       obstack_grow (obs, str + end, length - end);
@@ -1053,27 +1053,27 @@ m4_expand_ranges (const char *s, size_t *len, m4_obstack *obs)
   for ( ; s != end; from = *s++)
     {
       if (*s == '-')
-	{
-	  if (++s == end)
-	    {
-	      /* trailing dash */
-	      obstack_1grow (obs, '-');
-	      break;
-	    }
-	  to = *s;
-	  if (from <= to)
-	    {
-	      while (from++ < to)
-		obstack_1grow (obs, from);
-	    }
-	  else
-	    {
-	      while (--from >= to)
-		obstack_1grow (obs, from);
-	    }
-	}
+        {
+          if (++s == end)
+            {
+              /* trailing dash */
+              obstack_1grow (obs, '-');
+              break;
+            }
+          to = *s;
+          if (from <= to)
+            {
+              while (from++ < to)
+                obstack_1grow (obs, from);
+            }
+          else
+            {
+              while (--from >= to)
+                obstack_1grow (obs, from);
+            }
+        }
       else
-	obstack_1grow (obs, *s);
+        obstack_1grow (obs, *s);
     }
   *len = obstack_object_size (obs);
   return (char *) obstack_finish (obs);
@@ -1121,15 +1121,15 @@ M4BUILTIN_HANDLER (translit)
       int second = from[from_len / 2];
       data = M4ARG (1);
       while ((p = (char *) memchr2 (data, from[0], second, len)))
-	{
-	  obstack_grow (obs, data, p - data);
-	  len -= p - data + 1;
-	  data = p + 1;
-	  if (*p == from[0] && to_len)
-	    obstack_1grow (obs, to[0]);
-	  else if (*p == second && 1 < to_len)
-	    obstack_1grow (obs, to[1]);
-	}
+        {
+          obstack_grow (obs, data, p - data);
+          len -= p - data + 1;
+          data = p + 1;
+          if (*p == from[0] && to_len)
+            obstack_1grow (obs, to[0]);
+          else if (*p == second && 1 < to_len)
+            obstack_1grow (obs, to[1]);
+        }
       obstack_grow (obs, data, len);
       return;
     }
@@ -1149,20 +1149,20 @@ M4BUILTIN_HANDLER (translit)
     {
       ch = *from++;
       if (found[ch] == ASIS)
-	{
-	  if (to_len)
-	    {
-	      found[ch] = REPLACE;
-	      map[ch] = *to;
-	    }
-	  else
-	    found[ch] = DELETE;
-	}
+        {
+          if (to_len)
+            {
+              found[ch] = REPLACE;
+              map[ch] = *to;
+            }
+          else
+            found[ch] = DELETE;
+        }
       if (to_len)
-	{
-	  to++;
-	  to_len--;
-	}
+        {
+          to++;
+          to_len--;
+        }
     }
 
   data = M4ARG (1);
@@ -1171,19 +1171,19 @@ M4BUILTIN_HANDLER (translit)
     {
       ch = *data++;
       switch (found[ch])
-	{
-	case ASIS:
-	  obstack_1grow (obs, ch);
-	  break;
-	case REPLACE:
-	  obstack_1grow (obs, map[ch]);
-	  break;
-	case DELETE:
-	  break;
-	default:
-	  assert (!"translit");
-	  abort ();
-	}
+        {
+        case ASIS:
+          obstack_1grow (obs, ch);
+          break;
+        case REPLACE:
+          obstack_1grow (obs, map[ch]);
+          break;
+        case DELETE:
+          break;
+        default:
+          assert (!"translit");
+          abort ();
+        }
     }
 }
 
@@ -1251,8 +1251,8 @@ M4BUILTIN_HANDLER (translit)
   (*(x) = (number) ((unumber) *(x) << (*(y) & shift_mask)))
 #define numb_rshift(c, x, y)					\
   (*(x) = (number) (*(x) < 0					\
-		    ? ~(~(unumber) *(x) >> (*(y) & shift_mask)) \
-		    : (unumber) *(x) >> (*(y) & shift_mask)))
+                    ? ~(~(unumber) *(x) >> (*(y) & shift_mask)) \
+                    : (unumber) *(x) >> (*(y) & shift_mask)))
 #define numb_urshift(c, x, y)					\
   (*(x) = (number) ((unumber) *(x) >> (*(y) & shift_mask)))
 
@@ -1306,18 +1306,18 @@ numb_obstack (m4_obstack *obs, number value, int radix, int min)
   if (radix == 1)
     {
       if (value < 0)
-	{
-	  obstack_1grow (obs, '-');
-	  uvalue = -value;
-	}
+        {
+          obstack_1grow (obs, '-');
+          uvalue = -value;
+        }
       else
-	uvalue = value;
+        uvalue = value;
       if (uvalue < min)
-	{
-	  obstack_blank (obs, min - uvalue);
-	  memset ((char *) obstack_next_free (obs) - (min - uvalue), '0',
-		  min - uvalue);
-	}
+        {
+          obstack_blank (obs, min - uvalue);
+          memset ((char *) obstack_next_free (obs) - (min - uvalue), '0',
+                  min - uvalue);
+        }
       obstack_blank (obs, uvalue);
       memset ((char *) obstack_next_free (obs) - uvalue, '1', uvalue);
       return;

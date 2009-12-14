@@ -86,9 +86,9 @@ struct m4_hash_iterator
 /* Helper macros. */
 #define BUCKET_NTH(hash, n)	(HASH_BUCKETS (hash)[n])
 #define BUCKET_COUNT(hash, key)					\
-	((*HASH_HASH_FUNC (hash))(key) % HASH_SIZE (hash))
+        ((*HASH_HASH_FUNC (hash))(key) % HASH_SIZE (hash))
 #define BUCKET_KEY(hash, key)					\
-	(BUCKET_NTH ((hash), BUCKET_COUNT ((hash), (key))))
+        (BUCKET_NTH ((hash), BUCKET_COUNT ((hash), (key))))
 
 /* Debugging macros.  */
 #ifdef NDEBUG
@@ -119,7 +119,7 @@ static hash_node *free_list = NULL;
    and CMP_FUNC will be called to compare keys.  */
 m4_hash *
 m4_hash_new (size_t size, m4_hash_hash_func *hash_func,
-	     m4_hash_cmp_func *cmp_func)
+             m4_hash_cmp_func *cmp_func)
 {
   m4_hash *hash;
 
@@ -133,7 +133,7 @@ m4_hash_new (size_t size, m4_hash_hash_func *hash_func,
   HASH_SIZE (hash)	= size;
   HASH_LENGTH (hash)	= 0;
   HASH_BUCKETS (hash)	= (hash_node **) xcalloc (size,
-						  sizeof *HASH_BUCKETS (hash));
+                                                  sizeof *HASH_BUCKETS (hash));
   HASH_HASH_FUNC (hash)	= hash_func;
   HASH_CMP_FUNC (hash)	= cmp_func;
 #ifndef NDEBUG
@@ -152,7 +152,7 @@ m4_hash_dup (m4_hash *src, m4_hash_copy_func *copy)
   assert (copy);
 
   dest = m4_hash_new (HASH_SIZE (src), HASH_HASH_FUNC (src),
-		      HASH_CMP_FUNC (src));
+                      HASH_CMP_FUNC (src));
 
   m4_hash_apply (src, (m4_hash_apply_func *) copy, dest);
 
@@ -311,21 +311,21 @@ m4_hash_remove (m4_hash *hash, const void *key)
       hash_node *next = node ? NODE_NEXT (node) : BUCKET_NTH (hash, n);
 
       if (next && ((*HASH_CMP_FUNC (hash)) (NODE_KEY (next), key) == 0))
-	{
-	  if (node)
-	    NODE_NEXT (node) = NODE_NEXT (next);
-	  else
-	    BUCKET_NTH (hash, n) = NODE_NEXT (next);
+        {
+          if (node)
+            NODE_NEXT (node) = NODE_NEXT (next);
+          else
+            BUCKET_NTH (hash, n) = NODE_NEXT (next);
 
-	  key = NODE_KEY (next);
+          key = NODE_KEY (next);
 #ifndef NDEBUG
-	  if (iter)
-	    assert (ITERATOR_PLACE (iter) == next);
-	  NODE_KEY (next) = NULL;
+          if (iter)
+            assert (ITERATOR_PLACE (iter) == next);
+          NODE_KEY (next) = NULL;
 #endif
-	  node_delete (hash, next);
-	  return (void *) key; /* Cast away const.  */
-	}
+          node_delete (hash, next);
+          return (void *) key; /* Cast away const.  */
+        }
       node = next;
     }
   while (node);
@@ -401,13 +401,13 @@ m4_hash_resize (m4_hash *hash, size_t size)
 
   HASH_SIZE (hash)	= size;
   HASH_BUCKETS (hash)   = (hash_node **) xcalloc (size,
-						  sizeof *HASH_BUCKETS (hash));
+                                                  sizeof *HASH_BUCKETS (hash));
 
   {
     size_t i;
     for (i = 0; i < original_size; ++i)
       if (original_buckets[i])
-	bucket_insert (hash, original_buckets[i]);
+        bucket_insert (hash, original_buckets[i]);
   }
 
   free (original_buckets);
@@ -433,13 +433,13 @@ maybe_grow (m4_hash *hash)
       /* HASH sizes are always 1 less than a power of 2.  */
       HASH_SIZE (hash)    = (2 * (1 + original_size)) -1;
       HASH_BUCKETS (hash) =
-	(hash_node **) xcalloc (HASH_SIZE (hash), sizeof *HASH_BUCKETS (hash));
+        (hash_node **) xcalloc (HASH_SIZE (hash), sizeof *HASH_BUCKETS (hash));
 
       {
-	size_t i;
-	for (i = 0; i < original_size; ++i)
-	  if (original_buckets[i])
-	    bucket_insert (hash, original_buckets[i]);
+        size_t i;
+        for (i = 0; i < original_size; ++i)
+          if (original_buckets[i])
+            bucket_insert (hash, original_buckets[i]);
       }
 
       free (original_buckets);
@@ -521,19 +521,19 @@ m4_get_hash_iterator_next (const m4_hash *hash, m4_hash_iterator *place)
     {
       /* Find the next non-empty bucket.  */
       while ((ITERATOR_NEXT_BUCKET (place) < HASH_SIZE (hash))
-	 && (BUCKET_NTH (hash, ITERATOR_NEXT_BUCKET (place)) == NULL))
-	{
-	  ++ITERATOR_NEXT_BUCKET (place);
-	}
+         && (BUCKET_NTH (hash, ITERATOR_NEXT_BUCKET (place)) == NULL))
+        {
+          ++ITERATOR_NEXT_BUCKET (place);
+        }
 
       /* Select the first node in the new bucket.  */
       if (ITERATOR_NEXT_BUCKET (place) < HASH_SIZE (hash))
-	{
-	  ITERATOR_NEXT (place)
-	    = BUCKET_NTH (hash, ITERATOR_NEXT_BUCKET (place));
-	}
+        {
+          ITERATOR_NEXT (place)
+            = BUCKET_NTH (hash, ITERATOR_NEXT_BUCKET (place));
+        }
       else
-	ITERATOR_NEXT (place) = NULL;
+        ITERATOR_NEXT (place) = NULL;
 
       /* Advance the `next' reference.  */
       ++ITERATOR_NEXT_BUCKET (place);
@@ -572,13 +572,13 @@ m4_free_hash_iterator (const m4_hash *hash, m4_hash_iterator *place)
     {
       next = iter ? ITER_CHAIN (iter) : HASH_ITER (hash);
       if (place == next)
-	{
-	  if (iter)
-	    ITER_CHAIN (iter) = ITER_CHAIN (next);
-	  else
-	    HASH_ITER (hash) = ITER_CHAIN (next);
-	  break;
-	}
+        {
+          if (iter)
+            ITER_CHAIN (iter) = ITER_CHAIN (next);
+          else
+            HASH_ITER (hash) = ITER_CHAIN (next);
+          break;
+        }
       iter = next;
     }
   while (iter);
@@ -624,13 +624,13 @@ m4_hash_apply (m4_hash *hash, m4_hash_apply_func *func, void *userdata)
   while ((place = m4_get_hash_iterator_next (hash, place)))
     {
       result = (*func) (hash, m4_get_hash_iterator_key (place),
-			m4_get_hash_iterator_value (place), userdata);
+                        m4_get_hash_iterator_value (place), userdata);
 
       if (result != NULL)
-	{
-	  m4_free_hash_iterator (hash, place);
-	  break;
-	}
+        {
+          m4_free_hash_iterator (hash, place);
+          break;
+        }
     }
 
   return result;

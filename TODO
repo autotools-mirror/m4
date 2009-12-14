@@ -82,9 +82,9 @@ for any of these ideas or if you have others to add.
 * OPTIMIZATION AND CLEAN UP
 
   + Have NULs go really undisturbed through GNU m4
-	GNU m4 is lousy regarding NULs in streams (this would require
-	maintaining the string lengths, and avoiding strlen, strcpy,
-	etc.).  (Almost there, once argv_ref is ported).
+        GNU m4 is lousy regarding NULs in streams (this would require
+        maintaining the string lengths, and avoiding strlen, strcpy,
+        etc.).  (Almost there, once argv_ref is ported).
 
   + The argument count limits are handled for all tokens passed around by
     the internals:  we should enable attaching these values to text macros
@@ -116,7 +116,7 @@ for any of these ideas or if you have others to add.
 
   + Setting of the module search path within m4 scripts:
 
-	append(__modulepath__, `/some/modules/live/here')
+        append(__modulepath__, `/some/modules/live/here')
 
   + Module autoloader.  This would allow an m4 core with no builtins except
     for loadmodule().  A default startup script would mark the recognised

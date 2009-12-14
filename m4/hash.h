@@ -38,10 +38,10 @@ typedef struct m4_hash m4_hash;
 typedef size_t	m4_hash_hash_func (const void *key);
 typedef int	m4_hash_cmp_func  (const void *key, const void *try);
 typedef void *	m4_hash_copy_func (m4_hash *src, const void *key, void *value,
-				   m4_hash *dest);
+                                   m4_hash *dest);
 
 extern m4_hash *m4_hash_new	(size_t size, m4_hash_hash_func *hash_func,
-				 m4_hash_cmp_func *cmp_func);
+                                 m4_hash_cmp_func *cmp_func);
 extern m4_hash *m4_hash_dup	(m4_hash *hash, m4_hash_copy_func *copy);
 extern void	m4_hash_delete	(m4_hash *hash);
 extern void	m4_hash_exit	(void);
@@ -51,7 +51,7 @@ extern size_t	m4_get_hash_length	(m4_hash *hash);
 extern void **		m4_hash_lookup	(m4_hash *hash, const void *key);
 extern void *		m4_hash_remove	(m4_hash *hash, const void *key);
 extern const void *	m4_hash_insert	(m4_hash *hash, const void *key,
-					 void *value);
+                                         void *value);
 
 
 
@@ -62,17 +62,17 @@ extern int	m4_hash_string_cmp  (const void *key, const void *try);
 
 typedef struct m4_hash_iterator m4_hash_iterator;
 typedef void *	m4_hash_apply_func  (m4_hash *hash, const void *key,
-				     void *value, void *userdata);
+                                     void *value, void *userdata);
 
 extern void *	m4_hash_apply	    (m4_hash *hash, m4_hash_apply_func *func,
-				     void *userdata);
+                                     void *userdata);
 
 extern const void *	 m4_get_hash_iterator_key   (m4_hash_iterator *place);
 extern void *		 m4_get_hash_iterator_value (m4_hash_iterator *place);
 extern m4_hash_iterator *m4_get_hash_iterator_next  (const m4_hash *hash,
-						     m4_hash_iterator *place);
+                                                     m4_hash_iterator *place);
 extern void		 m4_free_hash_iterator      (const m4_hash *hash,
-						     m4_hash_iterator *place);
+                                                     m4_hash_iterator *place);
 
 
 END_C_DECLS

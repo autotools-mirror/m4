@@ -31,7 +31,7 @@ case $use_gmp:$LIBADD_GMP:$ac_cv_header_gmp_h in
     ;;
   *::yes)
     AC_MSG_WARN([gmp library not found or does not appear to work
-		 but `gmp.h' is present])
+                 but `gmp.h' is present])
     M4_cv_using_lib_gmp=no
     ;;
   *:-lgmp:no)

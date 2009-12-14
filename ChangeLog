@@ -1,5 +1,55 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Switch to indentation by space, not tab.
+	* .gitmodules: Convert leading tabs to spaces.
+	* TODO: Likewise.
+	* bootstrap: Likewise.
+	* configure.ac: Likewise.
+	* examples/WWW/m4lib/html.m4: Likewise.
+	* examples/WWW/m4lib/layout.m4: Likewise.
+	* examples/WWW/m4lib/menu.m4: Likewise.
+	* ltdl/m4/debug.m4: Likewise.
+	* ltdl/m4/gmp.m4: Likewise.
+	* ltdl/m4/m4-obstack.m4: Likewise.
+	* ltdl/m4/stackovf.m4: Likewise.
+	* m4/builtin.c: Likewise.
+	* m4/debug.c: Likewise.
+	* m4/hash.c: Likewise.
+	* m4/hash.h: Likewise.
+	* m4/input.c: Likewise.
+	* m4/m4.c: Likewise.
+	* m4/m4module.h: Likewise.
+	* m4/m4private.h: Likewise.
+	* m4/macro.c: Likewise.
+	* m4/module.c: Likewise.
+	* m4/output.c: Likewise.
+	* m4/path.c: Likewise.
+	* m4/resyntax.c: Likewise.
+	* m4/symtab.c: Likewise.
+	* m4/syntax.c: Likewise.
+	* m4/utility.c: Likewise.
+	* modules/evalparse.c: Likewise.
+	* modules/format.c: Likewise.
+	* modules/gnu.c: Likewise.
+	* modules/load.c: Likewise.
+	* modules/m4.c: Likewise.
+	* modules/m4.h: Likewise.
+	* modules/mpeval.c: Likewise.
+	* modules/perl.c: Likewise.
+	* modules/stdlib.c: Likewise.
+	* modules/time.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/main.c: Likewise.
+	* src/stackovf.c: Likewise.
+	* tests/builtins.at: Likewise.
+	* tests/freeze.at: Likewise.
+	* tests/generate.awk: Likewise.
+	* tests/modules.at: Likewise.
+	* tests/others.at: Likewise.
+	* tests/stackovf.test: Likewise.
+	* tests/testsuite.at: Likewise.
+
 	Update copyright year.
 	All files impacted, via 'make update-copyright'.  Additionally:
 	* .gitignore: Ignore backup files.

@@ -24,9 +24,9 @@ AC_PREREQ([2.62])
 ## Autoconf initialization. ##
 ## ------------------------ ##
 m4_define([M4_VERSION],
-	  m4_esyscmd([build-aux/git-version-gen .tarball-version]))
+          m4_esyscmd([build-aux/git-version-gen .tarball-version]))
 m4_bmatch(m4_defn([M4_VERSION]), [^[0-9]], [],
-	  [m4_define([M4_VERSION], [1.9a])])
+          [m4_define([M4_VERSION], [1.9a])])
 AC_INIT([GNU M4], m4_defn([M4_VERSION]), [bug-m4@gnu.org])
 
 AC_CONFIG_SRCDIR([src/m4.h])
@@ -86,7 +86,7 @@ if test "x$with_included_ltdl" != "xyes"; then
   CFLAGS="$CFLAGS $LTDLINCL"
   LDFLAGS="$LDFLAGS $LIBLTDL"
   AC_CHECK_LIB([ltdl], [lt_dlhandle_iterate],
-	     [],
+             [],
      [AC_MSG_ERROR([installed libltdl is too old])])
   LDFLAGS="$save_LDFLAGS"
   CFLAGS="$save_CFLAGS"
@@ -96,11 +96,11 @@ fi
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in
   *-pipe* ) ;;
-	* ) _LT_COMPILER_OPTION([if $compiler supports -pipe],
-		[M4_cv_prog_compiler_pipe],
-		[-pipe -c conftest.$ac_ext], [],
-		[CFLAGS="$CFLAGS -pipe"])
-	      ;;
+        * ) _LT_COMPILER_OPTION([if $compiler supports -pipe],
+                [M4_cv_prog_compiler_pipe],
+                [-pipe -c conftest.$ac_ext], [],
+                [CFLAGS="$CFLAGS -pipe"])
+              ;;
 esac
 
 ## ------------------------------- ##
@@ -115,7 +115,7 @@ AC_MSG_CHECKING([for modules to preload])
 
   AC_ARG_WITH([modules],
     [AS_HELP_STRING([--with-modules=MODULES],
-		    [preload MODULES @<:@default: ]M4_DEFAULT_PRELOAD[@:>@])],
+                    [preload MODULES @<:@default: ]M4_DEFAULT_PRELOAD[@:>@])],
     [use_modules="$withval"],
     [use_modules="$M4_default_preload"])
 
@@ -126,15 +126,15 @@ AC_MSG_CHECKING([for modules to preload])
   else
     if test "$use_modules" != yes; then
       for module in $use_modules; do
-	case $module in
-	  no|none) break ;;
-	  m4|traditional|gnu|load|mpeval) dir=modules ;;
-	  import|modtest|shadow|stdlib|time) dir=tests ;;
-	  *) AC_MSG_ERROR([Unrecognized module `$module' in --with-modules])
-	    ;;
-	esac
-	DLPREOPEN="$DLPREOPEN -dlpreopen $dir/$module.la"
-	PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES $dir/$module.la"
+        case $module in
+          no|none) break ;;
+          m4|traditional|gnu|load|mpeval) dir=modules ;;
+          import|modtest|shadow|stdlib|time) dir=tests ;;
+          *) AC_MSG_ERROR([Unrecognized module `$module' in --with-modules])
+            ;;
+        esac
+        DLPREOPEN="$DLPREOPEN -dlpreopen $dir/$module.la"
+        PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES $dir/$module.la"
       done
     fi
   fi

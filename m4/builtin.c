@@ -47,13 +47,13 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
   do
     {
       bp = (m4__builtin *) bsearch (name, cur->builtins, cur->builtins_len,
-				    sizeof *bp, compare_builtin_name_CB);
+                                    sizeof *bp, compare_builtin_name_CB);
       if (bp)
-	{
-	  m4_symbol_value *token = (m4_symbol_value *) xzalloc (sizeof *token);
-	  m4__set_symbol_value_builtin (token, bp);
-	  return token;
-	}
+        {
+          m4_symbol_value *token = (m4_symbol_value *) xzalloc (sizeof *token);
+          m4__set_symbol_value_builtin (token, bp);
+          return token;
+        }
     }
   while (!module && (cur = m4__module_next (cur)));
 
@@ -73,13 +73,13 @@ m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
   do
     {
       for (i = 0; i < cur->builtins_len; i++)
-	if (cur->builtins[i].builtin.func == func)
-	  {
-	    m4_symbol_value *token =
-	      (m4_symbol_value *) xzalloc (sizeof *token);
-	    m4__set_symbol_value_builtin (token, &cur->builtins[i]);
-	    return token;
-	  }
+        if (cur->builtins[i].builtin.func == func)
+          {
+            m4_symbol_value *token =
+              (m4_symbol_value *) xzalloc (sizeof *token);
+            m4__set_symbol_value_builtin (token, &cur->builtins[i]);
+            return token;
+          }
     }
   while (!module && (cur = m4__module_next (cur)));
 
@@ -92,17 +92,17 @@ m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
    the name of FUNC.  */
 void
 m4__builtin_print (m4_obstack *obs, const m4__builtin *func, bool flatten,
-		   m4__symbol_chain **chain, const m4_string_pair *quotes,
-		   bool module)
+                   m4__symbol_chain **chain, const m4_string_pair *quotes,
+                   bool module)
 {
   assert (func);
   if (flatten)
     {
       if (quotes)
-	{
-	  obstack_grow (obs, quotes->str1, quotes->len1);
-	  obstack_grow (obs, quotes->str2, quotes->len2);
-	}
+        {
+          obstack_grow (obs, quotes->str1, quotes->len1);
+          obstack_grow (obs, quotes->str2, quotes->len2);
+        }
       module = false;
     }
   else if (chain)

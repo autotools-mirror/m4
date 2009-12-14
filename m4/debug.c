@@ -50,78 +50,78 @@ m4_debug_decode (m4 *context, const char *opts, size_t len)
   else
     {
       if (*opts == '-' || *opts == '+')
-	{
-	  len--;
-	  mode = *opts++;
-	}
+        {
+          len--;
+          mode = *opts++;
+        }
       for (level = 0; len--; opts++)
-	{
-	  switch (*opts)
-	    {
-	    case 'a':
-	      level |= M4_DEBUG_TRACE_ARGS;
-	      break;
+        {
+          switch (*opts)
+            {
+            case 'a':
+              level |= M4_DEBUG_TRACE_ARGS;
+              break;
 
-	    case 'e':
-	      level |= M4_DEBUG_TRACE_EXPANSION;
-	      break;
+            case 'e':
+              level |= M4_DEBUG_TRACE_EXPANSION;
+              break;
 
-	    case 'q':
-	      level |= M4_DEBUG_TRACE_QUOTE;
-	      break;
+            case 'q':
+              level |= M4_DEBUG_TRACE_QUOTE;
+              break;
 
-	    case 't':
-	      level |= M4_DEBUG_TRACE_ALL;
-	      break;
+            case 't':
+              level |= M4_DEBUG_TRACE_ALL;
+              break;
 
-	    case 'l':
-	      level |= M4_DEBUG_TRACE_LINE;
-	      break;
+            case 'l':
+              level |= M4_DEBUG_TRACE_LINE;
+              break;
 
-	    case 'f':
-	      level |= M4_DEBUG_TRACE_FILE;
-	      break;
+            case 'f':
+              level |= M4_DEBUG_TRACE_FILE;
+              break;
 
-	    case 'p':
-	      level |= M4_DEBUG_TRACE_PATH;
-	      break;
+            case 'p':
+              level |= M4_DEBUG_TRACE_PATH;
+              break;
 
-	    case 'c':
-	      level |= M4_DEBUG_TRACE_CALL;
-	      break;
+            case 'c':
+              level |= M4_DEBUG_TRACE_CALL;
+              break;
 
-	    case 'i':
-	      level |= M4_DEBUG_TRACE_INPUT;
-	      break;
+            case 'i':
+              level |= M4_DEBUG_TRACE_INPUT;
+              break;
 
-	    case 'x':
-	      level |= M4_DEBUG_TRACE_CALLID;
-	      break;
+            case 'x':
+              level |= M4_DEBUG_TRACE_CALLID;
+              break;
 
-	    case 'm':
-	      level |= M4_DEBUG_TRACE_MODULE;
-	      break;
+            case 'm':
+              level |= M4_DEBUG_TRACE_MODULE;
+              break;
 
-	    case 's':
-	      level |= M4_DEBUG_TRACE_STACK;
-	      break;
+            case 's':
+              level |= M4_DEBUG_TRACE_STACK;
+              break;
 
-	    case 'd':
-	      level |= M4_DEBUG_TRACE_DEREF;
-	      break;
+            case 'd':
+              level |= M4_DEBUG_TRACE_DEREF;
+              break;
 
-	    case 'o':
-	       level |= M4_DEBUG_TRACE_OUTPUT_DUMPDEF;
-	       break;
+            case 'o':
+               level |= M4_DEBUG_TRACE_OUTPUT_DUMPDEF;
+               break;
 
-	    case 'V':
-	      level |= M4_DEBUG_TRACE_VERBOSE;
-	      break;
+            case 'V':
+              level |= M4_DEBUG_TRACE_VERBOSE;
+              break;
 
-	    default:
-	      return -1;
-	    }
-	}
+            default:
+              return -1;
+            }
+        }
     }
 
   switch (mode)
@@ -169,21 +169,21 @@ set_debug_file (m4 *context, const m4_call_info *caller, FILE *fp)
   if (debug_file != NULL && debug_file != stdout)
     {
       if (fstat (fileno (stdout), &stdout_stat) < 0)
-	return;
+        return;
       if (fstat (fileno (debug_file), &debug_stat) < 0)
-	return;
+        return;
 
       /* mingw has a bug where fstat on a regular file reports st_ino
-	 of 0.  On normal system, st_ino should never be 0.  */
+         of 0.  On normal system, st_ino should never be 0.  */
       if (stdout_stat.st_ino == debug_stat.st_ino
-	  && stdout_stat.st_dev == debug_stat.st_dev
-	  && stdout_stat.st_ino != 0)
-	{
-	  if (debug_file != stderr && close_stream (debug_file) != 0)
-	    m4_error (context, 0, errno, caller,
-		      _("error writing to debug stream"));
-	  m4_set_debug_file (context, stdout);
-	}
+          && stdout_stat.st_dev == debug_stat.st_dev
+          && stdout_stat.st_ino != 0)
+        {
+          if (debug_file != stderr && close_stream (debug_file) != 0)
+            m4_error (context, 0, errno, caller,
+                      _("error writing to debug stream"));
+          m4_set_debug_file (context, stdout);
+        }
     }
 }
 
@@ -206,11 +206,11 @@ m4_debug_set_output (m4 *context, const m4_call_info *caller, const char *name)
     {
       fp = fopen (name, "a");
       if (fp == NULL)
-	return false;
+        return false;
 
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	m4_warn (context, errno, caller,
-		 _("cannot protect debug file across forks"));
+        m4_warn (context, errno, caller,
+                 _("cannot protect debug file across forks"));
       set_debug_file (context, caller, fp);
     }
   return true;
@@ -229,9 +229,9 @@ m4_debug_message_prefix (m4 *context)
   if (m4_get_current_line (context))
     {
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_FILE))
-	xfprintf (debug_file, "%s:", m4_get_current_file (context));
+        xfprintf (debug_file, "%s:", m4_get_current_file (context));
       if (m4_is_debug_bit (context, M4_DEBUG_TRACE_LINE))
-	xfprintf (debug_file, "%d:", m4_get_current_line (context));
+        xfprintf (debug_file, "%d:", m4_get_current_line (context));
     }
   putc (' ', debug_file);
 }

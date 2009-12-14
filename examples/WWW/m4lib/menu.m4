@@ -17,55 +17,55 @@
 \table([],
        [\header([General info])],
        [\rows(
-	   [whatis.htm], [What is m4],
-	   [features.htm], [Features],
-	   [uses.htm], [Uses of m4],
-	   )],
+           [whatis.htm], [What is m4],
+           [features.htm], [Features],
+           [uses.htm], [Uses of m4],
+           )],
        [\separator],
 
        [\header([Documentation])],
        [\rows(
-	   [man/m4_toc.html], [Manual],
-	   )],
+           [man/m4_toc.html], [Manual],
+           )],
        [\separator],
 
        [\header([Source files])],
        [\rows(
-	   [readme.htm], [README],
-	   [todo.htm], [TODO],
-	   [news.htm], [NEWS],
-	   [changelog.htm], [ChangeLog],
-	   [thanks.htm], [Contributors],
-	   [m4/], [Browse it],
-	   )],
+           [readme.htm], [README],
+           [todo.htm], [TODO],
+           [news.htm], [NEWS],
+           [changelog.htm], [ChangeLog],
+           [thanks.htm], [Contributors],
+           [m4/], [Browse it],
+           )],
        [\separator],
 
        [\header([The Future])],
        [\rows(
-	   [modules.htm], [Modules],
-	   [visions.htm], [Visions],
-	   )],
+           [modules.htm], [Modules],
+           [visions.htm], [Visions],
+           )],
        [\separator],
 
        [\header([Feedback])],
        [\rows(
-	   [lists.htm], [Mailing-lists],
-	   [feedback.htm], [Feedback],
-	   [/forum/list.php3?num=2], [Discussion Forum],
-	   )],
+           [lists.htm], [Mailing-lists],
+           [feedback.htm], [Feedback],
+           [/forum/list.php3?num=2], [Discussion Forum],
+           )],
        [\separator],
 
        [\header([Development])],
        [\rows(
-	   [download.htm], [Download],
-	   [bugs.htm], [Known bugs],
-	   )],
+           [download.htm], [Download],
+           [bugs.htm], [Known bugs],
+           )],
        [\separator],
 
        [\header([Examples])],
        [\rows(
-	   [thissite.htm], [This site],
-	   )],
+           [thissite.htm], [This site],
+           )],
        )
 
 \popdef([header])

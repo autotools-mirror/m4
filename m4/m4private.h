@@ -124,23 +124,23 @@ struct m4 {
 #  define m4_set_regexp_syntax_opt(C, V)	((C)->regexp_syntax = (V))
 
 #  define m4_get_prefix_builtins_opt(C)					\
-		(BIT_TEST((C)->opt_flags, M4_OPT_PREFIX_BUILTINS_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_PREFIX_BUILTINS_BIT))
 #  define m4_get_suppress_warnings_opt(C)				\
-		(BIT_TEST((C)->opt_flags, M4_OPT_SUPPRESS_WARN_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_SUPPRESS_WARN_BIT))
 #  define m4_get_discard_comments_opt(C)				\
-		(BIT_TEST((C)->opt_flags, M4_OPT_DISCARD_COMMENTS_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_DISCARD_COMMENTS_BIT))
 #  define m4_get_interactive_opt(C)					\
-		(BIT_TEST((C)->opt_flags, M4_OPT_INTERACTIVE_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_INTERACTIVE_BIT))
 #  define m4_get_syncoutput_opt(C)					\
-		(BIT_TEST((C)->opt_flags, M4_OPT_SYNCOUTPUT_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_SYNCOUTPUT_BIT))
 #  define m4_get_posixly_correct_opt(C)					\
-		(BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_POSIXLY_CORRECT_BIT))
 #  define m4_get_fatal_warnings_opt(C)					\
-		(BIT_TEST((C)->opt_flags, M4_OPT_FATAL_WARN_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_FATAL_WARN_BIT))
 #  define m4_get_warnings_exit_opt(C)					\
-		(BIT_TEST((C)->opt_flags, M4_OPT_WARN_EXIT_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_WARN_EXIT_BIT))
 #  define m4_get_safer_opt(C)						\
-		(BIT_TEST((C)->opt_flags, M4_OPT_SAFER_BIT))
+                (BIT_TEST((C)->opt_flags, M4_OPT_SAFER_BIT))
 
 /* No fast opt bit set macros, as they would need to evaluate their
    arguments more than once, which would subtly change their semantics.  */
@@ -165,10 +165,10 @@ struct m4__builtin
 typedef struct m4__builtin m4__builtin;
 
 extern void m4__set_symbol_value_builtin (m4_symbol_value *,
-					  const m4__builtin *);
+                                          const m4__builtin *);
 extern void m4__builtin_print (m4_obstack *, const m4__builtin *, bool,
-			       m4__symbol_chain **, const m4_string_pair *,
-			       bool);
+                               m4__symbol_chain **, const m4_string_pair *,
+                               bool);
 
 
 /* --- MODULE MANAGEMENT --- */
@@ -190,7 +190,7 @@ struct m4_module
 
 extern void	    m4__module_init (m4 *context);
 extern m4_module *  m4__module_open (m4 *context, const char *name,
-				     m4_obstack *obs);
+                                     m4_obstack *obs);
 extern void	    m4__module_exit (m4 *context);
 extern m4_module *  m4__module_next (m4_module *);
 extern m4_module *  m4__module_find (const char *name);
@@ -273,7 +273,7 @@ struct m4_symbol_value
       size_t		len;	/* Length of string.  */
       const char *	text;	/* String contents.  */
       /* Quote age when this string was built, or zero to force a
-	 rescan of the string.  Ignored for 0 len.  */
+         rescan of the string.  Ignored for 0 len.  */
       unsigned int	quote_age;
     } u_t;			/* Valid when type is TEXT, PLACEHOLDER.  */
     const m4__builtin *	builtin;/* Valid when type is FUNC.  */
@@ -353,11 +353,11 @@ struct m4_call_info
 extern size_t	m4__adjust_refcount	(m4 *, size_t, bool);
 extern bool	m4__arg_adjust_refcount	(m4 *, m4_macro_args *, bool);
 extern void	m4__push_arg_quote	(m4 *, m4_obstack *, m4_macro_args *,
-					 size_t, const m4_string_pair *);
+                                         size_t, const m4_string_pair *);
 extern bool	m4__arg_print		(m4 *, m4_obstack *, m4_macro_args *,
-					 size_t, const m4_string_pair *, bool,
-					 m4__symbol_chain **, const char *,
-					 size_t *, bool, bool);
+                                         size_t, const m4_string_pair *, bool,
+                                         m4__symbol_chain **, const char *,
+                                         size_t *, bool, bool);
 
 #define VALUE_NEXT(T)		((T)->next)
 #define VALUE_MODULE(T)		((T)->module)
@@ -388,14 +388,14 @@ extern bool	m4__arg_print		(m4 *, m4_obstack *, m4_macro_args *,
 #  define m4_is_symbol_value_func(V)	((V)->type == M4_SYMBOL_FUNC)
 #  define m4_is_symbol_value_void(V)	((V)->type == M4_SYMBOL_VOID)
 #  define m4_is_symbol_value_placeholder(V)				\
-					((V)->type == M4_SYMBOL_PLACEHOLDER)
+                                        ((V)->type == M4_SYMBOL_PLACEHOLDER)
 #  define m4_get_symbol_value_text(V)	((V)->u.u_t.text)
 #  define m4_get_symbol_value_len(V)	((V)->u.u_t.len)
 #  define m4_get_symbol_value_quote_age(V)	((V)->u.u_t.quote_age)
 #  define m4_get_symbol_value_func(V)	((V)->u.builtin->builtin.func)
 #  define m4_get_symbol_value_builtin(V) (&(V)->u.builtin->builtin)
 #  define m4_get_symbol_value_placeholder(V)				\
-					((V)->u.u_t.text)
+                                        ((V)->u.u_t.text)
 #  define m4_symbol_value_flatten_args(V)				\
   (BIT_TEST ((V)->flags, VALUE_FLATTEN_ARGS_BIT))
 
@@ -441,10 +441,10 @@ struct m4_symbol_arg {
 #define SYMBOL_ARG_KEY_BIT	(1 << 1)
 
 extern void m4__symtab_remove_module_references (m4_symbol_table *,
-						 m4_module *);
+                                                 m4_module *);
 extern bool m4__symbol_value_print (m4 *, m4_symbol_value *, m4_obstack *,
-				    const m4_string_pair *, bool,
-				    m4__symbol_chain **, size_t *, bool);
+                                    const m4_string_pair *, bool,
+                                    m4__symbol_chain **, size_t *, bool);
 
 
 
@@ -537,8 +537,8 @@ struct m4_syntax_table {
 
 /* Set or refresh the cached quote.  */
 extern const m4_string_pair *m4__quote_cache (m4_syntax_table *,
-					      m4_obstack *obs, unsigned int,
-					      const m4_string_pair *);
+                                              m4_obstack *obs, unsigned int,
+                                              const m4_string_pair *);
 
 /* Clear the cached quote.  */
 #define m4__quote_uncache(S)		((S)->cached_quote = NULL)
@@ -563,18 +563,18 @@ typedef enum {
 } m4__token_type;
 
 extern	void		m4__make_text_link (m4_obstack *, m4__symbol_chain **,
-					    m4__symbol_chain **);
+                                            m4__symbol_chain **);
 extern	void		m4__append_builtin (m4_obstack *, const m4__builtin *,
-					    m4__symbol_chain **,
-					    m4__symbol_chain **);
+                                            m4__symbol_chain **,
+                                            m4__symbol_chain **);
 extern	bool		m4__push_symbol (m4 *, m4_symbol_value *, size_t,
-					 bool);
+                                         bool);
 extern	m4_obstack	*m4__push_wrapup_init (m4 *, const m4_call_info *,
-					       m4__symbol_chain ***);
+                                               m4__symbol_chain ***);
 extern	void		m4__push_wrapup_finish (void);
 extern	m4__token_type	m4__next_token (m4 *, m4_symbol_value *, int *,
-					m4_obstack *, bool,
-					const m4_call_info *);
+                                        m4_obstack *, bool,
+                                        const m4_call_info *);
 extern	bool		m4__next_token_is_open (m4 *);
 
 /* Fast macro versions of macro argv accessor functions,

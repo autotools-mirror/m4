@@ -70,27 +70,27 @@ m4_delete (m4 *context)
       m4__search_path *path = context->search_path->list;
 
       while (path)
-	{
-	  m4__search_path *stale = path;
-	  path = path->next;
+        {
+          m4__search_path *stale = path;
+          path = path->next;
 
-	  free ((void*) stale->dir);
-	  free (stale);
-	}
+          free ((void*) stale->dir);
+          free (stale);
+        }
       free (context->search_path);
     }
 
   for (i = 0; i < context->stacks_count; i++)
     {
       assert (context->arg_stacks[i].refcount == 0
-	      && context->arg_stacks[i].argcount == 0);
+              && context->arg_stacks[i].argcount == 0);
       if (context->arg_stacks[i].args)
-	{
-	  obstack_free (context->arg_stacks[i].args, NULL);
-	  free (context->arg_stacks[i].args);
-	  obstack_free (context->arg_stacks[i].argv, NULL);
-	  free (context->arg_stacks[i].argv);
-	}
+        {
+          obstack_free (context->arg_stacks[i].args, NULL);
+          free (context->arg_stacks[i].args);
+          obstack_free (context->arg_stacks[i].argv, NULL);
+          free (context->arg_stacks[i].argv);
+        }
     }
   free (context->arg_stacks);
 
@@ -104,41 +104,41 @@ m4_delete (m4 *context)
    name to protect against macro expansion from the fast macros used to
    replace these functions when NDEBUG is defined.  */
 #define M4FIELD(type, base, field)					\
-	type (CONC(m4_get_, base)) (m4 *context)			\
-	{								\
-	  assert (context);						\
-	  return context->field;					\
-	}
+        type (CONC(m4_get_, base)) (m4 *context)			\
+        {								\
+          assert (context);						\
+          return context->field;					\
+        }
 m4_context_field_table
 #undef M4FIELD
 
 #define M4FIELD(type, base, field)					\
-	type (CONC(m4_set_, base)) (m4 *context, type value)		\
-	{								\
-	  assert (context);						\
-	  return context->field = value;				\
-	}
+        type (CONC(m4_set_, base)) (m4 *context, type value)		\
+        {								\
+          assert (context);						\
+          return context->field = value;				\
+        }
 m4_context_field_table
 #undef M4FIELD
 
 #define M4OPT_BIT(bit, base)						\
-	bool (CONC(m4_get_, base)) (m4 *context)			\
-	{								\
-	  assert (context);						\
-	  return BIT_TEST (context->opt_flags, (bit));			\
-	}
+        bool (CONC(m4_get_, base)) (m4 *context)			\
+        {								\
+          assert (context);						\
+          return BIT_TEST (context->opt_flags, (bit));			\
+        }
 m4_context_opt_bit_table
 #undef M4OPT_BIT
 
 #define M4OPT_BIT(bit, base)						\
-	bool (CONC(m4_set_, base)) (m4 *context, bool value)		\
-	{								\
-	  assert (context);						\
-	  if (value)							\
-	     BIT_SET   (context->opt_flags, (bit));			\
-	  else								\
-	     BIT_RESET (context->opt_flags, (bit));			\
-	  return value;							\
-	}
+        bool (CONC(m4_set_, base)) (m4 *context, bool value)		\
+        {								\
+          assert (context);						\
+          if (value)							\
+             BIT_SET   (context->opt_flags, (bit));			\
+          else								\
+             BIT_RESET (context->opt_flags, (bit));			\
+          return value;							\
+        }
 m4_context_opt_bit_table
 #undef M4OPT_BIT

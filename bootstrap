@@ -155,9 +155,9 @@ func_missing_arg ()
 func_usage ()
 {
     $SED '/^# Usage:/,/# -h/ {
-	s/^# //; s/^# *$//;
-	s/\$progname/'$progname'/;
-	p;
+        s/^# //; s/^# *$//;
+        s/\$progname/'$progname'/;
+        p;
     }; d' < "$progpath"
     echo
     echo "run \`$progname --help | more' for full usage"
@@ -169,9 +169,9 @@ func_usage ()
 func_help ()
 {
     $SED '/^# Usage:/,/# Report bugs to/ {
-	s/^# //; s/^# *$//;
-	s/\$progname/'$progname'/;
-	p;
+        s/^# //; s/^# *$//;
+        s/\$progname/'$progname'/;
+        p;
      }; d' < "$progpath"
     exit $EXIT_SUCCESS
 }
@@ -181,9 +181,9 @@ func_help ()
 func_version ()
 {
     $SED '/^# '$PROGRAM' (GNU /,/# Written by / {
-	s/^# //;
-	s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
-	p;
+        s/^# //;
+        s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
+        p;
      }; d' < "$progpath"
      exit $EXIT_SUCCESS
 }
@@ -286,8 +286,8 @@ func_update_po ()
     new_po="$ref_po_dir/$po.po"
     cksum_file="$ref_po_dir/$po.s1"
     if ! test -f "$cksum_file" ||
-	! test -f "$po_dir/$po.po" ||
-	! sha1sum -c --status "$cksum_file" < "$new_po" > /dev/null; then
+        ! test -f "$po_dir/$po.po" ||
+        ! sha1sum -c --status "$cksum_file" < "$new_po" > /dev/null; then
       echo "updated $po_dir/$po.po..."
       cp "$new_po" "$po_dir/$po.po" && sha1sum < "$new_po" > "$cksum_file"
     fi
@@ -339,11 +339,11 @@ if test -d .git && (git --version) >/dev/null 2>/dev/null ; then
     if test -d "$GNULIB_SRCDIR" ; then
       rmdir gnulib 2>/dev/null
       git clone --reference "$GNULIB_SRCDIR" git://git.sv.gnu.org/gnulib.git \
-	&& git submodule init && git submodule update \
-	|| func_fatal_error "Unable to update gnulib"
+        && git submodule init && git submodule update \
+        || func_fatal_error "Unable to update gnulib"
     else
       git submodule update --init \
-	|| func_fatal_error "Unable to update gnulib"
+        || func_fatal_error "Unable to update gnulib"
     fi
   fi
 else
@@ -392,20 +392,20 @@ do
 
     dest=`echo $file | $SED "$basename"`
     case $file in
-	lib/*) dest=src/$dest ;;
-	m4/*)  dest=$config_macro_dir/$dest ;;
-	*)     func_echo "Unknown file: $file"
-	       exit 1
-	       ;;
+        lib/*) dest=src/$dest ;;
+        m4/*)  dest=$config_macro_dir/$dest ;;
+        *)     func_echo "Unknown file: $file"
+               exit 1
+               ;;
     esac
 
     # Be sure to show all copying errors before bailing out
     if test -f gnulib/$file; then
-	func_echo "copying file \`$dest'"
-	cp gnulib/$file $dest
+        func_echo "copying file \`$dest'"
+        cp gnulib/$file $dest
     else
-	func_error "gnulib/$file does not exist"
-	bailout_cb="exit 1"
+        func_error "gnulib/$file does not exist"
+        bailout_cb="exit 1"
     fi
 done
 $bailout_cb

@@ -73,7 +73,7 @@ usage (int status)
 {
   if (status != EXIT_SUCCESS)
     xfprintf (stderr, _("Try `%s --help' for more information.\n"),
-	      m4_get_program_name ());
+              m4_get_program_name ());
   else
     {
       xprintf (_("Usage: %s [OPTION]... [FILE]...\n"), m4_get_program_name ());
@@ -311,11 +311,11 @@ process_file (m4 *context, const char *name)
       char *full_name;
       FILE *fp = m4_path_search (context, name, &full_name);
       if (fp == NULL)
-	{
-	  m4_error (context, 0, errno, NULL, _("cannot open %s"),
-		    quotearg_style (locale_quoting_style, name));
-	  return;
-	}
+        {
+          m4_error (context, 0, errno, NULL, _("cannot open %s"),
+                    quotearg_style (locale_quoting_style, name));
+          return;
+        }
       m4_push_file (context, fp, full_name, true);
       free (full_name);
     }
@@ -377,231 +377,231 @@ main (int argc, char *const *argv, char *const *envp)
     {
       int oi = -1;
       int optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-				 long_options, &oi);
+                                 long_options, &oi);
       if (optchar == -1)
-	break;
+        break;
 
       switch (optchar)
-	{
-	default:
-	  usage (EXIT_FAILURE);
+        {
+        default:
+          usage (EXIT_FAILURE);
 
-	case 'H':
-	case HASHSIZE_OPTION:
-	  /* -H was supported in 1.4.x, but is a no-op now.  FIXME -
-	     remove support for -H after 2.0.  */
-	  error (0, 0, _("Warning: `%s' is deprecated"),
-		 optchar == 'H' ? "-H" : "--hashsize");
-	  break;
+        case 'H':
+        case HASHSIZE_OPTION:
+          /* -H was supported in 1.4.x, but is a no-op now.  FIXME -
+             remove support for -H after 2.0.  */
+          error (0, 0, _("Warning: `%s' is deprecated"),
+                 optchar == 'H' ? "-H" : "--hashsize");
+          break;
 
-	case 'S':
-	case 'T':
-	  /* Compatibility junk: options that other implementations
-	     support, but which we ignore as no-ops and don't list in
-	     --help.  */
-	  error (0, 0, _("Warning: `-%c' is deprecated"),
-		 optchar);
-	  break;
+        case 'S':
+        case 'T':
+          /* Compatibility junk: options that other implementations
+             support, but which we ignore as no-ops and don't list in
+             --help.  */
+          error (0, 0, _("Warning: `-%c' is deprecated"),
+                 optchar);
+          break;
 
-	case WORD_REGEXP_OPTION:
-	  /* Supported in 1.4.x as -W, but no longer present.  */
-	  error (0, 0, _("Warning: `%s' is deprecated"), "--word-regexp");
-	  break;
+        case WORD_REGEXP_OPTION:
+          /* Supported in 1.4.x as -W, but no longer present.  */
+          error (0, 0, _("Warning: `%s' is deprecated"), "--word-regexp");
+          break;
 
-	case 's':
-	  optchar = SYNCOUTPUT_OPTION;
-	  optarg = "1";
-	  /* fall through */
-	case 'D':
-	case 'U':
-	case 'm':
-	case 'p':
-	case 'r':
-	case 't':
-	case POPDEF_OPTION:
-	case SYNCOUTPUT_OPTION:
-	case TRACEOFF_OPTION:
-	case UNLOAD_MODULE_OPTION:
-	defer:
-	  /* Arguments that cannot be handled until later are accumulated.  */
+        case 's':
+          optchar = SYNCOUTPUT_OPTION;
+          optarg = "1";
+          /* fall through */
+        case 'D':
+        case 'U':
+        case 'm':
+        case 'p':
+        case 'r':
+        case 't':
+        case POPDEF_OPTION:
+        case SYNCOUTPUT_OPTION:
+        case TRACEOFF_OPTION:
+        case UNLOAD_MODULE_OPTION:
+        defer:
+          /* Arguments that cannot be handled until later are accumulated.  */
 
-	  defn = (deferred *) xmalloc (sizeof *defn);
-	  defn->code = optchar;
-	  defn->value = optarg;
-	  defn->next = NULL;
+          defn = (deferred *) xmalloc (sizeof *defn);
+          defn->code = optchar;
+          defn->value = optarg;
+          defn->next = NULL;
 
-	  if (head == NULL)
-	    head = defn;
-	  else
-	    tail->next = defn;
-	  tail = defn;
-	  break;
+          if (head == NULL)
+            head = defn;
+          else
+            tail->next = defn;
+          tail = defn;
+          break;
 
-	case '\1':
-	  seen_file = true;
-	  goto defer;
+        case '\1':
+          seen_file = true;
+          goto defer;
 
-	case 'B':
-	  /* In 1.4.x, -B<num> was a no-op option for compatibility with
-	     Solaris m4.  Warn if optarg is all numeric.  FIXME -
-	     silence this warning after 2.0.  */
-	  if (isdigit (to_uchar (*optarg)))
-	    {
-	      char *end;
-	      errno = 0;
-	      strtol (optarg, &end, 10);
-	      if (*end == '\0' && errno == 0)
-		error (0, 0, _("Warning: recommend using `-B ./%s' instead"),
-		       optarg);
-	    }
-	  /* fall through */
-	case PREPEND_INCLUDE_OPTION:
-	  m4_add_include_directory (context, optarg, true);
-	  break;
+        case 'B':
+          /* In 1.4.x, -B<num> was a no-op option for compatibility with
+             Solaris m4.  Warn if optarg is all numeric.  FIXME -
+             silence this warning after 2.0.  */
+          if (isdigit (to_uchar (*optarg)))
+            {
+              char *end;
+              errno = 0;
+              strtol (optarg, &end, 10);
+              if (*end == '\0' && errno == 0)
+                error (0, 0, _("Warning: recommend using `-B ./%s' instead"),
+                       optarg);
+            }
+          /* fall through */
+        case PREPEND_INCLUDE_OPTION:
+          m4_add_include_directory (context, optarg, true);
+          break;
 
-	case 'E':
-	  m4_debug_decode (context, "-d", SIZE_MAX);
-	  if (m4_get_fatal_warnings_opt (context))
-	    m4_set_warnings_exit_opt (context, true);
-	  else
-	    m4_set_fatal_warnings_opt (context, true);
-	  break;
+        case 'E':
+          m4_debug_decode (context, "-d", SIZE_MAX);
+          if (m4_get_fatal_warnings_opt (context))
+            m4_set_warnings_exit_opt (context, true);
+          else
+            m4_set_fatal_warnings_opt (context, true);
+          break;
 
-	case 'F':
-	  frozen_file_to_write = optarg;
-	  break;
+        case 'F':
+          frozen_file_to_write = optarg;
+          break;
 
-	case 'G':
-	  m4_set_posixly_correct_opt (context, true);
-	  break;
+        case 'G':
+          m4_set_posixly_correct_opt (context, true);
+          break;
 
-	case 'I':
-	  m4_add_include_directory (context, optarg, false);
-	  break;
+        case 'I':
+          m4_add_include_directory (context, optarg, false);
+          break;
 
-	case 'L':
-	  size = size_opt (optarg, oi, optchar);
-	  if (!size)
-	    size = SIZE_MAX;
-	  m4_set_nesting_limit_opt (context, size);
-	  break;
+        case 'L':
+          size = size_opt (optarg, oi, optchar);
+          if (!size)
+            size = SIZE_MAX;
+          m4_set_nesting_limit_opt (context, size);
+          break;
 
-	case 'M':
-	  if (lt_dlinsertsearchdir (lt_dlgetsearchpath (), optarg) != 0)
-	    {
-	      const char *dlerr = lt_dlerror ();
-	      if (dlerr == NULL)
-		m4_error (context, EXIT_FAILURE, 0, NULL,
-			  _("failed to add search directory %s"),
-			  quotearg_style (locale_quoting_style, optarg));
-	      else
-		m4_error (context, EXIT_FAILURE, 0, NULL,
-			  _("failed to add search directory %s: %s"),
-			  quotearg_style (locale_quoting_style, optarg),
-			  dlerr);
-	    }
-	  break;
+        case 'M':
+          if (lt_dlinsertsearchdir (lt_dlgetsearchpath (), optarg) != 0)
+            {
+              const char *dlerr = lt_dlerror ();
+              if (dlerr == NULL)
+                m4_error (context, EXIT_FAILURE, 0, NULL,
+                          _("failed to add search directory %s"),
+                          quotearg_style (locale_quoting_style, optarg));
+              else
+                m4_error (context, EXIT_FAILURE, 0, NULL,
+                          _("failed to add search directory %s: %s"),
+                          quotearg_style (locale_quoting_style, optarg),
+                          dlerr);
+            }
+          break;
 
-	case 'P':
-	  m4_set_prefix_builtins_opt (context, true);
-	  break;
+        case 'P':
+          m4_set_prefix_builtins_opt (context, true);
+          break;
 
-	case 'Q':
-	  m4_set_suppress_warnings_opt (context, true);
-	  break;
+        case 'Q':
+          m4_set_suppress_warnings_opt (context, true);
+          break;
 
-	case 'R':
-	  frozen_file_to_read = optarg;
-	  break;
+        case 'R':
+          frozen_file_to_read = optarg;
+          break;
 
-	case 'W':
-	  /* FIXME - should W take an optional argument, to allow -Wall,
-	     -Wnone, -Werror, -Wcategory, -Wno-category?  If so, then have
-	     -W == -Wall.  */
-	  m4_set_suppress_warnings_opt (context, false);
-	  break;
+        case 'W':
+          /* FIXME - should W take an optional argument, to allow -Wall,
+             -Wnone, -Werror, -Wcategory, -Wno-category?  If so, then have
+             -W == -Wall.  */
+          m4_set_suppress_warnings_opt (context, false);
+          break;
 
-	case 'b':
-	  interactive = INTERACTIVE_NO;
-	  break;
+        case 'b':
+          interactive = INTERACTIVE_NO;
+          break;
 
-	case 'c':
-	  m4_set_discard_comments_opt (context, true);
-	  break;
+        case 'c':
+          m4_set_discard_comments_opt (context, true);
+          break;
 
-	case 'd':
-	  /* Staggered handling of 'd', since -dm is useful prior to
-	     first file and prior to reloading, but other -d must also
-	     have effect between files.	 */
-	  if (seen_file || frozen_file_to_read)
-	    goto defer;
-	  if (m4_debug_decode (context, optarg, SIZE_MAX) < 0)
-	    error (0, 0, _("bad debug flags: %s"),
-		   quotearg_style (locale_quoting_style, optarg));
-	  break;
+        case 'd':
+          /* Staggered handling of 'd', since -dm is useful prior to
+             first file and prior to reloading, but other -d must also
+             have effect between files.	 */
+          if (seen_file || frozen_file_to_read)
+            goto defer;
+          if (m4_debug_decode (context, optarg, SIZE_MAX) < 0)
+            error (0, 0, _("bad debug flags: %s"),
+                   quotearg_style (locale_quoting_style, optarg));
+          break;
 
-	case 'e':
-	  error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
-		 "-e", "-i");
-	  /* fall through */
-	case 'i':
-	  interactive = INTERACTIVE_YES;
-	  break;
+        case 'e':
+          error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+                 "-e", "-i");
+          /* fall through */
+        case 'i':
+          interactive = INTERACTIVE_YES;
+          break;
 
-	case 'g':
-	  m4_set_posixly_correct_opt (context, false);
-	  break;
+        case 'g':
+          m4_set_posixly_correct_opt (context, false);
+          break;
 
-	case ARGLENGTH_OPTION:
-	  error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
-		 "--arglength", "--debuglen");
-	  /* fall through */
-	case 'l':
-	  size = size_opt (optarg, oi, optchar);
-	  if (!size)
-	    size = SIZE_MAX;
-	  m4_set_max_debug_arg_length_opt (context, size);
-	  break;
+        case ARGLENGTH_OPTION:
+          error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+                 "--arglength", "--debuglen");
+          /* fall through */
+        case 'l':
+          size = size_opt (optarg, oi, optchar);
+          if (!size)
+            size = SIZE_MAX;
+          m4_set_max_debug_arg_length_opt (context, size);
+          break;
 
-	case DEBUGFILE_OPTION:
-	  /* Staggered handling of '--debugfile', since it is useful
-	     prior to first file and prior to reloading, but other
-	     uses must also have effect between files.  */
-	  if (seen_file || frozen_file_to_read)
-	    goto defer;
-	  debugfile = optarg;
-	  break;
+        case DEBUGFILE_OPTION:
+          /* Staggered handling of '--debugfile', since it is useful
+             prior to first file and prior to reloading, but other
+             uses must also have effect between files.  */
+          if (seen_file || frozen_file_to_read)
+            goto defer;
+          debugfile = optarg;
+          break;
 
-	case 'o':
-	case ERROR_OUTPUT_OPTION:
-	  /* FIXME: -o is inconsistent with other tools' use of
-	     -o/--output for creating an output file instead of using
-	     stdout, and --error-output is misnamed since it does not
-	     affect error messages to stderr.  Change the meaning of -o
-	     after 2.1.	 */
-	  error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
-		 optchar == 'o' ? "-o" : "--error-output", "--debugfile");
-	  /* Don't call m4_debug_set_output here, as it has side effects.  */
-	  debugfile = optarg;
-	  break;
+        case 'o':
+        case ERROR_OUTPUT_OPTION:
+          /* FIXME: -o is inconsistent with other tools' use of
+             -o/--output for creating an output file instead of using
+             stdout, and --error-output is misnamed since it does not
+             affect error messages to stderr.  Change the meaning of -o
+             after 2.1.	 */
+          error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+                 optchar == 'o' ? "-o" : "--error-output", "--debugfile");
+          /* Don't call m4_debug_set_output here, as it has side effects.  */
+          debugfile = optarg;
+          break;
 
-	case IMPORT_ENVIRONMENT_OPTION:
-	  import_environment = true;
-	  break;
+        case IMPORT_ENVIRONMENT_OPTION:
+          import_environment = true;
+          break;
 
-	case SAFER_OPTION:
-	  m4_set_safer_opt (context, true);
-	  break;
+        case SAFER_OPTION:
+          m4_set_safer_opt (context, true);
+          break;
 
-	case VERSION_OPTION:
-	  version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
-	  exit (EXIT_SUCCESS);
-	  break;
+        case VERSION_OPTION:
+          version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
+          exit (EXIT_SUCCESS);
+          break;
 
-	case HELP_OPTION:
-	  usage (EXIT_SUCCESS);
-	  break;
-	}
+        case HELP_OPTION:
+          usage (EXIT_SUCCESS);
+          break;
+        }
     }
 
   /* Interactive if specified, or if no input files and stdin and
@@ -609,10 +609,10 @@ main (int argc, char *const *argv, char *const *envp)
      means unbuffered output, and interrupts ignored.  */
 
   m4_set_interactive_opt (context, (interactive == INTERACTIVE_YES
-				    || (interactive == INTERACTIVE_UNKNOWN
-					&& optind == argc && !seen_file
-					&& isatty (STDIN_FILENO)
-					&& isatty (STDERR_FILENO))));
+                                    || (interactive == INTERACTIVE_UNKNOWN
+                                        && optind == argc && !seen_file
+                                        && isatty (STDIN_FILENO)
+                                        && isatty (STDERR_FILENO))));
   if (m4_get_interactive_opt (context))
     {
       signal (SIGINT, SIG_IGN);
@@ -625,7 +625,7 @@ main (int argc, char *const *argv, char *const *envp)
   /* Do the basic initializations.  */
   if (debugfile && !m4_debug_set_output (context, NULL, debugfile))
     m4_error (context, 0, errno, NULL, _("cannot set debug file %s"),
-	      quotearg_style (locale_quoting_style, debugfile));
+              quotearg_style (locale_quoting_style, debugfile));
   m4_input_init (context);
   m4_output_init (context);
   m4_include_env_init (context);
@@ -636,9 +636,9 @@ main (int argc, char *const *argv, char *const *envp)
     {
       m4_module_load (context, "m4", NULL);
       if (m4_get_posixly_correct_opt (context))
-	m4_module_load (context, "traditional", NULL);
+        m4_module_load (context, "traditional", NULL);
       else
-	m4_module_load (context, "gnu", NULL);
+        m4_module_load (context, "gnu", NULL);
     }
 
   /* Import environment variables as macros.  The definition are
@@ -650,13 +650,13 @@ main (int argc, char *const *argv, char *const *envp)
       char *const *env;
 
       for (env = envp; *env != NULL; env++)
-	{
-	  defn = (deferred *) xmalloc (sizeof *defn);
-	  defn->code = 'D';
-	  defn->value = *env;
-	  defn->next = head;
-	  head = defn;
-	}
+        {
+          defn = (deferred *) xmalloc (sizeof *defn);
+          defn->code = 'D';
+          defn->value = *env;
+          defn->next = head;
+          head = defn;
+        }
     }
 
   /* Handle deferred command line macro definitions.  Must come after
@@ -668,96 +668,96 @@ main (int argc, char *const *argv, char *const *envp)
       const char *arg = defn->value;
 
       switch (defn->code)
-	{
-	case 'D':
-	case 'p':
-	  {
-	    m4_symbol_value *value = m4_symbol_value_create ();
+        {
+        case 'D':
+        case 'p':
+          {
+            m4_symbol_value *value = m4_symbol_value_create ();
 
-	    const char *str = strchr (arg, '=');
-	    size_t len = str ? str - arg : strlen (arg);
+            const char *str = strchr (arg, '=');
+            size_t len = str ? str - arg : strlen (arg);
 
-	    m4_set_symbol_value_text (value, xstrdup (str ? str + 1 : ""),
-				      str ? strlen (str + 1) : 0, 0);
+            m4_set_symbol_value_text (value, xstrdup (str ? str + 1 : ""),
+                                      str ? strlen (str + 1) : 0, 0);
 
-	    if (defn->code == 'D')
-	      m4_symbol_define (M4SYMTAB, arg, len, value);
-	    else
-	      m4_symbol_pushdef (M4SYMTAB, arg, len, value);
-	  }
-	  break;
+            if (defn->code == 'D')
+              m4_symbol_define (M4SYMTAB, arg, len, value);
+            else
+              m4_symbol_pushdef (M4SYMTAB, arg, len, value);
+          }
+          break;
 
-	case 'U':
-	  m4_symbol_delete (M4SYMTAB, arg, strlen (arg));
-	  break;
+        case 'U':
+          m4_symbol_delete (M4SYMTAB, arg, strlen (arg));
+          break;
 
-	case 'd':
-	  if (m4_debug_decode (context, arg, SIZE_MAX) < 0)
-	    error (0, 0, _("bad debug flags: %s"),
-		   quotearg_style (locale_quoting_style, arg));
-	  break;
+        case 'd':
+          if (m4_debug_decode (context, arg, SIZE_MAX) < 0)
+            error (0, 0, _("bad debug flags: %s"),
+                   quotearg_style (locale_quoting_style, arg));
+          break;
 
-	case 'm':
-	  /* FIXME - should loading a module result in output?  */
-	  m4_module_load (context, arg, NULL);
-	  break;
+        case 'm':
+          /* FIXME - should loading a module result in output?  */
+          m4_module_load (context, arg, NULL);
+          break;
 
-	case 'r':
-	  m4_set_regexp_syntax_opt (context, m4_regexp_syntax_encode (arg));
-	  if (m4_get_regexp_syntax_opt (context) < 0)
-	    m4_error (context, EXIT_FAILURE, 0, NULL,
-		      _("bad syntax-spec: %s"),
-		      quotearg_style (locale_quoting_style, arg));
-	  break;
+        case 'r':
+          m4_set_regexp_syntax_opt (context, m4_regexp_syntax_encode (arg));
+          if (m4_get_regexp_syntax_opt (context) < 0)
+            m4_error (context, EXIT_FAILURE, 0, NULL,
+                      _("bad syntax-spec: %s"),
+                      quotearg_style (locale_quoting_style, arg));
+          break;
 
-	case 't':
-	  m4_set_symbol_name_traced (M4SYMTAB, arg, strlen (arg), true);
-	  break;
+        case 't':
+          m4_set_symbol_name_traced (M4SYMTAB, arg, strlen (arg), true);
+          break;
 
-	case '\1':
-	  process_file (context, arg);
-	  break;
+        case '\1':
+          process_file (context, arg);
+          break;
 
-	case DEBUGFILE_OPTION:
-	  if (!m4_debug_set_output (context, NULL, arg))
-	    m4_error (context, 0, errno, NULL, _("cannot set debug file %s"),
-		      quotearg_style (locale_quoting_style,
-				      arg ? arg : _("stderr")));
-	  break;
+        case DEBUGFILE_OPTION:
+          if (!m4_debug_set_output (context, NULL, arg))
+            m4_error (context, 0, errno, NULL, _("cannot set debug file %s"),
+                      quotearg_style (locale_quoting_style,
+                                      arg ? arg : _("stderr")));
+          break;
 
-	case POPDEF_OPTION:
-	  {
-	    size_t len = strlen (arg);
-	    if (m4_symbol_lookup (M4SYMTAB, arg, len))
-	      m4_symbol_popdef (M4SYMTAB, arg, len);
-	  }
-	  break;
+        case POPDEF_OPTION:
+          {
+            size_t len = strlen (arg);
+            if (m4_symbol_lookup (M4SYMTAB, arg, len))
+              m4_symbol_popdef (M4SYMTAB, arg, len);
+          }
+          break;
 
-	case SYNCOUTPUT_OPTION:
-	  {
-	    bool previous = m4_get_syncoutput_opt (context);
-	    m4_call_info info = {0};
-	    info.name = "--syncoutput";
-	    info.name_len = strlen (info.name);
-	    m4_set_syncoutput_opt (context,
-				   m4_parse_truth_arg (context, &info, arg,
-						       SIZE_MAX, previous));
-	  }
-	  break;
+        case SYNCOUTPUT_OPTION:
+          {
+            bool previous = m4_get_syncoutput_opt (context);
+            m4_call_info info = {0};
+            info.name = "--syncoutput";
+            info.name_len = strlen (info.name);
+            m4_set_syncoutput_opt (context,
+                                   m4_parse_truth_arg (context, &info, arg,
+                                                       SIZE_MAX, previous));
+          }
+          break;
 
-	case TRACEOFF_OPTION:
-	  m4_set_symbol_name_traced (M4SYMTAB, arg, strlen (arg), false);
-	  break;
+        case TRACEOFF_OPTION:
+          m4_set_symbol_name_traced (M4SYMTAB, arg, strlen (arg), false);
+          break;
 
-	case UNLOAD_MODULE_OPTION:
-	  /* FIXME - should unloading a module result in output?  */
-	  m4_module_unload (context, arg, NULL);
-	  break;
+        case UNLOAD_MODULE_OPTION:
+          /* FIXME - should unloading a module result in output?  */
+          m4_module_unload (context, arg, NULL);
+          break;
 
-	default:
-	  assert (!"INTERNAL ERROR: bad code in deferred arguments");
-	  abort ();
-	}
+        default:
+          assert (!"INTERNAL ERROR: bad code in deferred arguments");
+          abort ();
+        }
 
       next = defn->next;
       free (defn);

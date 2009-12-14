@@ -223,9 +223,9 @@ b
 D,
 
 # Testing escape sequences
-T4,5
+T4,6
 blah
-\t\477\040\X5C
+-\t\477\040\X5C
 # Long macro definition.  Catches a regression introduced on 2007-01-20
 # and patched 2007-02-25.
 T4,122
@@ -246,7 +246,7 @@ AT_CHECK_M4([-R frozen.m4f input.m4], [0],
 [[< comment: builtin()
 
 bar
-	'7 \
+-	'7 \
 a
 b]])
 

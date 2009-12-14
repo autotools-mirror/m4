@@ -84,8 +84,8 @@ if test "$M4_cv_use_stackovf" = yes; then
 
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
 ]],
-	    [[struct sigaltstack x; x.ss_base = 0;]])],
-	    [AC_DEFINE([ss_sp], [ss_base],
-	    [Define to ss_base if stack_t has ss_base instead of ss_sp.])])
+            [[struct sigaltstack x; x.ss_base = 0;]])],
+            [AC_DEFINE([ss_sp], [ss_base],
+            [Define to ss_base if stack_t has ss_base instead of ss_sp.])])
 fi
 ])# M4_SYS_STACKOVF

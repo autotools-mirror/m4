@@ -105,7 +105,7 @@ M4BUILTIN_HANDLER (ctime)
   if (argc == 2)
     {
       m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		      &i);
+                      &i);
       t = i;
     }
   else
@@ -154,7 +154,7 @@ M4BUILTIN_HANDLER (gmtime)
   int i;
 
   if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		       &i))
+                       &i))
     return;
 
   t = i;
@@ -170,7 +170,7 @@ M4BUILTIN_HANDLER (localtime)
   int i;
 
   if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		       &i))
+                       &i))
     return;
 
   t = i;
@@ -200,7 +200,7 @@ M4BUILTIN_HANDLER (mktime)
   if (!m4_numeric_arg (context, me, M4ARG (6), M4ARGLEN (6), &tm.tm_year))
     return;
   if (M4ARG (7) && !m4_numeric_arg (context, me, M4ARG (7), M4ARGLEN (7),
-				    &tm.tm_isdst))
+                                    &tm.tm_isdst))
     return;
 
   t = mktime (&tm);
@@ -221,7 +221,7 @@ M4BUILTIN_HANDLER (strftime)
   int l;
 
   if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (2), M4ARGLEN (2),
-		       &l))
+                       &l))
     return;
 
   t = l;

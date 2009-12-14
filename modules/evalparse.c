@@ -137,80 +137,80 @@ eval_lex (number *val)
       int base, digit;
 
       if (*eval_text == '0')
-	{
-	  eval_text++;
-	  switch (*eval_text)
-	    {
-	    case 'x':
-	    case 'X':
-	      base = 16;
-	      eval_text++;
-	      break;
+        {
+          eval_text++;
+          switch (*eval_text)
+            {
+            case 'x':
+            case 'X':
+              base = 16;
+              eval_text++;
+              break;
 
-	    case 'b':
-	    case 'B':
-	      base = 2;
-	      eval_text++;
-	      break;
+            case 'b':
+            case 'B':
+              base = 2;
+              eval_text++;
+              break;
 
-	    case 'r':
-	    case 'R':
-	      base = 0;
-	      eval_text++;
-	      while (isdigit (to_uchar (*eval_text)) && base <= 36)
-		base = 10 * base + *eval_text++ - '0';
-	      if (base == 0 || base > 36 || *eval_text != ':')
-		return ERROR;
-	      eval_text++;
-	      break;
+            case 'r':
+            case 'R':
+              base = 0;
+              eval_text++;
+              while (isdigit (to_uchar (*eval_text)) && base <= 36)
+                base = 10 * base + *eval_text++ - '0';
+              if (base == 0 || base > 36 || *eval_text != ':')
+                return ERROR;
+              eval_text++;
+              break;
 
-	    default:
-	      base = 8;
-	    }
-	}
+            default:
+              base = 8;
+            }
+        }
       else
-	base = 10;
+        base = 10;
 
       numb_set_si (val, 0);
       for (; *eval_text; eval_text++)
-	{
-	  if (isdigit (to_uchar (*eval_text)))
-	    digit = *eval_text - '0';
-	  else if (islower (to_uchar (*eval_text)))
-	    digit = *eval_text - 'a' + 10;
-	  else if (isupper (to_uchar (*eval_text)))
-	    digit = *eval_text - 'A' + 10;
-	  else
-	    break;
+        {
+          if (isdigit (to_uchar (*eval_text)))
+            digit = *eval_text - '0';
+          else if (islower (to_uchar (*eval_text)))
+            digit = *eval_text - 'a' + 10;
+          else if (isupper (to_uchar (*eval_text)))
+            digit = *eval_text - 'A' + 10;
+          else
+            break;
 
-	  if (base == 1)
-	    {
-	      if (digit == 1)
-		numb_incr (*val);
-	      else if (digit == 0 && numb_zerop (*val))
-		continue;
-	      else
-		break;
-	    }
-	  else if (digit >= base)
-	    break;
-	  else
-	    {
-	      number xbase;
-	      number xdigit;
+          if (base == 1)
+            {
+              if (digit == 1)
+                numb_incr (*val);
+              else if (digit == 0 && numb_zerop (*val))
+                continue;
+              else
+                break;
+            }
+          else if (digit >= base)
+            break;
+          else
+            {
+              number xbase;
+              number xdigit;
 
-	      /* (*val) = (*val) * base; */
-	      numb_init (xbase);
-	      numb_set_si (&xbase, base);
-	      numb_times (*val, xbase);
-	      numb_fini (xbase);
-	      /* (*val) = (*val) + digit; */
-	      numb_init (xdigit);
-	      numb_set_si (&xdigit, digit);
-	      numb_plus (*val, xdigit);
-	      numb_fini (xdigit);
-	    }
-	}
+              /* (*val) = (*val) * base; */
+              numb_init (xbase);
+              numb_set_si (&xbase, base);
+              numb_times (*val, xbase);
+              numb_fini (xbase);
+              /* (*val) = (*val) + digit; */
+              numb_init (xdigit);
+              numb_set_si (&xdigit, digit);
+              numb_plus (*val, xdigit);
+              numb_fini (xdigit);
+            }
+        }
       return NUMBER;
     }
 
@@ -218,102 +218,102 @@ eval_lex (number *val)
     {
     case '+':
       if (*eval_text == '+' || *eval_text == '=')
-	return BADOP;
+        return BADOP;
       return PLUS;
     case '-':
       if (*eval_text == '-' || *eval_text == '=')
-	return BADOP;
+        return BADOP;
       return MINUS;
     case '*':
       if (*eval_text == '*')
-	{
-	  eval_text++;
-	  return EXPONENT;
-	}
+        {
+          eval_text++;
+          return EXPONENT;
+        }
       else if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return TIMES;
     case '/':
       if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return DIVIDE;
     case '%':
       if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return MODULO;
     case '\\':
       return RATIO;
     case '=':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return EQ;
-	}
+        {
+          eval_text++;
+          return EQ;
+        }
       return BADOP;
     case '!':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return NOTEQ;
-	}
+        {
+          eval_text++;
+          return NOTEQ;
+        }
       return LNOT;
     case '>':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return GTEQ;
-	}
+        {
+          eval_text++;
+          return GTEQ;
+        }
       else if (*eval_text == '>')
-	{
-	  eval_text++;
-	  if (*eval_text == '=')
-	    return BADOP;
-	  else if (*eval_text == '>')
-	    {
-	      eval_text++;
-	      return URSHIFT;
-	    }
-	  return RSHIFT;
-	}
+        {
+          eval_text++;
+          if (*eval_text == '=')
+            return BADOP;
+          else if (*eval_text == '>')
+            {
+              eval_text++;
+              return URSHIFT;
+            }
+          return RSHIFT;
+        }
       else
-	return GT;
+        return GT;
     case '<':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return LSEQ;
-	}
+        {
+          eval_text++;
+          return LSEQ;
+        }
       else if (*eval_text == '<')
-	{
-	  if (*++eval_text == '=')
-	    return BADOP;
-	  return LSHIFT;
-	}
+        {
+          if (*++eval_text == '=')
+            return BADOP;
+          return LSHIFT;
+        }
       else
-	return LS;
+        return LS;
     case '^':
       if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return XOR;
     case '~':
       return NOT;
     case '&':
       if (*eval_text == '&')
-	{
-	  eval_text++;
-	  return LAND;
-	}
+        {
+          eval_text++;
+          return LAND;
+        }
       else if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return AND;
     case '|':
       if (*eval_text == '|')
-	{
-	  eval_text++;
-	  return LOR;
-	}
+        {
+          eval_text++;
+          return LOR;
+        }
       else if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return OR;
     case '(':
       return LEFTP;
@@ -345,10 +345,10 @@ comma_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = condition_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
       numb_set (*v1, v2);
     }
   numb_fini (v2);
@@ -375,28 +375,28 @@ condition_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
       er = comma_term (context, et, &v2);
       if (er != NO_ERROR
-	  && !(numb_zerop (*v1) && er < SYNTAX_ERROR))
-	return er;
+          && !(numb_zerop (*v1) && er < SYNTAX_ERROR))
+        return er;
 
       et = eval_lex (&v3);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
       if (et != COLON)
-	return MISSING_COLON;
+        return MISSING_COLON;
 
       et = eval_lex (&v3);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       er = condition_term (context, et, &v3);
       if (er != NO_ERROR
-	  && !(! numb_zerop (*v1) && er < SYNTAX_ERROR))
-	return er;
+          && !(! numb_zerop (*v1) && er < SYNTAX_ERROR))
+        return er;
 
       numb_set (*v1, ! numb_zerop (*v1) ? v2 : v3);
     }
@@ -423,16 +423,16 @@ logical_or_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
       er = logical_and_term (context, et, &v2);
       if (er == NO_ERROR)
-	numb_lior (*v1, v2);
+        numb_lior (*v1, v2);
       else if (! numb_zerop (*v1) && er < SYNTAX_ERROR)
-	numb_set (*v1, numb_ONE);
+        numb_set (*v1, numb_ONE);
       else
-	return er;
+        return er;
     }
   numb_fini (v2);
   if (et == ERROR)
@@ -456,16 +456,16 @@ logical_and_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
       er = or_term (context, et, &v2);
       if (er == NO_ERROR)
-	numb_land (*v1, v2);
+        numb_land (*v1, v2);
       else if (numb_zerop (*v1) && er < SYNTAX_ERROR)
-	numb_set (*v1, numb_ZERO);
+        numb_set (*v1, numb_ZERO);
       else
-	return er;
+        return er;
     }
   numb_fini (v2);
   if (et == ERROR)
@@ -489,10 +489,10 @@ or_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = xor_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       numb_ior (context, v1, &v2);
     }
@@ -518,10 +518,10 @@ xor_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = and_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       numb_eor (context, v1, &v2);
     }
@@ -547,10 +547,10 @@ and_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = equality_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       numb_and (context, v1, &v2);
     }
@@ -577,15 +577,15 @@ equality_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = cmp_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       if (op == EQ)
-	numb_eq (*v1, v2);
+        numb_eq (*v1, v2);
       else
-	numb_ne (*v1, v2);
+        numb_ne (*v1, v2);
     }
   numb_fini (v2);
   if (op == ERROR)
@@ -607,38 +607,38 @@ cmp_term (m4 *context, eval_token et, number *v1)
 
   numb_init (v2);
   while ((op = eval_lex (&v2)) == GT || op == GTEQ
-	 || op == LS || op == LSEQ)
+         || op == LS || op == LSEQ)
     {
 
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = shift_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       switch (op)
-	{
-	case GT:
-	  numb_gt (*v1, v2);
-	  break;
+        {
+        case GT:
+          numb_gt (*v1, v2);
+          break;
 
-	case GTEQ:
-	  numb_ge (*v1, v2);
-	  break;
+        case GTEQ:
+          numb_ge (*v1, v2);
+          break;
 
-	case LS:
-	  numb_lt (*v1, v2);
-	  break;
+        case LS:
+          numb_lt (*v1, v2);
+          break;
 
-	case LSEQ:
-	  numb_le (*v1, v2);
-	  break;
+        case LSEQ:
+          numb_le (*v1, v2);
+          break;
 
-	default:
-	  assert (!"INTERNAL ERROR: bad comparison operator in cmp_term ()");
-	  abort ();
-	}
+        default:
+          assert (!"INTERNAL ERROR: bad comparison operator in cmp_term ()");
+          abort ();
+        }
     }
   numb_fini (v2);
   if (op == ERROR)
@@ -664,29 +664,29 @@ shift_term (m4 *context, eval_token et, number *v1)
 
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = add_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       switch (op)
-	{
-	case LSHIFT:
-	  numb_lshift (context, v1, &v2);
-	  break;
+        {
+        case LSHIFT:
+          numb_lshift (context, v1, &v2);
+          break;
 
-	case RSHIFT:
-	  numb_rshift (context, v1, &v2);
-	  break;
+        case RSHIFT:
+          numb_rshift (context, v1, &v2);
+          break;
 
-	case URSHIFT:
-	  numb_urshift (context, v1, &v2);
-	  break;
+        case URSHIFT:
+          numb_urshift (context, v1, &v2);
+          break;
 
-	default:
-	  assert (!"INTERNAL ERROR: bad shift operator in shift_term ()");
-	  abort ();
-	}
+        default:
+          assert (!"INTERNAL ERROR: bad shift operator in shift_term ()");
+          abort ();
+        }
     }
   numb_fini (v2);
   if (op == ERROR)
@@ -711,15 +711,15 @@ add_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = mult_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       if (op == PLUS)
-	numb_plus (*v1, v2);
+        numb_plus (*v1, v2);
       else
-	numb_minus (*v1, v2);
+        numb_minus (*v1, v2);
     }
   numb_fini (v2);
   if (op == ERROR)
@@ -741,49 +741,49 @@ mult_term (m4 *context, eval_token et, number *v1)
 
   numb_init (v2);
   while (op = eval_lex (&v2),
-	 op == TIMES
-	 || op == DIVIDE
-	 || op == MODULO
-	 || op == RATIO)
+         op == TIMES
+         || op == DIVIDE
+         || op == MODULO
+         || op == RATIO)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = exp_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       switch (op)
-	{
-	case TIMES:
-	  numb_times (*v1, v2);
-	  break;
+        {
+        case TIMES:
+          numb_times (*v1, v2);
+          break;
 
-	case DIVIDE:
-	  if (numb_zerop (v2))
-	    return DIVIDE_ZERO;
-	  else
-	    numb_divide(v1, &v2);
-	  break;
+        case DIVIDE:
+          if (numb_zerop (v2))
+            return DIVIDE_ZERO;
+          else
+            numb_divide(v1, &v2);
+          break;
 
-	case RATIO:
-	  if (numb_zerop (v2))
-	    return DIVIDE_ZERO;
-	  else
-	    numb_ratio (*v1, v2);
-	  break;
+        case RATIO:
+          if (numb_zerop (v2))
+            return DIVIDE_ZERO;
+          else
+            numb_ratio (*v1, v2);
+          break;
 
-	case MODULO:
-	  if (numb_zerop (v2))
-	    return MODULO_ZERO;
-	  else
-	    numb_modulo (context, v1, &v2);
-	  break;
+        case MODULO:
+          if (numb_zerop (v2))
+            return MODULO_ZERO;
+          else
+            numb_modulo (context, v1, &v2);
+          break;
 
-	default:
-	  assert (!"INTERNAL ERROR: bad operator in mult_term ()");
-	  abort ();
-	}
+        default:
+          assert (!"INTERNAL ERROR: bad operator in mult_term ()");
+          abort ();
+        }
     }
   numb_fini (v2);
   if (op == ERROR)
@@ -807,13 +807,13 @@ exp_term (m4 *context, eval_token et, number *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = exp_term (context, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       if ((er = numb_pow (v1, &v2)) != NO_ERROR)
-	return er;
+        return er;
     }
   numb_fini (v2);
   if (et == ERROR)
@@ -833,17 +833,17 @@ unary_term (m4 *context, eval_token et, number *v1)
     {
       et2 = eval_lex (v1);
       if (et2 == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = unary_term (context, et2, v1)) != NO_ERROR)
-	return er;
+        return er;
 
       if (et == MINUS)
-	numb_negate(*v1);
+        numb_negate(*v1);
       else if (et == NOT)
-	numb_not (context, v1);
+        numb_not (context, v1);
       else if (et == LNOT)
-	numb_lnot (*v1);
+        numb_lnot (*v1);
     }
   else if ((er = simple_term (context, et, v1)) != NO_ERROR)
     return er;
@@ -862,17 +862,17 @@ simple_term (m4 *context, eval_token et, number *v1)
     case LEFTP:
       et = eval_lex (v1);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = comma_term (context, et, v1)) != NO_ERROR)
-	return er;
+        return er;
 
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if (et != RIGHTP)
-	return MISSING_RIGHT;
+        return MISSING_RIGHT;
 
       break;
 
@@ -911,7 +911,7 @@ m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
     }
 
   if (argc >= 4 && !m4_numeric_arg (context, me, M4ARG (3), M4ARGLEN (3),
-				    &min))
+                                    &min))
     return;
 
   if (min < 0)
@@ -936,9 +936,9 @@ m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
   if (err == NO_ERROR && *eval_text != '\0')
     {
       if (eval_lex (&val) == BADOP)
-	err = INVALID_OPERATOR;
+        err = INVALID_OPERATOR;
       else
-	err = EXCESS_INPUT;
+        err = EXCESS_INPUT;
     }
 
   if (err != NO_ERROR)

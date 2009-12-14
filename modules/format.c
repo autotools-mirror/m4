@@ -30,7 +30,7 @@
    of ME.  */
 static int
 arg_int (struct m4 *context, const m4_call_info *me, const char *str,
-	 size_t len)
+         size_t len)
 {
   char *endp;
   long value;
@@ -46,7 +46,7 @@ arg_int (struct m4 *context, const m4_call_info *me, const char *str,
   value = strtol (str, &endp, 10);
   if (endp - str != len)
     m4_warn (context, 0, me, _("non-numeric argument %s"),
-	     quotearg_style_mem (locale_quoting_style, str, len));
+             quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
     m4_warn (context, 0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE || (int) value != value)
@@ -58,7 +58,7 @@ arg_int (struct m4 *context, const m4_call_info *me, const char *str,
    ME.  */
 static long
 arg_long (struct m4 *context, const m4_call_info *me, const char *str,
-	  size_t len)
+          size_t len)
 {
   char *endp;
   long value;
@@ -74,7 +74,7 @@ arg_long (struct m4 *context, const m4_call_info *me, const char *str,
   value = strtol (str, &endp, 10);
   if (endp - str != len)
     m4_warn (context, 0, me, _("non-numeric argument %s"),
-	     quotearg_style_mem (locale_quoting_style, str, len));
+             quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
     m4_warn (context, 0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE)
@@ -86,11 +86,11 @@ arg_long (struct m4 *context, const m4_call_info *me, const char *str,
    behalf of ME.  */
 static const char *
 arg_string (struct m4 *context, const m4_call_info *me, const char *str,
-	    size_t len)
+            size_t len)
 {
   if (strlen (str) < len)
     m4_warn (context, 0, me, _("argument %s truncated"),
-	     quotearg_style_mem (locale_quoting_style, str, len));
+             quotearg_style_mem (locale_quoting_style, str, len));
   return str;
 }
 
@@ -98,7 +98,7 @@ arg_string (struct m4 *context, const m4_call_info *me, const char *str,
    of ME.  */
 static double
 arg_double (struct m4 *context, const m4_call_info *me, const char *str,
-	    size_t len)
+            size_t len)
 {
   char *endp;
   double value;
@@ -112,7 +112,7 @@ arg_double (struct m4 *context, const m4_call_info *me, const char *str,
   value = strtod (str, &endp);
   if (endp - str != len)
     m4_warn (context, 0, me, _("non-numeric argument %s"),
-	     quotearg_style_mem (locale_quoting_style, str, len));
+             quotearg_style_mem (locale_quoting_style, str, len));
   else if (isspace (to_uchar (*str)))
     m4_warn (context, 0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE)
@@ -186,233 +186,233 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
     {
       const char *percent = (char *) memchr (fmt, '%', f_len);
       if (!percent)
-	{
-	  obstack_grow (obs, fmt, f_len);
-	  break;
-	}
+        {
+          obstack_grow (obs, fmt, f_len);
+          break;
+        }
       obstack_grow (obs, fmt, percent - fmt);
       f_len -= percent - fmt + 1;
       fmt = percent + 1;
 
       if (*fmt == '%')
-	{
-	  obstack_1grow (obs, '%');
-	  fmt++;
-	  f_len--;
-	  continue;
-	}
+        {
+          obstack_1grow (obs, '%');
+          fmt++;
+          f_len--;
+          continue;
+        }
 
       p = fstart + 1; /* % */
       lflag = 0;
       ok['a'] = ok['A'] = ok['c'] = ok['d'] = ok['e'] = ok['E']
-	= ok['f'] = ok['F'] = ok['g'] = ok['G'] = ok['i'] = ok['o']
-	= ok['s'] = ok['u'] = ok['x'] = ok['X'] = 1;
+        = ok['f'] = ok['F'] = ok['g'] = ok['G'] = ok['i'] = ok['o']
+        = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 1;
 
       /* Parse flags.  */
       flags = 0;
       do
-	{
-	  switch (*fmt)
-	    {
-	    case '\'':		/* thousands separator */
-	      ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E']
-		= ok['o'] = ok['s'] = ok['x'] = ok['X'] = 0;
-	      flags |= THOUSANDS;
-	      break;
+        {
+          switch (*fmt)
+            {
+            case '\'':		/* thousands separator */
+              ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E']
+                = ok['o'] = ok['s'] = ok['x'] = ok['X'] = 0;
+              flags |= THOUSANDS;
+              break;
 
-	    case '+':		/* mandatory sign */
-	      ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
-	      flags |= PLUS;
-	      break;
+            case '+':		/* mandatory sign */
+              ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
+              flags |= PLUS;
+              break;
 
-	    case ' ':		/* space instead of positive sign */
-	      ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
-	      flags |= SPACE;
-	      break;
+            case ' ':		/* space instead of positive sign */
+              ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
+              flags |= SPACE;
+              break;
 
-	    case '0':		/* zero padding */
-	      ok['c'] = ok['s'] = 0;
-	      flags |= ZERO;
-	      break;
+            case '0':		/* zero padding */
+              ok['c'] = ok['s'] = 0;
+              flags |= ZERO;
+              break;
 
-	    case '#':		/* alternate output */
-	      ok['c'] = ok['d'] = ok['i'] = ok['s'] = ok['u'] = 0;
-	      flags |= ALT;
-	      break;
+            case '#':		/* alternate output */
+              ok['c'] = ok['d'] = ok['i'] = ok['s'] = ok['u'] = 0;
+              flags |= ALT;
+              break;
 
-	    case '-':		/* left justification */
-	      flags |= MINUS;
-	      break;
+            case '-':		/* left justification */
+              flags |= MINUS;
+              break;
 
-	    default:
-	      flags |= DONE;
-	      break;
-	    }
-	}
+            default:
+              flags |= DONE;
+              break;
+            }
+        }
       while (!(flags & DONE) && (f_len--, fmt++));
       if (flags & THOUSANDS)
-	*p++ = '\'';
+        *p++ = '\'';
       if (flags & PLUS)
-	*p++ = '+';
+        *p++ = '+';
       if (flags & MINUS)
-	*p++ = '-';
+        *p++ = '-';
       if (flags & SPACE)
-	*p++ = ' ';
+        *p++ = ' ';
       if (flags & ZERO)
-	*p++ = '0';
+        *p++ = '0';
       if (flags & ALT)
-	*p++ = '#';
+        *p++ = '#';
 
       /* Minimum field width; an explicit 0 is the same as not giving
-	 the width.  */
+         the width.  */
       width = 0;
       *p++ = '*';
       if (*fmt == '*')
-	{
-	  width = ARG_INT (i, argc, argv);
-	  fmt++;
-	  f_len--;
-	}
+        {
+          width = ARG_INT (i, argc, argv);
+          fmt++;
+          f_len--;
+        }
       else
-	while (isdigit ((unsigned char) *fmt))
-	  {
-	    width = 10 * width + *fmt - '0';
-	    fmt++;
-	    f_len--;
-	  }
+        while (isdigit ((unsigned char) *fmt))
+          {
+            width = 10 * width + *fmt - '0';
+            fmt++;
+            f_len--;
+          }
 
       /* Maximum precision; an explicit negative precision is the same
-	 as not giving the precision.  A lone '.' is a precision of 0.  */
+         as not giving the precision.  A lone '.' is a precision of 0.  */
       prec = -1;
       *p++ = '.';
       *p++ = '*';
       if (*fmt == '.')
-	{
-	  ok['c'] = 0;
-	  f_len--;
-	  if (*(++fmt) == '*')
-	    {
-	      prec = ARG_INT (i, argc, argv);
-	      ++fmt;
-	      f_len--;
-	    }
-	  else
-	    {
-	      prec = 0;
-	      while (isdigit ((unsigned char) *fmt))
-		{
-		  prec = 10 * prec + *fmt - '0';
-		  fmt++;
-		  f_len--;
-		}
-	    }
-	}
+        {
+          ok['c'] = 0;
+          f_len--;
+          if (*(++fmt) == '*')
+            {
+              prec = ARG_INT (i, argc, argv);
+              ++fmt;
+              f_len--;
+            }
+          else
+            {
+              prec = 0;
+              while (isdigit ((unsigned char) *fmt))
+                {
+                  prec = 10 * prec + *fmt - '0';
+                  fmt++;
+                  f_len--;
+                }
+            }
+        }
 
       /* Length modifiers.  We don't yet recognize ll, j, t, or z.  */
       if (*fmt == 'l')
-	{
-	  *p++ = 'l';
-	  lflag = 1;
-	  fmt++;
-	  f_len--;
-	  ok['c'] = ok['s'] = 0;
-	}
+        {
+          *p++ = 'l';
+          lflag = 1;
+          fmt++;
+          f_len--;
+          ok['c'] = ok['s'] = 0;
+        }
       else if (*fmt == 'h')
-	{
-	  *p++ = 'h';
-	  fmt++;
-	  f_len--;
-	  if (*fmt == 'h')
-	    {
-	      *p++ = 'h';
-	      fmt++;
-	      f_len--;
-	    }
-	  ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E'] = ok['f'] = ok['F']
-	    = ok['g'] = ok['G'] = ok['s'] = 0;
-	}
+        {
+          *p++ = 'h';
+          fmt++;
+          f_len--;
+          if (*fmt == 'h')
+            {
+              *p++ = 'h';
+              fmt++;
+              f_len--;
+            }
+          ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E'] = ok['f'] = ok['F']
+            = ok['g'] = ok['G'] = ok['s'] = 0;
+        }
 
       c = *fmt;
       if (c > sizeof ok || !ok[c] || !f_len)
-	{
-	  m4_warn (context, 0, me, _("unrecognized specifier in %s"),
-		   quotearg_style_mem (locale_quoting_style, f, M4ARGLEN (1)));
-	  valid_format = false;
-	  continue;
-	}
+        {
+          m4_warn (context, 0, me, _("unrecognized specifier in %s"),
+                   quotearg_style_mem (locale_quoting_style, f, M4ARGLEN (1)));
+          valid_format = false;
+          continue;
+        }
       fmt++;
       f_len--;
 
       /* Specifiers.  We don't yet recognize C, S, n, or p.  */
       switch (c)
-	{
-	case 'c':
-	  datatype = CHAR;
-	  p -= 2; /* %.*c is undefined, so undo the '.*'.  */
-	  break;
+        {
+        case 'c':
+          datatype = CHAR;
+          p -= 2; /* %.*c is undefined, so undo the '.*'.  */
+          break;
 
-	case 's':
-	  datatype = STR;
-	  break;
+        case 's':
+          datatype = STR;
+          break;
 
-	case 'd':
-	case 'i':
-	case 'o':
-	case 'x':
-	case 'X':
-	case 'u':
-	  datatype = lflag ? LONG : INT;
-	  break;
+        case 'd':
+        case 'i':
+        case 'o':
+        case 'x':
+        case 'X':
+        case 'u':
+          datatype = lflag ? LONG : INT;
+          break;
 
-	case 'a':
-	case 'A':
-	case 'e':
-	case 'E':
-	case 'f':
-	case 'F':
-	case 'g':
-	case 'G':
-	  datatype = DOUBLE;
-	  break;
+        case 'a':
+        case 'A':
+        case 'e':
+        case 'E':
+        case 'f':
+        case 'F':
+        case 'g':
+        case 'G':
+          datatype = DOUBLE;
+          break;
 
-	default:
-	  abort ();
-	}
+        default:
+          abort ();
+        }
       *p++ = c;
       *p = '\0';
 
       switch (datatype)
-	{
-	case CHAR:
-	  result = obstack_printf (obs, fstart, width,
-				   ARG_INT (i, argc, argv));
-	  break;
+        {
+        case CHAR:
+          result = obstack_printf (obs, fstart, width,
+                                   ARG_INT (i, argc, argv));
+          break;
 
-	case INT:
-	  result = obstack_printf (obs, fstart, width, prec,
-				   ARG_INT (i, argc, argv));
-	  break;
+        case INT:
+          result = obstack_printf (obs, fstart, width, prec,
+                                   ARG_INT (i, argc, argv));
+          break;
 
-	case LONG:
-	  result = obstack_printf (obs, fstart, width, prec,
-				   ARG_LONG (i, argc, argv));
-	  break;
+        case LONG:
+          result = obstack_printf (obs, fstart, width, prec,
+                                   ARG_LONG (i, argc, argv));
+          break;
 
-	case DOUBLE:
-	  result = obstack_printf (obs, fstart, width, prec,
-				   ARG_DOUBLE (i, argc, argv));
-	  break;
+        case DOUBLE:
+          result = obstack_printf (obs, fstart, width, prec,
+                                   ARG_DOUBLE (i, argc, argv));
+          break;
 
-	case STR:
-	  result = obstack_printf (obs, fstart, width, prec,
-				   ARG_STR (i, argc, argv));
-	  break;
+        case STR:
+          result = obstack_printf (obs, fstart, width, prec,
+                                   ARG_STR (i, argc, argv));
+          break;
 
-	default:
-	  abort ();
-	}
+        default:
+          abort ();
+        }
       /* Since obstack_printf can only fail with EILSEQ or EINVAL, but
-	 we constructed fstart, the result should not be negative.  */
+         we constructed fstart, the result should not be negative.  */
       assert (0 <= result);
     }
   if (valid_format)

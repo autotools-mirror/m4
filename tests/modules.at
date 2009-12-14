@@ -52,18 +52,18 @@ test3
 # First generate the `expout' ouput by running over the sources before
 # freezing.
 AT_CHECK_M4([-M "$abs_builddir" -m load frozen.m4 unfrozen.m4],
-	    [0], [stdout], [stderr])
+            [0], [stdout], [stderr])
 
 mv stdout expout
 mv stderr experr
 
 # Now freeze the first source file.
 AT_CHECK_M4([-M "$abs_builddir" -m load -F frozen.m4f frozen.m4],
-	    [0], [], [ignore])
+            [0], [], [ignore])
 
 # Now rerun the original sequence, but using the frozen file.
 AT_CHECK_M4([-M "$abs_builddir" -R frozen.m4f unfrozen.m4],
-	    [0], [expout], [experr])
+            [0], [expout], [experr])
 
 AT_CLEANUP([frozen.m4f])
 
@@ -142,22 +142,22 @@ AT_CLEANUP
 
 
 AT_CHECK_M4_MODTEST([--module-directory: absolute path],
-		    [], [-M "$abs_builddir"])
+                    [], [-M "$abs_builddir"])
 
 AT_CHECK_M4_MODTEST([--module-directory: relative path],
-		    [], [-M "$top_build_prefix/tests"])
+                    [], [-M "$top_build_prefix/tests"])
 
 AT_CHECK_M4_MODTEST([M4MODPATH: absolute path],
-		    [M4MODPATH="$abs_builddir"], [])
+                    [M4MODPATH="$abs_builddir"], [])
 
 AT_CHECK_M4_MODTEST([M4MODPATH: relative path],
-		    [M4MODPATH="$top_build_prefix/tests"], [])
+                    [M4MODPATH="$top_build_prefix/tests"], [])
 
 AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: absolute path],
-		    [LTDL_LIBRARY_PATH="$abs_builddir"], [])
+                    [LTDL_LIBRARY_PATH="$abs_builddir"], [])
 
 AT_CHECK_M4_MODTEST([LTDL_LIBRARY_PATH: relative path],
-		    [LTDL_LIBRARY_PATH="$top_build_prefix/tests"], [])
+                    [LTDL_LIBRARY_PATH="$top_build_prefix/tests"], [])
 
 
 
@@ -297,7 +297,7 @@ shadow:	<shadow>
 ]])
 
 AT_CHECK_M4([-M "$abs_builddir" -m load input.m4], [0],
-	    [expout], [experr])
+            [expout], [experr])
 
 AT_CLEANUP
 
@@ -365,7 +365,7 @@ Test module unloaded.
 
 
 AT_CHECK_M4([-M "$abs_builddir" -m load input.m4],
-	    [0], [expout], [experr])
+            [0], [expout], [experr])
 
 AT_CLEANUP
 
@@ -417,7 +417,7 @@ m4:input.m4:7: cannot open module `no_such'
 ]])
 
 AT_CHECK_M4([-M "$abs_builddir" -m load input.m4],
-	    [1], [expout], [experr])
+            [1], [expout], [experr])
 
 AT_CLEANUP
 
@@ -502,7 +502,7 @@ m4trace: -1- test -> `Shadow::`test' called.'
 
 
 AT_CHECK_M4([-M "$abs_builddir" -m load -t test input.m4],
-	    [0], [expout], [experr])
+            [0], [expout], [experr])
 
 AT_CLEANUP
 

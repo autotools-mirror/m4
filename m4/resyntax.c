@@ -92,15 +92,15 @@ m4_regexp_syntax_encode (const char *spec)
   for (p = canonical; *p != '\0'; ++p)
     {
       if ((*p == ' ') || (*p == '-'))
-	*p = '_';
+        *p = '_';
       else if (islower (to_uchar (*p)))
-	*p = toupper (to_uchar (*p));
+        *p = toupper (to_uchar (*p));
     }
 
   for (resyntax = m4_resyntax_map; resyntax->spec != NULL; ++resyntax)
     {
       if (!strcmp (resyntax->spec, canonical))
-	break;
+        break;
     }
 
   free (canonical);
@@ -119,7 +119,7 @@ m4_regexp_syntax_decode (int code)
   for (resyntax = m4_resyntax_map; resyntax->spec != NULL; ++resyntax)
     {
       if (resyntax->code == code)
-	break;
+        break;
     }
 
   return resyntax->spec;

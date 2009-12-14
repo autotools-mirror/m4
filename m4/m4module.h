@@ -169,11 +169,11 @@ struct m4_string_pair
 #define M4ARGLEN(i) m4_arg_len (context, argv, i, false)
 
 extern bool	m4_bad_argc	   (m4 *, size_t, const m4_call_info *, size_t,
-				    size_t, bool);
+                                    size_t, bool);
 extern bool	m4_numeric_arg	   (m4 *, const m4_call_info *, const char *,
-				    size_t, int *);
+                                    size_t, int *);
 extern bool	m4_parse_truth_arg (m4 *, const m4_call_info *, const char *,
-				    size_t, bool);
+                                    size_t, bool);
 extern m4_symbol *m4_symbol_value_lookup (m4 *, m4_macro_args *, size_t, bool);
 extern const char *m4_info_name	   (const m4_call_info *);
 
@@ -197,36 +197,36 @@ extern m4 *		m4_create	(void);
 extern void		m4_delete	(m4 *);
 
 #define m4_context_field_table						\
-	M4FIELD(m4_symbol_table *, symbol_table,   symtab)		\
-	M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
-	M4FIELD(const char *,	   current_file,   current_file)	\
-	M4FIELD(int,		   current_line,   current_line)	\
-	M4FIELD(int,		   output_line,	   output_line)		\
-	M4FIELD(FILE *,		   debug_file,	   debug_file)		\
-	M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
-	M4FIELD(int,		   exit_status,	   exit_status)		\
-	M4FIELD(int,	current_diversion,	   current_diversion)	\
-	M4FIELD(size_t,	nesting_limit_opt,	   nesting_limit)	\
-	M4FIELD(int,	debug_level_opt,	   debug_level)		\
-	M4FIELD(size_t,	max_debug_arg_length_opt,  max_debug_arg_length)\
-	M4FIELD(int,	regexp_syntax_opt,	   regexp_syntax)	\
+        M4FIELD(m4_symbol_table *, symbol_table,   symtab)		\
+        M4FIELD(m4_syntax_table *, syntax_table,   syntax)		\
+        M4FIELD(const char *,	   current_file,   current_file)	\
+        M4FIELD(int,		   current_line,   current_line)	\
+        M4FIELD(int,		   output_line,	   output_line)		\
+        M4FIELD(FILE *,		   debug_file,	   debug_file)		\
+        M4FIELD(m4_obstack,	   trace_messages, trace_messages)	\
+        M4FIELD(int,		   exit_status,	   exit_status)		\
+        M4FIELD(int,	current_diversion,	   current_diversion)	\
+        M4FIELD(size_t,	nesting_limit_opt,	   nesting_limit)	\
+        M4FIELD(int,	debug_level_opt,	   debug_level)		\
+        M4FIELD(size_t,	max_debug_arg_length_opt,  max_debug_arg_length)\
+        M4FIELD(int,	regexp_syntax_opt,	   regexp_syntax)	\
 
 
 #define m4_context_opt_bit_table					\
-	M4OPT_BIT(M4_OPT_PREFIX_BUILTINS_BIT,	prefix_builtins_opt)	\
-	M4OPT_BIT(M4_OPT_SUPPRESS_WARN_BIT,	suppress_warnings_opt)	\
-	M4OPT_BIT(M4_OPT_DISCARD_COMMENTS_BIT,	discard_comments_opt)	\
-	M4OPT_BIT(M4_OPT_INTERACTIVE_BIT,	interactive_opt)	\
-	M4OPT_BIT(M4_OPT_SYNCOUTPUT_BIT,	syncoutput_opt)		\
-	M4OPT_BIT(M4_OPT_POSIXLY_CORRECT_BIT,	posixly_correct_opt)	\
-	M4OPT_BIT(M4_OPT_FATAL_WARN_BIT,	fatal_warnings_opt)	\
-	M4OPT_BIT(M4_OPT_WARN_EXIT_BIT,		warnings_exit_opt)	\
-	M4OPT_BIT(M4_OPT_SAFER_BIT,		safer_opt)		\
+        M4OPT_BIT(M4_OPT_PREFIX_BUILTINS_BIT,	prefix_builtins_opt)	\
+        M4OPT_BIT(M4_OPT_SUPPRESS_WARN_BIT,	suppress_warnings_opt)	\
+        M4OPT_BIT(M4_OPT_DISCARD_COMMENTS_BIT,	discard_comments_opt)	\
+        M4OPT_BIT(M4_OPT_INTERACTIVE_BIT,	interactive_opt)	\
+        M4OPT_BIT(M4_OPT_SYNCOUTPUT_BIT,	syncoutput_opt)		\
+        M4OPT_BIT(M4_OPT_POSIXLY_CORRECT_BIT,	posixly_correct_opt)	\
+        M4OPT_BIT(M4_OPT_FATAL_WARN_BIT,	fatal_warnings_opt)	\
+        M4OPT_BIT(M4_OPT_WARN_EXIT_BIT,		warnings_exit_opt)	\
+        M4OPT_BIT(M4_OPT_SAFER_BIT,		safer_opt)		\
 
 
 #define M4FIELD(type, base, field)					\
-	extern type CONC (m4_get_, base) (m4 *context);			\
-	extern type CONC (m4_set_, base) (m4 *context, type value);
+        extern type CONC (m4_get_, base) (m4 *context);			\
+        extern type CONC (m4_set_, base) (m4 *context, type value);
 m4_context_field_table
 #undef M4FIELD
 
@@ -251,7 +251,7 @@ extern const char * m4_module_makeresident (m4_module *);
 extern int	    m4_module_refcount (const m4_module *);
 extern void	    m4_module_unload   (m4 *, const char *, m4_obstack *);
 extern void *	    m4_module_import   (m4 *, const char *, const char *,
-					m4_obstack *);
+                                        m4_obstack *);
 
 extern const char * m4_get_module_name (const m4_module *);
 extern void	    m4__module_exit    (m4 *);
@@ -262,21 +262,21 @@ extern void	    m4__module_exit    (m4 *);
 
 
 typedef void *m4_symtab_apply_func (m4_symbol_table *, const char *, size_t,
-				    m4_symbol *, void *);
+                                    m4_symbol *, void *);
 
 extern m4_symbol_table *m4_symtab_create  (size_t);
 extern void	  m4_symtab_delete  (m4_symbol_table *);
 extern void *	  m4_symtab_apply   (m4_symbol_table *, bool,
-				     m4_symtab_apply_func *, void *);
+                                     m4_symtab_apply_func *, void *);
 
 extern m4_symbol *m4_symbol_lookup  (m4_symbol_table *, const char *, size_t);
 extern m4_symbol *m4_symbol_pushdef (m4_symbol_table *, const char *, size_t,
-				     m4_symbol_value *);
+                                     m4_symbol_value *);
 extern m4_symbol *m4_symbol_define  (m4_symbol_table *, const char *, size_t,
-				     m4_symbol_value *);
+                                     m4_symbol_value *);
 extern void       m4_symbol_popdef  (m4_symbol_table *, const char *, size_t);
 extern m4_symbol *m4_symbol_rename  (m4_symbol_table *, const char *, size_t,
-				     const char *, size_t);
+                                     const char *, size_t);
 
 extern void       m4_symbol_delete  (m4_symbol_table *, const char *, size_t);
 
@@ -289,37 +289,37 @@ extern void       m4_symbol_delete  (m4_symbol_table *, const char *, size_t);
 extern m4_symbol_value *m4_get_symbol_value	  (m4_symbol *);
 extern bool		m4_get_symbol_traced	  (m4_symbol *);
 extern bool		m4_set_symbol_name_traced (m4_symbol_table *,
-						   const char *, size_t, bool);
+                                                   const char *, size_t, bool);
 extern void	m4_symbol_print		(m4 *, m4_symbol *, m4_obstack *,
-					 const m4_string_pair *, bool, size_t,
-					 bool);
+                                         const m4_string_pair *, bool, size_t,
+                                         bool);
 extern bool	m4_symbol_value_flatten_args (m4_symbol_value *);
 
 #define m4_is_symbol_void(symbol)					\
-	(m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
+        (m4_is_symbol_value_void (m4_get_symbol_value (symbol)))
 #define m4_is_symbol_text(symbol)					\
-	(m4_is_symbol_value_text (m4_get_symbol_value (symbol)))
+        (m4_is_symbol_value_text (m4_get_symbol_value (symbol)))
 #define m4_is_symbol_func(symbol)					\
-	(m4_is_symbol_value_func (m4_get_symbol_value (symbol)))
+        (m4_is_symbol_value_func (m4_get_symbol_value (symbol)))
 #define m4_is_symbol_placeholder(symbol)				\
-	(m4_is_symbol_value_placeholder (m4_get_symbol_value (symbol)))
+        (m4_is_symbol_value_placeholder (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_text(symbol)					\
-	(m4_get_symbol_value_text (m4_get_symbol_value (symbol)))
+        (m4_get_symbol_value_text (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_len(symbol)					\
-	(m4_get_symbol_value_len (m4_get_symbol_value (symbol)))
+        (m4_get_symbol_value_len (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_func(symbol)					\
-	(m4_get_symbol_value_func (m4_get_symbol_value (symbol)))
+        (m4_get_symbol_value_func (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_builtin(symbol)					\
-	(m4_get_symbol_value_builtin (m4_get_symbol_value (symbol)))
+        (m4_get_symbol_value_builtin (m4_get_symbol_value (symbol)))
 #define m4_get_symbol_placeholder(symbol)				\
-	(m4_get_symbol_value_placeholder (m4_get_symbol_value (symbol)))
+        (m4_get_symbol_value_placeholder (m4_get_symbol_value (symbol)))
 #define m4_symbol_flatten_args(symbol)					\
-	(m4_symbol_value_flatten_args (m4_get_symbol_value (symbol)))
+        (m4_symbol_value_flatten_args (m4_get_symbol_value (symbol)))
 
 extern m4_symbol_value *m4_symbol_value_create	  (void);
 extern void		m4_symbol_value_delete	  (m4_symbol_value *);
 extern bool		m4_symbol_value_copy	  (m4 *, m4_symbol_value *,
-						   m4_symbol_value *);
+                                                   m4_symbol_value *);
 extern bool		m4_is_symbol_value_text   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_func   (m4_symbol_value *);
 extern bool		m4_is_symbol_value_placeholder  (m4_symbol_value *);
@@ -334,10 +334,10 @@ extern const m4_builtin *m4_get_symbol_value_builtin	(m4_symbol_value *);
 extern const char *	m4_get_symbol_value_placeholder	(m4_symbol_value *);
 
 extern void		m4_set_symbol_value_text  (m4_symbol_value *,
-						   const char *, size_t,
-						   unsigned int);
+                                                   const char *, size_t,
+                                                   unsigned int);
 extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
-							 const char *);
+                                                         const char *);
 
 
 
@@ -345,7 +345,7 @@ extern void		m4_set_symbol_value_placeholder	(m4_symbol_value *,
 
 extern m4_symbol_value	*m4_builtin_find_by_name (m4_module *, const char *);
 extern m4_symbol_value	*m4_builtin_find_by_func (m4_module *,
-						  m4_builtin_func *);
+                                                  m4_builtin_func *);
 
 
 
@@ -353,7 +353,7 @@ extern m4_symbol_value	*m4_builtin_find_by_func (m4_module *,
 
 extern void	m4_macro_expand_input	(m4 *);
 extern void	m4_macro_call		(m4 *, m4_symbol_value *, m4_obstack *,
-					 m4_macro_args *);
+                                         m4_macro_args *);
 extern size_t	m4_arg_argc		(m4_macro_args *);
 extern const m4_call_info *m4_arg_info	(m4_macro_args *);
 extern m4_symbol_value *m4_arg_symbol	(m4_macro_args *, size_t);
@@ -362,17 +362,17 @@ extern bool	m4_is_arg_func		(m4_macro_args *, size_t);
 extern bool	m4_is_arg_composite	(m4_macro_args *, size_t);
 extern const char *m4_arg_text		(m4 *, m4_macro_args *, size_t, bool);
 extern bool	m4_arg_equal		(m4 *, m4_macro_args *, size_t,
-					 size_t);
+                                         size_t);
 extern bool	m4_arg_empty		(m4_macro_args *, size_t);
 extern size_t	m4_arg_len		(m4 *, m4_macro_args *, size_t, bool);
 extern m4_builtin_func *m4_arg_func	(m4_macro_args *, size_t);
 extern m4_obstack *m4_arg_scratch	(m4 *);
 extern m4_macro_args *m4_make_argv_ref	(m4 *, m4_macro_args *, const char *,
-					 size_t, bool, bool);
+                                         size_t, bool, bool);
 extern void	m4_push_arg		(m4 *, m4_obstack *, m4_macro_args *,
-					 size_t);
+                                         size_t);
 extern void	m4_push_args		(m4 *, m4_obstack *, m4_macro_args *,
-					 bool, bool);
+                                         bool, bool);
 extern void	m4_wrap_args		(m4 *, m4_macro_args *);
 
 
@@ -418,20 +418,20 @@ enum {
 
 /* default flags, used by debugmode() -- equiv: +adeq */
 #define M4_DEBUG_TRACE_DEFAULT				\
-	(M4_DEBUG_TRACE_ARGS | M4_DEBUG_TRACE_EXPANSION \
-	 | M4_DEBUG_TRACE_QUOTE | M4_DEBUG_TRACE_DEREF)
+        (M4_DEBUG_TRACE_ARGS | M4_DEBUG_TRACE_EXPANSION \
+         | M4_DEBUG_TRACE_QUOTE | M4_DEBUG_TRACE_DEREF)
 
 #define m4_is_debug_bit(C,B)	((m4_get_debug_level_opt (C) & (B)) != 0)
 
 extern int	m4_debug_decode		(m4 *, const char *, size_t);
 extern bool	m4_debug_set_output	(m4 *, const m4_call_info *,
-					 const char *);
+                                         const char *);
 extern void	m4_debug_message_prefix (m4 *);
 extern void	m4_debug_message	(m4 *, int, const char *, ...)
   M4_GNUC_PRINTF (3, 4);
 
 extern void	m4_trace_prepare	(m4 *, const m4_call_info *,
-					 m4_symbol_value *);
+                                         m4_symbol_value *);
 
 
 /* --- REGEXP SYNTAX --- */
@@ -489,12 +489,12 @@ enum {
 
 /* Mask of attribute syntax categories.  */
 #define M4_SYNTAX_MASKS		(M4_SYNTAX_RQUOTE | M4_SYNTAX_ECOMM	\
-				 | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE	\
-				 | M4_SYNTAX_RBRACE)
+                                 | M4_SYNTAX_DOLLAR | M4_SYNTAX_LBRACE	\
+                                 | M4_SYNTAX_RBRACE)
 /* Mask of basic syntax categories where any change requires a
    recomputation of the overall syntax characteristics.  */
 #define M4_SYNTAX_SUSPECT	(M4_SYNTAX_LQUOTE | M4_SYNTAX_BCOMM	\
-				 | M4_SYNTAX_ESCAPE)
+                                 | M4_SYNTAX_ESCAPE)
 
 #define m4_syntab(S, C)		((S)->table[(C)])
 /* Determine if character C matches any of the bitwise-or'd syntax
@@ -505,11 +505,11 @@ enum {
   ((m4_syntab ((S), sizeof (C) == 1 ? to_uchar (C) : (C)) & (T)) > 0)
 
 extern void	m4_set_quotes	(m4_syntax_table *, const char *, size_t,
-				 const char *, size_t);
+                                 const char *, size_t);
 extern void	m4_set_comment	(m4_syntax_table *, const char *, size_t,
-				 const char *, size_t);
+                                 const char *, size_t);
 extern int	m4_set_syntax	(m4_syntax_table *, char, char, const char *,
-				 size_t);
+                                 size_t);
 extern void	m4_reset_syntax (m4_syntax_table *);
 
 
@@ -537,12 +537,12 @@ extern void	m4_output_init		(m4 *);
 extern void	m4_output_exit		(void);
 extern void	m4_output_text		(m4 *, const char *, size_t);
 extern void	m4_divert_text		(m4 *, m4_obstack *, const char *,
-					 size_t, int);
+                                         size_t, int);
 extern void	m4_shipout_int		(m4_obstack *, int);
 extern void	m4_shipout_string	(m4 *, m4_obstack *, const char *,
-					 size_t, bool);
+                                         size_t, bool);
 extern bool	m4_shipout_string_trunc	(m4_obstack *, const char *, size_t,
-					 const m4_string_pair *, size_t *);
+                                         const m4_string_pair *, size_t *);
 
 extern void	m4_make_diversion    (m4 *, int);
 extern void	m4_insert_diversion  (m4 *, int);

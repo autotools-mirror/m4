@@ -126,29 +126,29 @@ m4_syntax_create (void)
     switch (ch)
       {
       case '(':
-	syntax->orig[ch] = M4_SYNTAX_OPEN;
-	break;
+        syntax->orig[ch] = M4_SYNTAX_OPEN;
+        break;
       case ')':
-	syntax->orig[ch] = M4_SYNTAX_CLOSE;
-	break;
+        syntax->orig[ch] = M4_SYNTAX_CLOSE;
+        break;
       case ',':
-	syntax->orig[ch] = M4_SYNTAX_COMMA;
-	break;
+        syntax->orig[ch] = M4_SYNTAX_COMMA;
+        break;
       case '`':
-	syntax->orig[ch] = M4_SYNTAX_LQUOTE;
-	break;
+        syntax->orig[ch] = M4_SYNTAX_LQUOTE;
+        break;
       case '#':
-	syntax->orig[ch] = M4_SYNTAX_BCOMM;
-	break;
+        syntax->orig[ch] = M4_SYNTAX_BCOMM;
+        break;
       default:
-	if (isspace (ch))
-	  syntax->orig[ch] = M4_SYNTAX_SPACE;
-	else if (isalpha (ch) || ch == '_')
-	  syntax->orig[ch] = M4_SYNTAX_ALPHA;
-	else if (isdigit (ch))
-	  syntax->orig[ch] = M4_SYNTAX_NUM;
-	else
-	  syntax->orig[ch] = M4_SYNTAX_OTHER;
+        if (isspace (ch))
+          syntax->orig[ch] = M4_SYNTAX_SPACE;
+        else if (isalpha (ch) || ch == '_')
+          syntax->orig[ch] = M4_SYNTAX_ALPHA;
+        else if (isdigit (ch))
+          syntax->orig[ch] = M4_SYNTAX_NUM;
+        else
+          syntax->orig[ch] = M4_SYNTAX_OTHER;
       }
 
   /* Set up current table to match default.  */
@@ -222,14 +222,14 @@ add_syntax_attribute (m4_syntax_table *syntax, char ch, int code)
   else
     {
       if ((code & (M4_SYNTAX_SUSPECT)) != 0
-	  || m4_has_syntax (syntax, c, M4_SYNTAX_SUSPECT))
-	syntax->suspect = true;
+          || m4_has_syntax (syntax, c, M4_SYNTAX_SUSPECT))
+        syntax->suspect = true;
       syntax->table[c] = ((syntax->table[c] & M4_SYNTAX_MASKS) | code);
     }
 
 #ifdef DEBUG_SYNTAX
   xfprintf(stderr, "Set syntax %o %c = %04X\n", c, isprint(c) ? c : '-',
-	   syntax->table[c]);
+           syntax->table[c]);
 #endif
 
   return syntax->table[c];
@@ -245,7 +245,7 @@ remove_syntax_attribute (m4_syntax_table *syntax, char ch, int code)
 
 #ifdef DEBUG_SYNTAX
   xfprintf(stderr, "Unset syntax %o %c = %04X\n", c, isprint(c) ? c : '-',
-	   syntax->table[c]);
+           syntax->table[c]);
 #endif
 
   return syntax->table[c];
@@ -255,7 +255,7 @@ remove_syntax_attribute (m4_syntax_table *syntax, char ch, int code)
    them from whatever category they used to be in.  */
 static void
 add_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
-		int code)
+                int code)
 {
   while (len--)
     add_syntax_attribute (syntax, *chars++, code);
@@ -265,15 +265,15 @@ add_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
    adding them to category M4_SYNTAX_OTHER instead.  */
 static void
 subtract_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
-		     int code)
+                     int code)
 {
   while (len--)
     {
       char ch = *chars++;
       if ((code & M4_SYNTAX_MASKS) != 0)
-	remove_syntax_attribute (syntax, ch, code);
+        remove_syntax_attribute (syntax, ch, code);
       else if (m4_has_syntax (syntax, ch, code))
-	add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
+        add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
     }
 }
 
@@ -283,7 +283,7 @@ subtract_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
    instead.  */
 static void
 set_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
-		int code)
+                int code)
 {
   int ch;
   /* Explicit set of characters to install with this category; all
@@ -292,9 +292,9 @@ set_syntax_set (m4_syntax_table *syntax, const char *chars, size_t len,
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if ((code & M4_SYNTAX_MASKS) != 0)
-	remove_syntax_attribute (syntax, ch, code);
+        remove_syntax_attribute (syntax, ch, code);
       else if (m4_has_syntax (syntax, ch, code))
-	add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
+        add_syntax_attribute (syntax, ch, M4_SYNTAX_OTHER);
     }
   while (len--)
     {
@@ -312,45 +312,45 @@ reset_syntax_set (m4_syntax_table *syntax, int code)
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       /* Reset the category back to its default state.  All other
-	 characters that used to have this category get reset to
-	 their default state as well.  */
+         characters that used to have this category get reset to
+         their default state as well.  */
       if (code == M4_SYNTAX_RQUOTE)
-	{
-	  if (ch == '\'')
-	    add_syntax_attribute (syntax, ch, code);
-	  else
-	    remove_syntax_attribute (syntax, ch, code);
-	}
+        {
+          if (ch == '\'')
+            add_syntax_attribute (syntax, ch, code);
+          else
+            remove_syntax_attribute (syntax, ch, code);
+        }
       else if (code == M4_SYNTAX_ECOMM)
-	{
-	  if (ch == '\n')
-	    add_syntax_attribute (syntax, ch, code);
-	  else
-	    remove_syntax_attribute (syntax, ch, code);
-	}
+        {
+          if (ch == '\n')
+            add_syntax_attribute (syntax, ch, code);
+          else
+            remove_syntax_attribute (syntax, ch, code);
+        }
       else if (code == M4_SYNTAX_DOLLAR)
-	{
-	  if (ch == '$')
-	    add_syntax_attribute (syntax, ch, code);
-	  else
-	    remove_syntax_attribute (syntax, ch, code);
-	}
+        {
+          if (ch == '$')
+            add_syntax_attribute (syntax, ch, code);
+          else
+            remove_syntax_attribute (syntax, ch, code);
+        }
       else if (code == M4_SYNTAX_LBRACE)
-	{
-	  if (ch == '{')
-	    add_syntax_attribute (syntax, ch, code);
-	  else
-	    remove_syntax_attribute (syntax, ch, code);
-	}
+        {
+          if (ch == '{')
+            add_syntax_attribute (syntax, ch, code);
+          else
+            remove_syntax_attribute (syntax, ch, code);
+        }
       else if (code == M4_SYNTAX_RBRACE)
-	{
-	  if (ch == '}')
-	    add_syntax_attribute (syntax, ch, code);
-	  else
-	    remove_syntax_attribute (syntax, ch, code);
-	}
+        {
+          if (ch == '}')
+            add_syntax_attribute (syntax, ch, code);
+          else
+            remove_syntax_attribute (syntax, ch, code);
+        }
       else if (syntax->orig[ch] == code || m4_has_syntax (syntax, ch, code))
-	add_syntax_attribute (syntax, ch, syntax->orig[ch]);
+        add_syntax_attribute (syntax, ch, syntax->orig[ch]);
     }
 }
 
@@ -398,7 +398,7 @@ m4_reset_syntax (m4_syntax_table *syntax)
    syntax category matching KEY.  */
 int
 m4_set_syntax (m4_syntax_table *syntax, char key, char action,
-	       const char *chars, size_t len)
+               const char *chars, size_t len)
 {
   int code;
 
@@ -440,162 +440,162 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
       bool single_comm_possible = true;
       int dollar = -1;
       if (m4_has_syntax (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE))
-	{
-	  assert (syntax->quote.len1 == 1);
-	  lquote = to_uchar (syntax->quote.str1[0]);
-	}
+        {
+          assert (syntax->quote.len1 == 1);
+          lquote = to_uchar (syntax->quote.str1[0]);
+        }
       if (m4_has_syntax (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE))
-	{
-	  assert (syntax->quote.len2 == 1);
-	  rquote = to_uchar (syntax->quote.str2[0]);
-	}
+        {
+          assert (syntax->quote.len2 == 1);
+          rquote = to_uchar (syntax->quote.str2[0]);
+        }
       if (m4_has_syntax (syntax, syntax->comm.str1[0], M4_SYNTAX_BCOMM))
-	{
-	  assert (syntax->comm.len1 == 1);
-	  bcomm = to_uchar (syntax->comm.str1[0]);
-	}
+        {
+          assert (syntax->comm.len1 == 1);
+          bcomm = to_uchar (syntax->comm.str1[0]);
+        }
       if (m4_has_syntax (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM))
-	{
-	  assert (syntax->comm.len2 == 1);
-	  ecomm = to_uchar (syntax->comm.str2[0]);
-	}
+        {
+          assert (syntax->comm.len2 == 1);
+          ecomm = to_uchar (syntax->comm.str2[0]);
+        }
       syntax->is_single_dollar = false;
       syntax->is_macro_escaped = false;
       /* Find candidates for each category.  */
       for (ch = UCHAR_MAX + 1; --ch >= 0; )
-	{
-	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
-	    {
-	      if (lquote == -1)
-		lquote = ch;
-	      else if (lquote != ch)
-		single_quote_possible = false;
-	    }
-	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_RQUOTE))
-	    {
-	      if (rquote == -1)
-		rquote = ch;
-	      else if (rquote != ch)
-		single_quote_possible = false;
-	    }
-	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
-	    {
-	      if (bcomm == -1)
-		bcomm = ch;
-	      else if (bcomm != ch)
-		single_comm_possible = false;
-	    }
-	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
-	    {
-	      if (ecomm == -1)
-		ecomm = ch;
-	      else if (ecomm != ch)
-		single_comm_possible = false;
-	    }
-	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_DOLLAR))
-	    {
-	      if (dollar == -1)
-		{
-		  syntax->dollar = dollar = ch;
-		  syntax->is_single_dollar = true;
-		}
-	      else
-		syntax->is_single_dollar = false;
-	    }
-	  if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
-	    syntax->is_macro_escaped = true;
-	}
+        {
+          if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
+            {
+              if (lquote == -1)
+                lquote = ch;
+              else if (lquote != ch)
+                single_quote_possible = false;
+            }
+          if (m4_has_syntax (syntax, ch, M4_SYNTAX_RQUOTE))
+            {
+              if (rquote == -1)
+                rquote = ch;
+              else if (rquote != ch)
+                single_quote_possible = false;
+            }
+          if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
+            {
+              if (bcomm == -1)
+                bcomm = ch;
+              else if (bcomm != ch)
+                single_comm_possible = false;
+            }
+          if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
+            {
+              if (ecomm == -1)
+                ecomm = ch;
+              else if (ecomm != ch)
+                single_comm_possible = false;
+            }
+          if (m4_has_syntax (syntax, ch, M4_SYNTAX_DOLLAR))
+            {
+              if (dollar == -1)
+                {
+                  syntax->dollar = dollar = ch;
+                  syntax->is_single_dollar = true;
+                }
+              else
+                syntax->is_single_dollar = false;
+            }
+          if (m4_has_syntax (syntax, ch, M4_SYNTAX_ESCAPE))
+            syntax->is_macro_escaped = true;
+        }
       /* Disable multi-character delimiters if we discovered
-	 delimiters.  */
+         delimiters.  */
       if (!single_quote_possible)
-	syntax->is_single_quotes = false;
+        syntax->is_single_quotes = false;
       if (!single_comm_possible)
-	syntax->is_single_comments = false;
+        syntax->is_single_comments = false;
       if ((1 < syntax->quote.len1 || 1 < syntax->quote.len2)
-	  && (!syntax->is_single_quotes || lquote != -1 || rquote != -1))
-	{
-	  if (syntax->quote.len1)
-	    {
-	      syntax->quote.len1 = lquote == to_uchar (syntax->quote.str1[0]);
-	      syntax->quote.str1[syntax->quote.len1] = '\0';
-	    }
-	  if (syntax->quote.len2)
-	    {
-	      syntax->quote.len2 = rquote == to_uchar (syntax->quote.str2[0]);
-	      syntax->quote.str2[syntax->quote.len2] = '\0';
-	    }
-	}
+          && (!syntax->is_single_quotes || lquote != -1 || rquote != -1))
+        {
+          if (syntax->quote.len1)
+            {
+              syntax->quote.len1 = lquote == to_uchar (syntax->quote.str1[0]);
+              syntax->quote.str1[syntax->quote.len1] = '\0';
+            }
+          if (syntax->quote.len2)
+            {
+              syntax->quote.len2 = rquote == to_uchar (syntax->quote.str2[0]);
+              syntax->quote.str2[syntax->quote.len2] = '\0';
+            }
+        }
       if ((1 < syntax->comm.len1 || 1 < syntax->comm.len2)
-	  && (!syntax->is_single_comments || bcomm != -1 || ecomm != -1))
-	{
-	  if (syntax->comm.len1)
-	    {
-	      syntax->comm.len1 = bcomm == to_uchar (syntax->comm.str1[0]);
-	      syntax->comm.str1[syntax->comm.len1] = '\0';
-	    }
-	  if (syntax->comm.len2)
-	    {
-	      syntax->comm.len2 = ecomm == to_uchar (syntax->comm.str2[0]);
-	      syntax->comm.str2[syntax->comm.len2] = '\0';
-	    }
-	}
+          && (!syntax->is_single_comments || bcomm != -1 || ecomm != -1))
+        {
+          if (syntax->comm.len1)
+            {
+              syntax->comm.len1 = bcomm == to_uchar (syntax->comm.str1[0]);
+              syntax->comm.str1[syntax->comm.len1] = '\0';
+            }
+          if (syntax->comm.len2)
+            {
+              syntax->comm.len2 = ecomm == to_uchar (syntax->comm.str2[0]);
+              syntax->comm.str2[syntax->comm.len2] = '\0';
+            }
+        }
       /* Update the strings.  */
       if (lquote != -1)
-	{
-	  if (single_quote_possible)
-	    syntax->is_single_quotes = true;
-	  if (syntax->quote.len1)
-	    assert (syntax->quote.len1 == 1);
-	  else
-	    {
-	      free (syntax->quote.str1);
-	      syntax->quote.str1 = xcharalloc (2);
-	      syntax->quote.str1[1] = '\0';
-	      syntax->quote.len1 = 1;
-	    }
-	  syntax->quote.str1[0] = lquote;
-	  if (rquote == -1)
-	    {
-	      rquote = '\'';
-	      add_syntax_attribute (syntax, rquote, M4_SYNTAX_RQUOTE);
-	    }
-	  if (!syntax->quote.len2)
-	    {
-	      free (syntax->quote.str2);
-	      syntax->quote.str2 = xcharalloc (2);
-	    }
-	  syntax->quote.str2[0] = rquote;
-	  syntax->quote.str2[1] = '\0';
-	  syntax->quote.len2 = 1;
-	}
+        {
+          if (single_quote_possible)
+            syntax->is_single_quotes = true;
+          if (syntax->quote.len1)
+            assert (syntax->quote.len1 == 1);
+          else
+            {
+              free (syntax->quote.str1);
+              syntax->quote.str1 = xcharalloc (2);
+              syntax->quote.str1[1] = '\0';
+              syntax->quote.len1 = 1;
+            }
+          syntax->quote.str1[0] = lquote;
+          if (rquote == -1)
+            {
+              rquote = '\'';
+              add_syntax_attribute (syntax, rquote, M4_SYNTAX_RQUOTE);
+            }
+          if (!syntax->quote.len2)
+            {
+              free (syntax->quote.str2);
+              syntax->quote.str2 = xcharalloc (2);
+            }
+          syntax->quote.str2[0] = rquote;
+          syntax->quote.str2[1] = '\0';
+          syntax->quote.len2 = 1;
+        }
       if (bcomm != -1)
-	{
-	  if (single_comm_possible)
-	    syntax->is_single_comments = true;
-	  if (syntax->comm.len1)
-	    assert (syntax->comm.len1 == 1);
-	  else
-	    {
-	      free (syntax->comm.str1);
-	      syntax->comm.str1 = xcharalloc (2);
-	      syntax->comm.str1[1] = '\0';
-	      syntax->comm.len1 = 1;
-	    }
-	  syntax->comm.str1[0] = bcomm;
-	  if (ecomm == -1)
-	    {
-	      ecomm = '\n';
-	      add_syntax_attribute (syntax, ecomm, M4_SYNTAX_ECOMM);
-	    }
-	  if (!syntax->comm.len2)
-	    {
-	      free (syntax->comm.str2);
-	      syntax->comm.str2 = xcharalloc (2);
-	    }
-	  syntax->comm.str2[0] = ecomm;
-	  syntax->comm.str2[1] = '\0';
-	  syntax->comm.len2 = 1;
-	}
+        {
+          if (single_comm_possible)
+            syntax->is_single_comments = true;
+          if (syntax->comm.len1)
+            assert (syntax->comm.len1 == 1);
+          else
+            {
+              free (syntax->comm.str1);
+              syntax->comm.str1 = xcharalloc (2);
+              syntax->comm.str1[1] = '\0';
+              syntax->comm.len1 = 1;
+            }
+          syntax->comm.str1[0] = bcomm;
+          if (ecomm == -1)
+            {
+              ecomm = '\n';
+              add_syntax_attribute (syntax, ecomm, M4_SYNTAX_ECOMM);
+            }
+          if (!syntax->comm.len2)
+            {
+              free (syntax->comm.str2);
+              syntax->comm.str2 = xcharalloc (2);
+            }
+          syntax->comm.str2[0] = ecomm;
+          syntax->comm.str2[1] = '\0';
+          syntax->comm.len2 = 1;
+        }
     }
   set_quote_age (syntax, false, true);
   m4__quote_uncache (syntax);
@@ -612,7 +612,7 @@ m4_set_syntax (m4_syntax_table *syntax, char key, char action,
    distinguish from an explicit empty string.  */
 void
 m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
-	       const char *rq, size_t rq_len)
+               const char *rq, size_t rq_len)
 {
   int ch;
 
@@ -658,21 +658,21 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_LQUOTE))
-	add_syntax_attribute (syntax, ch,
-			      (syntax->orig[ch] == M4_SYNTAX_LQUOTE
-			       ? M4_SYNTAX_OTHER : syntax->orig[ch]));
+        add_syntax_attribute (syntax, ch,
+                              (syntax->orig[ch] == M4_SYNTAX_LQUOTE
+                               ? M4_SYNTAX_OTHER : syntax->orig[ch]));
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_RQUOTE))
-	remove_syntax_attribute (syntax, ch, M4_SYNTAX_RQUOTE);
+        remove_syntax_attribute (syntax, ch, M4_SYNTAX_RQUOTE);
     }
 
   if (!m4_has_syntax (syntax, *syntax->quote.str1,
-		      (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE | M4_SYNTAX_ALPHA
-		       | M4_SYNTAX_NUM)))
+                      (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE | M4_SYNTAX_ALPHA
+                       | M4_SYNTAX_NUM)))
     {
       if (syntax->quote.len1 == 1)
-	add_syntax_attribute (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE);
+        add_syntax_attribute (syntax, syntax->quote.str1[0], M4_SYNTAX_LQUOTE);
       if (syntax->quote.len2 == 1)
-	add_syntax_attribute (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE);
+        add_syntax_attribute (syntax, syntax->quote.str2[0], M4_SYNTAX_RQUOTE);
     }
   set_quote_age (syntax, false, false);
 }
@@ -682,7 +682,7 @@ m4_set_quotes (m4_syntax_table *syntax, const char *lq, size_t lq_len,
    distinguish from an explicit empty string.  */
 void
 m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
-		const char *ec, size_t ec_len)
+                const char *ec, size_t ec_len)
 {
   int ch;
 
@@ -726,20 +726,20 @@ m4_set_comment (m4_syntax_table *syntax, const char *bc, size_t bc_len,
   for (ch = UCHAR_MAX + 1; --ch >= 0; )
     {
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_BCOMM))
-	add_syntax_attribute (syntax, ch,
-			      (syntax->orig[ch] == M4_SYNTAX_BCOMM
-			       ? M4_SYNTAX_OTHER : syntax->orig[ch]));
+        add_syntax_attribute (syntax, ch,
+                              (syntax->orig[ch] == M4_SYNTAX_BCOMM
+                               ? M4_SYNTAX_OTHER : syntax->orig[ch]));
       if (m4_has_syntax (syntax, ch, M4_SYNTAX_ECOMM))
-	remove_syntax_attribute (syntax, ch, M4_SYNTAX_ECOMM);
+        remove_syntax_attribute (syntax, ch, M4_SYNTAX_ECOMM);
     }
   if (!m4_has_syntax (syntax, *syntax->comm.str1,
-		      (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE | M4_SYNTAX_ALPHA
-		       | M4_SYNTAX_NUM | M4_SYNTAX_LQUOTE)))
+                      (M4_SYNTAX_IGNORE | M4_SYNTAX_ESCAPE | M4_SYNTAX_ALPHA
+                       | M4_SYNTAX_NUM | M4_SYNTAX_LQUOTE)))
     {
       if (syntax->comm.len1 == 1)
-	add_syntax_attribute (syntax, syntax->comm.str1[0], M4_SYNTAX_BCOMM);
+        add_syntax_attribute (syntax, syntax->comm.str1[0], M4_SYNTAX_BCOMM);
       if (syntax->comm.len2 == 1)
-	add_syntax_attribute (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM);
+        add_syntax_attribute (syntax, syntax->comm.str2[0], M4_SYNTAX_ECOMM);
     }
   set_quote_age (syntax, false, false);
 }
@@ -803,24 +803,24 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
   if (local_syntax_age < 0xffff && syntax->is_single_quotes
       && syntax->quote.len1 == 1 && syntax->quote.len2 == 1
       && !m4_has_syntax (syntax, *syntax->quote.str1,
-			 (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
-			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
-			  | M4_SYNTAX_SPACE))
+                         (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
+                          | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
+                          | M4_SYNTAX_SPACE))
       && !m4_has_syntax (syntax, *syntax->quote.str2,
-			 (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
-			  | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
-			  | M4_SYNTAX_SPACE))
+                         (M4_SYNTAX_ALPHA | M4_SYNTAX_NUM | M4_SYNTAX_OPEN
+                          | M4_SYNTAX_COMMA | M4_SYNTAX_CLOSE
+                          | M4_SYNTAX_SPACE))
       && *syntax->quote.str1 != *syntax->quote.str2
       && (!syntax->comm.len1
-	  || (*syntax->comm.str1 != *syntax->quote.str2
-	      && !m4_has_syntax (syntax, *syntax->comm.str1,
-				 (M4_SYNTAX_OPEN | M4_SYNTAX_COMMA
-				  | M4_SYNTAX_CLOSE))))
+          || (*syntax->comm.str1 != *syntax->quote.str2
+              && !m4_has_syntax (syntax, *syntax->comm.str1,
+                                 (M4_SYNTAX_OPEN | M4_SYNTAX_COMMA
+                                  | M4_SYNTAX_CLOSE))))
       && m4_has_syntax (syntax, ',', M4_SYNTAX_COMMA))
     {
       syntax->quote_age = ((local_syntax_age << 16)
-			   | ((*syntax->quote.str1 & 0xff) << 8)
-			   | (*syntax->quote.str2 & 0xff));
+                           | ((*syntax->quote.str1 & 0xff) << 8)
+                           | (*syntax->quote.str2 & 0xff));
     }
   else
     syntax->quote_age = 0;
@@ -839,7 +839,7 @@ set_quote_age (m4_syntax_table *syntax, bool reset, bool change)
    used to refresh the contents of the result.  */
 const m4_string_pair *
 m4__quote_cache (m4_syntax_table *syntax, m4_obstack *obs, unsigned int age,
-		 const m4_string_pair *quotes)
+                 const m4_string_pair *quotes)
 {
   /* Implementation - if AGE is non-zero, then the implementation of
      set_quote_age guarantees that we can recreate the return value on
@@ -861,11 +861,11 @@ m4__quote_cache (m4_syntax_table *syntax, m4_obstack *obs, unsigned int age,
     {
       assert (obstack_object_size (obs) == 0);
       syntax->cached_quote = (m4_string_pair *) obstack_copy (obs, quotes,
-							      sizeof *quotes);
+                                                              sizeof *quotes);
       syntax->cached_quote->str1 = (char *) obstack_copy0 (obs, quotes->str1,
-							   quotes->len1);
+                                                           quotes->len1);
       syntax->cached_quote->str2 = (char *) obstack_copy0 (obs, quotes->str2,
-							   quotes->len2);
+                                                           quotes->len2);
     }
   return syntax->cached_quote;
 }

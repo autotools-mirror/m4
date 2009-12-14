@@ -40,13 +40,13 @@ typedef struct
 typedef void m4_sysval_flush_func (m4 *context, bool report);
 typedef void m4_set_sysval_func (int value);
 typedef void m4_dump_symbols_func (m4 *context, m4_dump_symbol_data *data,
-				   size_t argc, m4_macro_args *argv,
-				   bool complain);
+                                   size_t argc, m4_macro_args *argv,
+                                   bool complain);
 typedef const char *m4_expand_ranges_func (const char *s, size_t *len,
-					   m4_obstack *obs);
+                                           m4_obstack *obs);
 typedef void m4_make_temp_func (m4 *context, m4_obstack *obs,
-				const m4_call_info *macro, const char *name,
-				size_t len, bool dir);
+                                const m4_call_info *macro, const char *name,
+                                size_t len, bool dir);
 
 END_C_DECLS
 

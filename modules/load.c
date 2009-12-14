@@ -33,7 +33,7 @@
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-	   function	macros	blind	side	minargs	maxargs */
+           function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
   BUILTIN (load,	false,	true,	false,	1,	1  )	\
   BUILTIN (m4modules,	false,	false,	false,	0,	0  )	\
@@ -77,7 +77,7 @@ M4INIT_HANDLER (load)
   const char *err = m4_module_makeresident (module);
   if (err)
     m4_error (context, 0, 0, NULL, _("cannot make module `%s' resident: %s"),
-	      m4_get_module_name (module), err);
+              m4_get_module_name (module), err);
 }
 
 
@@ -98,11 +98,11 @@ M4BUILTIN_HANDLER (m4modules)
   if (module)
     do
       {
-	m4_shipout_string (context, obs, m4_get_module_name (module), SIZE_MAX,
-			   true);
+        m4_shipout_string (context, obs, m4_get_module_name (module), SIZE_MAX,
+                           true);
 
-	if ((module = m4__module_next (module)))
-	  obstack_1grow (obs, ',');
+        if ((module = m4__module_next (module)))
+          obstack_1grow (obs, ',');
       }
     while (module);
 }

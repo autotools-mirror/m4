@@ -36,7 +36,7 @@ static	void  produce_syntax_dump	(FILE *, m4_syntax_table *, char);
 static	void  produce_module_dump	(FILE *, m4_module *);
 static	void  produce_symbol_dump	(m4 *, FILE *, m4_symbol_table *);
 static	void *dump_symbol_CB		(m4_symbol_table *, const char *,
-					 size_t, m4_symbol *, void *);
+                                         size_t, m4_symbol *, void *);
 static	void  issue_expect_message	(m4 *, int);
 static	int   decode_char		(m4 *, FILE *, bool *);
 
@@ -70,11 +70,11 @@ produce_resyntax_dump (m4 *context, FILE *file)
       const char *resyntax = m4_regexp_syntax_decode (code);
 
       if (!resyntax)
-	m4_error (context, EXIT_FAILURE, 0, NULL,
-		  _("invalid regexp syntax code `%d'"), code);
+        m4_error (context, EXIT_FAILURE, 0, NULL,
+                  _("invalid regexp syntax code `%d'"), code);
 
       /* No need to use produce_mem_dump, since we know all resyntax
-	 names are already ASCII-encoded.  */
+         names are already ASCII-encoded.  */
       xfprintf (file, "R%zu\n%s\n", strlen (resyntax), resyntax);
     }
 }
@@ -95,7 +95,7 @@ produce_syntax_dump (FILE *file, m4_syntax_table *syntax, char ch)
      specially, since it will not be found in syntax->orig.  */
   if (count == 1
       && ((code == M4_SYNTAX_RQUOTE && *buf == *DEF_RQUOTE)
-	  || (code == M4_SYNTAX_ECOMM && *buf == *DEF_ECOMM)))
+          || (code == M4_SYNTAX_ECOMM && *buf == *DEF_ECOMM)))
     return;
 
   if (count || (code & M4_SYNTAX_MASKS))
@@ -200,7 +200,7 @@ reverse_symbol_value_stack (m4_symbol_value *value)
    FILE* to dump to.  */
 static void *
 dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name, size_t len,
-		m4_symbol *symbol, void *userdata)
+                m4_symbol *symbol, void *userdata)
 {
   FILE *file = (FILE *) userdata;
   m4_symbol_value *value;
@@ -214,51 +214,51 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *symbol_name, size_t len,
       size_t module_len = module_name ? strlen (module_name) : 0;
 
       if (m4_is_symbol_value_text (value))
-	{
-	  const char *text = m4_get_symbol_value_text (value);
-	  size_t text_len = m4_get_symbol_value_len (value);
-	  xfprintf (file, "T%zu,%zu", len, text_len);
-	  if (module)
-	    xfprintf (file, ",%zu", module_len);
-	  fputc ('\n', file);
+        {
+          const char *text = m4_get_symbol_value_text (value);
+          size_t text_len = m4_get_symbol_value_len (value);
+          xfprintf (file, "T%zu,%zu", len, text_len);
+          if (module)
+            xfprintf (file, ",%zu", module_len);
+          fputc ('\n', file);
 
-	  produce_mem_dump (file, symbol_name, len);
-	  fputc ('\n', file);
-	  produce_mem_dump (file, text, text_len);
-	  fputc ('\n', file);
-	  if (module)
-	    {
-	      produce_mem_dump (file, module_name, module_len);
-	      fputc ('\n', file);
-	    }
-	}
+          produce_mem_dump (file, symbol_name, len);
+          fputc ('\n', file);
+          produce_mem_dump (file, text, text_len);
+          fputc ('\n', file);
+          if (module)
+            {
+              produce_mem_dump (file, module_name, module_len);
+              fputc ('\n', file);
+            }
+        }
       else if (m4_is_symbol_value_func (value))
-	{
-	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
-	  size_t bp_len;
-	  if (bp == NULL)
-	    assert (!"INTERNAL ERROR: builtin not found in builtin table!");
-	  bp_len = strlen (bp->name);
+        {
+          const m4_builtin *bp = m4_get_symbol_value_builtin (value);
+          size_t bp_len;
+          if (bp == NULL)
+            assert (!"INTERNAL ERROR: builtin not found in builtin table!");
+          bp_len = strlen (bp->name);
 
-	  xfprintf (file, "F%zu,%zu", len, bp_len);
-	  if (module)
-	    xfprintf (file, ",%zu", module_len);
-	  fputc ('\n', file);
+          xfprintf (file, "F%zu,%zu", len, bp_len);
+          if (module)
+            xfprintf (file, ",%zu", module_len);
+          fputc ('\n', file);
 
-	  produce_mem_dump (file, symbol_name, len);
-	  fputc ('\n', file);
-	  produce_mem_dump (file, bp->name, bp_len);
-	  fputc ('\n', file);
-	  if (module)
-	    {
-	      produce_mem_dump (file, module_name, module_len);
-	      fputc ('\n', file);
-	    }
-	}
+          produce_mem_dump (file, symbol_name, len);
+          fputc ('\n', file);
+          produce_mem_dump (file, bp->name, bp_len);
+          fputc ('\n', file);
+          if (module)
+            {
+              produce_mem_dump (file, module_name, module_len);
+              fputc ('\n', file);
+            }
+        }
       else if (m4_is_symbol_value_placeholder (value))
-	; /* Nothing to do for a builtin we couldn't reload earlier.  */
+        ; /* Nothing to do for a builtin we couldn't reload earlier.  */
       else
-	assert (!"dump_symbol_CB");
+        assert (!"dump_symbol_CB");
       value = VALUE_NEXT (value);
     }
   reverse_symbol_value_stack (last);
@@ -278,14 +278,14 @@ produce_frozen_state (m4 *context, const char *name)
   if (!file)
     {
       m4_error (context, 0, errno, NULL, _("cannot open %s"),
-		quotearg_style (locale_quoting_style, name));
+                quotearg_style (locale_quoting_style, name));
       return;
     }
 
   /* Write a recognizable header.  */
 
   xfprintf (file, "# This is a frozen state file generated by GNU %s %s\n",
-	    PACKAGE, VERSION);
+            PACKAGE, VERSION);
   fputs ("V2\n", file);
 
   /* Dump quote delimiters.  */
@@ -336,7 +336,7 @@ produce_frozen_state (m4 *context, const char *name)
   fputs ("# End of frozen state file\n", file);
   if (close_stream (file) != 0)
     m4_error (context, EXIT_FAILURE, errno, NULL,
-	      _("unable to create frozen state"));
+              _("unable to create frozen state"));
 }
 
 /* Issue a message saying that some character is an EXPECTED character. */
@@ -345,10 +345,10 @@ issue_expect_message (m4 *context, int expected)
 {
   if (expected == '\n')
     m4_error (context, EXIT_FAILURE, 0, NULL,
-	      _("expecting line feed in frozen file"));
+              _("expecting line feed in frozen file"));
   else
     m4_error (context, EXIT_FAILURE, 0, NULL,
-	      _("expecting character `%c' in frozen file"), expected);
+              _("expecting character `%c' in frozen file"), expected);
 }
 
 
@@ -376,65 +376,65 @@ decode_char (m4 *context, FILE *in, bool *advance_line)
     {
       ch = getc (in);
       switch (ch)
-	{
-	case 'a': return '\a';
-	case 'b': return '\b';
-	case 'f': return '\f';
-	case 'n': return '\n';
-	case 'r': return '\r';
-	case 't': return '\t';
-	case 'v': return '\v';
-	case '\\': return '\\';
+        {
+        case 'a': return '\a';
+        case 'b': return '\b';
+        case 'f': return '\f';
+        case 'n': return '\n';
+        case 'r': return '\r';
+        case 't': return '\t';
+        case 'v': return '\v';
+        case '\\': return '\\';
 
-	case '\n':
-	  ch = getc (in);
-	  m4_set_current_line (context, m4_get_current_line (context) + 1);
-	  continue;
+        case '\n':
+          ch = getc (in);
+          m4_set_current_line (context, m4_get_current_line (context) + 1);
+          continue;
 
-	case 'x': case 'X':
-	  next = getc (in);
-	  if (next >= '0' && next <= '9')
-	    ch = (next - '0') * 16;
-	  else if (next >= 'a' && next <= 'f')
-	    ch = (next - 'a' + 10) * 16;
-	  else if (next >= 'A' && next <= 'F')
-	    ch = (next - 'A' + 10) * 16;
-	  else
-	    return EOF;
-	  next = getc (in);
-	  if (next >= '0' && next <= '9')
-	    ch += next - '0';
-	  else if (next >= 'a' && next <= 'f')
-	    ch += next - 'a' + 10;
-	  else if (next >= 'A' && next <= 'F')
-	    ch += next - 'A' + 10;
-	  else
-	    return EOF;
-	  return ch;
-	case '0': case '1': case '2': case '3':
-	  value = ch - '0';
-	  ch = getc (in);
-	  /* fall through */
-	case '4': case '5': case '6': case '7':
-	  if (ch >= '0' && ch <= '7')
-	    {
-	      value = value * 8 + ch - '0';
-	      ch = getc (in);
-	    }
-	  else
-	    {
-	      ungetc (ch, in);
-	      return value;
-	    }
-	  if (ch >= '0' && ch <= '7')
-	    value = value * 8 + ch - '0';
-	  else
-	    ungetc (ch, in);
-	  return value;
+        case 'x': case 'X':
+          next = getc (in);
+          if (next >= '0' && next <= '9')
+            ch = (next - '0') * 16;
+          else if (next >= 'a' && next <= 'f')
+            ch = (next - 'a' + 10) * 16;
+          else if (next >= 'A' && next <= 'F')
+            ch = (next - 'A' + 10) * 16;
+          else
+            return EOF;
+          next = getc (in);
+          if (next >= '0' && next <= '9')
+            ch += next - '0';
+          else if (next >= 'a' && next <= 'f')
+            ch += next - 'a' + 10;
+          else if (next >= 'A' && next <= 'F')
+            ch += next - 'A' + 10;
+          else
+            return EOF;
+          return ch;
+        case '0': case '1': case '2': case '3':
+          value = ch - '0';
+          ch = getc (in);
+          /* fall through */
+        case '4': case '5': case '6': case '7':
+          if (ch >= '0' && ch <= '7')
+            {
+              value = value * 8 + ch - '0';
+              ch = getc (in);
+            }
+          else
+            {
+              ungetc (ch, in);
+              return value;
+            }
+          if (ch >= '0' && ch <= '7')
+            value = value * 8 + ch - '0';
+          else
+            ungetc (ch, in);
+          return value;
 
-	default:
-	  return EOF;
-	}
+        default:
+          return EOF;
+        }
     }
 
   if (ch == '\n')
@@ -463,14 +463,14 @@ reload_frozen_state (m4 *context, const char *name)
   do									\
     {									\
       if (advance_line)							\
-	{								\
-	  m4_set_current_line (context,					\
-			       m4_get_current_line (context) + 1);	\
-	  advance_line = false;						\
-	}								\
+        {								\
+          m4_set_current_line (context,					\
+                               m4_get_current_line (context) + 1);	\
+          advance_line = false;						\
+        }								\
       character = getc (file);						\
       if (character == '\n')						\
-	advance_line = true;						\
+        advance_line = true;						\
     }									\
   while (0)
 
@@ -479,14 +479,14 @@ reload_frozen_state (m4 *context, const char *name)
     {								\
       unsigned int n = 0;					\
       while (isdigit (character) && n <= INT_MAX / 10)		\
-	{							\
-	  n = 10 * n + character - '0';				\
-	  GET_CHARACTER;					\
-	}							\
+        {							\
+          n = 10 * n + character - '0';				\
+          GET_CHARACTER;					\
+        }							\
       if (((AllowNeg) ? INT_MIN: INT_MAX) < n			\
-	  || isdigit (character))				\
-	m4_error (context, EXIT_FAILURE, 0, NULL,		\
-		  _("integer overflow in frozen file"));	\
+          || isdigit (character))				\
+        m4_error (context, EXIT_FAILURE, 0, NULL,		\
+                  _("integer overflow in frozen file"));	\
       (Number) = n;						\
     }								\
   while (0)
@@ -498,34 +498,34 @@ reload_frozen_state (m4 *context, const char *name)
       char *p;							\
       int ch;							\
       if (UseChar)						\
-	{							\
-	  ungetc (character, File);				\
-	  if (advance_line)					\
-	    {							\
-	      assert (character == '\n');			\
-	      advance_line = false;				\
-	    }							\
-	}							\
+        {							\
+          ungetc (character, File);				\
+          if (advance_line)					\
+            {							\
+              assert (character == '\n');			\
+              advance_line = false;				\
+            }							\
+        }							\
       CHECK_ALLOCATION ((Buf), (BufSize), len);			\
       p = (Buf);						\
       while (len-- > 0)						\
-	{							\
-	  ch = (version > 1					\
-		? decode_char (context, File, &advance_line)	\
-		: getc (File));					\
-	  if (ch == EOF)					\
-	    m4_error (context, EXIT_FAILURE, 0, NULL,		\
-		      _("premature end of frozen file"));	\
-	  *p++ = ch;						\
-	}							\
+        {							\
+          ch = (version > 1					\
+                ? decode_char (context, File, &advance_line)	\
+                : getc (File));					\
+          if (ch == EOF)					\
+            m4_error (context, EXIT_FAILURE, 0, NULL,		\
+                      _("premature end of frozen file"));	\
+          *p++ = ch;						\
+        }							\
       *p = '\0';						\
       GET_CHARACTER;						\
       while (version > 1 && character == '\\')			\
-	{							\
-	  GET_CHARACTER;					\
-	  VALIDATE ('\n');					\
-	  GET_CHARACTER;					\
-	}							\
+        {							\
+          GET_CHARACTER;					\
+          VALIDATE ('\n');					\
+          GET_CHARACTER;					\
+        }							\
     }								\
   while (0)
 
@@ -533,7 +533,7 @@ reload_frozen_state (m4 *context, const char *name)
   do								\
     {								\
       if (character != (Expected))				\
-	issue_expect_message (context, (Expected));		\
+        issue_expect_message (context, (Expected));		\
     }								\
   while (0)
 
@@ -541,11 +541,11 @@ reload_frozen_state (m4 *context, const char *name)
   do								\
     {								\
       if ((Needed) + 1 > (Allocated))				\
-	{							\
-	  free (Where);						\
-	  (Allocated) = (Needed) + 1;				\
-	  (Where) = xcharalloc (Allocated);			\
-	}							\
+        {							\
+          free (Where);						\
+          (Allocated) = (Needed) + 1;				\
+          (Where) = xcharalloc (Allocated);			\
+        }							\
     }								\
   while (0)
 
@@ -557,18 +557,18 @@ reload_frozen_state (m4 *context, const char *name)
     {								\
       GET_CHARACTER;						\
       if (character == '#')					\
-	{							\
-	  while (character != EOF && character != '\n')		\
-	    GET_CHARACTER;					\
-	  VALIDATE ('\n');					\
-	}							\
+        {							\
+          while (character != EOF && character != '\n')		\
+            GET_CHARACTER;					\
+          VALIDATE ('\n');					\
+        }							\
     }								\
   while (character == '\n')
 
   file = m4_path_search (context, name, (char **)NULL);
   if (file == NULL)
     m4_error (context, EXIT_FAILURE, errno, NULL, _("cannot open %s"),
-	      quotearg_style (locale_quoting_style, name));
+              quotearg_style (locale_quoting_style, name));
   m4_set_current_file (context, name);
 
   allocated[0] = 100;
@@ -591,21 +591,21 @@ reload_frozen_state (m4 *context, const char *name)
     case 1:
       m4__module_open (context, "m4", NULL);
       if (m4_get_posixly_correct_opt (context))
-	m4__module_open (context, "traditional", NULL);
+        m4__module_open (context, "traditional", NULL);
       else
-	m4__module_open (context, "gnu", NULL);
+        m4__module_open (context, "gnu", NULL);
       /* Disable { and } categories, since ${11} was not supported in
-	 1.4.x.  */
+         1.4.x.  */
       m4_set_syntax (M4SYNTAX, 'O', '+', "{}", 2);
       break;
     default:
       if (version > 2)
-	m4_error (context, EXIT_MISMATCH, 0, NULL,
-		  _("frozen file version %d greater than max supported of 2"),
-		  version);
+        m4_error (context, EXIT_MISMATCH, 0, NULL,
+                  _("frozen file version %d greater than max supported of 2"),
+                  version);
       else
-	m4_error (context, EXIT_FAILURE, 0, NULL,
-		  _("ill-formed frozen file, version directive expected"));
+        m4_error (context, EXIT_FAILURE, 0, NULL,
+                  _("ill-formed frozen file, version directive expected"));
     }
   VALIDATE ('\n');
 
@@ -613,370 +613,370 @@ reload_frozen_state (m4 *context, const char *name)
   while (character != EOF)
     {
       switch (character)
-	{
-	default:
-	  m4_error (context, EXIT_FAILURE, 0, NULL,
-		    _("ill-formed frozen file, unknown directive %c"),
-		    character);
+        {
+        default:
+          m4_error (context, EXIT_FAILURE, 0, NULL,
+                    _("ill-formed frozen file, unknown directive %c"),
+                    character);
 
-	case 'd':
-	  /* Set debugmode flags.  */
-	  if (version < 2)
-	    {
-	      /* 'd' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+        case 'd':
+          /* Set debugmode flags.  */
+          if (version < 2)
+            {
+              /* 'd' operator is not supported in format version 1. */
+              m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'd');
-	    }
+            }
 
-	  GET_CHARACTER;
-	  GET_NUMBER (number[0], false);
-	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0], false);
-	  VALIDATE ('\n');
+          GET_CHARACTER;
+          GET_NUMBER (number[0], false);
+          VALIDATE ('\n');
+          GET_STRING (file, string[0], allocated[0], number[0], false);
+          VALIDATE ('\n');
 
-	  if (m4_debug_decode (context, string[0], number[0]) < 0)
-	    m4_error (context, EXIT_FAILURE, 0, NULL,
-		      _("unknown debug mode %s"),
-		      quotearg_style_mem (locale_quoting_style, string[0],
-					  number[0]));
-	  break;
+          if (m4_debug_decode (context, string[0], number[0]) < 0)
+            m4_error (context, EXIT_FAILURE, 0, NULL,
+                      _("unknown debug mode %s"),
+                      quotearg_style_mem (locale_quoting_style, string[0],
+                                          number[0]));
+          break;
 
-	case 'F':
-	  GET_CHARACTER;
+        case 'F':
+          GET_CHARACTER;
 
-	  /* Get string lengths. */
+          /* Get string lengths. */
 
-	  GET_NUMBER (number[0], false);
-	  VALIDATE (',');
-	  GET_CHARACTER;
-	  GET_NUMBER (number[1], false);
+          GET_NUMBER (number[0], false);
+          VALIDATE (',');
+          GET_CHARACTER;
+          GET_NUMBER (number[1], false);
 
-	  if (character == ',')
-	    {
-	      if (version > 1)
-		{
-		  /* 'F' operator accepts an optional third argument for
-		     format versions 2 or later.  */
-		  GET_CHARACTER;
-		  GET_NUMBER (number[2], false);
-		}
-	      else
-		/* 3 argument 'F' operations are invalid for format
-		   version 1.  */
-		m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+          if (character == ',')
+            {
+              if (version > 1)
+                {
+                  /* 'F' operator accepts an optional third argument for
+                     format versions 2 or later.  */
+                  GET_CHARACTER;
+                  GET_NUMBER (number[2], false);
+                }
+              else
+                /* 3 argument 'F' operations are invalid for format
+                   version 1.  */
+                m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'F');
-	    }
-	  else
-	    {
-	      number[2] = 0;
-	    }
+            }
+          else
+            {
+              number[2] = 0;
+            }
 
-	  VALIDATE ('\n');
+          VALIDATE ('\n');
 
 
-	  /* Get string contents.  */
+          /* Get string contents.  */
 
-	  GET_STRING (file, string[0], allocated[0], number[0], false);
-	  if (version > 1)
-	    {
-	      VALIDATE ('\n');
-	      GET_CHARACTER;
-	    }
-	  GET_STRING (file, string[1], allocated[1], number[1], true);
-	  if (version > 1 && number[2])
-	    {
-	      VALIDATE ('\n');
-	      GET_CHARACTER;
-	    }
-	  GET_STRING (file, string[2], allocated[2], number[2], true);
-	  VALIDATE ('\n');
+          GET_STRING (file, string[0], allocated[0], number[0], false);
+          if (version > 1)
+            {
+              VALIDATE ('\n');
+              GET_CHARACTER;
+            }
+          GET_STRING (file, string[1], allocated[1], number[1], true);
+          if (version > 1 && number[2])
+            {
+              VALIDATE ('\n');
+              GET_CHARACTER;
+            }
+          GET_STRING (file, string[2], allocated[2], number[2], true);
+          VALIDATE ('\n');
 
-	  /* Enter a macro having a builtin function as a definition.  */
-	  {
-	    m4_module *module = NULL;
-	    m4_symbol_value *token;
+          /* Enter a macro having a builtin function as a definition.  */
+          {
+            m4_module *module = NULL;
+            m4_symbol_value *token;
 
-	    // Builtins cannot contain a NUL byte.
-	    if (strlen (string[1]) < number[1])
-	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+            // Builtins cannot contain a NUL byte.
+            if (strlen (string[1]) < number[1])
+              m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, invalid builtin %s encountered"),
-			quotearg_style_mem (locale_quoting_style, string[1],
-					    number[1]));
-	    if (number[2] > 0)
-	      {
-		if (strlen (string[2]) < number[2])
-		  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+                        quotearg_style_mem (locale_quoting_style, string[1],
+                                            number[1]));
+            if (number[2] > 0)
+              {
+                if (strlen (string[2]) < number[2])
+                  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, invalid module %s encountered"),
-			    quotearg_style_mem (locale_quoting_style,
-						string[2], number[2]));
-		module = m4__module_find (string[2]);
-	      }
-	    token = m4_builtin_find_by_name (module, string[1]);
+                            quotearg_style_mem (locale_quoting_style,
+                                                string[2], number[2]));
+                module = m4__module_find (string[2]);
+              }
+            token = m4_builtin_find_by_name (module, string[1]);
 
-	    if (token == NULL)
-	      {
-		token = (m4_symbol_value *) xzalloc (sizeof *token);
-		m4_set_symbol_value_placeholder (token, xstrdup (string[1]));
-		VALUE_MODULE (token) = module;
-		VALUE_MIN_ARGS (token) = 0;
-		VALUE_MAX_ARGS (token) = -1;
-	      }
-	    m4_symbol_pushdef (M4SYMTAB, string[0], number[0], token);
-	  }
-	  break;
+            if (token == NULL)
+              {
+                token = (m4_symbol_value *) xzalloc (sizeof *token);
+                m4_set_symbol_value_placeholder (token, xstrdup (string[1]));
+                VALUE_MODULE (token) = module;
+                VALUE_MIN_ARGS (token) = 0;
+                VALUE_MAX_ARGS (token) = -1;
+              }
+            m4_symbol_pushdef (M4SYMTAB, string[0], number[0], token);
+          }
+          break;
 
-	case 'M':
+        case 'M':
 
-	  /* Load a module, but *without* perturbing the symbol table.
-	     Note that any expansion from loading the module which would
-	     have been seen when loading it originally is discarded
-	     when loading it from a frozen file. */
+          /* Load a module, but *without* perturbing the symbol table.
+             Note that any expansion from loading the module which would
+             have been seen when loading it originally is discarded
+             when loading it from a frozen file. */
 
-	  if (version < 2)
-	    {
-	      /* 'M' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+          if (version < 2)
+            {
+              /* 'M' operator is not supported in format version 1. */
+              m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'M');
-	    }
+            }
 
-	  GET_CHARACTER;
-	  GET_NUMBER (number[0], false);
-	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0], false);
-	  VALIDATE ('\n');
+          GET_CHARACTER;
+          GET_NUMBER (number[0], false);
+          VALIDATE ('\n');
+          GET_STRING (file, string[0], allocated[0], number[0], false);
+          VALIDATE ('\n');
 
-	  if (strlen (string[0]) < number[0])
-	    m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+          if (strlen (string[0]) < number[0])
+            m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, invalid module %s encountered"),
-		      quotearg_style_mem (locale_quoting_style,
-					  string[0], number[0]));
-	  m4__module_open (context, string[0], NULL);
+                      quotearg_style_mem (locale_quoting_style,
+                                          string[0], number[0]));
+          m4__module_open (context, string[0], NULL);
 
-	  break;
+          break;
 
-	case 'R':
+        case 'R':
 
-	  if (version < 2)
-	    {
-	      /* 'R' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+          if (version < 2)
+            {
+              /* 'R' operator is not supported in format version 1. */
+              m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'R');
-	    }
+            }
 
-	  GET_CHARACTER;
-	  GET_NUMBER (number[0], false);
-	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0], false);
-	  VALIDATE ('\n');
+          GET_CHARACTER;
+          GET_NUMBER (number[0], false);
+          VALIDATE ('\n');
+          GET_STRING (file, string[0], allocated[0], number[0], false);
+          VALIDATE ('\n');
 
-	  m4_set_regexp_syntax_opt (context,
-				    m4_regexp_syntax_encode (string[0]));
-	  if (m4_get_regexp_syntax_opt (context) < 0
-	      || strlen (string[0]) < number[0])
-	    {
-	      m4_error (context, EXIT_FAILURE, 0, NULL,
-			_("bad syntax-spec %s"),
-			quotearg_style_mem (locale_quoting_style, string[0],
-					    number[0]));
-	    }
+          m4_set_regexp_syntax_opt (context,
+                                    m4_regexp_syntax_encode (string[0]));
+          if (m4_get_regexp_syntax_opt (context) < 0
+              || strlen (string[0]) < number[0])
+            {
+              m4_error (context, EXIT_FAILURE, 0, NULL,
+                        _("bad syntax-spec %s"),
+                        quotearg_style_mem (locale_quoting_style, string[0],
+                                            number[0]));
+            }
 
-	  break;
+          break;
 
-	case 'S':
+        case 'S':
 
-	  if (version < 2)
-	    {
-	      /* 'S' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+          if (version < 2)
+            {
+              /* 'S' operator is not supported in format version 1. */
+              m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'S');
-	    }
+            }
 
-	  GET_CHARACTER;
-	  syntax = character;
-	  GET_CHARACTER;
-	  GET_NUMBER (number[0], false);
-	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0], false);
+          GET_CHARACTER;
+          syntax = character;
+          GET_CHARACTER;
+          GET_NUMBER (number[0], false);
+          VALIDATE ('\n');
+          GET_STRING (file, string[0], allocated[0], number[0], false);
 
-	  /* Syntax under M4_SYNTAX_MASKS is handled specially; all
-	     other characters are additive.  */
-	  if ((m4_set_syntax (M4SYNTAX, syntax,
-			      (m4_syntax_code (syntax) & M4_SYNTAX_MASKS
-			       ? '=' : '+'), string[0], number[0]) < 0)
-	      && (syntax != '\0'))
-	    {
-	      m4_error (context, 0, 0, NULL,
-			_("undefined syntax code %c"), syntax);
-	    }
-	  break;
+          /* Syntax under M4_SYNTAX_MASKS is handled specially; all
+             other characters are additive.  */
+          if ((m4_set_syntax (M4SYNTAX, syntax,
+                              (m4_syntax_code (syntax) & M4_SYNTAX_MASKS
+                               ? '=' : '+'), string[0], number[0]) < 0)
+              && (syntax != '\0'))
+            {
+              m4_error (context, 0, 0, NULL,
+                        _("undefined syntax code %c"), syntax);
+            }
+          break;
 
-	case 't':
-	  /* Trace a macro name.  */
-	  if (version < 2)
-	    {
-	      /* 't' operator is not supported in format version 1. */
-	      m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+        case 't':
+          /* Trace a macro name.  */
+          if (version < 2)
+            {
+              /* 't' operator is not supported in format version 1. */
+              m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 't');
-	    }
+            }
 
-	  GET_CHARACTER;
-	  GET_NUMBER (number[0], false);
-	  VALIDATE ('\n');
-	  GET_STRING (file, string[0], allocated[0], number[0], false);
-	  VALIDATE ('\n');
+          GET_CHARACTER;
+          GET_NUMBER (number[0], false);
+          VALIDATE ('\n');
+          GET_STRING (file, string[0], allocated[0], number[0], false);
+          VALIDATE ('\n');
 
-	  m4_set_symbol_name_traced (M4SYMTAB, string[0], number[0], true);
+          m4_set_symbol_name_traced (M4SYMTAB, string[0], number[0], true);
 
-	  break;
+          break;
 
-	case 'C':
-	case 'D':
-	case 'Q':
-	  operation = character;
-	  GET_CHARACTER;
+        case 'C':
+        case 'D':
+        case 'Q':
+          operation = character;
+          GET_CHARACTER;
 
-	  /* Get string lengths. */
+          /* Get string lengths. */
 
-	  if (operation == 'D' && character == '-')
-	    {
-	      /* Accept a negative diversion number.  */
-	      GET_CHARACTER;
-	      GET_NUMBER (number[0], true);
-	      number[0] = -number[0];
-	    }
-	  else
-	    GET_NUMBER (number[0], false);
-	  VALIDATE (',');
-	  GET_CHARACTER;
-	  GET_NUMBER (number[1], false);
-	  VALIDATE ('\n');
+          if (operation == 'D' && character == '-')
+            {
+              /* Accept a negative diversion number.  */
+              GET_CHARACTER;
+              GET_NUMBER (number[0], true);
+              number[0] = -number[0];
+            }
+          else
+            GET_NUMBER (number[0], false);
+          VALIDATE (',');
+          GET_CHARACTER;
+          GET_NUMBER (number[1], false);
+          VALIDATE ('\n');
 
-	  /* Get string contents.  */
-	  if (operation != 'D')
-	    {
-	      GET_STRING (file, string[0], allocated[0], number[0], false);
-	      if (version > 1)
-		{
-		  VALIDATE ('\n');
-		  GET_CHARACTER;
-		}
-	    }
-	  else
-	    GET_CHARACTER;
-	  GET_STRING (file, string[1], allocated[1], number[1], true);
-	  VALIDATE ('\n');
+          /* Get string contents.  */
+          if (operation != 'D')
+            {
+              GET_STRING (file, string[0], allocated[0], number[0], false);
+              if (version > 1)
+                {
+                  VALIDATE ('\n');
+                  GET_CHARACTER;
+                }
+            }
+          else
+            GET_CHARACTER;
+          GET_STRING (file, string[1], allocated[1], number[1], true);
+          VALIDATE ('\n');
 
-	  /* Act according to operation letter.  */
+          /* Act according to operation letter.  */
 
-	  switch (operation)
-	    {
-	    case 'C':
+          switch (operation)
+            {
+            case 'C':
 
-	      /* Change comment strings.  */
+              /* Change comment strings.  */
 
-	      m4_set_comment (M4SYNTAX, string[0], number[0], string[1],
-			      number[1]);
-	      break;
+              m4_set_comment (M4SYNTAX, string[0], number[0], string[1],
+                              number[1]);
+              break;
 
-	    case 'D':
+            case 'D':
 
-	      /* Select a diversion and add a string to it.  */
+              /* Select a diversion and add a string to it.  */
 
-	      m4_make_diversion (context, number[0]);
-	      if (number[1] > 0)
-		m4_output_text (context, string[1], number[1]);
-	      break;
+              m4_make_diversion (context, number[0]);
+              if (number[1] > 0)
+                m4_output_text (context, string[1], number[1]);
+              break;
 
-	    case 'Q':
+            case 'Q':
 
-	      /* Change quote strings.  */
+              /* Change quote strings.  */
 
-	      m4_set_quotes (M4SYNTAX, string[0], number[0], string[1],
-			     number[1]);
-	      break;
+              m4_set_quotes (M4SYNTAX, string[0], number[0], string[1],
+                             number[1]);
+              break;
 
-	    default:
+            default:
 
-	      /* Cannot happen.  */
+              /* Cannot happen.  */
 
-	      break;
-	    }
-	  break;
+              break;
+            }
+          break;
 
-	case 'T':
-	  GET_CHARACTER;
+        case 'T':
+          GET_CHARACTER;
 
-	  /* Get string lengths. */
+          /* Get string lengths. */
 
-	  GET_NUMBER (number[0], false);
-	  VALIDATE (',');
-	  GET_CHARACTER;
-	  GET_NUMBER (number[1], false);
+          GET_NUMBER (number[0], false);
+          VALIDATE (',');
+          GET_CHARACTER;
+          GET_NUMBER (number[1], false);
 
-	  if (character == ',')
-	    {
-	      if (version > 1)
-		{
-		  /* 'T' operator accepts an optional third argument for
-		     format versions 2 or later.  */
-		  GET_CHARACTER;
-		  GET_NUMBER (number[2], false);
-		}
-	      else
-		{
-		  /* 3 argument 'T' operations are invalid for format
-		     version 1.  */
-		  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+          if (character == ',')
+            {
+              if (version > 1)
+                {
+                  /* 'T' operator accepts an optional third argument for
+                     format versions 2 or later.  */
+                  GET_CHARACTER;
+                  GET_NUMBER (number[2], false);
+                }
+              else
+                {
+                  /* 3 argument 'T' operations are invalid for format
+                     version 1.  */
+                  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
-		}
-	    }
-	  else
-	    number[2] = 0;
+                }
+            }
+          else
+            number[2] = 0;
 
-	  VALIDATE ('\n');
+          VALIDATE ('\n');
 
-	  /* Get string contents.  */
-	  GET_STRING (file, string[0], allocated[0], number[0], false);
-	  if (version > 1)
-	    {
-	      VALIDATE ('\n');
-	      GET_CHARACTER;
-	    }
-	  GET_STRING (file, string[1], allocated[1], number[1], true);
-	  if (version > 1 && number[2])
-	    {
-	      VALIDATE ('\n');
-	      GET_CHARACTER;
-	    }
-	  GET_STRING (file, string[2], allocated[2], number[2], true);
-	  VALIDATE ('\n');
+          /* Get string contents.  */
+          GET_STRING (file, string[0], allocated[0], number[0], false);
+          if (version > 1)
+            {
+              VALIDATE ('\n');
+              GET_CHARACTER;
+            }
+          GET_STRING (file, string[1], allocated[1], number[1], true);
+          if (version > 1 && number[2])
+            {
+              VALIDATE ('\n');
+              GET_CHARACTER;
+            }
+          GET_STRING (file, string[2], allocated[2], number[2], true);
+          VALIDATE ('\n');
 
-	  /* Enter a macro having an expansion text as a definition.  */
-	  {
-	    m4_symbol_value *token;
-	    m4_module *module = NULL;
+          /* Enter a macro having an expansion text as a definition.  */
+          {
+            m4_symbol_value *token;
+            m4_module *module = NULL;
 
-	    token = (m4_symbol_value *) xzalloc (sizeof *token);
-	    if (number[2] > 0)
-	      {
-		if (strlen (string[2]) < number[2])
-		  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
+            token = (m4_symbol_value *) xzalloc (sizeof *token);
+            if (number[2] > 0)
+              {
+                if (strlen (string[2]) < number[2])
+                  m4_error (context, EXIT_FAILURE, 0, NULL, _("\
 ill-formed frozen file, invalid module %s encountered"),
-			    quotearg_style_mem (locale_quoting_style,
-						string[2], number[2]));
-		module = m4__module_find (string[2]);
-	      }
+                            quotearg_style_mem (locale_quoting_style,
+                                                string[2], number[2]));
+                module = m4__module_find (string[2]);
+              }
 
-	    m4_set_symbol_value_text (token, xmemdup0 (string[1], number[1]),
-				      number[1], 0);
-	    VALUE_MODULE (token) = module;
-	    VALUE_MAX_ARGS (token) = -1;
+            m4_set_symbol_value_text (token, xmemdup0 (string[1], number[1]),
+                                      number[1], 0);
+            VALUE_MODULE (token) = module;
+            VALUE_MAX_ARGS (token) = -1;
 
-	    m4_symbol_pushdef (M4SYMTAB, string[0], number[0], token);
-	  }
-	  break;
+            m4_symbol_pushdef (M4SYMTAB, string[0], number[0], token);
+          }
+          break;
 
-	}
+        }
       GET_DIRECTIVE;
     }
 
@@ -985,7 +985,7 @@ ill-formed frozen file, invalid module %s encountered"),
   free (string[2]);
   if (close_stream (file) != 0)
     m4_error (context, EXIT_FAILURE, errno, NULL,
-	      _("unable to read frozen state"));
+              _("unable to read frozen state"));
   m4_set_current_file (context, NULL);
   m4_set_current_line (context, 0);
 

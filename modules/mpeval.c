@@ -42,7 +42,7 @@
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-	   function	macros	blind	side	minargs	maxargs */
+           function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
   BUILTIN (mpeval,	false,	true,	true,	1,	3  )	\
 
@@ -135,7 +135,7 @@ typedef mpq_t number;
 
 static void numb_initialise (void);
 static void numb_obstack (m4_obstack *obs, const number value,
-			  const int radix, int min);
+                          const int radix, int min);
 static void mpq2mpz (m4 *context, mpz_t z, const number q, const char *noisily);
 static void mpz2mpq (number q, const mpz_t z);
 static void numb_divide (number *x, number *y);
@@ -171,7 +171,7 @@ numb_initialise (void)
 
 static void
 numb_obstack (m4_obstack *obs, const number value, const int radix,
-	      int min)
+              int min)
 {
   const char *s;
   size_t len;
@@ -398,11 +398,11 @@ numb_lshift (m4 *context, number * x, number * y)
     long int exp = mpz_get_si (yy);
     if (exp >= 0)
       {
-	mpz_mul_2exp (res, xx, (unsigned) exp);
+        mpz_mul_2exp (res, xx, (unsigned) exp);
       }
     else
       {
-	mpz_div_2exp (res, xx, (unsigned) -exp);
+        mpz_div_2exp (res, xx, (unsigned) -exp);
       }
   }
 
@@ -433,11 +433,11 @@ numb_rshift (m4 *context, number * x, number * y)
     long int exp = mpz_get_si (yy);
     if (exp >= 0)
       {
-	mpz_div_2exp (res, xx, (unsigned) exp);
+        mpz_div_2exp (res, xx, (unsigned) exp);
       }
     else
       {
-	mpz_mul_2exp (res, xx, (unsigned) -exp);
+        mpz_mul_2exp (res, xx, (unsigned) -exp);
       }
   }
 

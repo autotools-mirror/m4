@@ -82,14 +82,14 @@ fi]])
 # to m4: bad option
 m4_define([AT_CHECK_M4],
 [AT_CHECK([$M4 m4_ifval([$6], [], [-d ])$1 ]m4_if([$5], [-], [<&-],
-					    [< m4_default([$5], [/dev/null])]),
+                                            [< m4_default([$5], [/dev/null])]),
           [$2], [$3], m4_case([$4], [], [], [ignore], [ignore], [stderr]))
 m4_case([$4], [], [], [ignore], [],
 [AT_CHECK([[$SED 's/^[^:]*[lt-]*m4[.ex]*:/m4:/
-	/^m4debug: module/s/opening file.*/opening file/
-	s/\(cannot open module [^:]*\):.*/\1/
-	s/Bad file number/Bad file descriptor/
-	s/^m4:.* option .*/m4: bad option/
+        /^m4debug: module/s/opening file.*/opening file/
+        s/\(cannot open module [^:]*\):.*/\1/
+        s/Bad file number/Bad file descriptor/
+        s/^m4:.* option .*/m4: bad option/
     ' stderr >&2]], [0], [], [$4])])
 ])
 

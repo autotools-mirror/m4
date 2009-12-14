@@ -42,19 +42,19 @@ static const char *skip_space (m4 *, const char *);
    string, false otherwise.  */
 bool
 m4_bad_argc (m4 *context, size_t argc, const m4_call_info *caller, size_t min,
-	     size_t max, bool side_effect)
+             size_t max, bool side_effect)
 {
   if (argc - 1 < min)
     {
       m4_warn (context, 0, caller, _("too few arguments: %zu < %zu"),
-	       argc - 1, min);
+               argc - 1, min);
       return !side_effect;
     }
 
   if (argc - 1 > max)
     {
       m4_warn (context, 0, caller, _("extra arguments ignored: %zu > %zu"),
-	       argc - 1, max);
+               argc - 1, max);
     }
 
   return false;
@@ -75,7 +75,7 @@ skip_space (m4 *context, const char *arg)
    Otherwise, we are arbitrarily limiting integer values.  */
 bool
 m4_numeric_arg (m4 *context, const m4_call_info *caller, const char *arg,
-		size_t len, int *valuep)
+                size_t len, int *valuep)
 {
   char *endp;
 
@@ -89,15 +89,15 @@ m4_numeric_arg (m4 *context, const m4_call_info *caller, const char *arg,
       const char *str = skip_space (context, arg);
       *valuep = strtol (str, &endp, 10);
       if (endp - arg != len)
-	{
-	  m4_warn (context, 0, caller, _("non-numeric argument %s"),
-		   quotearg_style_mem (locale_quoting_style, arg, len));
-	  return false;
-	}
+        {
+          m4_warn (context, 0, caller, _("non-numeric argument %s"),
+                   quotearg_style_mem (locale_quoting_style, arg, len));
+          return false;
+        }
       if (str != arg)
-	m4_warn (context, 0, caller, _("leading whitespace ignored"));
+        m4_warn (context, 0, caller, _("leading whitespace ignored"));
       else if (errno == ERANGE)
-	m4_warn (context, 0, caller, _("numeric overflow detected"));
+        m4_warn (context, 0, caller, _("numeric overflow detected"));
     }
   return true;
 }
@@ -109,23 +109,23 @@ m4_numeric_arg (m4 *context, const m4_call_info *caller, const char *arg,
    return PREVIOUS; otherwise return the parsed value.  */
 bool
 m4_parse_truth_arg (m4 *context, const m4_call_info *caller, const char *arg,
-		    size_t len, bool previous)
+                    size_t len, bool previous)
 {
   /* 0, no, off, blank... */
   if (!arg || len == 0
       || arg[0] == '0'
       || arg[0] == 'n' || arg[0] == 'N'
       || ((arg[0] == 'o' || arg[0] == 'O')
-	  && (arg[1] == 'f' || arg[1] == 'F')))
+          && (arg[1] == 'f' || arg[1] == 'F')))
     return false;
   /* 1, yes, on... */
   if (arg[0] == '1'
       || arg[0] == 'y' || arg[0] == 'Y'
       || ((arg[0] == 'o' || arg[0] == 'O')
-	  && (arg[1] == 'n' || arg[1] == 'N')))
+          && (arg[1] == 'n' || arg[1] == 'N')))
     return true;
   m4_warn (context, 0, caller, _("unknown directive %s"),
-	   quotearg_style_mem (locale_quoting_style, arg, len));
+           quotearg_style_mem (locale_quoting_style, arg, len));
   return previous;
 }
 
@@ -135,7 +135,7 @@ m4_parse_truth_arg (m4 *context, const m4_call_info *caller, const char *arg,
    result of the lookup, or NULL.  */
 m4_symbol *
 m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
-			bool must_exist)
+                        bool must_exist)
 {
   m4_symbol *result = NULL;
   if (m4_is_arg_text (argv, i))
@@ -144,9 +144,9 @@ m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
       size_t len = M4ARGLEN (i);
       result = m4_symbol_lookup (M4SYMTAB, name, len);
       if (must_exist && !result
-	  && m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
-	m4_warn (context, 0, argv->info, _("undefined macro %s"),
-		 quotearg_style_mem (locale_quoting_style, name, len));
+          && m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
+        m4_warn (context, 0, argv->info, _("undefined macro %s"),
+                 quotearg_style_mem (locale_quoting_style, name, len));
     }
   else
     m4_warn (context, 0, argv->info, _("invalid macro name ignored"));
@@ -160,7 +160,7 @@ m4_symbol_value_lookup (m4 *context, m4_macro_args *argv, size_t i,
 const char *m4_info_name (const m4_call_info *caller)
 {
   return quotearg_style_mem (locale_quoting_style, caller->name,
-			     caller->name_len);
+                             caller->name_len);
 }
 
 /* Helper for all error reporting.  Report message based on FORMAT and
@@ -170,8 +170,8 @@ const char *m4_info_name (const m4_call_info *caller)
    WARN, prepend 'Warning: '.  */
 static void
 m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
-		   const m4_call_info *caller, const char *format,
-		   va_list args)
+                   const m4_call_info *caller, const char *format,
+                   va_list args)
 {
   char *full = NULL;
   char *safe_macro = NULL;
@@ -189,14 +189,14 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
       char *p = safe_macro = xcharalloc (2 * len);
       const char *end = macro + len;
       while (macro != end)
-	{
-	  if (*macro == '%')
-	    {
-	      *p++ = '%';
-	      len++;
-	    }
-	  *p++ = *macro++;
-	}
+        {
+          if (*macro == '%')
+            {
+              *p++ = '%';
+              len++;
+            }
+          *p++ = *macro++;
+        }
     }
   if (macro)
     /* Use slot 1, so that the rest of the code can use the simpler
@@ -212,7 +212,7 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
   else if (macro)
     full = xasprintf (_("%s: %s"), macro, format);
   verror_at_line (status, errnum, line ? file : NULL, line,
-		  full ? full : format, args);
+                  full ? full : format, args);
   free (full);
   free (safe_macro);
   if ((!warn || m4_get_fatal_warnings_opt (context))
@@ -230,7 +230,7 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
    cannot exit with success later on.*/
 void
 m4_error (m4 *context, int status, int errnum, const m4_call_info *caller,
-	  const char *format, ...)
+          const char *format, ...)
 {
   va_list args;
   va_start (args, format);
@@ -250,7 +250,7 @@ m4_error (m4 *context, int status, int errnum, const m4_call_info *caller,
    unchanged.  */
 void
 m4_warn (m4 *context, int errnum, const m4_call_info *caller,
-	 const char *format, ...)
+         const char *format, ...)
 {
   if (!m4_get_suppress_warnings_opt (context))
     {
@@ -258,7 +258,7 @@ m4_warn (m4 *context, int errnum, const m4_call_info *caller,
       int status = EXIT_SUCCESS;
       va_start (args, format);
       if (m4_get_warnings_exit_opt (context))
-	status = EXIT_FAILURE;
+        status = EXIT_FAILURE;
       m4_verror_at_line (context, true, status, errnum, caller, format, args);
       va_end (args);
     }

@@ -66,9 +66,9 @@ struct m4_diversion
   {
     union
       {
-	FILE *file;		/* Diversion file on disk.  */
-	char *buffer;		/* Malloc'd diversion buffer.  */
-	m4_diversion *next;	/* Free-list pointer */
+        FILE *file;		/* Diversion file on disk.  */
+        char *buffer;		/* Malloc'd diversion buffer.  */
+        m4_diversion *next;	/* Free-list pointer */
       } u;
     int divnum;			/* Which diversion this represents.  */
     size_t size;		/* Usable size before reallocation.  */
@@ -163,16 +163,16 @@ cleanup_tmpfile (void)
       const void *elt;
       gl_oset_iterator_t iter = gl_oset_iterator (diversion_table);
       while (gl_oset_iterator_next (&iter, &elt))
-	{
-	  m4_diversion *diversion = (m4_diversion *) elt;
-	  if (!diversion->size && diversion->u.file
-	      && close_stream_temp (diversion->u.file) != 0)
-	    {
-	      error (0, errno,
-		     _("cannot clean temporary file for diversion"));
-	      fail = true;
-	    }
-	}
+        {
+          m4_diversion *diversion = (m4_diversion *) elt;
+          if (!diversion->size && diversion->u.file
+              && close_stream_temp (diversion->u.file) != 0)
+            {
+              error (0, errno,
+                     _("cannot clean temporary file for diversion"));
+              fail = true;
+            }
+        }
       gl_oset_iterator_free (&iter);
     }
 
@@ -194,7 +194,7 @@ m4_tmpname (int divnum)
       obstack_printf (&diversion_storage, "%s/m4-", output_temp_dir->dir_name);
       offset = obstack_object_size (&diversion_storage);
       buffer = (char *) obstack_alloc (&diversion_storage,
-				       INT_BUFSIZE_BOUND (divnum));
+                                       INT_BUFSIZE_BOUND (divnum));
     }
   assert (0 < divnum);
   if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) < 0)
@@ -219,8 +219,8 @@ m4_tmpfile (m4 *context, int divnum)
     {
       output_temp_dir = create_temp_dir ("m4-", NULL, true);
       if (output_temp_dir == NULL)
-	m4_error (context, EXIT_FAILURE, errno, NULL,
-		  _("cannot create temporary file for diversion"));
+        m4_error (context, EXIT_FAILURE, errno, NULL,
+                  _("cannot create temporary file for diversion"));
       atexit (cleanup_tmpfile);
     }
   name = m4_tmpname (divnum);
@@ -230,7 +230,7 @@ m4_tmpfile (m4 *context, int divnum)
     {
       unregister_temp_file (output_temp_dir, name);
       m4_error (context, EXIT_FAILURE, errno, NULL,
-		_("cannot create temporary file for diversion"));
+                _("cannot create temporary file for diversion"));
     }
   else if (set_cloexec_flag (fileno (file), true) != 0)
     m4_warn (context, errno, NULL, _("cannot protect diversion across forks"));
@@ -251,16 +251,16 @@ m4_tmpopen (m4 *context, int divnum, bool reread)
   if (tmp_file1_owner == divnum)
     {
       if (reread && fseeko (tmp_file1, 0, SEEK_SET) != 0)
-	m4_error (context, EXIT_FAILURE, errno, NULL,
-		  _("cannot seek within diversion"));
+        m4_error (context, EXIT_FAILURE, errno, NULL,
+                  _("cannot seek within diversion"));
       tmp_file2_recent = false;
       return tmp_file1;
     }
   else if (tmp_file2_owner == divnum)
     {
       if (reread && fseeko (tmp_file2, 0, SEEK_SET) != 0)
-	m4_error (context, EXIT_FAILURE, errno, NULL,
-		  _("cannot seek to beginning of diversion"));
+        m4_error (context, EXIT_FAILURE, errno, NULL,
+                  _("cannot seek to beginning of diversion"));
       tmp_file2_recent = true;
       return tmp_file2;
     }
@@ -269,14 +269,14 @@ m4_tmpopen (m4 *context, int divnum, bool reread)
   file = fopen_temp (name, O_BINARY ? "rb+" : "r+");
   if (file == NULL)
     m4_error (context, EXIT_FAILURE, errno, NULL,
-	      _("cannot create temporary file for diversion"));
+              _("cannot create temporary file for diversion"));
   else if (set_cloexec_flag (fileno (file), true) != 0)
     m4_warn (context, errno, NULL, _("cannot protect diversion across forks"));
   /* Update mode starts at the beginning of the stream, but sometimes
      we want the end.  */
   else if (!reread && fseeko (file, 0, SEEK_END) != 0)
     m4_error (context, EXIT_FAILURE, errno, NULL,
-	      _("cannot seek within diversion"));
+              _("cannot seek within diversion"));
   return file;
 }
 
@@ -292,19 +292,19 @@ m4_tmpclose (FILE *file, int divnum)
   if (divnum != tmp_file1_owner && divnum != tmp_file2_owner)
     {
       if (tmp_file2_recent)
-	{
-	  if (tmp_file1_owner)
-	    result = close_stream_temp (tmp_file1);
-	  tmp_file1 = file;
-	  tmp_file1_owner = divnum;
-	}
+        {
+          if (tmp_file1_owner)
+            result = close_stream_temp (tmp_file1);
+          tmp_file1 = file;
+          tmp_file1_owner = divnum;
+        }
       else
-	{
-	  if (tmp_file2_owner)
-	    result = close_stream_temp (tmp_file2);
-	  tmp_file2 = file;
-	  tmp_file2_owner = divnum;
-	}
+        {
+          if (tmp_file2_owner)
+            result = close_stream_temp (tmp_file2);
+          tmp_file2 = file;
+          tmp_file2_owner = divnum;
+        }
     }
   return result;
 }
@@ -317,14 +317,14 @@ m4_tmpremove (int divnum)
     {
       int result = close_stream_temp (tmp_file1);
       if (result)
-	return result;
+        return result;
       tmp_file1_owner = 0;
     }
   else if (divnum == tmp_file2_owner)
     {
       int result = close_stream_temp (tmp_file2);
       if (result)
-	return result;
+        return result;
       tmp_file2_owner = 0;
     }
   return cleanup_temp_file (output_temp_dir, m4_tmpname (divnum));
@@ -344,33 +344,33 @@ m4_tmprename (m4 *context, int oldnum, int newnum)
     {
       /* Be careful of mingw, which can't rename an open file.  */
       if (RENAME_OPEN_FILE_WORKS)
-	tmp_file1_owner = newnum;
+        tmp_file1_owner = newnum;
       else
-	{
-	  if (close_stream_temp (tmp_file1))
-	    m4_error (context, EXIT_FAILURE, errno, NULL,
-		      _("cannot close temporary file for diversion"));
-	  tmp_file1_owner = 0;
-	}
+        {
+          if (close_stream_temp (tmp_file1))
+            m4_error (context, EXIT_FAILURE, errno, NULL,
+                      _("cannot close temporary file for diversion"));
+          tmp_file1_owner = 0;
+        }
     }
   else if (oldnum == tmp_file2_owner)
     {
       /* Be careful of mingw, which can't rename an open file.  */
       if (RENAME_OPEN_FILE_WORKS)
-	tmp_file2_owner = newnum;
+        tmp_file2_owner = newnum;
       else
-	{
-	  if (close_stream_temp (tmp_file2))
-	    m4_error (context, EXIT_FAILURE, errno, NULL,
-		      _("cannot close temporary file for diversion"));
-	  tmp_file2_owner = 0;
-	}
+        {
+          if (close_stream_temp (tmp_file2))
+            m4_error (context, EXIT_FAILURE, errno, NULL,
+                      _("cannot close temporary file for diversion"));
+          tmp_file2_owner = 0;
+        }
     }
   /* Either it is safe to rename an open file, or no one should have
      oldname open at this point.  */
   if (rename (oldname, newname))
     m4_error (context, EXIT_FAILURE, errno, NULL,
-	      _("cannot create temporary file for diversion"));
+              _("cannot create temporary file for diversion"));
   unregister_temp_file (output_temp_dir, oldname);
   free (oldname);
   return m4_tmpopen (context, newnum, false);
@@ -384,7 +384,7 @@ void
 m4_output_init (m4 *context)
 {
   diversion_table = gl_oset_create_empty (GL_AVLTREE_OSET, cmp_diversion_CB,
-					  NULL);
+                                          NULL);
   div0.u.file = stdout;
   m4_set_current_diversion (context, 0);
   output_diversion = &div0;
@@ -433,7 +433,7 @@ make_room_for (m4 *context, size_t length)
 
   for (wanted_size = output_diversion->size;
        wanted_size <= MAXIMUM_TOTAL_SIZE
-	 && wanted_size - output_diversion->used < length;
+         && wanted_size - output_diversion->used < length;
        wanted_size = wanted_size == 0 ? INITIAL_BUFFER_SIZE : wanted_size * 2)
     ;
 
@@ -450,46 +450,46 @@ make_room_for (m4 *context, size_t length)
       const void *elt;
 
       /* Find out the buffer having most data, in view of flushing it to
-	 disk.  Fake the current buffer as having already received the
-	 projected data, while making the selection.  So, if it is
-	 selected indeed, we will flush it smaller, before it grows.  */
+         disk.  Fake the current buffer as having already received the
+         projected data, while making the selection.  So, if it is
+         selected indeed, we will flush it smaller, before it grows.  */
 
       selected_diversion = output_diversion;
       selected_used = output_diversion->used + length;
 
       iter = gl_oset_iterator (diversion_table);
       while (gl_oset_iterator_next (&iter, &elt))
-	{
-	  diversion = (m4_diversion *) elt;
-	  if (diversion->used > selected_used)
-	    {
-	      selected_diversion = diversion;
-	      selected_used = diversion->used;
-	    }
-	}
+        {
+          diversion = (m4_diversion *) elt;
+          if (diversion->used > selected_used)
+            {
+              selected_diversion = diversion;
+              selected_used = diversion->used;
+            }
+        }
       gl_oset_iterator_free (&iter);
 
       /* Create a temporary file, write the in-memory buffer of the
-	 diversion to this file, then release the buffer.  Zero the
-	 diversion before doing anything that can exit () (including
-	 m4_tmpfile), so that the atexit handler doesn't try to close
-	 a garbage pointer as a file.  */
+         diversion to this file, then release the buffer.  Zero the
+         diversion before doing anything that can exit () (including
+         m4_tmpfile), so that the atexit handler doesn't try to close
+         a garbage pointer as a file.  */
 
       selected_buffer = selected_diversion->u.buffer;
       total_buffer_size -= selected_diversion->size;
       selected_diversion->size = 0;
       selected_diversion->u.file = NULL;
       selected_diversion->u.file = m4_tmpfile (context,
-					       selected_diversion->divnum);
+                                               selected_diversion->divnum);
 
       if (selected_diversion->used > 0)
-	{
-	  count = fwrite (selected_buffer, selected_diversion->used, 1,
-			  selected_diversion->u.file);
-	  if (count != 1)
-	    m4_error (context, EXIT_FAILURE, errno, NULL,
-		      _("cannot flush diversion to temporary file"));
-	}
+        {
+          count = fwrite (selected_buffer, selected_diversion->used, 1,
+                          selected_diversion->u.file);
+          if (count != 1)
+            m4_error (context, EXIT_FAILURE, errno, NULL,
+                      _("cannot flush diversion to temporary file"));
+        }
 
       /* Reclaim the buffer space for other diversions.  */
 
@@ -511,21 +511,21 @@ make_room_for (m4 *context, size_t length)
     {
       /* Close any selected file since it is not the current diversion.  */
       if (selected_diversion)
-	{
-	  FILE *file = selected_diversion->u.file;
-	  selected_diversion->u.file = NULL;
-	  if (m4_tmpclose (file, selected_diversion->divnum) != 0)
-	    m4_error (context, 0, errno, NULL,
-		      _("cannot close temporary file for diversion"));
-	}
+        {
+          FILE *file = selected_diversion->u.file;
+          selected_diversion->u.file = NULL;
+          if (m4_tmpclose (file, selected_diversion->divnum) != 0)
+            m4_error (context, 0, errno, NULL,
+                      _("cannot close temporary file for diversion"));
+        }
 
       /* The current buffer may be safely reallocated.  */
       assert (wanted_size >= length);
       {
-	char *buffer = output_diversion->u.buffer;
-	output_diversion->u.buffer = xcharalloc ((size_t) wanted_size);
-	memcpy (output_diversion->u.buffer, buffer, output_diversion->used);
-	free (buffer);
+        char *buffer = output_diversion->u.buffer;
+        output_diversion->u.buffer = xcharalloc ((size_t) wanted_size);
+        memcpy (output_diversion->u.buffer, buffer, output_diversion->used);
+        free (buffer);
       }
 
       total_buffer_size += wanted_size - output_diversion->size;
@@ -578,8 +578,8 @@ m4_output_text (m4 *context, const char *text, size_t length)
     {
       count = fwrite (text, length, 1, output_file);
       if (count != 1)
-	m4_error (context, EXIT_FAILURE, errno, NULL,
-		  _("copying inserted file"));
+        m4_error (context, EXIT_FAILURE, errno, NULL,
+                  _("copying inserted file"));
     }
   else
     {
@@ -603,7 +603,7 @@ m4_output_text (m4 *context, const char *text, size_t length)
    generate any output.  */
 void
 m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
-		int line)
+                int line)
 {
   static bool start_of_output_line = true;
 
@@ -626,7 +626,7 @@ m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
     switch (length)
       {
 
-	/* In-line short texts.  */
+        /* In-line short texts.  */
 
       case 8: OUTPUT_CHARACTER (*text); text++;
       case 7: OUTPUT_CHARACTER (*text); text++;
@@ -637,72 +637,72 @@ m4_divert_text (m4 *context, m4_obstack *obs, const char *text, size_t length,
       case 2: OUTPUT_CHARACTER (*text); text++;
       case 1: OUTPUT_CHARACTER (*text);
       case 0:
-	return;
+        return;
 
-	/* Optimize longer texts.  */
+        /* Optimize longer texts.  */
 
       default:
-	m4_output_text (context, text, length);
+        m4_output_text (context, text, length);
       }
   else
     {
       /* Check for syncline only at the start of a token.  Multiline
-	 tokens, and tokens that are out of sync but in the middle of
-	 the line, must wait until the next raw newline triggers a
-	 syncline.  */
+         tokens, and tokens that are out of sync but in the middle of
+         the line, must wait until the next raw newline triggers a
+         syncline.  */
       if (start_of_output_line)
-	{
-	  start_of_output_line = false;
-	  m4_set_output_line (context, m4_get_output_line (context) + 1);
+        {
+          start_of_output_line = false;
+          m4_set_output_line (context, m4_get_output_line (context) + 1);
 
 #ifdef DEBUG_OUTPUT
-	  xfprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
-		    (unsigned long int) m4_get_current_line (context),
-		    (unsigned long int) m4_get_output_line (context));
+          xfprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
+                    (unsigned long int) m4_get_current_line (context),
+                    (unsigned long int) m4_get_output_line (context));
 #endif
 
-	  /* Output a `#line NUM' synchronization directive if needed.
-	     If output_line was previously given a negative
-	     value (invalidated), then output `#line NUM "FILE"'.  */
+          /* Output a `#line NUM' synchronization directive if needed.
+             If output_line was previously given a negative
+             value (invalidated), then output `#line NUM "FILE"'.  */
 
-	  if (m4_get_output_line (context) != line)
-	    {
-	      char linebuf[sizeof "#line " + INT_BUFSIZE_BOUND (line)];
-	      sprintf (linebuf, "#line %lu",
-		       (unsigned long int) m4_get_current_line (context));
-	      m4_output_text (context, linebuf, strlen (linebuf));
-	      if (m4_get_output_line (context) < 1
-		  && m4_get_current_file (context)[0] != '\0')
-		{
-		  const char *file = m4_get_current_file (context);
-		  OUTPUT_CHARACTER (' ');
-		  OUTPUT_CHARACTER ('"');
-		  m4_output_text (context, file, strlen (file));
-		  OUTPUT_CHARACTER ('"');
-		}
-	      OUTPUT_CHARACTER ('\n');
-	      m4_set_output_line (context, line);
-	    }
-	}
+          if (m4_get_output_line (context) != line)
+            {
+              char linebuf[sizeof "#line " + INT_BUFSIZE_BOUND (line)];
+              sprintf (linebuf, "#line %lu",
+                       (unsigned long int) m4_get_current_line (context));
+              m4_output_text (context, linebuf, strlen (linebuf));
+              if (m4_get_output_line (context) < 1
+                  && m4_get_current_file (context)[0] != '\0')
+                {
+                  const char *file = m4_get_current_file (context);
+                  OUTPUT_CHARACTER (' ');
+                  OUTPUT_CHARACTER ('"');
+                  m4_output_text (context, file, strlen (file));
+                  OUTPUT_CHARACTER ('"');
+                }
+              OUTPUT_CHARACTER ('\n');
+              m4_set_output_line (context, line);
+            }
+        }
 
       /* Output the token, and track embedded newlines.  */
       for (; length-- > 0; text++)
-	{
-	  if (start_of_output_line)
-	    {
-	      start_of_output_line = false;
-	      m4_set_output_line (context, m4_get_output_line (context) + 1);
+        {
+          if (start_of_output_line)
+            {
+              start_of_output_line = false;
+              m4_set_output_line (context, m4_get_output_line (context) + 1);
 
 #ifdef DEBUG_OUTPUT
-	      xfprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
-			(unsigned long int) m4_get_current_line (context),
-			(unsigned long int) m4_get_output_line (context));
+              xfprintf (stderr, "DEBUG: line %d, cur %lu, cur out %lu\n", line,
+                        (unsigned long int) m4_get_current_line (context),
+                        (unsigned long int) m4_get_output_line (context));
 #endif
-	    }
-	  OUTPUT_CHARACTER (*text);
-	  if (*text == '\n')
-	    start_of_output_line = true;
-	}
+            }
+          OUTPUT_CHARACTER (*text);
+          if (*text == '\n')
+            start_of_output_line = true;
+        }
     }
 }
 
@@ -736,11 +736,11 @@ m4_shipout_int (m4_obstack *obs, int val)
    string length of S instead.  */
 void
 m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, size_t len,
-		   bool quoted)
+                   bool quoted)
 {
   m4_shipout_string_trunc (obs, s, len,
-			   quoted ? m4_get_syntax_quotes (M4SYNTAX) : NULL,
-			   NULL);
+                           quoted ? m4_get_syntax_quotes (M4SYNTAX) : NULL,
+                           NULL);
 }
 
 /* Output the text S, of length LEN, to OBS.  If QUOTES, also output
@@ -750,7 +750,7 @@ m4_shipout_string (m4 *context, m4_obstack *obs, const char *s, size_t len,
    otherwise return false.  Quotes do not count against MAX_LEN.  */
 bool
 m4_shipout_string_trunc (m4_obstack *obs, const char *s, size_t len,
-			 const m4_string_pair *quotes, size_t *max_len)
+                         const m4_string_pair *quotes, size_t *max_len)
 {
   size_t max = max_len ? *max_len : SIZE_MAX;
 
@@ -800,24 +800,24 @@ m4_make_diversion (m4 *context, int divnum)
       assert (!output_file || output_diversion->u.file == output_file);
       assert (output_diversion->divnum != divnum);
       if (!output_diversion->size && !output_diversion->u.file)
-	{
-	  assert (!output_diversion->used);
-	  if (!gl_oset_remove (diversion_table, output_diversion))
-	    assert (false);
-	  output_diversion->u.next = free_list;
-	  free_list = output_diversion;
-	}
+        {
+          assert (!output_diversion->used);
+          if (!gl_oset_remove (diversion_table, output_diversion))
+            assert (false);
+          output_diversion->u.next = free_list;
+          free_list = output_diversion;
+        }
       else if (output_diversion->size)
-	output_diversion->used = output_diversion->size - output_unused;
+        output_diversion->used = output_diversion->size - output_unused;
       else if (output_diversion->used)
-	{
-	  assert (output_diversion->divnum != 0);
-	  FILE *file = output_diversion->u.file;
-	  output_diversion->u.file = NULL;
-	  if (m4_tmpclose (file, output_diversion->divnum) != 0)
-	    m4_error (context, 0, errno, NULL,
-		      _("cannot close temporary file for diversion"));
-	}
+        {
+          assert (output_diversion->divnum != 0);
+          FILE *file = output_diversion->u.file;
+          output_diversion->u.file = NULL;
+          if (m4_tmpclose (file, output_diversion->divnum) != 0)
+            m4_error (context, 0, errno, NULL,
+                      _("cannot close temporary file for diversion"));
+        }
       output_diversion = NULL;
       output_file = NULL;
       output_cursor = NULL;
@@ -835,33 +835,33 @@ m4_make_diversion (m4 *context, int divnum)
     {
       const void *elt;
       if (gl_oset_search_atleast (diversion_table, threshold_diversion_CB,
-				  &divnum, &elt))
-	{
-	  m4_diversion *temp = (m4_diversion *) elt;
-	  if (temp->divnum == divnum)
-	    diversion = temp;
-	}
+                                  &divnum, &elt))
+        {
+          m4_diversion *temp = (m4_diversion *) elt;
+          if (temp->divnum == divnum)
+            diversion = temp;
+        }
     }
   if (diversion == NULL)
     {
       /* First time visiting this diversion.  */
       if (free_list)
-	{
-	  diversion = free_list;
-	  free_list = diversion->u.next;
-	  assert (!diversion->size && !diversion->used);
-	}
+        {
+          diversion = free_list;
+          free_list = diversion->u.next;
+          assert (!diversion->size && !diversion->used);
+        }
       else
-	{
-	  diversion = (m4_diversion *) obstack_alloc (&diversion_storage,
-						      sizeof *diversion);
-	  diversion->size = 0;
-	  diversion->used = 0;
-	}
+        {
+          diversion = (m4_diversion *) obstack_alloc (&diversion_storage,
+                                                      sizeof *diversion);
+          diversion->size = 0;
+          diversion->used = 0;
+        }
       diversion->u.file = NULL;
       diversion->divnum = divnum;
       if (!gl_oset_add (diversion_table, diversion))
-	assert (false);
+        assert (false);
     }
 
   output_diversion = diversion;
@@ -873,9 +873,9 @@ m4_make_diversion (m4 *context, int divnum)
   else
     {
       if (!output_diversion->u.file && output_diversion->used)
-	output_diversion->u.file = m4_tmpopen (context,
-					       output_diversion->divnum,
-					       false);
+        output_diversion->u.file = m4_tmpopen (context,
+                                               output_diversion->divnum,
+                                               false);
       output_file = output_diversion->u.file;
     }
 
@@ -899,18 +899,18 @@ insert_file (m4 *context, FILE *file, bool escaped)
     {
       length = fread (buffer, 1, sizeof buffer, file);
       if (ferror (file))
-	m4_error (context, EXIT_FAILURE, errno, NULL,
-		  _("reading inserted file"));
+        m4_error (context, EXIT_FAILURE, errno, NULL,
+                  _("reading inserted file"));
       if (length == 0)
-	break;
+        break;
       if (escaped)
-	{
-	  if (first)
-	    first = false;
-	  else
-	    m4_output_text (context, "\\\n", 2);
-	  str = quotearg_style_mem (escape_quoting_style, buffer, length);
-	}
+        {
+          if (first)
+            first = false;
+          else
+            m4_output_text (context, "\\\n", 2);
+          str = quotearg_style_mem (escape_quoting_style, buffer, length);
+        }
       m4_output_text (context, str, escaped ? strlen (str) : length);
     }
 }
@@ -934,57 +934,57 @@ static void
 insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
 {
   assert (diversion->divnum > 0
-	  && diversion->divnum != m4_get_current_diversion (context));
+          && diversion->divnum != m4_get_current_diversion (context));
   /* Effectively undivert only if an output stream is active.  */
   if (output_diversion)
     {
       if (diversion->size)
-	{
-	  if (!output_diversion->u.file)
-	    {
-	      /* Transferring diversion metadata is faster than
-		 copying contents.  */
-	      assert (!output_diversion->used && output_diversion != &div0
-		      && !output_file);
-	      output_diversion->u.buffer = diversion->u.buffer;
-	      output_diversion->size = diversion->size;
-	      output_cursor = diversion->u.buffer + diversion->used;
-	      output_unused = diversion->size - diversion->used;
-	      diversion->u.buffer = NULL;
-	    }
-	  else
-	    {
-	      char *str = diversion->u.buffer;
-	      size_t len = diversion->used;
-	      /* Avoid double-charging the total in-memory size when
-		 transferring from one in-memory diversion to
-		 another.  */
-	      total_buffer_size -= diversion->size;
-	      if (escaped)
-		str = quotearg_style_mem (escape_quoting_style, str, len);
-	      m4_output_text (context, str, escaped ? strlen (str) : len);
-	    }
-	}
+        {
+          if (!output_diversion->u.file)
+            {
+              /* Transferring diversion metadata is faster than
+                 copying contents.  */
+              assert (!output_diversion->used && output_diversion != &div0
+                      && !output_file);
+              output_diversion->u.buffer = diversion->u.buffer;
+              output_diversion->size = diversion->size;
+              output_cursor = diversion->u.buffer + diversion->used;
+              output_unused = diversion->size - diversion->used;
+              diversion->u.buffer = NULL;
+            }
+          else
+            {
+              char *str = diversion->u.buffer;
+              size_t len = diversion->used;
+              /* Avoid double-charging the total in-memory size when
+                 transferring from one in-memory diversion to
+                 another.  */
+              total_buffer_size -= diversion->size;
+              if (escaped)
+                str = quotearg_style_mem (escape_quoting_style, str, len);
+              m4_output_text (context, str, escaped ? strlen (str) : len);
+            }
+        }
       else if (!output_diversion->u.file)
-	{
-	  /* Transferring diversion metadata is faster than copying
-	     contents.  */
-	  assert (!output_diversion->used && output_diversion != &div0
-		  && !output_file);
-	  output_diversion->u.file = m4_tmprename (context, diversion->divnum,
-						   output_diversion->divnum);
-	  output_diversion->used = 1;
-	  output_file = output_diversion->u.file;
-	  diversion->u.file = NULL;
-	  diversion->size = 1;
-	}
+        {
+          /* Transferring diversion metadata is faster than copying
+             contents.  */
+          assert (!output_diversion->used && output_diversion != &div0
+                  && !output_file);
+          output_diversion->u.file = m4_tmprename (context, diversion->divnum,
+                                                   output_diversion->divnum);
+          output_diversion->used = 1;
+          output_file = output_diversion->u.file;
+          diversion->u.file = NULL;
+          diversion->size = 1;
+        }
       else
-	{
-	  assert (diversion->used);
-	  if (!diversion->u.file)
-	    diversion->u.file = m4_tmpopen (context, diversion->divnum, true);
-	  insert_file (context, diversion->u.file, escaped);
-	}
+        {
+          assert (diversion->used);
+          if (!diversion->u.file)
+            diversion->u.file = m4_tmpopen (context, diversion->divnum, true);
+          insert_file (context, diversion->u.file, escaped);
+        }
 
       m4_set_output_line (context, -1);
     }
@@ -993,23 +993,23 @@ insert_diversion_helper (m4 *context, m4_diversion *diversion, bool escaped)
   if (diversion->size)
     {
       if (!output_diversion)
-	total_buffer_size -= diversion->size;
+        total_buffer_size -= diversion->size;
       free (diversion->u.buffer);
       diversion->size = 0;
     }
   else
     {
       if (diversion->u.file)
-	{
-	  FILE *file = diversion->u.file;
-	  diversion->u.file = NULL;
-	  if (m4_tmpclose (file, diversion->divnum) != 0)
-	    m4_error (context, 0, errno, NULL,
-		      _("cannot clean temporary file for diversion"));
-	}
+        {
+          FILE *file = diversion->u.file;
+          diversion->u.file = NULL;
+          if (m4_tmpclose (file, diversion->divnum) != 0)
+            m4_error (context, 0, errno, NULL,
+                      _("cannot clean temporary file for diversion"));
+        }
       if (m4_tmpremove (diversion->divnum) != 0)
-	m4_error (context, 0, errno, NULL,
-		  _("cannot clean temporary file for diversion"));
+        m4_error (context, 0, errno, NULL,
+                  _("cannot clean temporary file for diversion"));
     }
   diversion->used = 0;
   if (!gl_oset_remove (diversion_table, diversion))
@@ -1031,11 +1031,11 @@ m4_insert_diversion (m4 *context, int divnum)
   if (divnum <= 0 || m4_get_current_diversion (context) == divnum)
     return;
   if (gl_oset_search_atleast (diversion_table, threshold_diversion_CB,
-			      &divnum, &elt))
+                              &divnum, &elt))
     {
       m4_diversion *diversion = (m4_diversion *) elt;
       if (diversion->divnum == divnum)
-	insert_diversion_helper (context, diversion, false);
+        insert_diversion_helper (context, diversion, false);
     }
 }
 
@@ -1051,7 +1051,7 @@ m4_undivert_all (m4 *context)
     {
       m4_diversion *diversion = (m4_diversion *) elt;
       if (diversion->divnum != divnum)
-	insert_diversion_helper (context, diversion, false);
+        insert_diversion_helper (context, diversion, false);
     }
   gl_oset_iterator_free (&iter);
 }
@@ -1075,38 +1075,38 @@ m4_freeze_diversions (m4 *context, FILE *file)
     {
       m4_diversion *diversion = (m4_diversion *) elt;
       if (diversion->size || diversion->used)
-	{
-	  if (diversion->size)
-	    {
-	      assert (diversion->used == (int) diversion->used);
-	      xfprintf (file, "D%d,%d\n", diversion->divnum,
-			(int) diversion->used);
-	    }
-	  else
-	    {
-	      struct stat file_stat;
-	      assert (!diversion->u.file);
-	      diversion->u.file = m4_tmpopen (context, diversion->divnum,
-					      true);
-	      if (fstat (fileno (diversion->u.file), &file_stat) < 0)
-		m4_error (context, EXIT_FAILURE, errno, NULL,
-			  _("cannot stat diversion"));
-	      /* FIXME - support 64-bit off_t with 32-bit long, and
-		 fix frozen file format to support 64-bit integers.
-		 This implies fixing m4_divert_text to take off_t.  */
-	      if (file_stat.st_size < 0
-		  || file_stat.st_size != (unsigned long int) file_stat.st_size)
-		m4_error (context, EXIT_FAILURE, errno, NULL,
-			  _("diversion too large"));
-	      xfprintf (file, "D%d,%lu\n", diversion->divnum,
-			(unsigned long int) file_stat.st_size);
-	    }
+        {
+          if (diversion->size)
+            {
+              assert (diversion->used == (int) diversion->used);
+              xfprintf (file, "D%d,%d\n", diversion->divnum,
+                        (int) diversion->used);
+            }
+          else
+            {
+              struct stat file_stat;
+              assert (!diversion->u.file);
+              diversion->u.file = m4_tmpopen (context, diversion->divnum,
+                                              true);
+              if (fstat (fileno (diversion->u.file), &file_stat) < 0)
+                m4_error (context, EXIT_FAILURE, errno, NULL,
+                          _("cannot stat diversion"));
+              /* FIXME - support 64-bit off_t with 32-bit long, and
+                 fix frozen file format to support 64-bit integers.
+                 This implies fixing m4_divert_text to take off_t.  */
+              if (file_stat.st_size < 0
+                  || file_stat.st_size != (unsigned long int) file_stat.st_size)
+                m4_error (context, EXIT_FAILURE, errno, NULL,
+                          _("diversion too large"));
+              xfprintf (file, "D%d,%lu\n", diversion->divnum,
+                        (unsigned long int) file_stat.st_size);
+            }
 
-	  insert_diversion_helper (context, diversion, true);
-	  putc ('\n', file);
+          insert_diversion_helper (context, diversion, true);
+          putc ('\n', file);
 
-	  last_inserted = diversion->divnum;
-	}
+          last_inserted = diversion->divnum;
+        }
     }
   gl_oset_iterator_free (&iter);
 

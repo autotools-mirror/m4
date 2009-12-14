@@ -10,35 +10,35 @@ The semicolons are just to get GNU Emacs C mode to indent properly.
 \define([C_BG3], [bgcolor="#CC6600"]);
 
 \define([DO_HEADER],
-	[\head([\title([GNU m4 - \defn([_TITLE])])],
-	       [\meta_if_set([AUTHOR])],
-	       [\meta_if_set([GENERATOR])],
-	       [\meta_if_set([KEYWORDS])],
-	       )]);
+        [\head([\title([GNU m4 - \defn([_TITLE])])],
+               [\meta_if_set([AUTHOR])],
+               [\meta_if_set([GENERATOR])],
+               [\meta_if_set([KEYWORDS])],
+               )]);
 
 \define([DO_BODY],
-	[\body([\C_TEXT \C_BG1 \C_LINK \C_VLINK \C_ALINK],
-	       [\table([cellpadding=5 width="100%"],
-		       [\tr([align=left valign=bottom],
-			    [\td([align=center valign=middle colspan="3" width="100%" \C_BG2],
-				 [\h1([GNU m4])],
-				 [\h2(\defn([_TITLE]))],
-				 )],
-			    )],
-		       [\tr([],
-			    [\td([align=left valign=top width="15%" \C_BG2],
-				 [\include([menu.m4])],
-				 )],
-			    [\td([align=left valign=top width="90%"],
-				 [$*],
-				 )],
-			    )],
-		       )],
-	       )]
+        [\body([\C_TEXT \C_BG1 \C_LINK \C_VLINK \C_ALINK],
+               [\table([cellpadding=5 width="100%"],
+                       [\tr([align=left valign=bottom],
+                            [\td([align=center valign=middle colspan="3" width="100%" \C_BG2],
+                                 [\h1([GNU m4])],
+                                 [\h2(\defn([_TITLE]))],
+                                 )],
+                            )],
+                       [\tr([],
+                            [\td([align=left valign=top width="15%" \C_BG2],
+                                 [\include([menu.m4])],
+                                 )],
+                            [\td([align=left valign=top width="90%"],
+                                 [$*],
+                                 )],
+                            )],
+                       )],
+               )]
     );
 
 \define([DO_LAYOUT],
-	[\doctype([html public "-//w3c//dtd html 4.0 transitional//en"])
+        [\doctype([html public "-//w3c//dtd html 4.0 transitional//en"])
 \html([\DO_HEADER], [\DO_BODY([$*])])]
     );
 

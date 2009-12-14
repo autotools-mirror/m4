@@ -52,14 +52,14 @@ struct m4_symbol_table {
 };
 
 static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *,
-					 size_t);
+                                         size_t);
 static void	  symbol_popval		(m4_symbol *);
 static void *	  symbol_destroy_CB	(m4_symbol_table *, const char *,
-					 size_t, m4_symbol *, void *);
+                                         size_t, m4_symbol *, void *);
 static void *	  arg_destroy_CB	(m4_hash *, const void *, void *,
-					 void *);
+                                         void *);
 static void *	  arg_copy_CB		(m4_hash *, const void *, void *,
-					 m4_hash *);
+                                         m4_hash *);
 
 
 /* -- SYMBOL TABLE MANAGEMENT --
@@ -72,7 +72,7 @@ m4_symtab_create (size_t size)
   m4_symbol_table *symtab = (m4_symbol_table *) xmalloc (sizeof *symtab);
 
   symtab->table = m4_hash_new (size ? size : M4_SYMTAB_DEFAULT_SIZE,
-			       m4_hash_string_hash, m4_hash_string_cmp);
+                               m4_hash_string_hash, m4_hash_string_cmp);
   return symtab;
 }
 
@@ -95,7 +95,7 @@ m4_symtab_delete (m4_symbol_table *symtab)
    NULL when iteration completes.  */
 void *
 m4_symtab_apply (m4_symbol_table *symtab, bool include_trace,
-		 m4_symtab_apply_func *func, void *userdata)
+                 m4_symtab_apply_func *func, void *userdata)
 {
   m4_hash_iterator *place  = NULL;
   void *	    result = NULL;
@@ -108,16 +108,16 @@ m4_symtab_apply (m4_symbol_table *symtab, bool include_trace,
     {
       m4_symbol *symbol = m4_get_hash_iterator_value (place);
       if (symbol->value || include_trace)
-	{
-	  const m4_string *key
-	    = (const m4_string *) m4_get_hash_iterator_key (place);
-	  result = func (symtab, key->str, key->len, symbol, userdata);
-	}
+        {
+          const m4_string *key
+            = (const m4_string *) m4_get_hash_iterator_key (place);
+          result = func (symtab, key->str, key->len, symbol, userdata);
+        }
       if (result != NULL)
-	{
-	  m4_free_hash_iterator (symtab->table, place);
-	  break;
-	}
+        {
+          m4_free_hash_iterator (symtab->table, place);
+          break;
+        }
     }
 
   return result;
@@ -147,7 +147,7 @@ symtab_fetch (m4_symbol_table *symtab, const char *name, size_t len)
   else
     {
       /* Use xmemdup0 rather than memdup so that debugging the symbol
-	 table is easier.  */
+         table is easier.  */
       m4_string *new_key = (m4_string *) xmalloc (sizeof *new_key);
       new_key->str = xmemdup0 (name, len);
       new_key->len = len;
@@ -162,7 +162,7 @@ symtab_fetch (m4_symbol_table *symtab, const char *name, size_t len)
    the symbol table.  */
 void
 m4__symtab_remove_module_references (m4_symbol_table *symtab,
-				     m4_module *module)
+                                     m4_module *module)
 {
   m4_hash_iterator *place = 0;
 
@@ -176,31 +176,31 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab,
 
       /* For symbols that have token data... */
       if (data)
-	{
-	  /* Purge any shadowed references.  */
-	  while (VALUE_NEXT (data))
-	    {
-	      m4_symbol_value *next = VALUE_NEXT (data);
+        {
+          /* Purge any shadowed references.  */
+          while (VALUE_NEXT (data))
+            {
+              m4_symbol_value *next = VALUE_NEXT (data);
 
-	      if (VALUE_MODULE (next) == module)
-		{
-		  VALUE_NEXT (data) = VALUE_NEXT (next);
+              if (VALUE_MODULE (next) == module)
+                {
+                  VALUE_NEXT (data) = VALUE_NEXT (next);
 
-		  assert (next->type != M4_SYMBOL_PLACEHOLDER);
-		  m4_symbol_value_delete (next);
-		}
-	      else
-		data = next;
-	    }
+                  assert (next->type != M4_SYMBOL_PLACEHOLDER);
+                  m4_symbol_value_delete (next);
+                }
+              else
+                data = next;
+            }
 
-	  /* Purge the live reference if necessary.  */
-	  if (SYMBOL_MODULE (symbol) == module)
-	    {
-	      const m4_string *key
-		= (const m4_string *) m4_get_hash_iterator_key (place);
-	      m4_symbol_popdef (symtab, key->str, key->len);
-	    }
-	}
+          /* Purge the live reference if necessary.  */
+          if (SYMBOL_MODULE (symbol) == module)
+            {
+              const m4_string *key
+                = (const m4_string *) m4_get_hash_iterator_key (place);
+              m4_symbol_popdef (symtab, key->str, key->len);
+            }
+        }
     }
 }
 
@@ -211,7 +211,7 @@ m4__symtab_remove_module_references (m4_symbol_table *symtab,
    the table entry.  */
 static void *
 symbol_destroy_CB (m4_symbol_table *symtab, const char *name, size_t len,
-		   m4_symbol *symbol, void *ignored M4_GNUC_UNUSED)
+                   m4_symbol *symbol, void *ignored M4_GNUC_UNUSED)
 {
   m4_string key;
   key.str = xmemdup0 (name, len);
@@ -260,7 +260,7 @@ m4_symbol_lookup (m4_symbol_table *symtab, const char *name, size_t len)
    association.  */
 m4_symbol *
 m4_symbol_pushdef (m4_symbol_table *symtab, const char *name, size_t len,
-		   m4_symbol_value *value)
+                   m4_symbol_value *value)
 {
   m4_symbol *symbol;
 
@@ -282,7 +282,7 @@ m4_symbol_pushdef (m4_symbol_table *symtab, const char *name, size_t len,
    symbol's VALUE.  */
 m4_symbol *
 m4_symbol_define (m4_symbol_table *symtab, const char *name, size_t len,
-		  m4_symbol_value *value)
+                  m4_symbol_value *value)
 {
   m4_symbol *symbol;
 
@@ -371,25 +371,25 @@ m4_symbol_value_delete (m4_symbol_value *value)
   else
     {
       if (VALUE_ARG_SIGNATURE (value))
-	{
-	  m4_hash_apply (VALUE_ARG_SIGNATURE (value), arg_destroy_CB, NULL);
-	  m4_hash_delete (VALUE_ARG_SIGNATURE (value));
-	}
+        {
+          m4_hash_apply (VALUE_ARG_SIGNATURE (value), arg_destroy_CB, NULL);
+          m4_hash_delete (VALUE_ARG_SIGNATURE (value));
+        }
       switch (value->type)
-	{
-	case M4_SYMBOL_TEXT:
-	  free ((char *) m4_get_symbol_value_text (value));
-	  break;
-	case M4_SYMBOL_PLACEHOLDER:
-	  free ((char *) m4_get_symbol_value_placeholder (value));
-	  break;
-	case M4_SYMBOL_VOID:
-	case M4_SYMBOL_FUNC:
-	  break;
-	default:
-	  assert (!"m4_symbol_value_delete");
-	  abort ();
-	}
+        {
+        case M4_SYMBOL_TEXT:
+          free ((char *) m4_get_symbol_value_text (value));
+          break;
+        case M4_SYMBOL_PLACEHOLDER:
+          free ((char *) m4_get_symbol_value_placeholder (value));
+          break;
+        case M4_SYMBOL_VOID:
+        case M4_SYMBOL_FUNC:
+          break;
+        default:
+          assert (!"m4_symbol_value_delete");
+          abort ();
+        }
       free (value);
     }
 }
@@ -398,7 +398,7 @@ m4_symbol_value_delete (m4_symbol_value *value)
    NEWNAME and LEN2.  */
 m4_symbol *
 m4_symbol_rename (m4_symbol_table *symtab, const char *name, size_t len1,
-		  const char *newname, size_t len2)
+                  const char *newname, size_t len2)
 {
   m4_symbol *symbol	= NULL;
   m4_symbol **psymbol;
@@ -500,11 +500,11 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
     {
     case M4_SYMBOL_TEXT:
       {
-	size_t len = m4_get_symbol_value_len (src);
-	unsigned int age = m4_get_symbol_value_quote_age (src);
-	m4_set_symbol_value_text (dest,
-				  xmemdup0 (m4_get_symbol_value_text (src),
-					    len), len, age);
+        size_t len = m4_get_symbol_value_len (src);
+        unsigned int age = m4_get_symbol_value_quote_age (src);
+        m4_set_symbol_value_text (dest,
+                                  xmemdup0 (m4_get_symbol_value_text (src),
+                                            len), len, age);
       }
       break;
     case M4_SYMBOL_FUNC:
@@ -512,46 +512,46 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
       break;
     case M4_SYMBOL_PLACEHOLDER:
       m4_set_symbol_value_placeholder (dest,
-				       xstrdup (m4_get_symbol_value_placeholder
-						(src)));
+                                       xstrdup (m4_get_symbol_value_placeholder
+                                                (src)));
       break;
     case M4_SYMBOL_COMP:
       {
-	m4__symbol_chain *chain = src->u.u_c.chain;
-	size_t len;
-	char *str;
-	const m4_string_pair *quotes;
-	m4_obstack *obs = m4_arg_scratch (context);
-	while (chain)
-	  {
-	    switch (chain->type)
-	      {
-	      case M4__CHAIN_STR:
-		obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-		break;
-	      case M4__CHAIN_FUNC:
-		result = true;
-		break;
-	      case M4__CHAIN_ARGV:
-		quotes = m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
-					  chain->u.u_a.quotes);
-		if (chain->u.u_a.has_func && !chain->u.u_a.flatten)
-		  result = true;
-		m4__arg_print (context, obs, chain->u.u_a.argv,
-			       chain->u.u_a.index, quotes, true, NULL, NULL,
-			       NULL, false, false);
-		break;
-	      default:
-		assert (!"m4_symbol_value_copy");
-		abort ();
-	      }
-	    chain = chain->next;
-	  }
-	obstack_1grow (obs, '\0');
-	len = obstack_object_size (obs);
-	str = xcharalloc (len);
-	memcpy (str, obstack_finish (obs), len);
-	m4_set_symbol_value_text (dest, str, len - 1, 0);
+        m4__symbol_chain *chain = src->u.u_c.chain;
+        size_t len;
+        char *str;
+        const m4_string_pair *quotes;
+        m4_obstack *obs = m4_arg_scratch (context);
+        while (chain)
+          {
+            switch (chain->type)
+              {
+              case M4__CHAIN_STR:
+                obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+                break;
+              case M4__CHAIN_FUNC:
+                result = true;
+                break;
+              case M4__CHAIN_ARGV:
+                quotes = m4__quote_cache (M4SYNTAX, NULL, chain->quote_age,
+                                          chain->u.u_a.quotes);
+                if (chain->u.u_a.has_func && !chain->u.u_a.flatten)
+                  result = true;
+                m4__arg_print (context, obs, chain->u.u_a.argv,
+                               chain->u.u_a.index, quotes, true, NULL, NULL,
+                               NULL, false, false);
+                break;
+              default:
+                assert (!"m4_symbol_value_copy");
+                abort ();
+              }
+            chain = chain->next;
+          }
+        obstack_1grow (obs, '\0');
+        len = obstack_object_size (obs);
+        str = xcharalloc (len);
+        memcpy (str, obstack_finish (obs), len);
+        m4_set_symbol_value_text (dest, str, len - 1, 0);
       }
       break;
     default:
@@ -560,7 +560,7 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
     }
   if (VALUE_ARG_SIGNATURE (src))
     VALUE_ARG_SIGNATURE (dest) = m4_hash_dup (VALUE_ARG_SIGNATURE (src),
-					      arg_copy_CB);
+                                              arg_copy_CB);
   return result;
 }
 
@@ -578,7 +578,7 @@ arg_copy_CB (m4_hash *src, const void *name, void *arg, m4_hash *dest)
    previously traced.  */
 bool
 m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
-			   size_t len, bool traced)
+                           size_t len, bool traced)
 {
   m4_symbol *symbol;
   bool result;
@@ -594,12 +594,12 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
       m4_symbol **psymbol;
 
       /* Safe to cast away const, since m4_hash_lookup doesn't modify
-	 key.  */
+         key.  */
       key.str = (char *) name;
       key.len = len;
       psymbol = (m4_symbol **) m4_hash_lookup (symtab->table, &key);
       if (!psymbol)
-	return false;
+        return false;
       symbol = *psymbol;
     }
 
@@ -614,7 +614,7 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
       free (symbol);
 
       /* Safe to cast away const, since m4_hash_lookup doesn't modify
-	 key.  */
+         key.  */
       key.str = (char *) name;
       key.len = len;
       old_key = (m4_string *) m4_hash_remove (symtab->table, &key);
@@ -635,8 +635,8 @@ m4_set_symbol_name_traced (m4_symbol_table *symtab, const char *name,
    QUOTES and MODULE do not count against the truncation length.  */
 bool
 m4__symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
-			const m4_string_pair *quotes, bool flatten,
-			m4__symbol_chain **chainp, size_t *maxlen, bool module)
+                        const m4_string_pair *quotes, bool flatten,
+                        m4__symbol_chain **chainp, size_t *maxlen, bool module)
 {
   const char *text;
   m4__symbol_chain *chain;
@@ -647,71 +647,71 @@ m4__symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
     {
     case M4_SYMBOL_TEXT:
       if (m4_shipout_string_trunc (obs, m4_get_symbol_value_text (value),
-				   m4_get_symbol_value_len (value), quotes,
-				   &len))
-	result = true;
+                                   m4_get_symbol_value_len (value), quotes,
+                                   &len))
+        result = true;
       break;
     case M4_SYMBOL_FUNC:
       m4__builtin_print (obs, value->u.builtin, flatten, chainp, quotes,
-			 module);
+                         module);
       module = false;
       break;
     case M4_SYMBOL_PLACEHOLDER:
       if (flatten)
-	{
-	  if (quotes)
-	    {
-	      obstack_grow (obs, quotes->str1, quotes->len1);
-	      obstack_grow (obs, quotes->str2, quotes->len2);
-	    }
-	  module = false;
-	}
+        {
+          if (quotes)
+            {
+              obstack_grow (obs, quotes->str1, quotes->len1);
+              obstack_grow (obs, quotes->str2, quotes->len2);
+            }
+          module = false;
+        }
       else
-	{
-	  text = m4_get_symbol_value_placeholder (value);
-	  obstack_1grow (obs, '<');
-	  obstack_1grow (obs, '<');
-	  obstack_grow (obs, text, strlen (text));
-	  obstack_1grow (obs, '>');
-	  obstack_1grow (obs, '>');
-	}
+        {
+          text = m4_get_symbol_value_placeholder (value);
+          obstack_1grow (obs, '<');
+          obstack_1grow (obs, '<');
+          obstack_grow (obs, text, strlen (text));
+          obstack_1grow (obs, '>');
+          obstack_1grow (obs, '>');
+        }
       break;
     case M4_SYMBOL_COMP:
       chain = value->u.u_c.chain;
       assert (!module);
       if (quotes)
-	obstack_grow (obs, quotes->str1, quotes->len1);
+        obstack_grow (obs, quotes->str1, quotes->len1);
       while (chain && !result)
-	{
-	  switch (chain->type)
-	    {
-	    case M4__CHAIN_STR:
-	      if (m4_shipout_string_trunc (obs, chain->u.u_s.str,
-					   chain->u.u_s.len, NULL, &len))
-		result = true;
-	      break;
-	    case M4__CHAIN_FUNC:
-	      m4__builtin_print (obs, chain->u.builtin, flatten, chainp,
-				 quotes, module);
-	      break;
-	    case M4__CHAIN_ARGV:
-	      if (m4__arg_print (context, obs, chain->u.u_a.argv,
-				 chain->u.u_a.index,
-				 m4__quote_cache (M4SYNTAX, NULL,
-						  chain->quote_age,
-						  chain->u.u_a.quotes),
-				 chain->u.u_a.flatten, chainp, NULL, &len,
-				 false, module))
-		result = true;
-	      break;
-	    default:
-	      assert (!"m4__symbol_value_print");
-	      abort ();
-	    }
-	    chain = chain->next;
-	  }
+        {
+          switch (chain->type)
+            {
+            case M4__CHAIN_STR:
+              if (m4_shipout_string_trunc (obs, chain->u.u_s.str,
+                                           chain->u.u_s.len, NULL, &len))
+                result = true;
+              break;
+            case M4__CHAIN_FUNC:
+              m4__builtin_print (obs, chain->u.builtin, flatten, chainp,
+                                 quotes, module);
+              break;
+            case M4__CHAIN_ARGV:
+              if (m4__arg_print (context, obs, chain->u.u_a.argv,
+                                 chain->u.u_a.index,
+                                 m4__quote_cache (M4SYNTAX, NULL,
+                                                  chain->quote_age,
+                                                  chain->u.u_a.quotes),
+                                 chain->u.u_a.flatten, chainp, NULL, &len,
+                                 false, module))
+                result = true;
+              break;
+            default:
+              assert (!"m4__symbol_value_print");
+              abort ();
+            }
+            chain = chain->next;
+          }
       if (quotes)
-	obstack_grow (obs, quotes->str2, quotes->len2);
+        obstack_grow (obs, quotes->str2, quotes->len2);
       break;
     default:
       assert (!"m4__symbol_value_print");
@@ -738,8 +738,8 @@ m4__symbol_value_print (m4 *context, m4_symbol_value *value, m4_obstack *obs,
    MODULE do not count toward truncation.  */
 void
 m4_symbol_print (m4 *context, m4_symbol *symbol, m4_obstack *obs,
-		 const m4_string_pair *quotes, bool stack, size_t arg_length,
-		 bool module)
+                 const m4_string_pair *quotes, bool stack, size_t arg_length,
+                 bool module)
 {
   m4_symbol_value *value;
   size_t len = arg_length;
@@ -749,19 +749,19 @@ m4_symbol_print (m4 *context, m4_symbol *symbol, m4_obstack *obs,
 
   value = m4_get_symbol_value (symbol);
   m4__symbol_value_print (context, value, obs, quotes, false, NULL, &len,
-			  module);
+                          module);
   if (stack)
     {
       value = VALUE_NEXT (value);
       while (value)
-	{
-	  obstack_1grow (obs, ',');
-	  obstack_1grow (obs, ' ');
-	  len = arg_length;
-	  m4__symbol_value_print (context, value, obs, quotes, false, NULL,
-				  &len, module);
-	  value = VALUE_NEXT (value);
-	}
+        {
+          obstack_1grow (obs, ',');
+          obstack_1grow (obs, ' ');
+          len = arg_length;
+          m4__symbol_value_print (context, value, obs, quotes, false, NULL,
+                                  &len, module);
+          value = VALUE_NEXT (value);
+        }
     }
 }
 
@@ -885,7 +885,7 @@ m4_get_symbol_value_placeholder (m4_symbol_value *value)
 #undef m4_set_symbol_value_text
 void
 m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len,
-			  unsigned int quote_age)
+                          unsigned int quote_age)
 {
   assert (value && text);
   /* In practice, it is easier to debug when we guarantee a
@@ -901,7 +901,7 @@ m4_set_symbol_value_text (m4_symbol_value *value, const char *text, size_t len,
 #undef m4__set_symbol_value_builtin
 void
 m4__set_symbol_value_builtin (m4_symbol_value *value,
-			      const m4__builtin *builtin)
+                              const m4__builtin *builtin)
 {
   assert (value && builtin);
 
@@ -929,7 +929,7 @@ m4_set_symbol_value_placeholder (m4_symbol_value *value, const char *text)
 #ifdef DEBUG_SYM
 
 static void *dump_symbol_CB	(m4_symbol_table *symtab, const char *name,
-				 m4_symbol *symbol, void *userdata);
+                                 m4_symbol *symbol, void *userdata);
 static M4_GNUC_UNUSED void *
 symtab_dump (m4 *context, m4_symbol_table *symtab)
 {
@@ -938,7 +938,7 @@ symtab_dump (m4 *context, m4_symbol_table *symtab)
 
 static void *
 dump_symbol_CB (m4_symbol_table *symtab, const char *name,
-		m4_symbol *symbol, void *ptr)
+                m4_symbol *symbol, void *ptr)
 {
   m4 *		   context	= (m4 *) ptr;
   m4_symbol_value *value	= m4_get_symbol_value (symbol);
@@ -947,7 +947,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
   const char *     module_name	= module ? m4_get_module_name (module) : "NONE";
 
   xfprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,
-	    m4_get_symbol_traced (symbol) ? "!" : "", name);
+            m4_get_symbol_traced (symbol) ? "!" : "", name);
 
   if (!value)
     fputs ("<!UNDEFINED!>", stderr);
@@ -958,7 +958,7 @@ dump_symbol_CB (m4_symbol_table *symtab, const char *name,
       m4_obstack obs;
       obstack_init (&obs);
       m4__symbol_value_print (context, value, &obs, NULL, false, NULL, NULL,
-			      true);
+                              true);
       xfprintf (stderr, "%s", (char *) obstack_finish (&obs));
       obstack_free (&obs, NULL);
     }

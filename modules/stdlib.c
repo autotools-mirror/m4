@@ -109,7 +109,7 @@ M4BUILTIN_HANDLER (setenv)
 
   if (argc >= 4)
     if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (3), M4ARGLEN (3),
-			 &overwrite))
+                         &overwrite))
       return;
 
   /* TODO - error checking.  */
@@ -190,7 +190,7 @@ M4BUILTIN_HANDLER (getpwuid)
   int uid;
 
   if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		       &uid))
+                       &uid))
     return;
 
   pw = getpwuid (uid);
@@ -246,8 +246,8 @@ M4BUILTIN_HANDLER (srand)
   else
     {
       if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1),
-			   M4ARGLEN (1), &seed))
-	return;
+                           M4ARGLEN (1), &seed))
+        return;
     }
 
   srand (seed);

@@ -57,16 +57,16 @@ search_path_add (m4__search_path_info *info, const char *dir, bool prepend)
       path->next = info->list;
       info->list = path;
       if (info->list_end == NULL)
-	info->list_end = path;
+        info->list_end = path;
     }
   else
     {
       path->next = NULL;
 
       if (info->list_end == NULL)
-	info->list = path;
+        info->list = path;
       else
-	info->list_end->next = path;
+        info->list_end->next = path;
       info->list_end = path;
     }
 }
@@ -83,9 +83,9 @@ search_path_env_init (m4__search_path_info *info, char *path, bool isabs)
     {
       path_end = strchr (path, ':');
       if (path_end)
-	*path_end = '\0';
+        *path_end = '\0';
       if (!isabs || *path == '/')
-	search_path_add (info, path, false);
+        search_path_add (info, path, false);
       path = path_end + 1;
     }
   while (path_end);
@@ -119,7 +119,7 @@ m4_add_include_directory (m4 *context, const char *dir, bool prepend)
 
 #ifdef DEBUG_INCL
   xfprintf (stderr, "add_include_directory (%s) %s;\n", dir,
-	    prepend ? "prepend" : "append");
+            prepend ? "prepend" : "append");
 #endif
 }
 
@@ -134,14 +134,14 @@ m4_fopen (m4 *context, const char *file, const char *mode)
       struct stat st;
       int fd = fileno (fp);
       if (fstat (fd, &st) == 0 && S_ISDIR (st.st_mode))
-	{
-	  fclose (fp);
-	  errno = EISDIR;
-	  return NULL;
-	}
+        {
+          fclose (fp);
+          errno = EISDIR;
+          return NULL;
+        }
       if (set_cloexec_flag (fileno (fp), true) != 0)
-	m4_error (context, 0, errno, NULL,
-		  _("cannot protect input file across forks"));
+        m4_error (context, 0, errno, NULL,
+                  _("cannot protect input file across forks"));
     }
   return fp;
 }
@@ -177,11 +177,11 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
     {
       fp = m4_fopen (context, file, "r");
       if (fp != NULL)
-	{
-	  if (expanded_name != NULL)
-	    *expanded_name = xstrdup (file);
-	  return fp;
-	}
+        {
+          if (expanded_name != NULL)
+            *expanded_name = xstrdup (file);
+          return fp;
+        }
       return NULL;
     }
 
@@ -196,20 +196,20 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
 
       fp = m4_fopen (context, name, "r");
       if (fp != NULL)
-	{
-	  m4_debug_message (context, M4_DEBUG_TRACE_PATH,
-			    _("path search for %s found %s"),
-			    quotearg_style (locale_quoting_style, file),
-			    quotearg_n_style (1, locale_quoting_style, name));
-	  if (expanded_name != NULL)
-	    *expanded_name = name;
-	  else
-	    free (name);
-	  return fp;
-	}
+        {
+          m4_debug_message (context, M4_DEBUG_TRACE_PATH,
+                            _("path search for %s found %s"),
+                            quotearg_style (locale_quoting_style, file),
+                            quotearg_n_style (1, locale_quoting_style, name));
+          if (expanded_name != NULL)
+            *expanded_name = name;
+          else
+            free (name);
+          return fp;
+        }
       else if (!incl->len)
-	/* Capture errno only when searching `.'.  */
-	e = errno;
+        /* Capture errno only when searching `.'.  */
+        e = errno;
       free (name);
     }
 

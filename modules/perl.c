@@ -116,7 +116,7 @@ M4BUILTIN_HANDLER (perleval)
   for (i = 1; i < argc; i++)
     {
       if (i > 1)
-	obstack_1grow (obs, ',');
+        obstack_1grow (obs, ',');
 
       val = perl_eval_pv (M4ARG (i), true);
 

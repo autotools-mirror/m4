@@ -41,7 +41,7 @@
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-	   function	macros	blind	side	minargs	maxargs */
+           function	macros	blind	side	minargs	maxargs */
 #define builtin_functions					\
   BUILTIN (__file__,	false,	false,	false,	0,	0 )	\
   BUILTIN (__line__,	false,	false,	false,	0,	0  )	\
@@ -134,7 +134,7 @@ static m4_pattern_buffer regex_cache[REGEX_CACHE_SIZE];
 
 static m4_pattern_buffer *
 regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
-		size_t len, int resyntax)
+                size_t len, int resyntax)
 {
   /* regex_cache is guaranteed to start life 0-initialized, which
      works in the algorithm below.
@@ -156,10 +156,10 @@ regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
      If so, increase its use count and return it.  */
   for (i = 0; i < REGEX_CACHE_SIZE; i++)
     if (len == regex_cache[i].len && resyntax == regex_cache[i].resyntax
-	&& regex_cache[i].str && memcmp (regexp, regex_cache[i].str, len) == 0)
+        && regex_cache[i].str && memcmp (regexp, regex_cache[i].str, len) == 0)
       {
-	regex_cache[i].count++;
-	return &regex_cache[i];
+        regex_cache[i].count++;
+        return &regex_cache[i];
       }
 
   /* Next, check if REGEXP can be compiled.  */
@@ -170,7 +170,7 @@ regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
   if (msg != NULL)
     {
       m4_warn (context, 0, caller, _("bad regular expression %s: %s"),
-	       quotearg_style_mem (locale_quoting_style, regexp, len), msg);
+               quotearg_style_mem (locale_quoting_style, regexp, len), msg);
       regfree (pat);
       free (pat);
       return NULL;
@@ -189,12 +189,12 @@ regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
   for (i = 1; i < REGEX_CACHE_SIZE; i++)
     {
       if (regex_cache[i].count < victim_count)
-	{
-	  victim_count = regex_cache[i].count;
-	  victim = &regex_cache[i];
-	}
+        {
+          victim_count = regex_cache[i].count;
+          victim = &regex_cache[i];
+        }
       if (regex_cache[i].count)
-	regex_cache[i].count--;
+        regex_cache[i].count--;
     }
   victim->count = REGEX_CACHE_SIZE;
   victim->resyntax = resyntax;
@@ -208,7 +208,7 @@ regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
   victim->str = xstrdup (regexp);
   victim->pat = pat;
   re_set_registers (pat, &victim->regs, victim->regs.num_regs,
-		    victim->regs.start, victim->regs.end);
+                    victim->regs.start, victim->regs.end);
   return victim;
 }
 
@@ -218,10 +218,10 @@ regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
 
 static regoff_t
 regexp_search (m4_pattern_buffer *buf, const char *string, const int size,
-	       const int start, const int range, bool no_sub)
+               const int start, const int range, bool no_sub)
 {
   return re_search (buf->pat, string, size, start, range,
-		    no_sub ? NULL : &buf->regs);
+                    no_sub ? NULL : &buf->regs);
 }
 
 
@@ -236,52 +236,52 @@ regexp_search (m4_pattern_buffer *buf, const char *string, const int size,
 
 static void
 substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
-	    const char *victim, const char *repl, size_t repl_len,
-	    m4_pattern_buffer *buf)
+            const char *victim, const char *repl, size_t repl_len,
+            m4_pattern_buffer *buf)
 {
   int ch;
   while (1)
     {
       const char *backslash = (char *) memchr (repl, '\\', repl_len);
       if (!backslash)
-	{
-	  obstack_grow (obs, repl, repl_len);
-	  return;
-	}
+        {
+          obstack_grow (obs, repl, repl_len);
+          return;
+        }
       obstack_grow (obs, repl, backslash - repl);
       repl_len -= backslash - repl + 1;
       if (!repl_len)
-	{
-	  m4_warn (context, 0, caller,
-		   _("trailing \\ ignored in replacement"));
-	  return;
-	}
+        {
+          m4_warn (context, 0, caller,
+                   _("trailing \\ ignored in replacement"));
+          return;
+        }
       repl = backslash + 1;
       ch = *repl++;
       repl_len--;
       switch (ch)
-	{
-	case '&':
-	  if (buf)
-	    obstack_grow (obs, victim + buf->regs.start[0],
-			  buf->regs.end[0] - buf->regs.start[0]);
-	  break;
+        {
+        case '&':
+          if (buf)
+            obstack_grow (obs, victim + buf->regs.start[0],
+                          buf->regs.end[0] - buf->regs.start[0]);
+          break;
 
-	case '1': case '2': case '3': case '4': case '5': case '6':
-	case '7': case '8': case '9':
-	  ch -= '0';
-	  if (!buf || buf->pat->re_nsub < ch)
-	    m4_warn (context, 0, caller, _("sub-expression %d not present"),
-		     ch);
-	  else if (buf->regs.end[ch] > 0)
-	    obstack_grow (obs, victim + buf->regs.start[ch],
-			  buf->regs.end[ch] - buf->regs.start[ch]);
-	  break;
+        case '1': case '2': case '3': case '4': case '5': case '6':
+        case '7': case '8': case '9':
+          ch -= '0';
+          if (!buf || buf->pat->re_nsub < ch)
+            m4_warn (context, 0, caller, _("sub-expression %d not present"),
+                     ch);
+          else if (buf->regs.end[ch] > 0)
+            obstack_grow (obs, victim + buf->regs.start[ch],
+                          buf->regs.end[ch] - buf->regs.start[ch]);
+          break;
 
-	default:
-	  obstack_1grow (obs, ch);
-	  break;
-	}
+        default:
+          obstack_1grow (obs, ch);
+          break;
+        }
     }
 }
 
@@ -296,9 +296,9 @@ substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
 
 static bool
 regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
-		   const char *victim, size_t len, const char *regexp,
-		   size_t regexp_len, m4_pattern_buffer *buf,
-		   const char *replace, size_t repl_len, bool optimize)
+                   const char *victim, size_t len, const char *regexp,
+                   size_t regexp_len, m4_pattern_buffer *buf,
+                   const char *replace, size_t repl_len, bool optimize)
 {
   regoff_t matchpos = 0;	/* start position of match */
   size_t offset = 0;		/* current match offset */
@@ -307,29 +307,29 @@ regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
   while (offset <= len)
     {
       matchpos = regexp_search (buf, victim, len, offset, len - offset,
-				false);
+                                false);
 
       if (matchpos < 0)
-	{
+        {
 
-	  /* Match failed -- either error or there is no match in the
-	     rest of the string, in which case the rest of the string is
-	     copied verbatim.  */
+          /* Match failed -- either error or there is no match in the
+             rest of the string, in which case the rest of the string is
+             copied verbatim.  */
 
-	  if (matchpos == -2)
-	    m4_error (context, 0, 0, caller,
-		      _("problem matching regular expression %s"),
-		      quotearg_style_mem (locale_quoting_style, regexp,
-					  regexp_len));
-	  else if (offset < len && subst)
-	    obstack_grow (obs, victim + offset, len - offset);
-	  break;
-	}
+          if (matchpos == -2)
+            m4_error (context, 0, 0, caller,
+                      _("problem matching regular expression %s"),
+                      quotearg_style_mem (locale_quoting_style, regexp,
+                                          regexp_len));
+          else if (offset < len && subst)
+            obstack_grow (obs, victim + offset, len - offset);
+          break;
+        }
 
       /* Copy the part of the string that was skipped by re_search ().  */
 
       if (matchpos > offset)
-	obstack_grow (obs, victim + offset, matchpos - offset);
+        obstack_grow (obs, victim + offset, matchpos - offset);
 
       /* Handle the part of the string that was covered by the match.  */
 
@@ -337,16 +337,16 @@ regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
       subst = true;
 
       /* Update the offset to the end of the match.  If the regexp
-	 matched a null string, advance offset one more, to avoid
-	 infinite loops.  */
+         matched a null string, advance offset one more, to avoid
+         infinite loops.  */
 
       offset = buf->regs.end[0];
       if (buf->regs.start[0] == buf->regs.end[0])
-	{
-	  if (offset < len)
-	    obstack_1grow (obs, victim[offset]);
-	  offset++;
-	}
+        {
+          if (offset < len)
+            obstack_1grow (obs, victim[offset]);
+          offset++;
+        }
     }
 
   return subst;
@@ -360,11 +360,11 @@ M4FINISH_HANDLER(gnu)
   for (i = 0; i < REGEX_CACHE_SIZE; i++)
     if (regex_cache[i].str)
       {
-	free (regex_cache[i].str);
-	regfree (regex_cache[i].pat);
-	free (regex_cache[i].pat);
-	free (regex_cache[i].regs.start);
-	free (regex_cache[i].regs.end);
+        free (regex_cache[i].str);
+        regfree (regex_cache[i].pat);
+        free (regex_cache[i].pat);
+        free (regex_cache[i].regs.start);
+        free (regex_cache[i].regs.end);
       }
   /* If this module was preloaded, then we need to explicitly reset
      the memory in case it gets reloaded.  */
@@ -379,7 +379,7 @@ M4FINISH_HANDLER(gnu)
 M4BUILTIN_HANDLER (__file__)
 {
   m4_shipout_string (context, obs, m4_get_current_file (context), SIZE_MAX,
-		     true);
+                     true);
 }
 
 
@@ -423,55 +423,55 @@ M4BUILTIN_HANDLER (builtin)
     {
       assert (m4_is_arg_func (argv, 1));
       if (m4_arg_func (argv, 1) == builtin_builtin)
-	{
-	  if (m4_bad_argc (context, argc, me, 2, 2, false))
-	    return;
-	  if (!m4_is_arg_text (argv, 2))
-	    {
-	      m4_warn (context, 0, me, _("invalid macro name ignored"));
-	      return;
-	    }
-	  name = M4ARG (2);
-	  len = M4ARGLEN (2);
-	  if (len == strlen (name))
-	    value = m4_builtin_find_by_name (NULL, name);
-	  if (value)
-	    {
-	      m4_push_builtin (context, obs, value);
-	      free (value);
-	    }
-	  else if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
-	    m4_warn (context, 0, me, _("undefined builtin %s"),
-		     quotearg_style_mem (locale_quoting_style, name, len));
-	}
+        {
+          if (m4_bad_argc (context, argc, me, 2, 2, false))
+            return;
+          if (!m4_is_arg_text (argv, 2))
+            {
+              m4_warn (context, 0, me, _("invalid macro name ignored"));
+              return;
+            }
+          name = M4ARG (2);
+          len = M4ARGLEN (2);
+          if (len == strlen (name))
+            value = m4_builtin_find_by_name (NULL, name);
+          if (value)
+            {
+              m4_push_builtin (context, obs, value);
+              free (value);
+            }
+          else if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
+            m4_warn (context, 0, me, _("undefined builtin %s"),
+                     quotearg_style_mem (locale_quoting_style, name, len));
+        }
       else
-	m4_warn (context, 0, me, _("invalid macro name ignored"));
+        m4_warn (context, 0, me, _("invalid macro name ignored"));
     }
   else
     {
       name = M4ARG (1);
       len = M4ARGLEN (1);
       if (len == strlen (name))
-	value = m4_builtin_find_by_name (NULL, name);
+        value = m4_builtin_find_by_name (NULL, name);
       if (value == NULL)
-	{
-	  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
-	    m4_warn (context, 0, me, _("undefined builtin %s"),
-		     quotearg_style_mem (locale_quoting_style, name, len));
-	}
+        {
+          if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
+            m4_warn (context, 0, me, _("undefined builtin %s"),
+                     quotearg_style_mem (locale_quoting_style, name, len));
+        }
       else
-	{
-	  const m4_builtin *bp = m4_get_symbol_value_builtin (value);
-	  m4_macro_args *new_argv;
-	  bool flatten = (bp->flags & M4_BUILTIN_FLATTEN_ARGS) != 0;
-	  new_argv = m4_make_argv_ref (context, argv, name, len, flatten,
-				       false);
-	  if (!m4_bad_argc (context, argc - 1, m4_arg_info (new_argv),
-			    bp->min_args, bp->max_args,
-			    (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
-	    bp->func (context, obs, argc - 1, new_argv);
-	  free (value);
-	}
+        {
+          const m4_builtin *bp = m4_get_symbol_value_builtin (value);
+          m4_macro_args *new_argv;
+          bool flatten = (bp->flags & M4_BUILTIN_FLATTEN_ARGS) != 0;
+          new_argv = m4_make_argv_ref (context, argv, name, len, flatten,
+                                       false);
+          if (!m4_bad_argc (context, argc - 1, m4_arg_info (new_argv),
+                            bp->min_args, bp->max_args,
+                            (bp->flags & M4_BUILTIN_SIDE_EFFECT) != 0))
+            bp->func (context, obs, argc - 1, new_argv);
+          free (value);
+        }
     }
 }
 
@@ -482,7 +482,7 @@ M4BUILTIN_HANDLER (builtin)
 
 static int
 m4_resyntax_encode_safe (m4 *context, const m4_call_info *caller,
-			 const char *spec, size_t len)
+                         const char *spec, size_t len)
 {
   int resyntax;
 
@@ -493,7 +493,7 @@ m4_resyntax_encode_safe (m4 *context, const m4_call_info *caller,
 
   if (resyntax < 0)
     m4_warn (context, 0, caller, _("bad syntax-spec: %s"),
-	     quotearg_style_mem (locale_quoting_style, spec, len));
+             quotearg_style_mem (locale_quoting_style, spec, len));
 
   return resyntax;
 }
@@ -505,7 +505,7 @@ m4_resyntax_encode_safe (m4 *context, const m4_call_info *caller,
 M4BUILTIN_HANDLER (changeresyntax)
 {
   int resyntax = m4_resyntax_encode_safe (context, m4_arg_info (argv),
-					  M4ARG (1), M4ARGLEN (1));
+                                          M4ARG (1), M4ARGLEN (1));
 
   if (resyntax >= 0)
     m4_set_regexp_syntax_opt (context, resyntax);
@@ -529,43 +529,43 @@ M4BUILTIN_HANDLER (changesyntax)
     {
       size_t i;
       for (i = 1; i < argc; i++)
-	{
-	  size_t len = M4ARGLEN (i);
-	  const char *spec;
-	  char key;
-	  char action;
+        {
+          size_t len = M4ARGLEN (i);
+          const char *spec;
+          char key;
+          char action;
 
-	  if (!len)
-	    {
-	      m4_reset_syntax (M4SYNTAX);
-	      continue;
-	    }
-	  spec = M4ARG (i);
-	  key = *spec++;
-	  len--;
-	  action = len ? *spec : '\0';
-	  switch (action)
-	    {
-	    case '-':
-	    case '+':
-	    case '=':
-	      spec++;
-	      len--;
-	      break;
-	    case '\0':
-	      if (!len)
-		break;
-	      /* fall through */
-	    default:
-	      action = '=';
-	      break;
-	    }
-	  if (len)
-	    spec = m4_expand_ranges (spec, &len, m4_arg_scratch (context));
-	  if (m4_set_syntax (M4SYNTAX, key, action, spec, len) < 0)
-	    m4_warn (context, 0, me, _("undefined syntax code: %s"),
-		     quotearg_style_mem (locale_quoting_style, &key, 1));
-	}
+          if (!len)
+            {
+              m4_reset_syntax (M4SYNTAX);
+              continue;
+            }
+          spec = M4ARG (i);
+          key = *spec++;
+          len--;
+          action = len ? *spec : '\0';
+          switch (action)
+            {
+            case '-':
+            case '+':
+            case '=':
+              spec++;
+              len--;
+              break;
+            case '\0':
+              if (!len)
+                break;
+              /* fall through */
+            default:
+              action = '=';
+              break;
+            }
+          if (len)
+            spec = m4_expand_ranges (spec, &len, m4_arg_scratch (context));
+          if (m4_set_syntax (M4SYNTAX, key, action, spec, len) < 0)
+            m4_warn (context, 0, me, _("undefined syntax code: %s"),
+                     quotearg_style_mem (locale_quoting_style, &key, 1));
+        }
     }
   else
     assert (!"Unable to import from m4 module");
@@ -591,11 +591,11 @@ M4BUILTIN_HANDLER (debugfile)
       const char *str = M4ARG (1);
       size_t len = M4ARGLEN (1);
       if (strlen (str) < len)
-	m4_warn (context, 0, me, _("argument %s truncated"),
-		 quotearg_style_mem (locale_quoting_style, str, len));
+        m4_warn (context, 0, me, _("argument %s truncated"),
+                 quotearg_style_mem (locale_quoting_style, str, len));
       if (!m4_debug_set_output (context, me, str))
-	m4_warn (context, errno, me, _("cannot set debug file %s"),
-	      quotearg_style (locale_quoting_style, str));
+        m4_warn (context, errno, me, _("cannot set debug file %s"),
+              quotearg_style (locale_quoting_style, str));
     }
 }
 
@@ -611,7 +611,7 @@ M4BUILTIN_HANDLER (debuglen)
   int i;
   size_t s;
   if (!m4_numeric_arg (context, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		       &i))
+                       &i))
     return;
   /* FIXME - make m4_numeric_arg more powerful - we want to accept
      suffixes, and limit the result to size_t.  */
@@ -634,8 +634,8 @@ M4BUILTIN_HANDLER (debugmode)
     m4_set_debug_level_opt (context, 0);
   else if (m4_debug_decode (context, mode, len) < 0)
     m4_warn (context, 0, m4_arg_info (argv),
-	     _("bad debug flags: %s"),
-	     quotearg_style_mem (locale_quoting_style, mode, len));
+             _("bad debug flags: %s"),
+             quotearg_style_mem (locale_quoting_style, mode, len));
 }
 
 
@@ -665,87 +665,87 @@ M4BUILTIN_HANDLER (esyscmd)
       const char *caller;
 
       if (m4_get_safer_opt (context))
-	{
-	  m4_error (context, 0, 0, me, _("disabled by --safer"));
-	  return;
-	}
+        {
+          m4_error (context, 0, 0, me, _("disabled by --safer"));
+          return;
+        }
       if (strlen (cmd) != len)
-	m4_warn (context, 0, me, _("argument %s truncated"),
-		 quotearg_style_mem (locale_quoting_style, cmd, len));
+        m4_warn (context, 0, me, _("argument %s truncated"),
+                 quotearg_style_mem (locale_quoting_style, cmd, len));
 
       /* Optimize the empty command.  */
       if (!*cmd)
-	{
-	  m4_set_sysval (0);
-	  return;
-	}
+        {
+          m4_set_sysval (0);
+          return;
+        }
 
       m4_sysval_flush (context, false);
 #if W32_NATIVE
       if (strstr (M4_SYSCMD_SHELL, "cmd"))
-	{
-	  prog_args[0] = "cmd";
-	  prog_args[1] = "/c";
-	}
+        {
+          prog_args[0] = "cmd";
+          prog_args[1] = "/c";
+        }
 #endif
       prog_args[2] = cmd;
       caller = m4_info_name (me);
       errno = 0;
       child = create_pipe_in (caller, M4_SYSCMD_SHELL, (char **) prog_args,
-			      NULL, false, true, false, &fd);
+                              NULL, false, true, false, &fd);
       if (child == -1)
-	{
-	  m4_error (context, 0, errno, me, _("cannot run command %s"),
-		    quotearg_style (locale_quoting_style, cmd));
-	  m4_set_sysval (127);
-	  return;
-	}
+        {
+          m4_error (context, 0, errno, me, _("cannot run command %s"),
+                    quotearg_style (locale_quoting_style, cmd));
+          m4_set_sysval (127);
+          return;
+        }
       pin = fdopen (fd, "r");
       if (!pin)
-	{
-	  m4_error (context, 0, errno, me, _("cannot run command %s"),
-		    quotearg_style (locale_quoting_style, cmd));
-	  m4_set_sysval (127);
-	  close (fd);
-	  return;
-	}
+        {
+          m4_error (context, 0, errno, me, _("cannot run command %s"),
+                    quotearg_style (locale_quoting_style, cmd));
+          m4_set_sysval (127);
+          close (fd);
+          return;
+        }
       while (1)
-	{
-	  size_t avail = obstack_room (obs);
-	  if (!avail)
-	    {
-	      int ch = getc (pin);
-	      if (ch == EOF)
-		break;
-	      obstack_1grow (obs, ch);
-	    }
-	  else
-	    {
-	      size_t len = fread (obstack_next_free (obs), 1, avail, pin);
-	      if (len <= 0)
-		break;
-	      obstack_blank_fast (obs, len);
-	    }
-	}
+        {
+          size_t avail = obstack_room (obs);
+          if (!avail)
+            {
+              int ch = getc (pin);
+              if (ch == EOF)
+                break;
+              obstack_1grow (obs, ch);
+            }
+          else
+            {
+              size_t len = fread (obstack_next_free (obs), 1, avail, pin);
+              if (len <= 0)
+                break;
+              obstack_blank_fast (obs, len);
+            }
+        }
       if (ferror (pin) || fclose (pin))
-	m4_error (context, EXIT_FAILURE, errno, me,
-		  _("cannot read pipe to command %s"),
-		  quotearg_style (locale_quoting_style, cmd));
+        m4_error (context, EXIT_FAILURE, errno, me,
+                  _("cannot read pipe to command %s"),
+                  quotearg_style (locale_quoting_style, cmd));
       errno = 0;
       status = wait_subprocess (child, caller, false, true, true, false,
-				&sig_status);
+                                &sig_status);
       if (sig_status)
-	{
-	  assert (status == 127);
-	  m4_set_sysval (sig_status << 8);
-	}
+        {
+          assert (status == 127);
+          m4_set_sysval (sig_status << 8);
+        }
       else
-	{
-	  if (status == 127 && errno)
-	    m4_error (context, 0, errno, me, _("cannot run command %s"),
-		      quotearg_style (locale_quoting_style, cmd));
-	  m4_set_sysval (status);
-	}
+        {
+          if (status == 127 && errno)
+            m4_error (context, 0, errno, me, _("cannot run command %s"),
+                      quotearg_style (locale_quoting_style, cmd));
+          m4_set_sysval (status);
+        }
     }
   else
     assert (!"Unable to import from m4 module");
@@ -785,21 +785,21 @@ M4BUILTIN_HANDLER (indir)
       m4_symbol *symbol = m4_symbol_lookup (M4SYMTAB, name, len);
 
       if (symbol == NULL)
-	{
-	  if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
-	    m4_warn (context, 0, me, _("undefined macro %s"),
-		     quotearg_style_mem (locale_quoting_style, name, len));
-	}
+        {
+          if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
+            m4_warn (context, 0, me, _("undefined macro %s"),
+                     quotearg_style_mem (locale_quoting_style, name, len));
+        }
       else
-	{
-	  m4_macro_args *new_argv;
-	  m4_symbol_value *value = m4_get_symbol_value (symbol);
-	  new_argv = m4_make_argv_ref (context, argv, name, len,
-				       m4_symbol_flatten_args (symbol),
-				       m4_get_symbol_traced (symbol));
-	  m4_trace_prepare (context, m4_arg_info (new_argv), value);
-	  m4_macro_call (context, value, obs, new_argv);
-	}
+        {
+          m4_macro_args *new_argv;
+          m4_symbol_value *value = m4_get_symbol_value (symbol);
+          new_argv = m4_make_argv_ref (context, argv, name, len,
+                                       m4_symbol_flatten_args (symbol),
+                                       m4_get_symbol_traced (symbol));
+          m4_trace_prepare (context, m4_arg_info (new_argv), value);
+          m4_macro_call (context, value, obs, new_argv);
+        }
     }
 }
 
@@ -815,7 +815,7 @@ M4BUILTIN_HANDLER (mkdtemp)
 
   if (m4_make_temp)
     m4_make_temp (context, obs, m4_arg_info (argv), M4ARG (1), M4ARGLEN (1),
-		  true);
+                  true);
   else
     assert (!"Unable to import from m4 module");
 }
@@ -843,9 +843,9 @@ M4BUILTIN_HANDLER (patsubst)
   if (argc >= 5)		/* additional args ignored */
     {
       resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4),
-					  M4ARGLEN (4));
+                                          M4ARGLEN (4));
       if (resyntax < 0)
-	return;
+        return;
     }
 
   /* The empty regex matches everywhere, but if there is no
@@ -864,7 +864,7 @@ M4BUILTIN_HANDLER (patsubst)
     return;
 
   regexp_substitute (context, obs, me, M4ARG (1), M4ARGLEN (1), pattern,
-		     M4ARGLEN (2), buf, replace, M4ARGLEN (3), false);
+                     M4ARGLEN (2), buf, replace, M4ARGLEN (3), false);
 }
 
 
@@ -898,23 +898,23 @@ M4BUILTIN_HANDLER (regexp)
       resyntax = m4_regexp_syntax_encode (replace);
 
       /* The first case is the most difficult, because the empty string
-	 is a valid RESYNTAX, yet we want `regexp(aab, a*, )' to return
-	 an empty string as per M4 1.4.x.  */
+         is a valid RESYNTAX, yet we want `regexp(aab, a*, )' to return
+         an empty string as per M4 1.4.x.  */
 
       if (m4_arg_empty (argv, 3) || (resyntax < 0))
-	/* regexp(VICTIM, REGEXP, REPLACEMENT) */
-	resyntax = m4_get_regexp_syntax_opt (context);
+        /* regexp(VICTIM, REGEXP, REPLACEMENT) */
+        resyntax = m4_get_regexp_syntax_opt (context);
       else
-	/* regexp(VICTIM, REGEXP, RESYNTAX) */
-	replace = NULL;
+        /* regexp(VICTIM, REGEXP, RESYNTAX) */
+        replace = NULL;
     }
   else if (argc >= 5)
     {
       /* regexp(VICTIM, REGEXP, REPLACEMENT, RESYNTAX) */
       resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4),
-					  M4ARGLEN (4));
+                                          M4ARGLEN (4));
       if (resyntax < 0)
-	return;
+        return;
     }
   else
     /* regexp(VICTIM, REGEXP)  */
@@ -924,9 +924,9 @@ M4BUILTIN_HANDLER (regexp)
     {
       /* The empty regex matches everything.  */
       if (replace)
-	substitute (context, obs, me, M4ARG (1), replace, M4ARGLEN (3), NULL);
+        substitute (context, obs, me, M4ARG (1), replace, M4ARGLEN (3), NULL);
       else
-	m4_shipout_int (obs, 0);
+        m4_shipout_int (obs, 0);
       return;
     }
 
@@ -941,8 +941,8 @@ M4BUILTIN_HANDLER (regexp)
   if (startpos == -2)
     {
       m4_error (context, 0, 0, me, _("problem matching regular expression %s"),
-		quotearg_style_mem (locale_quoting_style, pattern,
-				    M4ARGLEN (2)));
+                quotearg_style_mem (locale_quoting_style, pattern,
+                                    M4ARGLEN (2)));
       return;
     }
 
@@ -984,33 +984,33 @@ M4BUILTIN_HANDLER (renamesyms)
 
       resyntax = m4_get_regexp_syntax_opt (context);
       if (argc >= 4)
-	{
-	  resyntax = m4_resyntax_encode_safe (context, me, M4ARG (3),
-					      M4ARGLEN (3));
-	  if (resyntax < 0)
-	    return;
-	}
+        {
+          resyntax = m4_resyntax_encode_safe (context, me, M4ARG (3),
+                                              M4ARGLEN (3));
+          if (resyntax < 0)
+            return;
+        }
 
       buf = regexp_compile (context, me, regexp, regexp_len, resyntax);
       if (!buf)
-	return;
+        return;
 
       data.obs = m4_arg_scratch (context);
       m4_dump_symbols (context, &data, 1, argv, false);
 
       for (; data.size > 0; --data.size, data.base++)
-	{
-	  const m4_string *key = &data.base[0];
+        {
+          const m4_string *key = &data.base[0];
 
-	  if (regexp_substitute (context, data.obs, me, key->str, key->len,
-				 regexp, regexp_len, buf, replace, replace_len,
-				 true))
-	    {
-	      size_t newlen = obstack_object_size (data.obs);
-	      m4_symbol_rename (M4SYMTAB, key->str, key->len,
-				(char *) obstack_finish (data.obs), newlen);
-	    }
-	}
+          if (regexp_substitute (context, data.obs, me, key->str, key->len,
+                                 regexp, regexp_len, buf, replace, replace_len,
+                                 true))
+            {
+              size_t newlen = obstack_object_size (data.obs);
+              m4_symbol_rename (M4SYMTAB, key->str, key->len,
+                                (char *) obstack_finish (data.obs), newlen);
+            }
+        }
     }
   else
     assert (!"Unable to import from m4 module");
@@ -1035,12 +1035,12 @@ M4BUILTIN_HANDLER (m4symbols)
       m4_dump_symbols (context, &data, argc, argv, false);
 
       for (; data.size > 0; --data.size, data.base++)
-	{
-	  m4_shipout_string (context, obs, data.base->str, data.base->len,
-			     true);
-	  if (data.size > 1)
-	    obstack_1grow (obs, ',');
-	}
+        {
+          m4_shipout_string (context, obs, data.base->str, data.base->len,
+                             true);
+          if (data.size > 1)
+            obstack_1grow (obs, ',');
+        }
     }
   else
     assert (!"Unable to import from m4 module");
@@ -1059,6 +1059,6 @@ M4BUILTIN_HANDLER (syncoutput)
 {
   bool value = m4_get_syncoutput_opt (context);
   value = m4_parse_truth_arg (context, m4_arg_info (argv), M4ARG (1),
-			      M4ARGLEN (1), value);
+                              M4ARGLEN (1), value);
   m4_set_syncoutput_opt (context, value);
 }
