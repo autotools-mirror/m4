@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 
 #include "gl_avltree_oset.h"
+#include "gl_xoset.h"
 
 /* Size of initial in-memory buffer size for diversions.  Small diversions
    would usually fit in.  */

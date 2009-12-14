@@ -1,3 +1,13 @@
+2009-12-29  Eric Blake  <ebb9@byu.net>
+
+	Update to latest gnulib.
+	* gnulib: Update.
+	* m4/gnulib-cache.m4: Import xoset.
+	* src/output.c (includes): Ensure that gnulib oset usage will
+	call xalloc_die on memory failure.
+	* build-aux/.cvsignore: Regenerate.
+	* build-aux/.gitignore: Likewise.
+
 2009-11-28  Eric Blake  <ebb9@byu.net>
 
 	Work around BSD getopt bug.
