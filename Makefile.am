@@ -1,7 +1,7 @@
 ## Makefile.am - template for generating Makefile via Automake
 ##
-## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-## Free Software Foundation, Inc.
+## Copyright (C) 2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
+## 2010 Free Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
 ##
@@ -108,9 +108,12 @@ BUILT_SOURCES  += src/$(GETOPT_H)
 endif
 EXTRA_DIST     += src/getopt.c src/getopt1.c src/getopt.in.h src/getopt_int.h
 
+LINK_WARNING_H = $(srcdir)/$(config_aux_dir)/link-warning.h
+ARG_NONNULL_H = $(srcdir)/$(config_aux_dir)/arg-nonnull.h
+
 # We need the following in order to create an <getopt.h> when the
 # system doesn't have one that works with the given compiler.
-src/getopt.h: src/getopt.in.h
+src/getopt.h: src/getopt.in.h $(LINK_WARNING_H) $(ARG_NONNULL_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''HAVE_GETOPT_H''@|$(HAVE_GETOPT_H)|g' \
@@ -118,6 +121,7 @@ src/getopt.h: src/getopt.in.h
 	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
 	      -e 's|@''NEXT_GETOPT_H''@|$(NEXT_GETOPT_H)|g' \
 	      -e '/definition of GL_LINK_WARNING/r $(LINK_WARNING_H)' \
+	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
 	      < $(srcdir)/src/getopt.in.h; \
 	} > $@-t && \
 	mv -f $@-t $@

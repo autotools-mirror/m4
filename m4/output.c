@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
    Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1998, 2002, 2004,
-   2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -26,6 +26,7 @@
 #include "clean-temp.h"
 #include "exitfail.h"
 #include "gl_avltree_oset.h"
+#include "gl_xoset.h"
 #include "intprops.h"
 #include "quotearg.h"
 #include "xvasprintf.h"

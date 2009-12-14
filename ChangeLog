@@ -1,5 +1,13 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Update to latest gnulib.
+	* gnulib: Update.
+	* ltdl/m4/gnulib-cache.m4: Import xoset.
+	* m4/output.c (includes): Ensure that gnulib oset usage will
+	call xalloc_die on memory failure.
+	* Makefile.am (src/getopt.h): Update snippet from gnulib.
+	(LINK_WARNING_H, ARG_NONNULL_H): New macros.
+
 	Fix testsuite failure on newer glibc.
 	* tests/testsuite.at (AT_CHECK_M4): Tolerate alternate getopt
 	spellings.
