@@ -87,7 +87,7 @@ typedef struct macro_definition macro_definition;
 
 static void M4_GNUC_PRINTF (5, 0)
 m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
-		   const char *format, va_list args)
+                   const char *format, va_list args)
 {
   char *full = NULL;
   char *safe_macro = NULL;
@@ -104,14 +104,14 @@ m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
       char *p = safe_macro = xcharalloc (2 * len);
       const char *end = macro + len;
       while (macro != end)
-	{
-	  if (*macro == '%')
-	    {
-	      *p++ = '%';
-	      len++;
-	    }
-	  *p++ = *macro++;
-	}
+        {
+          if (*macro == '%')
+            {
+              *p++ = '%';
+              len++;
+            }
+          *p++ = *macro++;
+        }
     }
   if (macro)
     /* Use slot 1, so that the rest of the code can use the simpler
@@ -127,7 +127,7 @@ m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
   else if (macro)
     full = xasprintf (_("%s: %s"), macro, format);
   verror_at_line (status, errnum, line ? file : NULL, line,
-		  full ? full : format, args);
+                  full ? full : format, args);
   free (full);
   free (safe_macro);
   if ((!warn || fatal_warnings) && !retcode)
@@ -143,7 +143,7 @@ m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
 
 void
 m4_error (int status, int errnum, const call_info *caller,
-	  const char *format, ...)
+          const char *format, ...)
 {
   va_list args;
   va_start (args, format);
@@ -182,7 +182,7 @@ static void
 stackovf_handler (void)
 {
   m4_error (EXIT_FAILURE, 0, NULL,
-	    _("FATAL: stack overflow.  (Infinite define recursion?)"));
+            _("FATAL: stack overflow.  (Infinite define recursion?)"));
 }
 
 #endif /* USE_STACKOVF */
@@ -197,7 +197,7 @@ usage (int status)
 {
   if (status != EXIT_SUCCESS)
     xfprintf (stderr, _("Try `%s --help' for more information.\n"),
-	      program_name);
+              program_name);
   else
     {
       xprintf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
@@ -351,11 +351,11 @@ process_file (const char *name)
   if (STREQ (name, "-"))
     {
       /* If stdin is a terminal, we want to allow 'm4 - file -'
-	 to read input from stdin twice, like GNU cat.  Besides,
-	 there is no point closing stdin before wrapped text, to
-	 minimize bugs in syscmd called from wrapped text.  */
+         to read input from stdin twice, like GNU cat.  Besides,
+         there is no point closing stdin before wrapped text, to
+         minimize bugs in syscmd called from wrapped text.  */
       /* TRANSLATORS: This is a short name for `standard input', used
-	 when a command line file was given as `-'.  */
+         when a command line file was given as `-'.  */
       push_file (stdin, _("stdin"), false);
     }
   else
@@ -363,14 +363,14 @@ process_file (const char *name)
       char *full_name;
       FILE *fp = m4_path_search (name, &full_name);
       if (fp == NULL)
-	{
-	  error (0, errno, _("cannot open %s"),
-		 quotearg_style (locale_quoting_style, name));
-	  /* Set the status to EXIT_FAILURE, even though we
-	     continue to process files after a missing file.  */
-	  retcode = EXIT_FAILURE;
-	  return;
-	}
+        {
+          error (0, errno, _("cannot open %s"),
+                 quotearg_style (locale_quoting_style, name));
+          /* Set the status to EXIT_FAILURE, even though we
+             continue to process files after a missing file.  */
+          retcode = EXIT_FAILURE;
+          return;
+        }
       push_file (fp, full_name, true);
       free (full_name);
     }
@@ -437,152 +437,152 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
   head = tail = NULL;
 
   while ((optchar = getopt_long (argc, (char **) argv, OPTSTRING,
-				 long_options, NULL)) != -1)
+                                 long_options, NULL)) != -1)
     switch (optchar)
       {
       default:
-	usage (EXIT_FAILURE);
+        usage (EXIT_FAILURE);
 
       case 'B':
       case 'S':
       case 'T':
-	/* Compatibility junk: options that other implementations
-	   support, but which we ignore as no-ops and don't list in
-	   --help.  */
-	error (0, 0, _("warning: `m4 -%c' may be removed in a future release"),
-	       optchar);
-	break;
+        /* Compatibility junk: options that other implementations
+           support, but which we ignore as no-ops and don't list in
+           --help.  */
+        error (0, 0, _("warning: `m4 -%c' may be removed in a future release"),
+               optchar);
+        break;
 
       case '\1':
-	seen_file = true;
-	/* fall through */
+        seen_file = true;
+        /* fall through */
       case 'D':
       case 'U':
       case 's':
       case 't':
       case DEBUGFILE_OPTION:
       defer:
-	/* Arguments that cannot be handled until later are accumulated.  */
+        /* Arguments that cannot be handled until later are accumulated.  */
 
-	defn = (macro_definition *) xmalloc (sizeof (macro_definition));
-	defn->code = optchar;
-	defn->arg = optarg;
-	defn->next = NULL;
+        defn = (macro_definition *) xmalloc (sizeof (macro_definition));
+        defn->code = optchar;
+        defn->arg = optarg;
+        defn->next = NULL;
 
-	if (head == NULL)
-	  head = defn;
-	else
-	  tail->next = defn;
-	tail = defn;
+        if (head == NULL)
+          head = defn;
+        else
+          tail->next = defn;
+        tail = defn;
 
-	break;
+        break;
 
       case 'E':
-	debug_decode ("-d", SIZE_MAX);
-	if (!fatal_warnings)
-	  fatal_warnings = true;
-	else
-	  warning_status = EXIT_FAILURE;
-	break;
+        debug_decode ("-d", SIZE_MAX);
+        if (!fatal_warnings)
+          fatal_warnings = true;
+        else
+          warning_status = EXIT_FAILURE;
+        break;
 
       case 'F':
-	frozen_file_to_write = optarg;
-	break;
+        frozen_file_to_write = optarg;
+        break;
 
       case 'G':
-	no_gnu_extensions = 1;
-	break;
+        no_gnu_extensions = 1;
+        break;
 
       case 'H':
         {
-	  long tmp = strtol (optarg, NULL, 10);
+          long tmp = strtol (optarg, NULL, 10);
           hash_table_size = tmp;
         }
-	if (hash_table_size == 0)
-	  hash_table_size = HASHMAX;
-	break;
+        if (hash_table_size == 0)
+          hash_table_size = HASHMAX;
+        break;
 
       case 'I':
-	add_include_directory (optarg);
-	break;
+        add_include_directory (optarg);
+        break;
 
       case 'L':
         {
           long tmp = strtol (optarg, NULL, 10);
           nesting_limit = tmp;
         }
-	break;
+        break;
 
       case 'P':
-	prefix_all_builtins = 1;
-	break;
+        prefix_all_builtins = 1;
+        break;
 
       case 'Q':
-	suppress_warnings = 1;
-	break;
+        suppress_warnings = 1;
+        break;
 
       case 'R':
-	frozen_file_to_read = optarg;
-	break;
+        frozen_file_to_read = optarg;
+        break;
 
 #ifdef ENABLE_CHANGEWORD
       case 'W':
-	user_word_regexp = optarg;
-	break;
+        user_word_regexp = optarg;
+        break;
 #endif
 
       case 'd':
-	if (seen_file)
-	  goto defer;
-	if (debug_decode (optarg, SIZE_MAX) < 0)
-	  error (0, 0, _("bad debug flags: %s"),
-		 quotearg_style (locale_quoting_style, optarg));
-	break;
+        if (seen_file)
+          goto defer;
+        if (debug_decode (optarg, SIZE_MAX) < 0)
+          error (0, 0, _("bad debug flags: %s"),
+                 quotearg_style (locale_quoting_style, optarg));
+        break;
 
       case 'e':
-	error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
-		       "-e", "-i");
-	/* fall through */
+        error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
+                       "-e", "-i");
+        /* fall through */
       case 'i':
-	interactive = true;
-	break;
+        interactive = true;
+        break;
 
       case 'g':
-	no_gnu_extensions = 0;
-	break;
+        no_gnu_extensions = 0;
+        break;
 
       case 'l':
-	{
-	  long tmp = strtol (optarg, NULL, 10);
-	  max_debug_argument_length = tmp <= 0 ? SIZE_MAX : (size_t) tmp;
-	}
-	break;
+        {
+          long tmp = strtol (optarg, NULL, 10);
+          max_debug_argument_length = tmp <= 0 ? SIZE_MAX : (size_t) tmp;
+        }
+        break;
 
       case 'o':
-	/* -o/--error-output are deprecated synonyms of --debugfile,
-	   so issue a warning.  Don't call debug_set_output here, as
-	   it has side effects.	 */
-	error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
-	       optchar == 'o' ? "-o" : "--error-output", "--debugfile");
-	debugfile = optarg;
-	break;
+        /* -o/--error-output are deprecated synonyms of --debugfile,
+           so issue a warning.  Don't call debug_set_output here, as
+           it has side effects.	 */
+        error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
+               optchar == 'o' ? "-o" : "--error-output", "--debugfile");
+        debugfile = optarg;
+        break;
 
       case WARN_MACRO_SEQUENCE_OPTION:
-	 /* Don't call set_macro_sequence here, as it can exit.
-	    --warn-macro-sequence sets optarg to NULL (which uses the
-	    default regexp); --warn-macro-sequence= sets optarg to ""
-	    (which disables these warnings).  */
-	macro_sequence = optarg;
-	break;
+         /* Don't call set_macro_sequence here, as it can exit.
+            --warn-macro-sequence sets optarg to NULL (which uses the
+            default regexp); --warn-macro-sequence= sets optarg to ""
+            (which disables these warnings).  */
+        macro_sequence = optarg;
+        break;
 
       case VERSION_OPTION:
-	version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
-	exit (EXIT_SUCCESS);
-	break;
+        version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
+        exit (EXIT_SUCCESS);
+        break;
 
       case HELP_OPTION:
-	usage (EXIT_SUCCESS);
-	break;
+        usage (EXIT_SUCCESS);
+        break;
       }
 
   defines = head;
@@ -590,7 +590,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (NULL, debugfile))
     m4_error (0, errno, NULL, _("cannot set debug file %s"),
-	      quotearg_style (locale_quoting_style, debugfile));
+              quotearg_style (locale_quoting_style, debugfile));
 
   input_init ();
   output_init ();
@@ -621,50 +621,50 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
       const char *arg = defines->arg;
 
       switch (defines->code)
-	{
-	case 'D':
-	  {
-	    const char *value = strchr (arg, '=');
-	    size_t len = value ? (size_t) (value - arg) : strlen (arg);
-	    define_user_macro (arg, len, value ? value + 1 : "",
-			       value ? SIZE_MAX : 0, SYMBOL_INSERT);
-	  }
-	  break;
+        {
+        case 'D':
+          {
+            const char *value = strchr (arg, '=');
+            size_t len = value ? (size_t) (value - arg) : strlen (arg);
+            define_user_macro (arg, len, value ? value + 1 : "",
+                               value ? SIZE_MAX : 0, SYMBOL_INSERT);
+          }
+          break;
 
-	case 'U':
-	  lookup_symbol (arg, strlen (arg), SYMBOL_DELETE);
-	  break;
+        case 'U':
+          lookup_symbol (arg, strlen (arg), SYMBOL_DELETE);
+          break;
 
-	case 'd':
-	  if (debug_decode (arg, SIZE_MAX) < 0)
-	    error (0, 0, _("bad debug flags: %s"),
-		   quotearg_style (locale_quoting_style, optarg));
-	  break;
+        case 'd':
+          if (debug_decode (arg, SIZE_MAX) < 0)
+            error (0, 0, _("bad debug flags: %s"),
+                   quotearg_style (locale_quoting_style, optarg));
+          break;
 
-	case 't':
-	  sym = lookup_symbol (arg, strlen (arg), SYMBOL_INSERT);
-	  SYMBOL_TRACED (sym) = true;
-	  break;
+        case 't':
+          sym = lookup_symbol (arg, strlen (arg), SYMBOL_INSERT);
+          SYMBOL_TRACED (sym) = true;
+          break;
 
-	case 's':
-	  sync_output = 1;
-	  break;
+        case 's':
+          sync_output = 1;
+          break;
 
-	case '\1':
-	  process_file (arg);
-	  break;
+        case '\1':
+          process_file (arg);
+          break;
 
-	case DEBUGFILE_OPTION:
-	  if (!debug_set_output (NULL, arg))
-	     m4_error (0, errno, NULL, _("cannot set debug file %s"),
-		       quotearg_style (locale_quoting_style,
-				       arg ? arg : _("stderr")));
-	  break;
+        case DEBUGFILE_OPTION:
+          if (!debug_set_output (NULL, arg))
+             m4_error (0, errno, NULL, _("cannot set debug file %s"),
+                       quotearg_style (locale_quoting_style,
+                                       arg ? arg : _("stderr")));
+          break;
 
-	default:
-	  assert (!"main");
-	  abort ();
-	}
+        default:
+          assert (!"main");
+          abort ();
+        }
 
       next = defines->next;
       free (defines);

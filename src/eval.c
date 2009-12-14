@@ -127,67 +127,67 @@ eval_lex (int32_t *val)
       int base, digit;
 
       if (*eval_text == '0')
-	{
-	  eval_text++;
-	  switch (*eval_text)
-	    {
-	    case 'x':
-	    case 'X':
-	      base = 16;
-	      eval_text++;
-	      break;
+        {
+          eval_text++;
+          switch (*eval_text)
+            {
+            case 'x':
+            case 'X':
+              base = 16;
+              eval_text++;
+              break;
 
-	    case 'b':
-	    case 'B':
-	      base = 2;
-	      eval_text++;
-	      break;
+            case 'b':
+            case 'B':
+              base = 2;
+              eval_text++;
+              break;
 
-	    case 'r':
-	    case 'R':
-	      base = 0;
-	      eval_text++;
-	      while (isdigit (to_uchar (*eval_text)) && base <= 36)
-		base = 10 * base + *eval_text++ - '0';
-	      if (base == 0 || base > 36 || *eval_text != ':')
-		return ERROR;
-	      eval_text++;
-	      break;
+            case 'r':
+            case 'R':
+              base = 0;
+              eval_text++;
+              while (isdigit (to_uchar (*eval_text)) && base <= 36)
+                base = 10 * base + *eval_text++ - '0';
+              if (base == 0 || base > 36 || *eval_text != ':')
+                return ERROR;
+              eval_text++;
+              break;
 
-	    default:
-	      base = 8;
-	    }
-	}
+            default:
+              base = 8;
+            }
+        }
       else
-	base = 10;
+        base = 10;
 
       /* FIXME - this calculation can overflow.  Consider xstrtol.  */
       *val = 0;
       for (; *eval_text; eval_text++)
-	{
-	  if (isdigit (to_uchar (*eval_text)))
-	    digit = *eval_text - '0';
-	  else if (islower (to_uchar (*eval_text)))
-	    digit = *eval_text - 'a' + 10;
-	  else if (isupper (to_uchar (*eval_text)))
-	    digit = *eval_text - 'A' + 10;
-	  else
-	    break;
+        {
+          if (isdigit (to_uchar (*eval_text)))
+            digit = *eval_text - '0';
+          else if (islower (to_uchar (*eval_text)))
+            digit = *eval_text - 'a' + 10;
+          else if (isupper (to_uchar (*eval_text)))
+            digit = *eval_text - 'A' + 10;
+          else
+            break;
 
-	  if (base == 1)
-	    {
-	      if (digit == 1)
-		(*val)++;
-	      else if (digit == 0 && !*val)
-		continue;
-	      else
-		break;
-	    }
-	  else if (digit >= base)
-	    break;
-	  else
-	    *val = *val * base + digit;
-	}
+          if (base == 1)
+            {
+              if (digit == 1)
+                (*val)++;
+              else if (digit == 0 && !*val)
+                continue;
+              else
+                break;
+            }
+          else if (digit >= base)
+            break;
+          else
+            *val = *val * base + digit;
+        }
       return NUMBER;
     }
 
@@ -195,92 +195,92 @@ eval_lex (int32_t *val)
     {
     case '+':
       if (*eval_text == '+' || *eval_text == '=')
-	return BADOP;
+        return BADOP;
       return PLUS;
     case '-':
       if (*eval_text == '-' || *eval_text == '=')
-	return BADOP;
+        return BADOP;
       return MINUS;
     case '*':
       if (*eval_text == '*')
-	{
-	  eval_text++;
-	  return EXPONENT;
-	}
+        {
+          eval_text++;
+          return EXPONENT;
+        }
       else if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return TIMES;
     case '/':
       if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return DIVIDE;
     case '%':
       if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return MODULO;
     case '=':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return EQ;
-	}
+        {
+          eval_text++;
+          return EQ;
+        }
       return ASSIGN;
     case '!':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return NOTEQ;
-	}
+        {
+          eval_text++;
+          return NOTEQ;
+        }
       return LNOT;
     case '>':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return GTEQ;
-	}
+        {
+          eval_text++;
+          return GTEQ;
+        }
       else if (*eval_text == '>')
-	{
-	  if (*++eval_text == '=')
-	    return BADOP;
-	  return RSHIFT;
-	}
+        {
+          if (*++eval_text == '=')
+            return BADOP;
+          return RSHIFT;
+        }
       return GT;
     case '<':
       if (*eval_text == '=')
-	{
-	  eval_text++;
-	  return LSEQ;
-	}
+        {
+          eval_text++;
+          return LSEQ;
+        }
       else if (*eval_text == '<')
-	{
-	  if (*++eval_text == '=')
-	    return BADOP;
-	  return LSHIFT;
-	}
+        {
+          if (*++eval_text == '=')
+            return BADOP;
+          return LSHIFT;
+        }
       return LS;
     case '^':
       if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return XOR;
     case '~':
       return NOT;
     case '&':
       if (*eval_text == '&')
-	{
-	  eval_text++;
-	  return LAND;
-	}
+        {
+          eval_text++;
+          return LAND;
+        }
       else if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return AND;
     case '|':
       if (*eval_text == '|')
-	{
-	  eval_text++;
-	  return LOR;
-	}
+        {
+          eval_text++;
+          return LOR;
+        }
       else if (*eval_text == '=')
-	return BADOP;
+        return BADOP;
       return OR;
     case '(':
       return LEFTP;
@@ -315,9 +315,9 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
   if (err == NO_ERROR && *eval_text != '\0')
     {
       if (eval_lex (val) == BADOP)
-	err = INVALID_OPERATOR;
+        err = INVALID_OPERATOR;
       else
-	err = EXCESS_INPUT;
+        err = EXCESS_INPUT;
     }
 
   if (err != NO_ERROR)
@@ -395,31 +395,31 @@ condition_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
       /* C requires 'logical_or_term ? expression : condition_term';
-	 if we ever introduce assignment_term or comma_term, then
-	 condition_term and expression are no longer synonymous.  */
+         if we ever introduce assignment_term or comma_term, then
+         condition_term and expression are no longer synonymous.  */
       er = condition_term (me, et, &v2);
       if (er != NO_ERROR
-	  && !(*v1 == 0 && er < SYNTAX_ERROR))
-	return er;
+          && !(*v1 == 0 && er < SYNTAX_ERROR))
+        return er;
 
       et = eval_lex (&v3);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
       if (et != COLON)
-	return MISSING_COLON;
+        return MISSING_COLON;
 
       et = eval_lex (&v3);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       er = condition_term (me, et, &v3);
       if (er != NO_ERROR
-	  && !(*v1 != 0 && er < SYNTAX_ERROR))
-	return er;
+          && !(*v1 != 0 && er < SYNTAX_ERROR))
+        return er;
 
       *v1 = *v1 ? v2 : v3;
     }
@@ -443,16 +443,16 @@ logical_or_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
       er = logical_and_term (me, et, &v2);
       if (er == NO_ERROR)
-	*v1 = *v1 || v2;
+        *v1 = *v1 || v2;
       else if (*v1 != 0 && er < SYNTAX_ERROR)
-	*v1 = 1;
+        *v1 = 1;
       else
-	return er;
+        return er;
     }
   if (et == ERROR)
     return UNKNOWN_INPUT;
@@ -474,16 +474,16 @@ logical_and_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       /* Implement short-circuiting of valid syntax.  */
       er = or_term (me, et, &v2);
       if (er == NO_ERROR)
-	*v1 = *v1 && v2;
+        *v1 = *v1 && v2;
       else if (*v1 == 0 && er < SYNTAX_ERROR)
-	; /* v1 is already 0 */
+        ; /* v1 is already 0 */
       else
-	return er;
+        return er;
     }
   if (et == ERROR)
     return UNKNOWN_INPUT;
@@ -505,10 +505,10 @@ or_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = xor_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       *v1 |= v2;
     }
@@ -532,10 +532,10 @@ xor_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = and_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       *v1 ^= v2;
     }
@@ -559,10 +559,10 @@ and_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = equality_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       *v1 &= v2;
     }
@@ -590,15 +590,15 @@ equality_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = cmp_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       if (op == ASSIGN)
       {
-	m4_warn (0, me, _("recommend ==, not =, for equality"));
-	op = EQ;
+        m4_warn (0, me, _("recommend ==, not =, for equality"));
+        op = EQ;
       }
       *v1 = (op == EQ) == (*v1 == v2);
     }
@@ -620,38 +620,38 @@ cmp_term (const call_info *me, eval_token et, int32_t *v1)
     return er;
 
   while ((op = eval_lex (&v2)) == GT || op == GTEQ
-	 || op == LS || op == LSEQ)
+         || op == LS || op == LSEQ)
     {
 
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = shift_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       switch (op)
-	{
-	case GT:
-	  *v1 = *v1 > v2;
-	  break;
+        {
+        case GT:
+          *v1 = *v1 > v2;
+          break;
 
-	case GTEQ:
-	  *v1 = *v1 >= v2;
-	  break;
+        case GTEQ:
+          *v1 = *v1 >= v2;
+          break;
 
-	case LS:
-	  *v1 = *v1 < v2;
-	  break;
+        case LS:
+          *v1 = *v1 < v2;
+          break;
 
-	case LSEQ:
-	  *v1 = *v1 <= v2;
-	  break;
+        case LSEQ:
+          *v1 = *v1 <= v2;
+          break;
 
-	default:
-	  assert (!"cmp_term");
-	  abort ();
-	}
+        default:
+          assert (!"cmp_term");
+          abort ();
+        }
     }
   if (op == ERROR)
     return UNKNOWN_INPUT;
@@ -676,35 +676,35 @@ shift_term (const call_info *me, eval_token et, int32_t *v1)
 
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = add_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       /* Minimize undefined C behavior (shifting by a negative number,
-	 shifting by the width or greater, left shift overflow, or
-	 right shift of a negative number).  Implement Java 32-bit
-	 wrap-around semantics.  This code assumes that the
-	 implementation-defined overflow when casting unsigned to
-	 signed is a silent twos-complement wrap-around.  */
+         shifting by the width or greater, left shift overflow, or
+         right shift of a negative number).  Implement Java 32-bit
+         wrap-around semantics.  This code assumes that the
+         implementation-defined overflow when casting unsigned to
+         signed is a silent twos-complement wrap-around.  */
       switch (op)
-	{
-	case LSHIFT:
-	  u1 = *v1;
-	  u1 <<= (uint32_t) (v2 & 0x1f);
-	  *v1 = u1;
-	  break;
+        {
+        case LSHIFT:
+          u1 = *v1;
+          u1 <<= (uint32_t) (v2 & 0x1f);
+          *v1 = u1;
+          break;
 
-	case RSHIFT:
-	  u1 = *v1 < 0 ? ~*v1 : *v1;
-	  u1 >>= (uint32_t) (v2 & 0x1f);
-	  *v1 = *v1 < 0 ? ~u1 : u1;
-	  break;
+        case RSHIFT:
+          u1 = *v1 < 0 ? ~*v1 : *v1;
+          u1 >>= (uint32_t) (v2 & 0x1f);
+          *v1 = *v1 < 0 ? ~u1 : u1;
+          break;
 
-	default:
-	  assert (!"shift_term");
-	  abort ();
-	}
+        default:
+          assert (!"shift_term");
+          abort ();
+        }
     }
   if (op == ERROR)
     return UNKNOWN_INPUT;
@@ -727,19 +727,19 @@ add_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = mult_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
-	 that the implementation-defined overflow when casting
-	 unsigned to signed is a silent twos-complement
-	 wrap-around.  */
+         that the implementation-defined overflow when casting
+         unsigned to signed is a silent twos-complement
+         wrap-around.  */
       if (op == PLUS)
-	*v1 = (int32_t) ((uint32_t) *v1 + (uint32_t) v2);
+        *v1 = (int32_t) ((uint32_t) *v1 + (uint32_t) v2);
       else
-	*v1 = (int32_t) ((uint32_t) *v1 - (uint32_t) v2);
+        *v1 = (int32_t) ((uint32_t) *v1 - (uint32_t) v2);
     }
   if (op == ERROR)
     return UNKNOWN_INPUT;
@@ -762,45 +762,45 @@ mult_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = exp_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
-	 that the implementation-defined overflow when casting
-	 unsigned to signed is a silent twos-complement
-	 wrap-around.  */
+         that the implementation-defined overflow when casting
+         unsigned to signed is a silent twos-complement
+         wrap-around.  */
       switch (op)
-	{
-	case TIMES:
-	  *v1 = (int32_t) ((uint32_t) *v1 * (uint32_t) v2);
-	  break;
+        {
+        case TIMES:
+          *v1 = (int32_t) ((uint32_t) *v1 * (uint32_t) v2);
+          break;
 
-	case DIVIDE:
-	  if (v2 == 0)
-	    return DIVIDE_ZERO;
-	  else if (v2 == -1)
-	    /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
-	    *v1 = (int32_t) -(uint32_t) *v1;
-	  else
-	    *v1 /= v2;
-	  break;
+        case DIVIDE:
+          if (v2 == 0)
+            return DIVIDE_ZERO;
+          else if (v2 == -1)
+            /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
+            *v1 = (int32_t) -(uint32_t) *v1;
+          else
+            *v1 /= v2;
+          break;
 
-	case MODULO:
-	  if (v2 == 0)
-	    return MODULO_ZERO;
-	  else if (v2 == -1)
-	    /* Avoid the x86 SIGFPE on INT_MIN % -1.  */
-	    *v1 = 0;
-	  else
-	    *v1 %= v2;
-	  break;
+        case MODULO:
+          if (v2 == 0)
+            return MODULO_ZERO;
+          else if (v2 == -1)
+            /* Avoid the x86 SIGFPE on INT_MIN % -1.  */
+            *v1 = 0;
+          else
+            *v1 %= v2;
+          break;
 
-	default:
-	  assert (!"mult_term");
-	  abort ();
-	}
+        default:
+          assert (!"mult_term");
+          abort ();
+        }
     }
   if (op == ERROR)
     return UNKNOWN_INPUT;
@@ -823,22 +823,22 @@ exp_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = exp_term (me, et, &v2)) != NO_ERROR)
-	return er;
+        return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
-	 that the implementation-defined overflow when casting
-	 unsigned to signed is a silent twos-complement
-	 wrap-around.  */
+         that the implementation-defined overflow when casting
+         unsigned to signed is a silent twos-complement
+         wrap-around.  */
       result = 1;
       if (v2 < 0)
-	return NEGATIVE_EXPONENT;
+        return NEGATIVE_EXPONENT;
       if (*v1 == 0 && v2 == 0)
-	return DIVIDE_ZERO;
+        return DIVIDE_ZERO;
       while (v2-- > 0)
-	result *= (uint32_t) *v1;
+        result *= (uint32_t) *v1;
       *v1 = result;
     }
   if (et == ERROR)
@@ -858,21 +858,21 @@ unary_term (const call_info *me, eval_token et, int32_t *v1)
     {
       et2 = eval_lex (v1);
       if (et2 == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = unary_term (me, et2, v1)) != NO_ERROR)
-	return er;
+        return er;
 
       /* Minimize undefined C behavior on overflow.  This code assumes
-	 that the implementation-defined overflow when casting
-	 unsigned to signed is a silent twos-complement
-	 wrap-around.  */
+         that the implementation-defined overflow when casting
+         unsigned to signed is a silent twos-complement
+         wrap-around.  */
       if (et == MINUS)
-	*v1 = (int32_t) -(uint32_t) *v1;
+        *v1 = (int32_t) -(uint32_t) *v1;
       else if (et == NOT)
-	*v1 = ~*v1;
+        *v1 = ~*v1;
       else if (et == LNOT)
-	*v1 = *v1 == 0 ? 1 : 0;
+        *v1 = *v1 == 0 ? 1 : 0;
     }
   else if ((er = simple_term (me, et, v1)) != NO_ERROR)
     return er;
@@ -891,17 +891,17 @@ simple_term (const call_info *me, eval_token et, int32_t *v1)
     case LEFTP:
       et = eval_lex (v1);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if ((er = condition_term (me, et, v1)) != NO_ERROR)
-	return er;
+        return er;
 
       et = eval_lex (&v2);
       if (et == ERROR)
-	return UNKNOWN_INPUT;
+        return UNKNOWN_INPUT;
 
       if (et != RIGHTP)
-	return MISSING_RIGHT;
+        return MISSING_RIGHT;
 
       break;
 

@@ -93,18 +93,18 @@ BEGIN {
     count++;
     file = sprintf("%03d.%s", count, node);
     printf("dnl @ %s:%d: Origin of test\n"\
-	   "dnl @ expected status: %d\n"\
-	   "dnl @ extra options: %s\n"\
-	   "dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software\n"\
-	   "dnl @ Foundation, Inc.\n"\
-	   "dnl @ This file is free software; the Free Software Foundation\n"\
-	   "dnl @ gives unlimited permission to copy and/or distribute it\n"\
-	   "dnl @ with or without modifications, as long as this notice\n"\
-	   "dnl @ is preserved.\n", FILENAME, NR, status, options) > file;
+           "dnl @ expected status: %d\n"\
+           "dnl @ extra options: %s\n"\
+           "dnl @ Copyright (C) 2006, 2007, 2008, 2009 Free Software\n"\
+           "dnl @ Foundation, Inc.\n"\
+           "dnl @ This file is free software; the Free Software Foundation\n"\
+           "dnl @ gives unlimited permission to copy and/or distribute it\n"\
+           "dnl @ with or without modifications, as long as this notice\n"\
+           "dnl @ is preserved.\n", FILENAME, NR, status, options) > file;
     if (xout)
-	printf("dnl @ expected output: %s\n", xout) > file;
+        printf("dnl @ expected output: %s\n", xout) > file;
     if (xerr)
-	printf("dnl @ expected error: %s\n", xerr) > file;
+        printf("dnl @ expected error: %s\n", xerr) > file;
     status = 0;
     options = "";
     xout = "";

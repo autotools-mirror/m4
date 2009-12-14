@@ -126,7 +126,7 @@ do
       cp $err $xerr ;;
     '')
       ${SED} '/^dnl @error{}/!d
-	   s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
+           s///; '"s|^m4:|$m4name:|; s|examples/|$examples/|" \
         "$file" > $xerr ;;
     *)
       # This is a no-op for GNU sed, but is important for Solaris sed

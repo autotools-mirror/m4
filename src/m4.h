@@ -167,7 +167,7 @@ void m4_warn (int, const call_info *, const char *, ...) M4_GNUC_PRINTF (3, 4);
 
 #ifdef USE_STACKOVF
 void setup_stackovf_trap (char *const *, char *const *,
-			  void (*handler) (void));
+                          void (*handler) (void));
 #endif
 
 /* File: debug.c  --- debugging and tracing function.  */
@@ -266,29 +266,29 @@ struct token_chain
   union
     {
       struct
-	{
-	  const char *str;	/* Pointer to text.  */
-	  size_t len;		/* Remaining length of str.  */
-	  int level;		/* Expansion level of link content, or -1.  */
-	}
+        {
+          const char *str;	/* Pointer to text.  */
+          size_t len;		/* Remaining length of str.  */
+          int level;		/* Expansion level of link content, or -1.  */
+        }
       u_s;
       builtin_func *func;		/* Builtin token from defn.  */
       struct
-	{
-	  macro_arguments *argv;	/* Reference to earlier $@.  */
-	  unsigned int index;		/* Argument index within argv.  */
-	  bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
-	  bool_bitfield comma : 1;	/* True when `,' is next input.  */
-	  bool_bitfield skip_last : 1;	/* True if last argument omitted.  */
-	  bool_bitfield has_func : 1;	/* True if argv includes func.  */
-	  const string_pair *quotes;	/* NULL for $*, quotes for $@.  */
-	}
+        {
+          macro_arguments *argv;	/* Reference to earlier $@.  */
+          unsigned int index;		/* Argument index within argv.  */
+          bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
+          bool_bitfield comma : 1;	/* True when `,' is next input.  */
+          bool_bitfield skip_last : 1;	/* True if last argument omitted.  */
+          bool_bitfield has_func : 1;	/* True if argv includes func.  */
+          const string_pair *quotes;	/* NULL for $*, quotes for $@.  */
+        }
       u_a;
       struct
-	{
-	  const char *file;	/* File where subsequent links originate.  */
-	  int line;		/* Line where subsequent links originate.  */
-	}
+        {
+          const char *file;	/* File where subsequent links originate.  */
+          int line;		/* Line where subsequent links originate.  */
+        }
       u_l;
     }
   u;
@@ -301,40 +301,40 @@ struct token_data
   union
     {
       struct
-	{
-	  /* We don't support NUL in text, yet.  So len is just a
-	     cache for now.  But it will be essential if we ever DO
-	     support NUL.  */
-	  size_t len;
-	  char *text; /* The contents of the token.  */
-	  /* The value of quote_age when this token was scanned.  If
-	     this token is later encountered in the context of
-	     scanning a quoted string, and quote_age has not changed,
-	     then rescanning this string is provably unnecessary.  If
-	     zero, then this string potentially contains content that
-	     might change the parse on rescan.  Ignored for 0 len.  */
-	  unsigned int quote_age;
+        {
+          /* We don't support NUL in text, yet.  So len is just a
+             cache for now.  But it will be essential if we ever DO
+             support NUL.  */
+          size_t len;
+          char *text; /* The contents of the token.  */
+          /* The value of quote_age when this token was scanned.  If
+             this token is later encountered in the context of
+             scanning a quoted string, and quote_age has not changed,
+             then rescanning this string is provably unnecessary.  If
+             zero, then this string potentially contains content that
+             might change the parse on rescan.  Ignored for 0 len.  */
+          unsigned int quote_age;
 #ifdef ENABLE_CHANGEWORD
-	  /* If changeword is in effect, and contains a () group, then
-	     this contains the entire token, while text contains the
-	     portion that matched the () group to form a macro name.
-	     Otherwise, this field is unused.  */
-	  const char *original_text;
-	  size_t original_len; /* Length of original_text.  */
+          /* If changeword is in effect, and contains a () group, then
+             this contains the entire token, while text contains the
+             portion that matched the () group to form a macro name.
+             Otherwise, this field is unused.  */
+          const char *original_text;
+          size_t original_len; /* Length of original_text.  */
 #endif
-	}
+        }
       u_t;
       builtin_func *func;
 
       /* Composite text: a linked list of straight text and $@
-	 placeholders.  */
+         placeholders.  */
       struct
-	{
-	  token_chain *chain;		/* First link of the chain.  */
-	  token_chain *end;		/* Last link of the chain.  */
-	  bool_bitfield wrapper : 1;	/* True if this is a $@ ref.  */
-	  bool_bitfield has_func : 1;	/* True if chain includes func.  */
-	}
+        {
+          token_chain *chain;		/* First link of the chain.  */
+          token_chain *end;		/* Last link of the chain.  */
+          bool_bitfield wrapper : 1;	/* True if this is a $@ ref.  */
+          bool_bitfield has_func : 1;	/* True if chain includes func.  */
+        }
       u_c;
     }
   u;
@@ -356,14 +356,14 @@ typedef enum token_data_type token_data_type;
 void input_init (void);
 token_type peek_token (void);
 token_type next_token (token_data *, int *, struct obstack *, bool,
-		       const call_info *);
+                       const call_info *);
 void skip_line (const call_info *);
 
 /* push back input */
 void make_text_link (struct obstack *, token_chain **, token_chain **);
 void push_file (FILE *, const char *, bool);
 void append_macro (struct obstack *, builtin_func *, token_chain **,
-		   token_chain **);
+                   token_chain **);
 void push_macro (struct obstack *, builtin_func *);
 struct obstack *push_string_init (const char *, int);
 bool push_token (token_data *, int, bool);
@@ -394,7 +394,7 @@ void set_word_regexp (const call_info *, const char *, size_t);
 unsigned int quote_age (void);
 bool safe_quotes (void);
 const string_pair *quote_cache (struct obstack *, unsigned int,
-				const string_pair *);
+                                const string_pair *);
 
 /* File: output.c --- output functions.  */
 extern int current_diversion;
@@ -480,13 +480,13 @@ size_t arg_len (macro_arguments *, unsigned int, bool);
 builtin_func *arg_func (macro_arguments *, unsigned int);
 struct obstack *arg_scratch (void);
 bool arg_print (struct obstack *, macro_arguments *, unsigned int,
-		const string_pair *, bool, token_chain **, const char *,
-		size_t *, bool);
+                const string_pair *, bool, token_chain **, const char *,
+                size_t *, bool);
 macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
-				bool, bool);
+                                bool, bool);
 void push_arg (struct obstack *, macro_arguments *, unsigned int);
 void push_arg_quote (struct obstack *, macro_arguments *, unsigned int,
-		     const string_pair *);
+                     const string_pair *);
 void push_args (struct obstack *, macro_arguments *, bool, bool);
 void wrap_args (macro_arguments *);
 
@@ -533,7 +533,7 @@ void define_builtin (const char *, size_t, const builtin *, symbol_lookup);
 void set_macro_sequence (const char *);
 void free_regex (void);
 void define_user_macro (const char *, size_t, const char *, size_t,
-			symbol_lookup);
+                        symbol_lookup);
 void undivert_all (void);
 void expand_user_macro (struct obstack *, symbol *, int, macro_arguments *);
 void m4_placeholder (struct obstack *, int, macro_arguments *);
@@ -542,7 +542,7 @@ void init_pattern_buffer (struct re_pattern_buffer *, struct re_registers *);
 const builtin *find_builtin_by_addr (builtin_func *);
 const builtin *find_builtin_by_name (const char *);
 void func_print (struct obstack *, const builtin *, bool, token_chain **,
-		 const string_pair *);
+                 const string_pair *);
 
 /* File: path.c  --- path search for include files.  */
 

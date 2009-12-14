@@ -96,7 +96,7 @@ struct macro_arguments
    thresholds of the input engine, the interesting sequence of events
    is as follows:
 
-				     stacks[0]             refs stacks[1] refs
+                                     stacks[0]             refs stacks[1] refs
      after second dnl ends:          `'                    0    `'        0
      expand_macro for x, level 0:    `'                    1    `'        0
      expand_macro for a, level 1:    `'                    1    `'        1
@@ -165,7 +165,7 @@ typedef struct macro_arg_stacks macro_arg_stacks;
 
 static void expand_macro (symbol *);
 static bool expand_token (struct obstack *, token_type, token_data *, int,
-			  bool);
+                          bool);
 
 /* Array of stacks, one element per macro recursion level.  */
 static macro_arg_stacks *stacks;
@@ -230,12 +230,12 @@ expand_input (void)
     {
       assert (stacks[i].refcount == 0 && stacks[i].argcount == 0);
       if (stacks[i].args)
-	{
-	  obstack_free (stacks[i].args, NULL);
-	  free (stacks[i].args);
-	  obstack_free (stacks[i].argv, NULL);
-	  free (stacks[i].argv);
-	}
+        {
+          obstack_free (stacks[i].args, NULL);
+          free (stacks[i].args);
+          obstack_free (stacks[i].argv, NULL);
+          free (stacks[i].argv);
+        }
     }
   free (stacks);
   stacks = NULL;
@@ -258,7 +258,7 @@ expand_input (void)
 
 static bool
 expand_token (struct obstack *obs, token_type t, token_data *td, int line,
-	      bool first)
+              bool first)
 {
   symbol *sym;
   bool result = false;
@@ -272,68 +272,68 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 
     case TOKEN_STRING:
       /* Strings are safe in isolation (since quote_age() detects any
-	 change in delimiters), or when safe_quotes is true.  When
-	 safe_quotes is false, we could technically return true if we
-	 can prove that the concatenation of this string to prior text
-	 does not form a multi-byte quote delimiter, but that is a lot
-	 of overhead, so we give the conservative answer of false.  */
+         change in delimiters), or when safe_quotes is true.  When
+         safe_quotes is false, we could technically return true if we
+         can prove that the concatenation of this string to prior text
+         does not form a multi-byte quote delimiter, but that is a lot
+         of overhead, so we give the conservative answer of false.  */
       result = first || safe_quotes ();
       /* fallthru */
     case TOKEN_COMMENT:
       /* Comments can contain unbalanced quote delimiters.  Rather
-	 than search for one, we return the conservative answer of
-	 false.  If obstack is provided, the string or comment was
-	 already expanded into it during next_token.  */
+         than search for one, we return the conservative answer of
+         false.  If obstack is provided, the string or comment was
+         already expanded into it during next_token.  */
       if (obs)
-	return result;
+        return result;
       break;
 
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:
       /* If safe_quotes is true, then these do not form a quote
-	 delimiter.  If it is false, we give the conservative answer
-	 of false rather than taking time to prove that no multi-byte
-	 quote delimiter is formed.  */
+         delimiter.  If it is false, we give the conservative answer
+         of false rather than taking time to prove that no multi-byte
+         quote delimiter is formed.  */
       result = safe_quotes ();
       break;
 
     case TOKEN_SIMPLE:
       /* If safe_quotes is true, then all but the single-byte end
-	 quote delimiter is safe in a quoted context; a single-byte
-	 start delimiter will trigger a TOKEN_STRING instead.  If
-	 safe_quotes is false, we give the conservative answer of
-	 false rather than taking time to prove that no multi-byte
-	 quote delimiter is formed.  */
+         quote delimiter is safe in a quoted context; a single-byte
+         start delimiter will trigger a TOKEN_STRING instead.  If
+         safe_quotes is false, we give the conservative answer of
+         false rather than taking time to prove that no multi-byte
+         quote delimiter is formed.  */
       result = *TOKEN_DATA_TEXT (td) != *curr_quote.str2 && safe_quotes ();
       if (result)
-	assert (*TOKEN_DATA_TEXT (td) != *curr_quote.str1);
+        assert (*TOKEN_DATA_TEXT (td) != *curr_quote.str1);
       break;
 
     case TOKEN_WORD:
       sym = lookup_symbol (TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td),
-			   SYMBOL_LOOKUP);
+                           SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
-	  || (SYMBOL_TYPE (sym) == TOKEN_FUNC
-	      && SYMBOL_BLIND_NO_ARGS (sym)
-	      && peek_token () != TOKEN_OPEN))
-	{
+          || (SYMBOL_TYPE (sym) == TOKEN_FUNC
+              && SYMBOL_BLIND_NO_ARGS (sym)
+              && peek_token () != TOKEN_OPEN))
+        {
 #ifdef ENABLE_CHANGEWORD
-	  divert_text (obs, TOKEN_DATA_ORIG_TEXT (td),
-		       TOKEN_DATA_ORIG_LEN (td), line);
+          divert_text (obs, TOKEN_DATA_ORIG_TEXT (td),
+                       TOKEN_DATA_ORIG_LEN (td), line);
 #else
-	  divert_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
+          divert_text (obs, TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td), line);
 #endif /* !ENABLE_CHANGEWORD */
-	  /* If safe_quotes is true, then words do not overlap with
-	     quote delimiters.  If it is false, we give the
-	     conservative answer of false rather than prove that no
-	     multi-byte delimiters are formed.  */
-	  return safe_quotes();
-	}
+          /* If safe_quotes is true, then words do not overlap with
+             quote delimiters.  If it is false, we give the
+             conservative answer of false rather than prove that no
+             multi-byte delimiters are formed.  */
+          return safe_quotes();
+        }
       expand_macro (sym);
       /* Expanding a macro creates new tokens to scan, and those new
-	 tokens may append unsafe text later; but we did not append
-	 any text now.  */
+         tokens may append unsafe text later; but we did not append
+         any text now.  */
       return true;
 
     default:
@@ -358,7 +358,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
 
 static bool
 expand_argument (struct obstack *obs, token_data *argp,
-		 const call_info *caller)
+                 const call_info *caller)
 {
   token_type t;
   token_data td;
@@ -382,104 +382,104 @@ expand_argument (struct obstack *obs, token_data *argp,
     {
 
       switch (t)
-	{			/* TOKSW */
-	case TOKEN_COMMA:
-	case TOKEN_CLOSE:
-	  if (paren_level == 0)
-	    {
-	      assert (TOKEN_DATA_TYPE (argp) != TOKEN_FUNC);
-	      if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
-		{
-		  size_t len = obstack_object_size (obs);
-		  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-		  if (len)
-		    {
-		      obstack_1grow (obs, '\0');
-		      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
-		    }
-		  else
-		    TOKEN_DATA_TEXT (argp) = NULL;
-		  TOKEN_DATA_LEN (argp) = len;
-		  TOKEN_DATA_QUOTE_AGE (argp) = age;
-		}
-	      else
-		{
-		  make_text_link (obs, NULL, &argp->u.u_c.end);
-		  if (argp->u.u_c.chain == argp->u.u_c.end
-		      && argp->u.u_c.chain->type == CHAIN_FUNC)
-		    {
-		      builtin_func *func = argp->u.u_c.chain->u.func;
-		      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
-		      TOKEN_DATA_FUNC (argp) = func;
-		    }
-		}
-	      return t == TOKEN_COMMA;
-	    }
-	  /* fallthru */
-	case TOKEN_OPEN:
-	case TOKEN_SIMPLE:
-	  if (t == TOKEN_OPEN)
-	    paren_level++;
-	  else if (t == TOKEN_CLOSE)
-	    paren_level--;
-	  if (!expand_token (obs, t, &td, line, first))
-	    age = 0;
-	  break;
+        {			/* TOKSW */
+        case TOKEN_COMMA:
+        case TOKEN_CLOSE:
+          if (paren_level == 0)
+            {
+              assert (TOKEN_DATA_TYPE (argp) != TOKEN_FUNC);
+              if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
+                {
+                  size_t len = obstack_object_size (obs);
+                  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
+                  if (len)
+                    {
+                      obstack_1grow (obs, '\0');
+                      TOKEN_DATA_TEXT (argp) = (char *) obstack_finish (obs);
+                    }
+                  else
+                    TOKEN_DATA_TEXT (argp) = NULL;
+                  TOKEN_DATA_LEN (argp) = len;
+                  TOKEN_DATA_QUOTE_AGE (argp) = age;
+                }
+              else
+                {
+                  make_text_link (obs, NULL, &argp->u.u_c.end);
+                  if (argp->u.u_c.chain == argp->u.u_c.end
+                      && argp->u.u_c.chain->type == CHAIN_FUNC)
+                    {
+                      builtin_func *func = argp->u.u_c.chain->u.func;
+                      TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
+                      TOKEN_DATA_FUNC (argp) = func;
+                    }
+                }
+              return t == TOKEN_COMMA;
+            }
+          /* fallthru */
+        case TOKEN_OPEN:
+        case TOKEN_SIMPLE:
+          if (t == TOKEN_OPEN)
+            paren_level++;
+          else if (t == TOKEN_CLOSE)
+            paren_level--;
+          if (!expand_token (obs, t, &td, line, first))
+            age = 0;
+          break;
 
-	case TOKEN_EOF:
-	  m4_error (EXIT_FAILURE, 0, caller,
-		    _("end of file in argument list"));
-	  break;
+        case TOKEN_EOF:
+          m4_error (EXIT_FAILURE, 0, caller,
+                    _("end of file in argument list"));
+          break;
 
-	case TOKEN_WORD:
-	case TOKEN_STRING:
-	case TOKEN_COMMENT:
-	case TOKEN_MACDEF:
-	  if (!expand_token (obs, t, &td, line, first))
-	    age = 0;
-	  if (TOKEN_DATA_TYPE (&td) == TOKEN_COMP)
-	    {
-	      if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
-		{
-		  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
-		  argp->u.u_c.chain = td.u.u_c.chain;
-		  argp->u.u_c.wrapper = argp->u.u_c.has_func = false;
-		}
-	      else
-		{
-		  assert (argp->u.u_c.end);
-		  argp->u.u_c.end->next = td.u.u_c.chain;
-		}
-	      argp->u.u_c.end = td.u.u_c.end;
-	      if (td.u.u_c.has_func)
-		argp->u.u_c.has_func = true;
-	    }
-	  break;
+        case TOKEN_WORD:
+        case TOKEN_STRING:
+        case TOKEN_COMMENT:
+        case TOKEN_MACDEF:
+          if (!expand_token (obs, t, &td, line, first))
+            age = 0;
+          if (TOKEN_DATA_TYPE (&td) == TOKEN_COMP)
+            {
+              if (TOKEN_DATA_TYPE (argp) != TOKEN_COMP)
+                {
+                  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
+                  argp->u.u_c.chain = td.u.u_c.chain;
+                  argp->u.u_c.wrapper = argp->u.u_c.has_func = false;
+                }
+              else
+                {
+                  assert (argp->u.u_c.end);
+                  argp->u.u_c.end->next = td.u.u_c.chain;
+                }
+              argp->u.u_c.end = td.u.u_c.end;
+              if (td.u.u_c.has_func)
+                argp->u.u_c.has_func = true;
+            }
+          break;
 
-	case TOKEN_ARGV:
-	  assert (paren_level == 0 && TOKEN_DATA_TYPE (argp) == TOKEN_VOID
-		  && obstack_object_size (obs) == 0
-		  && td.u.u_c.chain == td.u.u_c.end
-		  && td.u.u_c.chain->quote_age == age
-		  && td.u.u_c.chain->type == CHAIN_ARGV);
-	  TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
-	  argp->u.u_c.chain = argp->u.u_c.end = td.u.u_c.chain;
-	  argp->u.u_c.wrapper = true;
-	  argp->u.u_c.has_func = td.u.u_c.has_func;
-	  t = next_token (&td, NULL, NULL, false, caller);
-	  if (argp->u.u_c.chain->u.u_a.skip_last)
-	    assert (t == TOKEN_COMMA);
-	  else
-	    assert (t == TOKEN_COMMA || t == TOKEN_CLOSE);
-	  return t == TOKEN_COMMA;
+        case TOKEN_ARGV:
+          assert (paren_level == 0 && TOKEN_DATA_TYPE (argp) == TOKEN_VOID
+                  && obstack_object_size (obs) == 0
+                  && td.u.u_c.chain == td.u.u_c.end
+                  && td.u.u_c.chain->quote_age == age
+                  && td.u.u_c.chain->type == CHAIN_ARGV);
+          TOKEN_DATA_TYPE (argp) = TOKEN_COMP;
+          argp->u.u_c.chain = argp->u.u_c.end = td.u.u_c.chain;
+          argp->u.u_c.wrapper = true;
+          argp->u.u_c.has_func = td.u.u_c.has_func;
+          t = next_token (&td, NULL, NULL, false, caller);
+          if (argp->u.u_c.chain->u.u_a.skip_last)
+            assert (t == TOKEN_COMMA);
+          else
+            assert (t == TOKEN_COMMA || t == TOKEN_CLOSE);
+          return t == TOKEN_COMMA;
 
-	default:
-	  assert (!"expand_argument");
-	  abort ();
-	}
+        default:
+          assert (!"expand_argument");
+          abort ();
+        }
 
       if (TOKEN_DATA_TYPE (argp) != TOKEN_VOID || obstack_object_size (obs))
-	first = false;
+        first = false;
       t = next_token (&td, NULL, obs, first, caller);
     }
 }
@@ -492,7 +492,7 @@ expand_argument (struct obstack *obs, token_data *argp,
 
 static macro_arguments *
 collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
-		   struct obstack *argv_stack)
+                   struct obstack *argv_stack)
 {
   token_data td;
   token_data *tdp;
@@ -518,52 +518,52 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
       /* gobble parenthesis */
       next_token (&td, NULL, NULL, false, info);
       do
-	{
-	  tdp = (token_data *) obstack_alloc (arguments, sizeof *tdp);
-	  more_args = expand_argument (arguments, tdp, info);
+        {
+          tdp = (token_data *) obstack_alloc (arguments, sizeof *tdp);
+          more_args = expand_argument (arguments, tdp, info);
 
-	  if ((TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT && !TOKEN_DATA_LEN (tdp))
-	      || (!groks_macro_args && TOKEN_DATA_TYPE (tdp) == TOKEN_FUNC))
-	    {
-	      obstack_free (arguments, tdp);
-	      tdp = &empty_token;
-	    }
-	  obstack_ptr_grow (argv_stack, tdp);
-	  args.arraylen++;
-	  args.argc++;
-	  switch (TOKEN_DATA_TYPE (tdp))
-	    {
-	    case TOKEN_TEXT:
-	      /* Be conservative - any change in quoting while
-		 collecting arguments, or any argument that consists
-		 of unsafe text, will require a rescan if $@ is
-		 reused.  */
-	      if (TOKEN_DATA_LEN (tdp) > 0
-		  && TOKEN_DATA_QUOTE_AGE (tdp) != args.quote_age)
-		args.quote_age = 0;
-	      break;
-	    case TOKEN_FUNC:
-	      args.has_func = true;
-	      break;
-	    case TOKEN_COMP:
-	      args.has_ref = true;
-	      if (tdp->u.u_c.wrapper)
-		{
-		  assert (tdp->u.u_c.chain->type == CHAIN_ARGV
-			  && !tdp->u.u_c.chain->next);
-		  args.argc += (tdp->u.u_c.chain->u.u_a.argv->argc
-				- tdp->u.u_c.chain->u.u_a.index
-				- tdp->u.u_c.chain->u.u_a.skip_last - 1);
-		  args.wrapper = true;
-		}
-	      if (tdp->u.u_c.has_func)
-		args.has_func = true;
-	      break;
-	    default:
-	      assert (!"expand_argument");
-	      abort ();
-	    }
-	}
+          if ((TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT && !TOKEN_DATA_LEN (tdp))
+              || (!groks_macro_args && TOKEN_DATA_TYPE (tdp) == TOKEN_FUNC))
+            {
+              obstack_free (arguments, tdp);
+              tdp = &empty_token;
+            }
+          obstack_ptr_grow (argv_stack, tdp);
+          args.arraylen++;
+          args.argc++;
+          switch (TOKEN_DATA_TYPE (tdp))
+            {
+            case TOKEN_TEXT:
+              /* Be conservative - any change in quoting while
+                 collecting arguments, or any argument that consists
+                 of unsafe text, will require a rescan if $@ is
+                 reused.  */
+              if (TOKEN_DATA_LEN (tdp) > 0
+                  && TOKEN_DATA_QUOTE_AGE (tdp) != args.quote_age)
+                args.quote_age = 0;
+              break;
+            case TOKEN_FUNC:
+              args.has_func = true;
+              break;
+            case TOKEN_COMP:
+              args.has_ref = true;
+              if (tdp->u.u_c.wrapper)
+                {
+                  assert (tdp->u.u_c.chain->type == CHAIN_ARGV
+                          && !tdp->u.u_c.chain->next);
+                  args.argc += (tdp->u.u_c.chain->u.u_a.argv->argc
+                                - tdp->u.u_c.chain->u.u_a.index
+                                - tdp->u.u_c.chain->u.u_a.skip_last - 1);
+                  args.wrapper = true;
+                }
+              if (tdp->u.u_c.has_func)
+                args.has_func = true;
+              break;
+            default:
+              assert (!"expand_argument");
+              abort ();
+            }
+        }
       while (more_args);
     }
   argv = (macro_arguments *) obstack_finish (argv_stack);
@@ -637,24 +637,24 @@ expand_macro (symbol *sym)
     {
       size_t old_count = stacks_count;
       stacks = (macro_arg_stacks *) x2nrealloc (stacks, &stacks_count,
-						sizeof *stacks);
+                                                sizeof *stacks);
       memset (&stacks[old_count], 0,
-	      sizeof *stacks * (stacks_count - old_count));
+              sizeof *stacks * (stacks_count - old_count));
     }
   if (!stacks[level].args)
     {
       assert (!stacks[level].refcount);
       stacks[level].args =
-	(struct obstack *) xmalloc (sizeof *stacks[level].args);
+        (struct obstack *) xmalloc (sizeof *stacks[level].args);
       stacks[level].argv =
-	(struct obstack *) xmalloc (sizeof *stacks[level].argv);
+        (struct obstack *) xmalloc (sizeof *stacks[level].argv);
       obstack_init (stacks[level].args);
       obstack_init (stacks[level].argv);
       stacks[level].args_base = obstack_finish (stacks[level].args);
       stacks[level].argv_base = obstack_finish (stacks[level].argv);
     }
   assert (obstack_object_size (stacks[level].args) == 0
-	  && obstack_object_size (stacks[level].argv) == 0);
+          && obstack_object_size (stacks[level].argv) == 0);
   args_base = obstack_finish (stacks[level].args);
   argv_base = obstack_finish (stacks[level].argv);
   adjust_refcount (level, true);
@@ -665,8 +665,8 @@ expand_macro (symbol *sym)
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
     m4_error (EXIT_FAILURE, 0, NULL,
-	      _("recursion limit of %d exceeded, use -L<N> to change it"),
-	      nesting_limit);
+              _("recursion limit of %d exceeded, use -L<N> to change it"),
+              nesting_limit);
 
   /* Collect context in effect at start of macro, even if global state
      changes in the meantime.  */
@@ -681,7 +681,7 @@ expand_macro (symbol *sym)
 
   /* Collect the arguments.  */
   argv = collect_arguments (sym, &my_call_info, stacks[level].args,
-			    stacks[level].argv);
+                            stacks[level].argv);
   args_scratch = obstack_finish (stacks[level].args);
 
   /* The actual macro call.  */
@@ -706,20 +706,20 @@ expand_macro (symbol *sym)
   if (stacks[level].refcount)
     {
       if (argv->inuse)
-	{
-	  obstack_free (stacks[level].args, args_scratch);
-	  if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
-	    xfprintf (debug, "m4debug: -%d- `%s' in use, level=%d, "
-		      "refcount=%zu, argcount=%zu\n", my_call_info.call_id,
-		      my_call_info.name, level, stacks[level].refcount,
-		      stacks[level].argcount);
-	}
+        {
+          obstack_free (stacks[level].args, args_scratch);
+          if (debug_macro_level & PRINT_ARGCOUNT_CHANGES)
+            xfprintf (debug, "m4debug: -%d- `%s' in use, level=%d, "
+                      "refcount=%zu, argcount=%zu\n", my_call_info.call_id,
+                      my_call_info.name, level, stacks[level].refcount,
+                      stacks[level].argcount);
+        }
       else
-	{
-	  obstack_free (stacks[level].args, args_base);
-	  obstack_free (stacks[level].argv, argv_base);
-	  stacks[level].argcount--;
-	}
+        {
+          obstack_free (stacks[level].args, args_base);
+          obstack_free (stacks[level].argv, argv_base);
+          stacks[level].argcount--;
+        }
     }
 }
 
@@ -739,15 +739,15 @@ adjust_refcount (int level, bool increase)
       obstack_free (stacks[level].args, stacks[level].args_base);
       obstack_free (stacks[level].argv, stacks[level].argv_base);
       if ((debug_macro_level & PRINT_ARGCOUNT_CHANGES)
-	  && stacks[level].argcount > 1)
-	xfprintf (debug, "m4debug: -%d- freeing %zu args, level=%d\n",
-		  macro_call_id, stacks[level].argcount, level);
+          && stacks[level].argcount > 1)
+        xfprintf (debug, "m4debug: -%d- freeing %zu args, level=%d\n",
+                  macro_call_id, stacks[level].argcount, level);
       stacks[level].argcount = 0;
     }
   if (debug_macro_level
       & (increase ? PRINT_REFCOUNT_INCREASE : PRINT_REFCOUNT_DECREASE))
     xfprintf (debug, "m4debug: level %d refcount=%zu\n", level,
-	      stacks[level].refcount);
+              stacks[level].refcount);
   return stacks[level].refcount;
 }
 
@@ -764,29 +764,29 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
   if (argv->has_ref)
     for (i = 0; i < argv->arraylen; i++)
       if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP)
-	{
-	  chain = argv->array[i]->u.u_c.chain;
-	  while (chain)
-	    {
-	      switch (chain->type)
-		{
-		case CHAIN_STR:
-		  if (chain->u.u_s.level >= 0)
-		    adjust_refcount (chain->u.u_s.level, increase);
-		  break;
-		case CHAIN_FUNC:
-		  break;
-		case CHAIN_ARGV:
-		  assert (chain->u.u_a.argv->inuse);
-		  arg_adjust_refcount (chain->u.u_a.argv, increase);
-		  break;
-		default:
-		  assert (!"arg_adjust_refcount");
-		  abort ();
-		}
-	      chain = chain->next;
-	    }
-	}
+        {
+          chain = argv->array[i]->u.u_c.chain;
+          while (chain)
+            {
+              switch (chain->type)
+                {
+                case CHAIN_STR:
+                  if (chain->u.u_s.level >= 0)
+                    adjust_refcount (chain->u.u_s.level, increase);
+                  break;
+                case CHAIN_FUNC:
+                  break;
+                case CHAIN_ARGV:
+                  assert (chain->u.u_a.argv->inuse);
+                  arg_adjust_refcount (chain->u.u_a.argv, increase);
+                  break;
+                default:
+                  assert (!"arg_adjust_refcount");
+                  abort ();
+                }
+              chain = chain->next;
+            }
+        }
   adjust_refcount (argv->level, increase);
   return result;
 }
@@ -811,7 +811,7 @@ arg_token (macro_arguments *argv, unsigned int arg, int *level, bool flatten)
     {
       token = argv->array[arg - 1];
       if (flatten && TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
-	token = &empty_token;
+        token = &empty_token;
       return token;
     }
 
@@ -821,22 +821,22 @@ arg_token (macro_arguments *argv, unsigned int arg, int *level, bool flatten)
     {
       token = argv->array[i];
       if (TOKEN_DATA_TYPE (token) == TOKEN_COMP && token->u.u_c.wrapper)
-	{
-	  token_chain *chain = token->u.u_c.chain;
-	  assert (!chain->next && chain->type == CHAIN_ARGV);
-	  if (arg <= (chain->u.u_a.argv->argc - chain->u.u_a.index
-		      - chain->u.u_a.skip_last))
-	    {
-	      token = arg_token (chain->u.u_a.argv,
-				 chain->u.u_a.index - 1 + arg, level,
-				 flatten || chain->u.u_a.flatten);
-	      break;
-	    }
-	  arg -= (chain->u.u_a.argv->argc - chain->u.u_a.index
-		  - chain->u.u_a.skip_last);
-	}
+        {
+          token_chain *chain = token->u.u_c.chain;
+          assert (!chain->next && chain->type == CHAIN_ARGV);
+          if (arg <= (chain->u.u_a.argv->argc - chain->u.u_a.index
+                      - chain->u.u_a.skip_last))
+            {
+              token = arg_token (chain->u.u_a.argv,
+                                 chain->u.u_a.index - 1 + arg, level,
+                                 flatten || chain->u.u_a.flatten);
+              break;
+            }
+          arg -= (chain->u.u_a.argv->argc - chain->u.u_a.index
+                  - chain->u.u_a.skip_last);
+        }
       else if (--arg == 0)
-	break;
+        break;
     }
   return token;
 }
@@ -855,13 +855,13 @@ arg_mark (macro_arguments *argv)
   if (argv->wrapper)
     for (i = 0; i < argv->arraylen; i++)
       if (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
-	  && argv->array[i]->u.u_c.wrapper)
-	{
-	  chain = argv->array[i]->u.u_c.chain;
-	  assert (!chain->next && chain->type == CHAIN_ARGV);
-	  if (!chain->u.u_a.argv->inuse)
-	    arg_mark (chain->u.u_a.argv);
-	}
+          && argv->array[i]->u.u_c.wrapper)
+        {
+          chain = argv->array[i]->u.u_c.chain;
+          assert (!chain->next && chain->type == CHAIN_ARGV);
+          if (!chain->u.u_a.argv->inuse)
+            arg_mark (chain->u.u_a.argv);
+        }
 }
 
 /* Given ARGV, return how many arguments it refers to.  */
@@ -928,31 +928,31 @@ arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
       chain = token->u.u_c.chain;
       obs = arg_scratch ();
       while (chain)
-	{
-	  switch (chain->type)
-	    {
-	    case CHAIN_STR:
-	      obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-	      break;
-	    case CHAIN_FUNC:
-	      if (flatten)
-		break;
-	      assert (!"arg_text");
-	      abort ();
-	    case CHAIN_ARGV:
-	      assert (!chain->u.u_a.has_func || flatten || argv->flatten);
-	      arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			 quote_cache (NULL, chain->quote_age,
-				      chain->u.u_a.quotes),
-			 flatten || argv->flatten || chain->u.u_a.flatten,
-			 NULL, NULL, NULL, false);
-	      break;
-	    default:
-	      assert (!"arg_text");
-	      abort ();
-	    }
-	  chain = chain->next;
-	}
+        {
+          switch (chain->type)
+            {
+            case CHAIN_STR:
+              obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+              break;
+            case CHAIN_FUNC:
+              if (flatten)
+                break;
+              assert (!"arg_text");
+              abort ();
+            case CHAIN_ARGV:
+              assert (!chain->u.u_a.has_func || flatten || argv->flatten);
+              arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+                         quote_cache (NULL, chain->quote_age,
+                                      chain->u.u_a.quotes),
+                         flatten || argv->flatten || chain->u.u_a.flatten,
+                         NULL, NULL, NULL, false);
+              break;
+            default:
+              assert (!"arg_text");
+              abort ();
+            }
+          chain = chain->next;
+        }
       obstack_1grow (obs, '\0');
       return (char *) obstack_finish (obs);
     case TOKEN_FUNC:
@@ -985,8 +985,8 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   if (TOKEN_DATA_TYPE (ta) == TOKEN_TEXT
       && TOKEN_DATA_TYPE (tb) == TOKEN_TEXT)
     return (TOKEN_DATA_LEN (ta) == TOKEN_DATA_LEN (tb)
-	    && memcmp (TOKEN_DATA_TEXT (ta), TOKEN_DATA_TEXT (tb),
-		       TOKEN_DATA_LEN (ta)) == 0);
+            && memcmp (TOKEN_DATA_TEXT (ta), TOKEN_DATA_TEXT (tb),
+                       TOKEN_DATA_LEN (ta)) == 0);
 
   /* Convert both arguments to chains, if not one already.  */
   switch (TOKEN_DATA_TYPE (ta))
@@ -1034,76 +1034,76 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
   while (ca && cb)
     {
       if (ca->type == CHAIN_ARGV)
-	{
-	  tmpa.next = NULL;
-	  tmpa.type = CHAIN_STR;
-	  tmpa.u.u_s.str = NULL;
-	  tmpa.u.u_s.len = 0;
-	  chain = &tmpa;
-	  arg_print (obs, ca->u.u_a.argv, ca->u.u_a.index,
-		     quote_cache (NULL, ca->quote_age, ca->u.u_a.quotes),
-		     argv->flatten || ca->u.u_a.flatten, &chain, NULL, NULL,
-		     false);
-	  assert (obstack_object_size (obs) == 0 && chain != &tmpa);
-	  chain->next = ca->next;
-	  ca = tmpa.next;
-	  continue;
-	}
+        {
+          tmpa.next = NULL;
+          tmpa.type = CHAIN_STR;
+          tmpa.u.u_s.str = NULL;
+          tmpa.u.u_s.len = 0;
+          chain = &tmpa;
+          arg_print (obs, ca->u.u_a.argv, ca->u.u_a.index,
+                     quote_cache (NULL, ca->quote_age, ca->u.u_a.quotes),
+                     argv->flatten || ca->u.u_a.flatten, &chain, NULL, NULL,
+                     false);
+          assert (obstack_object_size (obs) == 0 && chain != &tmpa);
+          chain->next = ca->next;
+          ca = tmpa.next;
+          continue;
+        }
       if (cb->type == CHAIN_ARGV)
-	{
-	  tmpb.next = NULL;
-	  tmpb.type = CHAIN_STR;
-	  tmpb.u.u_s.str = NULL;
-	  tmpb.u.u_s.len = 0;
-	  chain = &tmpb;
-	  arg_print (obs, cb->u.u_a.argv, cb->u.u_a.index,
-		     quote_cache (NULL, cb->quote_age, cb->u.u_a.quotes),
-		     argv->flatten || cb->u.u_a.flatten, &chain, NULL, NULL,
-		     false);
-	  assert (obstack_object_size (obs) == 0 && chain != &tmpb);
-	  chain->next = cb->next;
-	  cb = tmpb.next;
-	  continue;
-	}
+        {
+          tmpb.next = NULL;
+          tmpb.type = CHAIN_STR;
+          tmpb.u.u_s.str = NULL;
+          tmpb.u.u_s.len = 0;
+          chain = &tmpb;
+          arg_print (obs, cb->u.u_a.argv, cb->u.u_a.index,
+                     quote_cache (NULL, cb->quote_age, cb->u.u_a.quotes),
+                     argv->flatten || cb->u.u_a.flatten, &chain, NULL, NULL,
+                     false);
+          assert (obstack_object_size (obs) == 0 && chain != &tmpb);
+          chain->next = cb->next;
+          cb = tmpb.next;
+          continue;
+        }
       if (ca->type == CHAIN_FUNC)
-	{
-	  if (cb->type != CHAIN_FUNC || ca->u.func != cb->u.func)
-	    return false;
-	  ca = ca->next;
-	  cb = cb->next;
-	  continue;
-	}
+        {
+          if (cb->type != CHAIN_FUNC || ca->u.func != cb->u.func)
+            return false;
+          ca = ca->next;
+          cb = cb->next;
+          continue;
+        }
       assert (ca->type == CHAIN_STR && cb->type == CHAIN_STR);
       if (ca->u.u_s.len == cb->u.u_s.len)
-	{
-	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
-	    return false;
-	  ca = ca->next;
-	  cb = cb->next;
-	}
+        {
+          if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
+            return false;
+          ca = ca->next;
+          cb = cb->next;
+        }
       else if (ca->u.u_s.len < cb->u.u_s.len)
-	{
-	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
-	    return false;
-	  tmpb.next = cb->next;
-	  tmpb.type = CHAIN_STR;
-	  tmpb.u.u_s.str = cb->u.u_s.str + ca->u.u_s.len;
-	  tmpb.u.u_s.len = cb->u.u_s.len - ca->u.u_s.len;
-	  ca = ca->next;
-	  cb = &tmpb;
-	}
+        {
+          if (memcmp (ca->u.u_s.str, cb->u.u_s.str, ca->u.u_s.len) != 0)
+            return false;
+          tmpb.next = cb->next;
+          tmpb.type = CHAIN_STR;
+          tmpb.u.u_s.str = cb->u.u_s.str + ca->u.u_s.len;
+          tmpb.u.u_s.len = cb->u.u_s.len - ca->u.u_s.len;
+          ca = ca->next;
+          cb = &tmpb;
+        }
       else
-	{
-	  assert (ca->u.u_s.len > cb->u.u_s.len);
-	  if (memcmp (ca->u.u_s.str, cb->u.u_s.str, cb->u.u_s.len) != 0)
-	    return false;
-	  tmpa.next = ca->next;
-	  tmpa.type = CHAIN_STR;
-	  tmpa.u.u_s.str = ca->u.u_s.str + cb->u.u_s.len;
-	  tmpa.u.u_s.len = ca->u.u_s.len - cb->u.u_s.len;
-	  ca = &tmpa;
-	  cb = cb->next;
-	}
+        {
+          assert (ca->u.u_s.len > cb->u.u_s.len);
+          if (memcmp (ca->u.u_s.str, cb->u.u_s.str, cb->u.u_s.len) != 0)
+            return false;
+          tmpa.next = ca->next;
+          tmpa.type = CHAIN_STR;
+          tmpa.u.u_s.str = ca->u.u_s.str + cb->u.u_s.len;
+          tmpa.u.u_s.len = ca->u.u_s.len - cb->u.u_s.len;
+          ca = &tmpa;
+          cb = cb->next;
+        }
     }
 
   /* If we get this far, the two tokens are equal only if both chains
@@ -1155,37 +1155,37 @@ arg_len (macro_arguments *argv, unsigned int arg, bool flatten)
       chain = token->u.u_c.chain;
       len = 0;
       while (chain)
-	{
-	  unsigned int i;
-	  unsigned int limit;
-	  const string_pair *quotes;
-	  switch (chain->type)
-	    {
-	    case CHAIN_STR:
-	      len += chain->u.u_s.len;
-	      break;
-	    case CHAIN_FUNC:
-	      assert (flatten);
-	      break;
-	    case CHAIN_ARGV:
-	      i = chain->u.u_a.index;
-	      limit = chain->u.u_a.argv->argc - i - chain->u.u_a.skip_last;
-	      quotes = quote_cache (NULL, chain->quote_age,
-				    chain->u.u_a.quotes);
-	      assert (limit);
-	      if (quotes)
-		len += (quotes->len1 + quotes->len2) * limit;
-	      len += limit - 1;
-	      while (limit--)
-		len += arg_len (chain->u.u_a.argv, i++,
-				flatten || chain->u.u_a.flatten);
-	      break;
-	    default:
-	      assert (!"arg_len");
-	      abort ();
-	    }
-	  chain = chain->next;
-	}
+        {
+          unsigned int i;
+          unsigned int limit;
+          const string_pair *quotes;
+          switch (chain->type)
+            {
+            case CHAIN_STR:
+              len += chain->u.u_s.len;
+              break;
+            case CHAIN_FUNC:
+              assert (flatten);
+              break;
+            case CHAIN_ARGV:
+              i = chain->u.u_a.index;
+              limit = chain->u.u_a.argv->argc - i - chain->u.u_a.skip_last;
+              quotes = quote_cache (NULL, chain->quote_age,
+                                    chain->u.u_a.quotes);
+              assert (limit);
+              if (quotes)
+                len += (quotes->len1 + quotes->len2) * limit;
+              len += limit - 1;
+              while (limit--)
+                len += arg_len (chain->u.u_a.argv, i++,
+                                flatten || chain->u.u_a.flatten);
+              break;
+            default:
+              assert (!"arg_len");
+              abort ();
+            }
+          chain = chain->next;
+        }
       assert (len || flatten);
       return len;
     case TOKEN_FUNC:
@@ -1233,8 +1233,8 @@ arg_scratch (void)
    specified.  */
 bool
 arg_print (struct obstack *obs, macro_arguments *argv, unsigned int arg,
-	   const string_pair *quotes, bool flatten, token_chain **chainp,
-	   const char *sep, size_t *max_len, bool quote_each)
+           const string_pair *quotes, bool flatten, token_chain **chainp,
+           const char *sep, size_t *max_len, bool quote_each)
 {
   size_t len = max_len ? *max_len : INT_MAX;
   unsigned int i;
@@ -1254,71 +1254,71 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int arg,
   for (i = arg; i < argv->argc; i++)
     {
       if (quote_each && max_len)
-	len = *max_len;
+        len = *max_len;
       if (use_sep && shipout_string_trunc (obs, sep, sep_len, plen))
-	return true;
+        return true;
       use_sep = true;
       token = arg_token (argv, i, NULL, flatten);
       switch (TOKEN_DATA_TYPE (token))
-	{
-	case TOKEN_TEXT:
-	  if (quotes && shipout_string_trunc (obs, quotes->str1, quotes->len1,
-					      plen))
-	    return true;
-	  if (shipout_string_trunc (obs, TOKEN_DATA_TEXT (token),
-				    TOKEN_DATA_LEN (token), &len)
-	      && !quote_each)
-	    return true;
-	  if (quotes && shipout_string_trunc (obs, quotes->str2, quotes->len2,
-					      plen))
-	    return true;
-	  break;
-	case TOKEN_COMP:
-	  if (quotes && shipout_string_trunc (obs, quotes->str1, quotes->len1,
-					      plen))
-	    return true;
-	  chain = token->u.u_c.chain;
-	  done = false;
-	  while (chain && !done)
-	    {
-	      switch (chain->type)
-		{
-		case CHAIN_STR:
-		  if (shipout_string_trunc (obs, chain->u.u_s.str,
-					    chain->u.u_s.len, &len))
-		    done = true;
-		  break;
-		case CHAIN_FUNC:
-		  func_print (obs, find_builtin_by_addr (chain->u.func),
-			      flatten, chainp, quotes);
-		  break;
-		case CHAIN_ARGV:
-		  if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-				 quote_cache (NULL, chain->quote_age,
-					      chain->u.u_a.quotes),
-				 flatten, chainp, NULL, &len, false))
-		    done = true;
-		  break;
-		default:
-		  assert (!"arg_print");
-		  abort ();
-		}
-	      chain = chain->next;
-	    }
-	  if (done && !quote_each)
-	    return true;
-	  if (quotes && shipout_string_trunc (obs, quotes->str2, quotes->len2,
-					      plen))
-	    return true;
-	  break;
-	case TOKEN_FUNC:
-	  func_print (obs, find_builtin_by_addr (TOKEN_DATA_FUNC (token)),
-		      flatten, chainp, quotes);
-	  break;
-	default:
-	  assert (!"arg_print");
-	  abort ();
-	}
+        {
+        case TOKEN_TEXT:
+          if (quotes && shipout_string_trunc (obs, quotes->str1, quotes->len1,
+                                              plen))
+            return true;
+          if (shipout_string_trunc (obs, TOKEN_DATA_TEXT (token),
+                                    TOKEN_DATA_LEN (token), &len)
+              && !quote_each)
+            return true;
+          if (quotes && shipout_string_trunc (obs, quotes->str2, quotes->len2,
+                                              plen))
+            return true;
+          break;
+        case TOKEN_COMP:
+          if (quotes && shipout_string_trunc (obs, quotes->str1, quotes->len1,
+                                              plen))
+            return true;
+          chain = token->u.u_c.chain;
+          done = false;
+          while (chain && !done)
+            {
+              switch (chain->type)
+                {
+                case CHAIN_STR:
+                  if (shipout_string_trunc (obs, chain->u.u_s.str,
+                                            chain->u.u_s.len, &len))
+                    done = true;
+                  break;
+                case CHAIN_FUNC:
+                  func_print (obs, find_builtin_by_addr (chain->u.func),
+                              flatten, chainp, quotes);
+                  break;
+                case CHAIN_ARGV:
+                  if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+                                 quote_cache (NULL, chain->quote_age,
+                                              chain->u.u_a.quotes),
+                                 flatten, chainp, NULL, &len, false))
+                    done = true;
+                  break;
+                default:
+                  assert (!"arg_print");
+                  abort ();
+                }
+              chain = chain->next;
+            }
+          if (done && !quote_each)
+            return true;
+          if (quotes && shipout_string_trunc (obs, quotes->str2, quotes->len2,
+                                              plen))
+            return true;
+          break;
+        case TOKEN_FUNC:
+          func_print (obs, find_builtin_by_addr (TOKEN_DATA_FUNC (token)),
+                      flatten, chainp, quotes);
+          break;
+        default:
+          assert (!"arg_print");
+          abort ();
+        }
     }
   if (max_len)
     *max_len = len;
@@ -1334,8 +1334,8 @@ arg_print (struct obstack *obs, macro_arguments *argv, unsigned int arg,
    NULL when wrapping ARGV is trivially empty.  */
 static token_data *
 make_argv_ref_token (token_data *token, struct obstack *obs, int level,
-		     macro_arguments *argv, unsigned int arg, bool flatten,
-		     const string_pair *quotes)
+                     macro_arguments *argv, unsigned int arg, bool flatten,
+                     const string_pair *quotes)
 {
   token_chain *chain;
 
@@ -1351,35 +1351,35 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
     {
       unsigned int i;
       for (i = 0; i < argv->arraylen; i++)
-	{
-	  if ((TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
-	       && argv->array[i]->u.u_c.wrapper)
-	      || level >= 0)
-	    break;
-	  if (arg == 1)
-	    {
-	      push_arg_quote (obs, argv, i + 1, quotes);
-	      obstack_1grow (obs, ',');
-	    }
-	  else
-	    arg--;
-	}
+        {
+          if ((TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
+               && argv->array[i]->u.u_c.wrapper)
+              || level >= 0)
+            break;
+          if (arg == 1)
+            {
+              push_arg_quote (obs, argv, i + 1, quotes);
+              obstack_1grow (obs, ',');
+            }
+          else
+            arg--;
+        }
       assert (i < argv->arraylen);
       if (i + 1 == argv->arraylen)
-	{
-	  assert (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
-		  && argv->array[i]->u.u_c.wrapper);
-	  chain = argv->array[i]->u.u_c.chain;
-	  assert (!chain->next && chain->type == CHAIN_ARGV
-		  && !chain->u.u_a.skip_last);
-	  argv = chain->u.u_a.argv;
-	  arg += chain->u.u_a.index - 1;
-	}
+        {
+          assert (TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
+                  && argv->array[i]->u.u_c.wrapper);
+          chain = argv->array[i]->u.u_c.chain;
+          assert (!chain->next && chain->type == CHAIN_ARGV
+                  && !chain->u.u_a.skip_last);
+          argv = chain->u.u_a.argv;
+          arg += chain->u.u_a.index - 1;
+        }
       else
-	{
-	  arg += i;
-	  break;
-	}
+        {
+          arg += i;
+          break;
+        }
     }
 
   make_text_link (obs, &token->u.u_c.chain, &token->u.u_c.end);
@@ -1413,7 +1413,7 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
    regardless of global trace state.  */
 macro_arguments *
 make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
-	       bool flatten, bool trace)
+               bool flatten, bool trace)
 {
   macro_arguments *new_argv;
   token_data *token;
@@ -1424,12 +1424,12 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   info = (call_info *) obstack_copy (obs, argv->info, sizeof *info);
   new_token = (token_data *) obstack_alloc (obs, sizeof *token);
   token = make_argv_ref_token (new_token, obs, expansion_level - 1, argv, 2,
-			       flatten, NULL);
+                               flatten, NULL);
   if (!token)
     {
       obstack_free (obs, new_token);
       new_argv = (macro_arguments *)
-	obstack_alloc (obs, offsetof (macro_arguments, array));
+        obstack_alloc (obs, offsetof (macro_arguments, array));
       new_argv->arraylen = 0;
       new_argv->wrapper = false;
       new_argv->has_ref = false;
@@ -1439,7 +1439,7 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   else
     {
       new_argv = (macro_arguments *)
-	obstack_alloc (obs, offsetof (macro_arguments, array) + sizeof token);
+        obstack_alloc (obs, offsetof (macro_arguments, array) + sizeof token);
       new_argv->arraylen = 1;
       new_argv->array[0] = token;
       new_argv->wrapper = true;
@@ -1466,7 +1466,7 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int arg)
   if (arg == 0)
     {
       /* Always push copy of arg 0, since its lifetime is not
-	 guaranteed beyond expand_macro.  */
+         guaranteed beyond expand_macro.  */
       assert (argv->info);
       obstack_grow (obs, argv->info->name, argv->info->name_len);
       return;
@@ -1481,7 +1481,7 @@ push_arg (struct obstack *obs, macro_arguments *argv, unsigned int arg)
    delimiters that were in effect when the reference was created.  */
 void
 push_arg_quote (struct obstack *obs, macro_arguments *argv, unsigned int arg,
-		const string_pair *quotes)
+                const string_pair *quotes)
 {
   int level;
   token_data *token = arg_token (argv, arg, &level, false);
@@ -1515,7 +1515,7 @@ push_args (struct obstack *obs, macro_arguments *argv, bool skip, bool quote)
     }
 
   token = make_argv_ref_token (&td, obs, -1, argv, i, argv->flatten,
-			       quote ? &curr_quote : NULL);
+                               quote ? &curr_quote : NULL);
   assert (token);
   if (push_token (token, -1, argv->inuse))
     arg_mark (argv);
@@ -1541,45 +1541,45 @@ wrap_args (macro_arguments *argv)
   for (i = 1; i < (no_gnu_extensions ? 2 : argv->argc); i++)
     {
       if (i != 1)
-	obstack_1grow (obs, ' ');
+        obstack_1grow (obs, ' ');
       token = arg_token (argv, i, NULL, false);
       switch (TOKEN_DATA_TYPE (token))
-	{
-	case TOKEN_TEXT:
-	  obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
-	  break;
-	case TOKEN_FUNC:
-	  append_macro (obs, TOKEN_DATA_FUNC (token), NULL, end);
-	  break;
-	case TOKEN_COMP:
-	  chain = token->u.u_c.chain;
-	  while (chain)
-	    {
-	      switch (chain->type)
-		{
-		case CHAIN_STR:
-		  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
-		  break;
-		case CHAIN_FUNC:
-		  append_macro (obs, chain->u.func, NULL, end);
-		  break;
-		case CHAIN_ARGV:
-		  arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			     quote_cache (NULL, chain->quote_age,
-					  chain->u.u_a.quotes),
-			     chain->u.u_a.flatten, end, NULL, NULL, false);
-		  break;
-		default:
-		  assert (!"wrap_args");
-		  abort ();
-		}
-	      chain = chain->next;
-	    }
-	  break;
-	default:
-	  assert (!"wrap_args");
-	  abort ();
-	}
+        {
+        case TOKEN_TEXT:
+          obstack_grow (obs, TOKEN_DATA_TEXT (token), TOKEN_DATA_LEN (token));
+          break;
+        case TOKEN_FUNC:
+          append_macro (obs, TOKEN_DATA_FUNC (token), NULL, end);
+          break;
+        case TOKEN_COMP:
+          chain = token->u.u_c.chain;
+          while (chain)
+            {
+              switch (chain->type)
+                {
+                case CHAIN_STR:
+                  obstack_grow (obs, chain->u.u_s.str, chain->u.u_s.len);
+                  break;
+                case CHAIN_FUNC:
+                  append_macro (obs, chain->u.func, NULL, end);
+                  break;
+                case CHAIN_ARGV:
+                  arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+                             quote_cache (NULL, chain->quote_age,
+                                          chain->u.u_a.quotes),
+                             chain->u.u_a.flatten, end, NULL, NULL, false);
+                  break;
+                default:
+                  assert (!"wrap_args");
+                  abort ();
+                }
+              chain = chain->next;
+            }
+          break;
+        default:
+          assert (!"wrap_args");
+          abort ();
+        }
     }
   push_wrapup_finish ();
 }

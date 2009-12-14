@@ -96,25 +96,25 @@ struct input_block
   union
     {
       struct
-	{
-	  char *str;		/* Remaining string value.  */
-	  size_t len;		/* Remaining length.  */
-	}
-	u_s;	/* INPUT_STRING */
+        {
+          char *str;		/* Remaining string value.  */
+          size_t len;		/* Remaining length.  */
+        }
+        u_s;	/* INPUT_STRING */
       struct
-	{
-	  FILE *fp;		     /* Input file handle.  */
-	  bool_bitfield end : 1;     /* True if peek has seen EOF.  */
-	  bool_bitfield close : 1;   /* True to close file on pop.  */
-	  bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
-	}
-	u_f;	/* INPUT_FILE */
+        {
+          FILE *fp;		     /* Input file handle.  */
+          bool_bitfield end : 1;     /* True if peek has seen EOF.  */
+          bool_bitfield close : 1;   /* True to close file on pop.  */
+          bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
+        }
+        u_f;	/* INPUT_FILE */
       struct
-	{
-	  token_chain *chain;	/* Current link in chain.  */
-	  token_chain *end;	/* Last link in chain.  */
-	}
-	u_c;	/* INPUT_CHAIN */
+        {
+          token_chain *chain;	/* Current link in chain.  */
+          token_chain *end;	/* Last link in chain.  */
+        }
+        u_c;	/* INPUT_CHAIN */
     }
   u;
 };
@@ -222,9 +222,9 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
       char *str = (char *) obstack_finish (obs);
       chain = (token_chain *) obstack_alloc (obs, sizeof *chain);
       if (*end)
-	(*end)->next = chain;
+        (*end)->next = chain;
       else
-	*start = chain;
+        *start = chain;
       *end = chain;
       chain->next = NULL;
       chain->type = CHAIN_STR;
@@ -257,7 +257,7 @@ push_file (FILE *fp, const char *title, bool close_when_done)
 
   if (debug_level & DEBUG_TRACE_INPUT)
     debug_message ("input read from %s",
-		   quotearg_style (locale_quoting_style, title));
+                   quotearg_style (locale_quoting_style, title));
 
   i = (input_block *) obstack_alloc (current_input, sizeof *i);
   i->type = INPUT_FILE;
@@ -283,7 +283,7 @@ push_file (FILE *fp, const char *title, bool close_when_done)
 `------------------------------------------------------------------*/
 void
 append_macro (struct obstack *obs, builtin_func *func, token_chain **start,
-	      token_chain **end)
+              token_chain **end)
 {
   token_chain *chain;
 
@@ -383,44 +383,44 @@ push_token (token_data *token, int level, bool inuse)
     {
       assert (level >= 0);
       if (TOKEN_DATA_LEN (token) <= INPUT_INLINE_THRESHOLD)
-	{
-	  obstack_grow (current_input, TOKEN_DATA_TEXT (token),
-			TOKEN_DATA_LEN (token));
-	  return false;
-	}
+        {
+          obstack_grow (current_input, TOKEN_DATA_TEXT (token),
+                        TOKEN_DATA_LEN (token));
+          return false;
+        }
     }
   else if (TOKEN_DATA_TYPE (token) == TOKEN_FUNC)
     {
       if (next->type == INPUT_STRING)
-	{
-	  next->type = INPUT_CHAIN;
-	  next->u.u_c.chain = next->u.u_c.end = NULL;
-	}
+        {
+          next->type = INPUT_CHAIN;
+          next->u.u_c.chain = next->u.u_c.end = NULL;
+        }
       append_macro (current_input, TOKEN_DATA_FUNC (token), &next->u.u_c.chain,
-		    &next->u.u_c.end);
+                    &next->u.u_c.end);
       return false;
     }
   else
     {
       /* For composite tokens, if argv is already in use, creating
-	 additional references for long text segments is more
-	 efficient in time.  But if argv is not yet in use, and we
-	 have a composite token, then the token must already contain a
-	 back-reference, and memory usage is more efficient if we can
-	 avoid using the current expand_macro, even if it means larger
-	 copies.  */
+         additional references for long text segments is more
+         efficient in time.  But if argv is not yet in use, and we
+         have a composite token, then the token must already contain a
+         back-reference, and memory usage is more efficient if we can
+         avoid using the current expand_macro, even if it means larger
+         copies.  */
       assert (TOKEN_DATA_TYPE (token) == TOKEN_COMP);
       src_chain = token->u.u_c.chain;
       while (level >= 0 && src_chain && src_chain->type == CHAIN_STR
-	     && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
-		 || (!inuse && src_chain->u.u_s.level == -1)))
-	{
-	  obstack_grow (current_input, src_chain->u.u_s.str,
-			src_chain->u.u_s.len);
-	  src_chain = src_chain->next;
-	}
+             && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+                 || (!inuse && src_chain->u.u_s.level == -1)))
+        {
+          obstack_grow (current_input, src_chain->u.u_s.str,
+                        src_chain->u.u_s.len);
+          src_chain = src_chain->next;
+        }
       if (!src_chain)
-	return false;
+        return false;
     }
 
   if (next->type == INPUT_STRING)
@@ -433,9 +433,9 @@ push_token (token_data *token, int level, bool inuse)
     {
       chain = (token_chain *) obstack_alloc (current_input, sizeof *chain);
       if (next->u.u_c.end)
-	next->u.u_c.end->next = chain;
+        next->u.u_c.end->next = chain;
       else
-	next->u.u_c.chain = chain;
+        next->u.u_c.chain = chain;
       next->u.u_c.end = chain;
       chain->next = NULL;
       chain->type = CHAIN_STR;
@@ -449,60 +449,60 @@ push_token (token_data *token, int level, bool inuse)
   while (src_chain)
     {
       if (src_chain->type == CHAIN_FUNC)
-	{
-	  append_macro (current_input, src_chain->u.func, &next->u.u_c.chain,
-			&next->u.u_c.end);
-	  src_chain = src_chain->next;
-	  continue;
-	}
+        {
+          append_macro (current_input, src_chain->u.func, &next->u.u_c.chain,
+                        &next->u.u_c.end);
+          src_chain = src_chain->next;
+          continue;
+        }
       if (level == -1)
-	{
-	  /* Nothing to copy, since link already lives on obstack.  */
-	  assert (src_chain->type != CHAIN_STR
-		  || src_chain->u.u_s.level == -1);
-	  chain = src_chain;
-	}
+        {
+          /* Nothing to copy, since link already lives on obstack.  */
+          assert (src_chain->type != CHAIN_STR
+                  || src_chain->u.u_s.level == -1);
+          chain = src_chain;
+        }
       else
-	{
-	  /* Allow inlining the final link with subsequent text.  */
-	  if (!src_chain->next && src_chain->type == CHAIN_STR
-	      && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
-		  || (!inuse && src_chain->u.u_s.level == -1)))
-	    {
-	      obstack_grow (current_input, src_chain->u.u_s.str,
-			    src_chain->u.u_s.len);
-	      break;
-	    }
-	  /* We must clone each link in the chain, since next_char
-	     destructively modifies the chain it is parsing.  */
-	  chain = (token_chain *) obstack_copy (current_input, src_chain,
-						sizeof *chain);
-	  chain->next = NULL;
-	  if (chain->type == CHAIN_STR && chain->u.u_s.level == -1)
-	    {
-	      if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)
-		chain->u.u_s.str = (char *) obstack_copy (current_input,
-							  chain->u.u_s.str,
-							  chain->u.u_s.len);
-	      else
-		{
-		  chain->u.u_s.level = level;
-		  inuse = true;
-		}
-	    }
-	}
+        {
+          /* Allow inlining the final link with subsequent text.  */
+          if (!src_chain->next && src_chain->type == CHAIN_STR
+              && (src_chain->u.u_s.len <= INPUT_INLINE_THRESHOLD
+                  || (!inuse && src_chain->u.u_s.level == -1)))
+            {
+              obstack_grow (current_input, src_chain->u.u_s.str,
+                            src_chain->u.u_s.len);
+              break;
+            }
+          /* We must clone each link in the chain, since next_char
+             destructively modifies the chain it is parsing.  */
+          chain = (token_chain *) obstack_copy (current_input, src_chain,
+                                                sizeof *chain);
+          chain->next = NULL;
+          if (chain->type == CHAIN_STR && chain->u.u_s.level == -1)
+            {
+              if (chain->u.u_s.len <= INPUT_INLINE_THRESHOLD || !inuse)
+                chain->u.u_s.str = (char *) obstack_copy (current_input,
+                                                          chain->u.u_s.str,
+                                                          chain->u.u_s.len);
+              else
+                {
+                  chain->u.u_s.level = level;
+                  inuse = true;
+                }
+            }
+        }
       if (next->u.u_c.end)
-	next->u.u_c.end->next = chain;
+        next->u.u_c.end->next = chain;
       else
-	next->u.u_c.chain = chain;
+        next->u.u_c.chain = chain;
       next->u.u_c.end = chain;
       if (chain->type == CHAIN_ARGV)
-	{
-	  assert (!chain->u.u_a.comma && !chain->u.u_a.skip_last);
-	  inuse |= arg_adjust_refcount (chain->u.u_a.argv, true);
-	}
+        {
+          assert (!chain->u.u_a.comma && !chain->u.u_a.skip_last);
+          inuse |= arg_adjust_refcount (chain->u.u_a.argv, true);
+        }
       else if (chain->type == CHAIN_STR && chain->u.u_s.level >= 0)
-	adjust_refcount (chain->u.u_s.level, true);
+        adjust_refcount (chain->u.u_s.level, true);
       src_chain = src_chain->next;
     }
   return inuse;
@@ -528,12 +528,12 @@ push_string_finish (void)
   if (len || next->type == INPUT_CHAIN)
     {
       if (next->type == INPUT_STRING)
-	{
-	  next->u.u_s.str = (char *) obstack_finish (current_input);
-	  next->u.u_s.len = len;
-	}
+        {
+          next->u.u_s.str = (char *) obstack_finish (current_input);
+          next->u.u_s.len = len;
+        }
       else
-	make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
+        make_text_link (current_input, &next->u.u_c.chain, &next->u.u_c.end);
       next->prev = isp;
       isp = next;
       input_change = true;
@@ -560,7 +560,7 @@ push_wrapup_init (const call_info *caller, token_chain ***end)
     {
       i = wsp;
       assert (i->type == INPUT_CHAIN && i->u.u_c.end
-	      && i->u.u_c.end->type != CHAIN_LOC);
+              && i->u.u_c.end->type != CHAIN_LOC);
     }
   else
     {
@@ -618,61 +618,61 @@ pop_input (bool cleanup)
     case INPUT_STRING:
       assert (!cleanup || !isp->u.u_s.len);
       if (isp->u.u_s.len)
-	return false;
+        return false;
       break;
 
     case INPUT_CHAIN:
       chain = isp->u.u_c.chain;
       assert (!chain || !cleanup);
       while (chain)
-	{
-	  switch (chain->type)
-	    {
-	    case CHAIN_STR:
-	      if (chain->u.u_s.len)
-		return false;
-	      if (chain->u.u_s.level >= 0)
-		adjust_refcount (chain->u.u_s.level, false);
-	      break;
-	    case CHAIN_FUNC:
-	       if (chain->u.func)
-		 return false;
-	       break;
-	    case CHAIN_ARGV:
-	      if (chain->u.u_a.index < arg_argc (chain->u.u_a.argv))
-		return false;
-	      arg_adjust_refcount (chain->u.u_a.argv, false);
-	      break;
-	    case CHAIN_LOC:
-	      return false;
-	    default:
-	      assert (!"pop_input");
-	      abort ();
-	    }
-	  isp->u.u_c.chain = chain = chain->next;
-	}
+        {
+          switch (chain->type)
+            {
+            case CHAIN_STR:
+              if (chain->u.u_s.len)
+                return false;
+              if (chain->u.u_s.level >= 0)
+                adjust_refcount (chain->u.u_s.level, false);
+              break;
+            case CHAIN_FUNC:
+               if (chain->u.func)
+                 return false;
+               break;
+            case CHAIN_ARGV:
+              if (chain->u.u_a.index < arg_argc (chain->u.u_a.argv))
+                return false;
+              arg_adjust_refcount (chain->u.u_a.argv, false);
+              break;
+            case CHAIN_LOC:
+              return false;
+            default:
+              assert (!"pop_input");
+              abort ();
+            }
+          isp->u.u_c.chain = chain = chain->next;
+        }
       break;
 
     case INPUT_FILE:
       if (!cleanup)
-	return false;
+        return false;
       if (debug_level & DEBUG_TRACE_INPUT)
-	{
-	  if (tmp != &input_eof)
-	    debug_message ("input reverted to %s, line %d",
-			   tmp->file, tmp->line);
-	  else
-	    debug_message ("input exhausted");
-	}
+        {
+          if (tmp != &input_eof)
+            debug_message ("input reverted to %s, line %d",
+                           tmp->file, tmp->line);
+          else
+            debug_message ("input exhausted");
+        }
 
       if (ferror (isp->u.u_f.fp))
-	{
-	  m4_error (0, 0, NULL, _("read error"));
-	  if (isp->u.u_f.close)
-	    fclose (isp->u.u_f.fp);
-	}
+        {
+          m4_error (0, 0, NULL, _("read error"));
+          if (isp->u.u_f.close)
+            fclose (isp->u.u_f.fp);
+        }
       else if (isp->u.u_f.close && fclose (isp->u.u_f.fp) == EOF)
-	m4_error (0, errno, NULL, _("error reading file"));
+        m4_error (0, errno, NULL, _("error reading file"));
       start_of_input_line = isp->u.u_f.advance;
       output_current_line = -1;
       break;
@@ -709,7 +709,7 @@ pop_wrapup (void)
   if (wsp == &input_eof)
     {
       /* End of the program.  Free all memory even though we are about
-	 to exit, since it makes leak detection easier.  */
+         to exit, since it makes leak detection easier.  */
       obstack_free (&token_stack, NULL);
       obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
@@ -761,32 +761,32 @@ input_print (struct obstack *obs)
     case INPUT_CHAIN:
       chain = next->u.u_c.chain;
       while (chain)
-	{
-	  switch (chain->type)
-	    {
-	    case CHAIN_STR:
-	      if (shipout_string_trunc (obs, chain->u.u_s.str,
-					chain->u.u_s.len, &maxlen))
-		return;
-	      break;
-	    case CHAIN_FUNC:
-	      func_print (obs, find_builtin_by_addr (chain->u.func), false,
-			  NULL, NULL);
-	      break;
-	    case CHAIN_ARGV:
-	      assert (!chain->u.u_a.comma);
-	      if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
-			     quote_cache (NULL, chain->quote_age,
-					  chain->u.u_a.quotes),
-			     chain->u.u_a.flatten, NULL, NULL, &maxlen, false))
-		return;
-	      break;
-	    default:
-	      assert (!"input_print");
-	      abort ();
-	    }
-	  chain = chain->next;
-	}
+        {
+          switch (chain->type)
+            {
+            case CHAIN_STR:
+              if (shipout_string_trunc (obs, chain->u.u_s.str,
+                                        chain->u.u_s.len, &maxlen))
+                return;
+              break;
+            case CHAIN_FUNC:
+              func_print (obs, find_builtin_by_addr (chain->u.func), false,
+                          NULL, NULL);
+              break;
+            case CHAIN_ARGV:
+              assert (!chain->u.u_a.comma);
+              if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
+                             quote_cache (NULL, chain->quote_age,
+                                          chain->u.u_a.quotes),
+                             chain->u.u_a.flatten, NULL, NULL, &maxlen, false))
+                return;
+              break;
+            default:
+              assert (!"input_print");
+              abort ();
+            }
+          chain = chain->next;
+        }
       break;
     default:
       assert (!"input_print");
@@ -794,7 +794,7 @@ input_print (struct obstack *obs)
     }
   if (len)
     shipout_string_trunc (obs, (char *) obstack_base (current_input), len,
-			  &maxlen);
+                          &maxlen);
 }
 
 
@@ -821,81 +821,81 @@ next_buffer (size_t *len, bool allow_quote)
     {
       assert (isp);
       if (input_change)
-	{
-	  current_file = isp->file;
-	  current_line = isp->line;
-	  input_change = false;
-	}
+        {
+          current_file = isp->file;
+          current_line = isp->line;
+          input_change = false;
+        }
 
       switch (isp->type)
-	{
-	case INPUT_STRING:
-	  if (isp->u.u_s.len)
-	    {
-	      *len = isp->u.u_s.len;
-	      return isp->u.u_s.str;
-	    }
-	  break;
+        {
+        case INPUT_STRING:
+          if (isp->u.u_s.len)
+            {
+              *len = isp->u.u_s.len;
+              return isp->u.u_s.str;
+            }
+          break;
 
-	case INPUT_FILE:
-	  if (start_of_input_line)
-	    {
-	      start_of_input_line = false;
-	      current_line = ++isp->line;
-	    }
-	  if (isp->u.u_f.end)
-	    break;
-	  return freadptr (isp->u.u_f.fp, len);
+        case INPUT_FILE:
+          if (start_of_input_line)
+            {
+              start_of_input_line = false;
+              current_line = ++isp->line;
+            }
+          if (isp->u.u_f.end)
+            break;
+          return freadptr (isp->u.u_f.fp, len);
 
-	case INPUT_CHAIN:
-	  chain = isp->u.u_c.chain;
-	  while (chain)
-	    {
-	      if (allow_quote && chain->quote_age == current_quote_age)
-		return NULL; /* CHAR_QUOTE doesn't fit in buffer.  */
-	      switch (chain->type)
-		{
-		case CHAIN_STR:
-		  if (chain->u.u_s.len)
-		    {
-		      *len = chain->u.u_s.len;
-		      return chain->u.u_s.str;
-		    }
-		  if (chain->u.u_s.level >= 0)
-		    adjust_refcount (chain->u.u_s.level, false);
-		  break;
-		case CHAIN_FUNC:
-		  if (chain->u.func)
-		    return NULL; /* CHAR_MACRO doesn't fit in buffer.  */
-		  break;
-		case CHAIN_ARGV:
-		  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
-		    {
-		      arg_adjust_refcount (chain->u.u_a.argv, false);
-		      break;
-		    }
-		  return NULL; /* No buffer to provide.  */
-		case CHAIN_LOC:
-		  isp->file = chain->u.u_l.file;
-		  isp->line = chain->u.u_l.line;
-		  input_change = true;
-		  isp->u.u_c.chain = chain->next;
-		  return next_buffer (len, allow_quote);
-		default:
-		  assert (!"next_buffer");
-		  abort ();
-		}
-	      isp->u.u_c.chain = chain = chain->next;
-	    }
-	  break;
+        case INPUT_CHAIN:
+          chain = isp->u.u_c.chain;
+          while (chain)
+            {
+              if (allow_quote && chain->quote_age == current_quote_age)
+                return NULL; /* CHAR_QUOTE doesn't fit in buffer.  */
+              switch (chain->type)
+                {
+                case CHAIN_STR:
+                  if (chain->u.u_s.len)
+                    {
+                      *len = chain->u.u_s.len;
+                      return chain->u.u_s.str;
+                    }
+                  if (chain->u.u_s.level >= 0)
+                    adjust_refcount (chain->u.u_s.level, false);
+                  break;
+                case CHAIN_FUNC:
+                  if (chain->u.func)
+                    return NULL; /* CHAR_MACRO doesn't fit in buffer.  */
+                  break;
+                case CHAIN_ARGV:
+                  if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
+                    {
+                      arg_adjust_refcount (chain->u.u_a.argv, false);
+                      break;
+                    }
+                  return NULL; /* No buffer to provide.  */
+                case CHAIN_LOC:
+                  isp->file = chain->u.u_l.file;
+                  isp->line = chain->u.u_l.line;
+                  input_change = true;
+                  isp->u.u_c.chain = chain->next;
+                  return next_buffer (len, allow_quote);
+                default:
+                  assert (!"next_buffer");
+                  abort ();
+                }
+              isp->u.u_c.chain = chain = chain->next;
+            }
+          break;
 
-	case INPUT_EOF:
-	  return NULL; /* CHAR_EOF doesn't fit in buffer.  */
+        case INPUT_EOF:
+          return NULL; /* CHAR_EOF doesn't fit in buffer.  */
 
-	default:
-	  assert (!"next_buffer");
-	  abort ();
-	}
+        default:
+          assert (!"next_buffer");
+          abort ();
+        }
 
       /* End of input source --- pop one level.  */
       pop_input (true);
@@ -931,15 +931,15 @@ consume_buffer (size_t len)
       assert (buf && len <= buf_len);
       buf_len = 0;
       while ((p = (char *) memchr (buf + buf_len, '\n', len - buf_len)))
-	{
-	  if (p == buf + len - 1)
-	    start_of_input_line = true;
-	  else
-	    current_line = ++isp->line;
-	  buf_len = p - buf + 1;
-	}
+        {
+          if (p == buf + len - 1)
+            start_of_input_line = true;
+          else
+            current_line = ++isp->line;
+          buf_len = p - buf + 1;
+        }
       if (freadseek (isp->u.u_f.fp, len) != 0)
-	assert (false);
+        assert (false);
       break;
 
     case INPUT_CHAIN:
@@ -978,78 +978,78 @@ peek_input (bool allow_argv)
     {
       assert (block);
       switch (block->type)
-	{
-	case INPUT_STRING:
-	  if (!block->u.u_s.len)
-	    break;
-	  return to_uchar (block->u.u_s.str[0]);
+        {
+        case INPUT_STRING:
+          if (!block->u.u_s.len)
+            break;
+          return to_uchar (block->u.u_s.str[0]);
 
-	case INPUT_FILE:
-	  ch = getc (block->u.u_f.fp);
-	  if (ch != EOF)
-	    {
-	      ungetc (ch, block->u.u_f.fp);
-	      return ch;
-	    }
-	  block->u.u_f.end = true;
-	  break;
+        case INPUT_FILE:
+          ch = getc (block->u.u_f.fp);
+          if (ch != EOF)
+            {
+              ungetc (ch, block->u.u_f.fp);
+              return ch;
+            }
+          block->u.u_f.end = true;
+          break;
 
-	case INPUT_CHAIN:
-	  chain = block->u.u_c.chain;
-	  while (chain)
-	    {
-	      unsigned int argc;
-	      switch (chain->type)
-		{
-		case CHAIN_STR:
-		  if (chain->u.u_s.len)
-		    return to_uchar (*chain->u.u_s.str);
-		  break;
-		case CHAIN_FUNC:
-		  if (chain->u.func)
-		    return CHAR_MACRO;
-		  break;
-		case CHAIN_ARGV:
-		  argc = arg_argc (chain->u.u_a.argv);
-		  if (chain->u.u_a.index == argc)
-		    break;
-		  if (chain->u.u_a.comma)
-		    return ',';
-		  /* Only return a reference if the quoting is correct
-		     and the reference has more than one argument
-		     left.  */
-		  if (allow_argv && chain->quote_age == current_quote_age
-		      && chain->u.u_a.quotes && chain->u.u_a.index + 1 < argc)
-		    return CHAR_ARGV;
-		  /* Rather than directly parse argv here, we push
-		     another input block containing the next unparsed
-		     argument from argv.  */
-		  push_string_init (block->file, block->line);
-		  push_arg_quote (current_input, chain->u.u_a.argv,
-				  chain->u.u_a.index,
-				  quote_cache (NULL, chain->quote_age,
-					       chain->u.u_a.quotes));
-		  chain->u.u_a.index++;
-		  chain->u.u_a.comma = true;
-		  push_string_finish ();
-		  return peek_input (allow_argv);
-		case CHAIN_LOC:
-		  break;
-		default:
-		  assert (!"peek_input");
-		  abort ();
-		}
-	      chain = chain->next;
-	    }
-	  break;
+        case INPUT_CHAIN:
+          chain = block->u.u_c.chain;
+          while (chain)
+            {
+              unsigned int argc;
+              switch (chain->type)
+                {
+                case CHAIN_STR:
+                  if (chain->u.u_s.len)
+                    return to_uchar (*chain->u.u_s.str);
+                  break;
+                case CHAIN_FUNC:
+                  if (chain->u.func)
+                    return CHAR_MACRO;
+                  break;
+                case CHAIN_ARGV:
+                  argc = arg_argc (chain->u.u_a.argv);
+                  if (chain->u.u_a.index == argc)
+                    break;
+                  if (chain->u.u_a.comma)
+                    return ',';
+                  /* Only return a reference if the quoting is correct
+                     and the reference has more than one argument
+                     left.  */
+                  if (allow_argv && chain->quote_age == current_quote_age
+                      && chain->u.u_a.quotes && chain->u.u_a.index + 1 < argc)
+                    return CHAR_ARGV;
+                  /* Rather than directly parse argv here, we push
+                     another input block containing the next unparsed
+                     argument from argv.  */
+                  push_string_init (block->file, block->line);
+                  push_arg_quote (current_input, chain->u.u_a.argv,
+                                  chain->u.u_a.index,
+                                  quote_cache (NULL, chain->quote_age,
+                                               chain->u.u_a.quotes));
+                  chain->u.u_a.index++;
+                  chain->u.u_a.comma = true;
+                  push_string_finish ();
+                  return peek_input (allow_argv);
+                case CHAIN_LOC:
+                  break;
+                default:
+                  assert (!"peek_input");
+                  abort ();
+                }
+              chain = chain->next;
+            }
+          break;
 
-	case INPUT_EOF:
-	  return CHAR_EOF;
+        case INPUT_EOF:
+          return CHAR_EOF;
 
-	default:
-	  assert (!"peek_input");
-	  abort ();
-	}
+        default:
+          assert (!"peek_input");
+          abort ();
+        }
       block = block->prev;
     }
 }
@@ -1084,114 +1084,114 @@ next_char_1 (bool allow_quote, bool allow_argv)
     {
       assert (isp);
       if (input_change)
-	{
-	  current_file = isp->file;
-	  current_line = isp->line;
-	  input_change = false;
-	}
+        {
+          current_file = isp->file;
+          current_line = isp->line;
+          input_change = false;
+        }
 
       switch (isp->type)
-	{
-	case INPUT_STRING:
-	  if (!isp->u.u_s.len)
-	    break;
-	  isp->u.u_s.len--;
-	  return to_uchar (*isp->u.u_s.str++);
+        {
+        case INPUT_STRING:
+          if (!isp->u.u_s.len)
+            break;
+          isp->u.u_s.len--;
+          return to_uchar (*isp->u.u_s.str++);
 
-	case INPUT_FILE:
-	  if (start_of_input_line)
-	    {
-	      start_of_input_line = false;
-	      current_line = ++isp->line;
-	    }
+        case INPUT_FILE:
+          if (start_of_input_line)
+            {
+              start_of_input_line = false;
+              current_line = ++isp->line;
+            }
 
-	  /* If stdin is a terminal, calling getc after peek_input
-	     already called it would make the user have to hit ^D
-	     twice to quit.  */
-	  ch = isp->u.u_f.end ? EOF : getc (isp->u.u_f.fp);
-	  if (ch != EOF)
-	    {
-	      if (ch == '\n')
-		start_of_input_line = true;
-	      return ch;
-	    }
-	  break;
+          /* If stdin is a terminal, calling getc after peek_input
+             already called it would make the user have to hit ^D
+             twice to quit.  */
+          ch = isp->u.u_f.end ? EOF : getc (isp->u.u_f.fp);
+          if (ch != EOF)
+            {
+              if (ch == '\n')
+                start_of_input_line = true;
+              return ch;
+            }
+          break;
 
-	case INPUT_CHAIN:
-	  chain = isp->u.u_c.chain;
-	  while (chain)
-	    {
-	      unsigned int argc;
-	      if (allow_quote && chain->quote_age == current_quote_age)
-		return CHAR_QUOTE;
-	      switch (chain->type)
-		{
-		case CHAIN_STR:
-		  if (chain->u.u_s.len)
-		    {
-		      /* Partial consumption invalidates quote age.  */
-		      chain->quote_age = 0;
-		      chain->u.u_s.len--;
-		      return to_uchar (*chain->u.u_s.str++);
-		    }
-		  if (chain->u.u_s.level >= 0)
-		    adjust_refcount (chain->u.u_s.level, false);
-		  break;
-		case CHAIN_FUNC:
-		  if (chain->u.func)
-		    return CHAR_MACRO;
-		  break;
-		case CHAIN_ARGV:
-		  argc = arg_argc (chain->u.u_a.argv);
-		  if (chain->u.u_a.index == argc)
-		    {
-		      arg_adjust_refcount (chain->u.u_a.argv, false);
-		      break;
-		    }
-		  if (chain->u.u_a.comma)
-		    {
-		      chain->u.u_a.comma = false;
-		      return ',';
-		    }
-		  /* Only return a reference if the quoting is correct
-		     and the reference has more than one argument
-		     left.  */
-		  if (allow_argv && chain->quote_age == current_quote_age
-		      && chain->u.u_a.quotes && chain->u.u_a.index + 1 < argc)
-		    return CHAR_ARGV;
-		  /* Rather than directly parse argv here, we push
-		     another input block containing the next unparsed
-		     argument from argv.  */
-		  push_string_init (isp->file, isp->line);
-		  push_arg_quote (current_input, chain->u.u_a.argv,
-				  chain->u.u_a.index,
-				  quote_cache (NULL, chain->quote_age,
-					       chain->u.u_a.quotes));
-		  chain->u.u_a.index++;
-		  chain->u.u_a.comma = true;
-		  push_string_finish ();
-		  return next_char_1 (allow_quote, allow_argv);
-		case CHAIN_LOC:
-		  isp->file = chain->u.u_l.file;
-		  isp->line = chain->u.u_l.line;
-		  input_change = true;
-		  isp->u.u_c.chain = chain->next;
-		  return next_char_1 (allow_quote, allow_argv);
-		default:
-		  assert (!"next_char_1");
-		  abort ();
-		}
-	      isp->u.u_c.chain = chain = chain->next;
-	    }
-	  break;
+        case INPUT_CHAIN:
+          chain = isp->u.u_c.chain;
+          while (chain)
+            {
+              unsigned int argc;
+              if (allow_quote && chain->quote_age == current_quote_age)
+                return CHAR_QUOTE;
+              switch (chain->type)
+                {
+                case CHAIN_STR:
+                  if (chain->u.u_s.len)
+                    {
+                      /* Partial consumption invalidates quote age.  */
+                      chain->quote_age = 0;
+                      chain->u.u_s.len--;
+                      return to_uchar (*chain->u.u_s.str++);
+                    }
+                  if (chain->u.u_s.level >= 0)
+                    adjust_refcount (chain->u.u_s.level, false);
+                  break;
+                case CHAIN_FUNC:
+                  if (chain->u.func)
+                    return CHAR_MACRO;
+                  break;
+                case CHAIN_ARGV:
+                  argc = arg_argc (chain->u.u_a.argv);
+                  if (chain->u.u_a.index == argc)
+                    {
+                      arg_adjust_refcount (chain->u.u_a.argv, false);
+                      break;
+                    }
+                  if (chain->u.u_a.comma)
+                    {
+                      chain->u.u_a.comma = false;
+                      return ',';
+                    }
+                  /* Only return a reference if the quoting is correct
+                     and the reference has more than one argument
+                     left.  */
+                  if (allow_argv && chain->quote_age == current_quote_age
+                      && chain->u.u_a.quotes && chain->u.u_a.index + 1 < argc)
+                    return CHAR_ARGV;
+                  /* Rather than directly parse argv here, we push
+                     another input block containing the next unparsed
+                     argument from argv.  */
+                  push_string_init (isp->file, isp->line);
+                  push_arg_quote (current_input, chain->u.u_a.argv,
+                                  chain->u.u_a.index,
+                                  quote_cache (NULL, chain->quote_age,
+                                               chain->u.u_a.quotes));
+                  chain->u.u_a.index++;
+                  chain->u.u_a.comma = true;
+                  push_string_finish ();
+                  return next_char_1 (allow_quote, allow_argv);
+                case CHAIN_LOC:
+                  isp->file = chain->u.u_l.file;
+                  isp->line = chain->u.u_l.line;
+                  input_change = true;
+                  isp->u.u_c.chain = chain->next;
+                  return next_char_1 (allow_quote, allow_argv);
+                default:
+                  assert (!"next_char_1");
+                  abort ();
+                }
+              isp->u.u_c.chain = chain = chain->next;
+            }
+          break;
 
-	case INPUT_EOF:
-	  return CHAR_EOF;
+        case INPUT_EOF:
+          return CHAR_EOF;
 
-	default:
-	  assert (!"next_char_1");
-	  abort ();
-	}
+        default:
+          assert (!"next_char_1");
+          abort ();
+        }
 
       /* End of input source --- pop one level.  */
       pop_input (true);
@@ -1214,22 +1214,22 @@ skip_line (const call_info *name)
       size_t len;
       const char *buffer = next_buffer (&len, false);
       if (buffer)
-	{
-	  const char *p = (char *) memchr (buffer, '\n', len);
-	  if (p)
-	    {
-	      consume_buffer (p - buffer + 1);
-	      ch = '\n';
-	      break;
-	    }
-	  consume_buffer (len);
-	}
+        {
+          const char *p = (char *) memchr (buffer, '\n', len);
+          if (p)
+            {
+              consume_buffer (p - buffer + 1);
+              ch = '\n';
+              break;
+            }
+          consume_buffer (len);
+        }
       else
-	{
-	  ch = next_char (false, false);
-	  if (ch == CHAR_EOF || ch == '\n')
-	    break;
-	}
+        {
+          ch = next_char (false, false);
+          if (ch == CHAR_EOF || ch == '\n')
+            break;
+        }
     }
   if (ch == CHAR_EOF)
     m4_warn (0, name, _("end of file treated as newline"));
@@ -1256,12 +1256,12 @@ init_macro_token (struct obstack *obs, token_data *td)
     {
       assert (td);
       if (TOKEN_DATA_TYPE (td) == TOKEN_VOID)
-	{
-	  TOKEN_DATA_TYPE (td) = TOKEN_COMP;
-	  td->u.u_c.chain = td->u.u_c.end = NULL;
-	  td->u.u_c.wrapper = false;
-	  td->u.u_c.has_func = true;
-	}
+        {
+          TOKEN_DATA_TYPE (td) = TOKEN_COMP;
+          td->u.u_c.chain = td->u.u_c.end = NULL;
+          td->u.u_c.wrapper = false;
+          td->u.u_c.has_func = true;
+        }
       assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP);
       append_macro (obs, chain->u.func, &td->u.u_c.chain, &td->u.u_c.end);
     }
@@ -1334,8 +1334,8 @@ init_argv_token (struct obstack *obs, token_data *td)
   int ch;
 
   assert (TOKEN_DATA_TYPE (td) == TOKEN_VOID
-	  && isp->type == INPUT_CHAIN && isp->u.u_c.chain->type == CHAIN_ARGV
-	  && obs && obstack_object_size (obs) == 0);
+          && isp->type == INPUT_CHAIN && isp->u.u_c.chain->type == CHAIN_ARGV
+          && obs && obstack_object_size (obs) == 0);
 
   src_chain = isp->u.u_c.chain;
   isp->u.u_c.chain = src_chain->next;
@@ -1368,7 +1368,7 @@ init_argv_token (struct obstack *obs, token_data *td)
      refcount here, to compensate for the fact that it will be
      decreased once the final element is parsed.  */
   assert (!curr_comm.len1 || (*curr_comm.str1 != ',' && *curr_comm.str1 != ')'
-			      && *curr_comm.str1 != *curr_quote.str1));
+                              && *curr_comm.str1 != *curr_quote.str1));
   ch = peek_input (true);
   if (ch != ',' && ch != ')')
     {
@@ -1410,7 +1410,7 @@ match_input (const char *s, size_t slen, bool consume)
   if (t && slen <= len && memcmp (s, t, slen) == 0)
     {
       if (consume)
-	consume_buffer (slen);
+        consume_buffer (slen);
       return true;
     }
 
@@ -1422,7 +1422,7 @@ match_input (const char *s, size_t slen, bool consume)
   if (slen == 1)
     {
       if (consume)
-	next_char (false, false);
+        next_char (false, false);
       return true;			/* short match */
     }
 
@@ -1432,12 +1432,12 @@ match_input (const char *s, size_t slen, bool consume)
       next_char (false, false);
       n++;
       if (--slen == 1)		/* long match */
-	{
-	  if (consume)
-	    return true;
-	  result = true;
-	  break;
-	}
+        {
+          if (consume)
+            return true;
+          result = true;
+          break;
+        }
     }
 
   /* Failed or shouldn't consume, push back input.  */
@@ -1618,7 +1618,7 @@ set_word_regexp (const call_info *caller, const char *regexp, size_t len)
     len = strlen (regexp);
   if (len == 0
       || (len == strlen (DEFAULT_WORD_REGEXP)
-	  && !memcmp (regexp, DEFAULT_WORD_REGEXP, len)))
+          && !memcmp (regexp, DEFAULT_WORD_REGEXP, len)))
     {
       default_word_regexp = true;
       set_quote_age ();
@@ -1633,7 +1633,7 @@ set_word_regexp (const call_info *caller, const char *regexp, size_t len)
   if (msg != NULL)
     {
       m4_warn (0, caller, _("bad regular expression %s: %s"),
-	       quotearg_style_mem (locale_quoting_style, regexp, len), msg);
+               quotearg_style_mem (locale_quoting_style, regexp, len), msg);
       return;
     }
 
@@ -1706,11 +1706,11 @@ set_quote_age (void)
       && (!*curr_quote.str2 || strchr (unsafe, *curr_quote.str2) == NULL)
       && default_word_regexp && *curr_quote.str1 != *curr_quote.str2
       && (!curr_comm.len1
-	  || (*curr_comm.str1 != '(' && *curr_comm.str1 != ','
-	      && *curr_comm.str1 != ')'
-	      && *curr_comm.str1 != *curr_quote.str1)))
+          || (*curr_comm.str1 != '(' && *curr_comm.str1 != ','
+              && *curr_comm.str1 != ')'
+              && *curr_comm.str1 != *curr_quote.str1)))
     current_quote_age = (((*curr_quote.str1 & 0xff) << 8)
-			 | (*curr_quote.str2 & 0xff));
+                         | (*curr_quote.str2 & 0xff));
   else
     current_quote_age = 0;
   cached_quote = NULL;
@@ -1778,11 +1778,11 @@ quote_cache (struct obstack *obs, unsigned int age, const string_pair *quotes)
     {
       assert (obs == current_input && obstack_object_size (obs) == 0);
       cached_quote = (string_pair *) obstack_copy (obs, quotes,
-						   sizeof *quotes);
+                                                   sizeof *quotes);
       cached_quote->str1 = (char *) obstack_copy0 (obs, quotes->str1,
-						   quotes->len1);
+                                                   quotes->len1);
       cached_quote->str2 = (char *) obstack_copy0 (obs, quotes->str2,
-						   quotes->len2);
+                                                   quotes->len2);
     }
   return cached_quote;
 }
@@ -1813,7 +1813,7 @@ quote_cache (struct obstack *obs, unsigned int age, const string_pair *quotes)
 
 token_type
 next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
-	    const call_info *caller)
+            const call_info *caller)
 {
   int ch;
   int quote_level;
@@ -1848,7 +1848,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       init_macro_token (obs, td);
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> MACDEF (%s)\n",
-		find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
+                find_builtin_by_addr (TOKEN_DATA_FUNC (td))->name);
 #endif /* DEBUG_INPUT */
       return TOKEN_MACDEF;
     }
@@ -1857,9 +1857,9 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       init_argv_token (obs, td);
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> ARGV (%d args)\n",
-		(arg_argc (td->u.u_c.chain->u.u_a.argv)
-		 - td->u.u_c.chain->u.u_a.index
-		 - (td->u.u_c.chain->u.u_a.skip_last ? 1 : 0)));
+                (arg_argc (td->u.u_c.chain->u.u_a.argv)
+                 - td->u.u_c.chain->u.u_a.index
+                 - (td->u.u_c.chain->u.u_a.skip_last ? 1 : 0)));
 #endif
       return TOKEN_ARGV;
     }
@@ -1868,37 +1868,37 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
     {
       obstack_1grow (&token_stack, ch);
       while (1)
-	{
-	  size_t len;
-	  const char *buffer = next_buffer (&len, false);
-	  if (buffer)
-	    {
-	      const char *p = buffer;
-	      while (len && (isalnum (to_uchar (*p)) || *p == '_'))
-		{
-		  p++;
-		  len--;
-		}
-	      if (p != buffer)
-		{
-		  obstack_grow (&token_stack, buffer, p - buffer);
-		  consume_buffer (p - buffer);
-		}
-	      if (len)
-		break;
-	    }
-	  else
-	    {
-	      ch = peek_input (false);
-	      if (ch < CHAR_EOF && (isalnum (ch) || ch == '_'))
-		{
-		  obstack_1grow (&token_stack, ch);
-		  next_char (false, false);
-		}
-	      else
-		break;
-	    }
-	}
+        {
+          size_t len;
+          const char *buffer = next_buffer (&len, false);
+          if (buffer)
+            {
+              const char *p = buffer;
+              while (len && (isalnum (to_uchar (*p)) || *p == '_'))
+                {
+                  p++;
+                  len--;
+                }
+              if (p != buffer)
+                {
+                  obstack_grow (&token_stack, buffer, p - buffer);
+                  consume_buffer (p - buffer);
+                }
+              if (len)
+                break;
+            }
+          else
+            {
+              ch = peek_input (false);
+              if (ch < CHAR_EOF && (isalnum (ch) || ch == '_'))
+                {
+                  obstack_1grow (&token_stack, ch);
+                  next_char (false, false);
+                }
+              else
+                break;
+            }
+        }
       type = TOKEN_WORD;
     }
 
@@ -1908,20 +1908,20 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
     {
       obstack_1grow (&token_stack, ch);
       while (1)
-	{
-	  ch = peek_input (false);
-	  if (ch >= CHAR_EOF)
-	    break;
-	  obstack_1grow (&token_stack, ch);
-	  if (re_match (&word_regexp, (char *) obstack_base (&token_stack),
-			obstack_object_size (&token_stack), 0, &regs)
-	      != (regoff_t) obstack_object_size (&token_stack))
-	    {
-	      obstack_blank (&token_stack, -1);
-	      break;
-	    }
-	  next_char (false, false);
-	}
+        {
+          ch = peek_input (false);
+          if (ch >= CHAR_EOF)
+            break;
+          obstack_1grow (&token_stack, ch);
+          if (re_match (&word_regexp, (char *) obstack_base (&token_stack),
+                        obstack_object_size (&token_stack), 0, &regs)
+              != (regoff_t) obstack_object_size (&token_stack))
+            {
+              obstack_blank (&token_stack, -1);
+              break;
+            }
+          next_char (false, false);
+        }
 
       TOKEN_DATA_ORIG_LEN (td) = obstack_object_size (&token_stack);
       obstack_1grow (&token_stack, '\0');
@@ -1929,10 +1929,10 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       TOKEN_DATA_ORIG_TEXT (td) = orig_text;
 
       if (regs.start[1] != -1)
-	obstack_grow (&token_stack, orig_text + regs.start[1],
-		      regs.end[1] - regs.start[1]);
+        obstack_grow (&token_stack, orig_text + regs.start[1],
+                      regs.end[1] - regs.start[1]);
       else
-	obstack_grow (&token_stack, orig_text, regs.end[0]);
+        obstack_grow (&token_stack, orig_text, regs.end[0]);
 
       type = TOKEN_WORD;
     }
@@ -1942,158 +1942,158 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
   else if (MATCH (ch, curr_quote.str1, curr_quote.len1, true))
     {
       if (obs)
-	obs_td = obs;
+        obs_td = obs;
       quote_level = 1;
       type = TOKEN_STRING;
       while (1)
-	{
-	  /* Start with buffer search for either potential delimiter.  */
-	  size_t len;
-	  const char *buffer = next_buffer (&len, obs && current_quote_age);
-	  if (buffer)
-	    {
-	      const char *p = buffer;
-	      do
-		{
-		  p = (char *) memchr2 (p, *curr_quote.str1, *curr_quote.str2,
-					buffer + len - p);
-		}
-	      while (p && current_quote_age
-		     && (*p++ == *curr_quote.str2
-			 ? --quote_level : ++quote_level));
-	      if (p)
-		{
-		  if (current_quote_age)
-		    {
-		      assert (!quote_level);
-		      obstack_grow (obs_td, buffer, p - buffer - 1);
-		      consume_buffer (p - buffer);
-		      break;
-		    }
-		  obstack_grow (obs_td, buffer, p - buffer);
-		  ch = to_uchar (*p);
-		  consume_buffer (p - buffer + 1);
-		}
-	      else
-		{
-		  obstack_grow (obs_td, buffer, len);
-		  consume_buffer (len);
-		  continue;
-		}
-	    }
+        {
+          /* Start with buffer search for either potential delimiter.  */
+          size_t len;
+          const char *buffer = next_buffer (&len, obs && current_quote_age);
+          if (buffer)
+            {
+              const char *p = buffer;
+              do
+                {
+                  p = (char *) memchr2 (p, *curr_quote.str1, *curr_quote.str2,
+                                        buffer + len - p);
+                }
+              while (p && current_quote_age
+                     && (*p++ == *curr_quote.str2
+                         ? --quote_level : ++quote_level));
+              if (p)
+                {
+                  if (current_quote_age)
+                    {
+                      assert (!quote_level);
+                      obstack_grow (obs_td, buffer, p - buffer - 1);
+                      consume_buffer (p - buffer);
+                      break;
+                    }
+                  obstack_grow (obs_td, buffer, p - buffer);
+                  ch = to_uchar (*p);
+                  consume_buffer (p - buffer + 1);
+                }
+              else
+                {
+                  obstack_grow (obs_td, buffer, len);
+                  consume_buffer (len);
+                  continue;
+                }
+            }
 
-	  /* Fall back to byte-wise search.  */
-	  else
-	    ch = next_char (obs && current_quote_age, false);
-	  if (ch == CHAR_EOF)
-	    {
-	      /* Current_file changed to "" if we see CHAR_EOF, use
-		 the previous value we stored earlier.  */
-	      if (!caller)
-		{
-		  assert (line);
-		  current_line = *line;
-		  current_file = file;
-		}
-	      m4_error (EXIT_FAILURE, 0, caller, _("end of file in string"));
-	    }
-	  if (ch == CHAR_MACRO)
-	    init_macro_token (obs, obs ? td : NULL);
-	  else if (ch == CHAR_QUOTE)
-	    append_quote_token (obs, td);
-	  else if (MATCH (ch, curr_quote.str2, curr_quote.len2, true))
-	    {
-	      if (--quote_level == 0)
-		break;
-	      obstack_grow (obs_td, curr_quote.str2, curr_quote.len2);
-	    }
-	  else if (MATCH (ch, curr_quote.str1, curr_quote.len1, true))
-	    {
-	      quote_level++;
-	      obstack_grow (obs_td, curr_quote.str1, curr_quote.len1);
-	    }
-	  else
-	    {
-	      assert (ch < CHAR_EOF);
-	      obstack_1grow (obs_td, ch);
-	    }
-	}
+          /* Fall back to byte-wise search.  */
+          else
+            ch = next_char (obs && current_quote_age, false);
+          if (ch == CHAR_EOF)
+            {
+              /* Current_file changed to "" if we see CHAR_EOF, use
+                 the previous value we stored earlier.  */
+              if (!caller)
+                {
+                  assert (line);
+                  current_line = *line;
+                  current_file = file;
+                }
+              m4_error (EXIT_FAILURE, 0, caller, _("end of file in string"));
+            }
+          if (ch == CHAR_MACRO)
+            init_macro_token (obs, obs ? td : NULL);
+          else if (ch == CHAR_QUOTE)
+            append_quote_token (obs, td);
+          else if (MATCH (ch, curr_quote.str2, curr_quote.len2, true))
+            {
+              if (--quote_level == 0)
+                break;
+              obstack_grow (obs_td, curr_quote.str2, curr_quote.len2);
+            }
+          else if (MATCH (ch, curr_quote.str1, curr_quote.len1, true))
+            {
+              quote_level++;
+              obstack_grow (obs_td, curr_quote.str1, curr_quote.len1);
+            }
+          else
+            {
+              assert (ch < CHAR_EOF);
+              obstack_1grow (obs_td, ch);
+            }
+        }
     }
   else if (MATCH (ch, curr_comm.str1, curr_comm.len1, true))
     {
       if (obs)
-	obs_td = obs;
+        obs_td = obs;
       obstack_grow (obs_td, curr_comm.str1, curr_comm.len1);
       while (1)
-	{
-	  /* Start with buffer search for potential end delimiter.  */
-	  size_t len;
-	  const char *buffer = next_buffer (&len, false);
-	  if (buffer)
-	    {
-	      const char *p = (char *) memchr (buffer, *curr_comm.str2, len);
-	      if (p)
-		{
-		  obstack_grow (obs_td, buffer, p - buffer);
-		  ch = to_uchar (*p);
-		  consume_buffer (p - buffer + 1);
-		}
-	      else
-		{
-		  obstack_grow (obs_td, buffer, len);
-		  consume_buffer (len);
-		  continue;
-		}
-	    }
+        {
+          /* Start with buffer search for potential end delimiter.  */
+          size_t len;
+          const char *buffer = next_buffer (&len, false);
+          if (buffer)
+            {
+              const char *p = (char *) memchr (buffer, *curr_comm.str2, len);
+              if (p)
+                {
+                  obstack_grow (obs_td, buffer, p - buffer);
+                  ch = to_uchar (*p);
+                  consume_buffer (p - buffer + 1);
+                }
+              else
+                {
+                  obstack_grow (obs_td, buffer, len);
+                  consume_buffer (len);
+                  continue;
+                }
+            }
 
-	  /* Fall back to byte-wise search.  */
-	  else
-	    ch = next_char (false, false);
-	  if (ch == CHAR_EOF)
-	    {
-	      /* Current_file changed to "" if we see CHAR_EOF, use
-		 the previous value we stored earlier.  */
-	      if (!caller)
-		{
-		  assert (line);
-		  current_line = *line;
-		  current_file = file;
-		}
-	      m4_error (EXIT_FAILURE, 0, caller, _("end of file in comment"));
-	    }
-	  if (ch == CHAR_MACRO)
-	    {
-	      init_macro_token (obs, obs ? td : NULL);
-	      continue;
-	    }
-	  if (MATCH (ch, curr_comm.str2, curr_comm.len2, true))
-	    {
-	      obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
-	      break;
-	    }
-	  assert (ch < CHAR_EOF);
-	  obstack_1grow (obs_td, ch);
-	}
+          /* Fall back to byte-wise search.  */
+          else
+            ch = next_char (false, false);
+          if (ch == CHAR_EOF)
+            {
+              /* Current_file changed to "" if we see CHAR_EOF, use
+                 the previous value we stored earlier.  */
+              if (!caller)
+                {
+                  assert (line);
+                  current_line = *line;
+                  current_file = file;
+                }
+              m4_error (EXIT_FAILURE, 0, caller, _("end of file in comment"));
+            }
+          if (ch == CHAR_MACRO)
+            {
+              init_macro_token (obs, obs ? td : NULL);
+              continue;
+            }
+          if (MATCH (ch, curr_comm.str2, curr_comm.len2, true))
+            {
+              obstack_grow (obs_td, curr_comm.str2, curr_comm.len2);
+              break;
+            }
+          assert (ch < CHAR_EOF);
+          obstack_1grow (obs_td, ch);
+        }
       type = TOKEN_COMMENT;
     }
   else
     {
       assert (ch < CHAR_EOF);
       switch (ch)
-	{
-	case '(':
-	  type = TOKEN_OPEN;
-	  break;
-	case ',':
-	  type = TOKEN_COMMA;
-	  break;
-	case ')':
-	  type = TOKEN_CLOSE;
-	  break;
-	default:
-	  type = TOKEN_SIMPLE;
-	  break;
-	}
+        {
+        case '(':
+          type = TOKEN_OPEN;
+          break;
+        case ',':
+          type = TOKEN_COMMA;
+          break;
+        case ')':
+          type = TOKEN_CLOSE;
+          break;
+        default:
+          type = TOKEN_SIMPLE;
+          break;
+        }
       obstack_1grow (&token_stack, ch);
     }
 
@@ -2102,61 +2102,61 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
       TOKEN_DATA_LEN (td) = obstack_object_size (obs_td);
       if (obs_td != obs)
-	{
-	  obstack_1grow (obs_td, '\0');
-	  TOKEN_DATA_TEXT (td) = (char *) obstack_finish (obs_td);
-	}
+        {
+          obstack_1grow (obs_td, '\0');
+          TOKEN_DATA_TEXT (td) = (char *) obstack_finish (obs_td);
+        }
       else
-	TOKEN_DATA_TEXT (td) = NULL;
+        TOKEN_DATA_TEXT (td) = NULL;
       TOKEN_DATA_QUOTE_AGE (td) = current_quote_age;
 #ifdef ENABLE_CHANGEWORD
       if (!orig_text)
-	{
-	  TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
-	  TOKEN_DATA_ORIG_LEN (td) = TOKEN_DATA_LEN (td);
-	}
+        {
+          TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
+          TOKEN_DATA_ORIG_LEN (td) = TOKEN_DATA_LEN (td);
+        }
 #endif /* ENABLE_CHANGEWORD */
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> %s (%s), len %zu\n",
-		token_type_string (type), TOKEN_DATA_TEXT (td),
-		TOKEN_DATA_LEN (td));
+                token_type_string (type), TOKEN_DATA_TEXT (td),
+                TOKEN_DATA_LEN (td));
 #endif /* DEBUG_INPUT */
     }
   else
     {
       assert (TOKEN_DATA_TYPE (td) == TOKEN_COMP
-	      && (type == TOKEN_STRING || type == TOKEN_COMMENT));
+              && (type == TOKEN_STRING || type == TOKEN_COMMENT));
 #ifdef DEBUG_INPUT
       {
-	token_chain *chain;
-	size_t len = 0;
-	int links = 0;
-	chain = td->u.u_c.chain;
-	xfprintf (stderr, "next_token -> %s <chain> (",
-		  token_type_string (type));
-	while (chain)
-	  {
-	    switch (chain->type)
-	      {
-	      case CHAIN_STR:
-		xfprintf (stderr, "%s", chain->u.u_s.str);
-		len += chain->u.u_s.len;
-		break;
-	      case CHAIN_FUNC:
-		xfprintf (stderr, "<func>");
-		break;
-	      case CHAIN_ARGV:
-		xfprintf (stderr, "{$@}");
-		break;
-	      default:
-		assert (!"next_token");
-		abort ();
-	      }
-	    links++;
-	    chain = chain->next;
-	  }
-	xfprintf (stderr, "), %d links, len %zu\n",
-		  links, len);
+        token_chain *chain;
+        size_t len = 0;
+        int links = 0;
+        chain = td->u.u_c.chain;
+        xfprintf (stderr, "next_token -> %s <chain> (",
+                  token_type_string (type));
+        while (chain)
+          {
+            switch (chain->type)
+              {
+              case CHAIN_STR:
+                xfprintf (stderr, "%s", chain->u.u_s.str);
+                len += chain->u.u_s.len;
+                break;
+              case CHAIN_FUNC:
+                xfprintf (stderr, "<func>");
+                break;
+              case CHAIN_ARGV:
+                xfprintf (stderr, "{$@}");
+                break;
+              default:
+                assert (!"next_token");
+                abort ();
+              }
+            links++;
+            chain = chain->next;
+          }
+        xfprintf (stderr, "), %d links, len %zu\n",
+                  links, len);
       }
 #endif /* DEBUG_INPUT */
     }
@@ -2201,16 +2201,16 @@ peek_token (void)
     switch (ch)
       {
       case '(':
-	result = TOKEN_OPEN;
-	break;
+        result = TOKEN_OPEN;
+        break;
       case ',':
-	result = TOKEN_COMMA;
-	break;
+        result = TOKEN_COMMA;
+        break;
       case ')':
-	result = TOKEN_CLOSE;
-	break;
+        result = TOKEN_CLOSE;
+        break;
       default:
-	result = TOKEN_SIMPLE;
+        result = TOKEN_SIMPLE;
       }
 
 #ifdef DEBUG_INPUT

@@ -209,16 +209,16 @@ find_builtin_by_name (const char *name)
 `------------------------------------------------------------------*/
 void
 func_print (struct obstack *obs, const builtin *func, bool flatten,
-	    token_chain **chain, const string_pair *quotes)
+            token_chain **chain, const string_pair *quotes)
 {
   assert (func);
   if (flatten)
     {
       if (quotes)
-	{
-	  obstack_grow (obs, quotes->str1, quotes->len1);
-	  obstack_grow (obs, quotes->str2, quotes->len2);
-	}
+        {
+          obstack_grow (obs, quotes->str1, quotes->len1);
+          obstack_grow (obs, quotes->str2, quotes->len2);
+        }
     }
   else if (chain)
     append_macro (obs, func->func, NULL, chain);
@@ -238,7 +238,7 @@ func_print (struct obstack *obs, const builtin *func, bool flatten,
 
 void
 define_builtin (const char *name, size_t len, const builtin *bp,
-		symbol_lookup mode)
+                symbol_lookup mode)
 {
   symbol *sym;
 
@@ -292,7 +292,7 @@ extern FILE *trace_file;
 `------------------------------------------------------------------*/
 static const char *
 compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
-		 struct re_registers **regs)
+                 struct re_registers **regs)
 {
   int i;
   m4_regex *victim;
@@ -305,20 +305,20 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
      count and return it.  */
   for (i = 0; i < REGEX_CACHE_SIZE; i++)
     if (len == regex_cache[i].len && regex_cache[i].str
-	&& memcmp (str, regex_cache[i].str, len) == 0)
+        && memcmp (str, regex_cache[i].str, len) == 0)
       {
-	*buf = regex_cache[i].buf;
-	*regs = &regex_cache[i].regs;
-	regex_cache[i].count++;
+        *buf = regex_cache[i].buf;
+        *regs = &regex_cache[i].regs;
+        regex_cache[i].count++;
 #ifdef DEBUG_REGEX
-	if (trace_file)
-	  {
-	    fputs ("cached:{", trace_file);
-	    xfwrite (str, 1, len, trace_file);
-	    fputs ("}\n", trace_file);
-	  }
+        if (trace_file)
+          {
+            fputs ("cached:{", trace_file);
+            xfwrite (str, 1, len, trace_file);
+            fputs ("}\n", trace_file);
+          }
 #endif /* DEBUG_REGEX */
-	return NULL;
+        return NULL;
       }
 
   /* Next, check if STR can be compiled.  */
@@ -352,12 +352,12 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
   for (i = 1; i < REGEX_CACHE_SIZE; i++)
     {
       if (regex_cache[i].count < victim_count)
-	{
-	  victim_count = regex_cache[i].count;
-	  victim = &regex_cache[i];
-	}
+        {
+          victim_count = regex_cache[i].count;
+          victim = &regex_cache[i];
+        }
       if (regex_cache[i].count)
-	regex_cache[i].count--;
+        regex_cache[i].count--;
     }
   victim->count = REGEX_CACHE_SIZE;
   victim->len = len;
@@ -365,11 +365,11 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
     {
 #ifdef DEBUG_REGEX
       if (trace_file)
-	{
-	  fputs ("flush:{", trace_file);
-	  xfwrite (victim->str, 1, victim->len, trace_file);
-	  fputs ("}\n", trace_file);
-	}
+        {
+          fputs ("flush:{", trace_file);
+          xfwrite (victim->str, 1, victim->len, trace_file);
+          fputs ("}\n", trace_file);
+        }
 #endif /* DEBUG_REGEX */
       free (victim->str);
       regfree (victim->buf);
@@ -379,7 +379,7 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
   victim->buf = new_buf;
   new_regs = &victim->regs;
   re_set_registers (new_buf, new_regs, new_regs->num_regs,
-		    new_regs->start, new_regs->end);
+                    new_regs->start, new_regs->end);
   *buf = new_buf;
   *regs = new_regs;
   return NULL;
@@ -417,11 +417,11 @@ set_macro_sequence (const char *regexp)
   msg = re_compile_pattern (regexp, strlen (regexp), &macro_sequence_buf);
   if (msg != NULL)
     m4_error (EXIT_FAILURE, 0, NULL,
-	      _("--warn-macro-sequence: bad regular expression %s: %s"),
-	      quotearg_style (locale_quoting_style, regexp), msg);
+              _("--warn-macro-sequence: bad regular expression %s: %s"),
+              quotearg_style (locale_quoting_style, regexp), msg);
   re_set_registers (&macro_sequence_buf, &macro_sequence_regs,
-		    macro_sequence_regs.num_regs,
-		    macro_sequence_regs.start, macro_sequence_regs.end);
+                    macro_sequence_regs.num_regs,
+                    macro_sequence_regs.start, macro_sequence_regs.end);
   macro_sequence_inuse = true;
 }
 
@@ -436,9 +436,9 @@ free_regex (void)
   for (i = 0; i < REGEX_CACHE_SIZE; i++)
     if (regex_cache[i].str)
       {
-	free (regex_cache[i].str);
-	free_pattern_buffer (regex_cache[i].buf, &regex_cache[i].regs);
-	free (regex_cache[i].buf);
+        free (regex_cache[i].str);
+        free_pattern_buffer (regex_cache[i].buf, &regex_cache[i].regs);
+        free (regex_cache[i].buf);
       }
 }
 
@@ -452,7 +452,7 @@ free_regex (void)
 
 void
 define_user_macro (const char *name, size_t name_len, const char *text,
-		   size_t len, symbol_lookup mode)
+                   size_t len, symbol_lookup mode)
 {
   symbol *s;
   char *defn;
@@ -477,29 +477,29 @@ define_user_macro (const char *name, size_t name_len, const char *text,
       struct re_registers *regs = &macro_sequence_regs;
 
       while (offset < (regoff_t) len
-	     && (offset = re_search (&macro_sequence_buf, defn, len, offset,
-				     len - offset, regs)) >= 0)
-	{
-	  /* Skip empty matches.  */
-	  if (regs->start[0] == regs->end[0])
-	    offset++;
-	  else
-	    {
-	      offset = regs->end[0];
-	      /* Safe to use slot 1 since we don't pass a macro name
-		 to m4_warn.  */
-	      m4_warn (0, NULL, _("definition of %s contains sequence %s"),
-		       quotearg_style_mem (locale_quoting_style, name,
-					   name_len),
-		       quotearg_n_style_mem (1, locale_quoting_style,
-					     defn + regs->start[0],
-					     regs->end[0] - regs->start[0]));
-	    }
-	}
+             && (offset = re_search (&macro_sequence_buf, defn, len, offset,
+                                     len - offset, regs)) >= 0)
+        {
+          /* Skip empty matches.  */
+          if (regs->start[0] == regs->end[0])
+            offset++;
+          else
+            {
+              offset = regs->end[0];
+              /* Safe to use slot 1 since we don't pass a macro name
+                 to m4_warn.  */
+              m4_warn (0, NULL, _("definition of %s contains sequence %s"),
+                       quotearg_style_mem (locale_quoting_style, name,
+                                           name_len),
+                       quotearg_n_style_mem (1, locale_quoting_style,
+                                             defn + regs->start[0],
+                                             regs->end[0] - regs->start[0]));
+            }
+        }
       if (offset == -2)
-	m4_warn (0, NULL,
-		 _("problem checking --warn-macro-sequence for macro %s"),
-		 quotearg_style_mem (locale_quoting_style, name, name_len));
+        m4_warn (0, NULL,
+                 _("problem checking --warn-macro-sequence for macro %s"),
+                 quotearg_style_mem (locale_quoting_style, name, name_len));
     }
 }
 
@@ -517,29 +517,29 @@ builtin_init (void)
   for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
     if (!no_gnu_extensions || !bp->gnu_extension)
       {
-	size_t len = strlen (bp->name);
-	if (prefix_all_builtins)
-	  {
-	    string = xasprintf ("m4_%s", bp->name);
-	    define_builtin (string, len + 3, bp, SYMBOL_INSERT);
-	    free (string);
-	  }
-	else
-	  define_builtin (bp->name, len, bp, SYMBOL_INSERT);
+        size_t len = strlen (bp->name);
+        if (prefix_all_builtins)
+          {
+            string = xasprintf ("m4_%s", bp->name);
+            define_builtin (string, len + 3, bp, SYMBOL_INSERT);
+            free (string);
+          }
+        else
+          define_builtin (bp->name, len, bp, SYMBOL_INSERT);
       }
 
   for (pp = &predefined_tab[0]; pp->func != NULL; pp++)
     if (no_gnu_extensions)
       {
-	if (pp->unix_name != NULL)
-	  define_user_macro (pp->unix_name, strlen (pp->unix_name),
-			     pp->func, SIZE_MAX, SYMBOL_INSERT);
+        if (pp->unix_name != NULL)
+          define_user_macro (pp->unix_name, strlen (pp->unix_name),
+                             pp->func, SIZE_MAX, SYMBOL_INSERT);
       }
     else
       {
-	if (pp->gnu_name != NULL)
-	  define_user_macro (pp->gnu_name, strlen (pp->gnu_name),
-			     pp->func, SIZE_MAX, SYMBOL_INSERT);
+        if (pp->gnu_name != NULL)
+          define_user_macro (pp->gnu_name, strlen (pp->gnu_name),
+                             pp->func, SIZE_MAX, SYMBOL_INSERT);
       }
 }
 
@@ -586,15 +586,15 @@ numeric_arg (const call_info *name, const char *arg, size_t len, int *valuep)
       errno = 0;
       *valuep = strtol (arg, &endp, 10);
       if (endp - arg - len)
-	{
-	  m4_warn (0, name, _("non-numeric argument %s"),
-		   quotearg_style_mem (locale_quoting_style, arg, len));
-	  return false;
-	}
+        {
+          m4_warn (0, name, _("non-numeric argument %s"),
+                   quotearg_style_mem (locale_quoting_style, arg, len));
+          return false;
+        }
       if (isspace (to_uchar (*arg)))
-	m4_warn (0, name, _("leading whitespace ignored"));
+        m4_warn (0, name, _("leading whitespace ignored"));
       else if (errno == ERANGE)
-	m4_warn (0, name, _("numeric overflow detected"));
+        m4_warn (0, name, _("numeric overflow detected"));
     }
   return true;
 }
@@ -705,15 +705,15 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
       /* fallthru */
     case TOKEN_TEXT:
       define_user_macro (ARG (1), ARG_LEN (1), arg_text (argv, 2, true),
-			 arg_len (argv, 2, true), mode);
+                         arg_len (argv, 2, true), mode);
       break;
 
     case TOKEN_FUNC:
       bp = find_builtin_by_addr (arg_func (argv, 2));
       if (bp == NULL)
-	return;
+        return;
       else
-	define_builtin (ARG (1), ARG_LEN (1), bp, mode);
+        define_builtin (ARG (1), ARG_LEN (1), bp, mode);
       break;
 
     default:
@@ -730,7 +730,7 @@ m4_define (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
 
 static void
 m4_undefine (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	     macro_arguments *argv)
+             macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   int i;
@@ -740,15 +740,15 @@ m4_undefine (struct obstack *obs M4_GNUC_UNUSED, int argc,
     if (arg_type (argv, i) != TOKEN_TEXT)
       m4_warn (0, me, _("invalid macro name ignored"));
     else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_DELETE)
-	     && (debug_level & DEBUG_TRACE_DEREF))
+             && (debug_level & DEBUG_TRACE_DEREF))
       m4_warn (0, me, _("undefined macro %s"),
-	       quotearg_style_mem (locale_quoting_style, ARG (i),
-				   ARG_LEN (i)));
+               quotearg_style_mem (locale_quoting_style, ARG (i),
+                                   ARG_LEN (i)));
 }
 
 static void
 m4_pushdef (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	    macro_arguments *argv)
+            macro_arguments *argv)
 {
   define_macro (argc, argv, SYMBOL_PUSHDEF);
 }
@@ -764,10 +764,10 @@ m4_popdef (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
     if (arg_type (argv, i) != TOKEN_TEXT)
       m4_warn (0, me, _("invalid macro name ignored"));
     else if (!lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_POPDEF)
-	     && (debug_level & DEBUG_TRACE_DEREF))
+             && (debug_level & DEBUG_TRACE_DEREF))
       m4_warn (0, me, _("undefined macro %s"),
-	       quotearg_style_mem (locale_quoting_style, ARG (i),
-				   ARG_LEN (i)));
+               quotearg_style_mem (locale_quoting_style, ARG (i),
+                                   ARG_LEN (i)));
 }
 
 /*---------------------.
@@ -810,24 +810,24 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
   while (true)
     {
       if (arg_equal (argv, i, i + 1))
-	{
-	  push_arg (obs, argv, i + 2);
-	  return;
-	}
+        {
+          push_arg (obs, argv, i + 2);
+          return;
+        }
       switch (argc)
-	{
-	case 3:
-	  return;
+        {
+        case 3:
+          return;
 
-	case 4:
-	case 5:
-	  push_arg (obs, argv, i + 3);
-	  return;
+        case 4:
+        case 5:
+          push_arg (obs, argv, i + 3);
+          return;
 
-	default:
-	  argc -= 3;
-	  i += 3;
-	}
+        default:
+          argc -= 3;
+          i += 3;
+        }
     }
 }
 
@@ -902,20 +902,20 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
   else
     {
       for (i = 1; i < argc; i++)
-	{
-	  if (arg_type (argv, i) != TOKEN_TEXT)
-	    {
-	      m4_warn (0, me, _("invalid macro name ignored"));
-	      continue;
-	    }
-	  s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
-	  if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
-	    dump_symbol (s, &data);
-	  else if (debug_level & DEBUG_TRACE_DEREF)
-	    m4_warn (0, me, _("undefined macro %s"),
-		     quotearg_style_mem (locale_quoting_style, ARG (i),
-					 ARG_LEN (i)));
-	}
+        {
+          if (arg_type (argv, i) != TOKEN_TEXT)
+            {
+              m4_warn (0, me, _("invalid macro name ignored"));
+              continue;
+            }
+          s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
+          if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
+            dump_symbol (s, &data);
+          else if (debug_level & DEBUG_TRACE_DEREF)
+            m4_warn (0, me, _("undefined macro %s"),
+                     quotearg_style_mem (locale_quoting_style, ARG (i),
+                                         ARG_LEN (i)));
+        }
     }
 
   /* Make table of symbols invisible to expand_macro ().  */
@@ -926,36 +926,36 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* TODO - add debugmode(b) option to control quoting style?  */
       xfwrite (SYMBOL_NAME (data.base[0]), 1, SYMBOL_NAME_LEN (data.base[0]),
-	       output);
+               output);
       fputc (':', output);
       fputc ('\t', output);
 
       switch (SYMBOL_TYPE (data.base[0]))
-	{
-	case TOKEN_TEXT:
-	  if (debug_level & DEBUG_TRACE_QUOTE)
-	    xfwrite (curr_quote.str1, 1, curr_quote.len1, output);
-	  xfwrite (SYMBOL_TEXT (data.base[0]), 1,
-		   SYMBOL_TEXT_LEN (data.base[0]), output);
-	  if (debug_level & DEBUG_TRACE_QUOTE)
-	    xfwrite (curr_quote.str2, 1, curr_quote.len2, output);
-	  break;
+        {
+        case TOKEN_TEXT:
+          if (debug_level & DEBUG_TRACE_QUOTE)
+            xfwrite (curr_quote.str1, 1, curr_quote.len1, output);
+          xfwrite (SYMBOL_TEXT (data.base[0]), 1,
+                   SYMBOL_TEXT_LEN (data.base[0]), output);
+          if (debug_level & DEBUG_TRACE_QUOTE)
+            xfwrite (curr_quote.str2, 1, curr_quote.len2, output);
+          break;
 
-	case TOKEN_FUNC:
-	  bp = find_builtin_by_addr (SYMBOL_FUNC (data.base[0]));
-	  if (bp == NULL)
-	    {
-	      assert (!"m4_dumpdef");
-	      abort ();
-	    }
-	  xfprintf (output, "<%s>", bp->name);
-	  break;
+        case TOKEN_FUNC:
+          bp = find_builtin_by_addr (SYMBOL_FUNC (data.base[0]));
+          if (bp == NULL)
+            {
+              assert (!"m4_dumpdef");
+              abort ();
+            }
+          xfprintf (output, "<%s>", bp->name);
+          break;
 
-	default:
-	  assert (!"m4_dumpdef");
-	  abort ();
-	  break;
-	}
+        default:
+          assert (!"m4_dumpdef");
+          abort ();
+          break;
+        }
       fputc ('\n', output);
     }
 }
@@ -987,13 +987,13 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
   if (bp->func == m4_placeholder)
     {
       if (debug_level & DEBUG_TRACE_DEREF)
-	m4_warn (0, me, _("undefined builtin %s"),
-		 quotearg_style_mem (locale_quoting_style, name, ARG_LEN (1)));
+        m4_warn (0, me, _("undefined builtin %s"),
+                 quotearg_style_mem (locale_quoting_style, name, ARG_LEN (1)));
     }
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
-						 !bp->groks_macro_args, false);
+                                                 !bp->groks_macro_args, false);
       bp->func (obs, argc - 1, new_argv);
     }
 }
@@ -1027,14 +1027,14 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
   if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
     {
       if (debug_level & DEBUG_TRACE_DEREF)
-	m4_warn (0, me, _("undefined macro %s"),
-		 quotearg_style_mem (locale_quoting_style, name, len));
+        m4_warn (0, me, _("undefined macro %s"),
+                 quotearg_style_mem (locale_quoting_style, name, len));
     }
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, len,
-						 !SYMBOL_MACRO_ARGS (s),
-						 SYMBOL_TRACED (s));
+                                                 !SYMBOL_MACRO_ARGS (s),
+                                                 SYMBOL_TRACED (s));
       trace_prepre (arg_info (new_argv));
       call_macro (s, new_argv, obs);
     }
@@ -1060,43 +1060,43 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
   for (i = 1; i < argc; i++)
     {
       if (arg_type (argv, i) != TOKEN_TEXT)
-	{
-	  m4_warn (0, me, _("invalid macro name ignored"));
-	  continue;
-	}
+        {
+          m4_warn (0, me, _("invalid macro name ignored"));
+          continue;
+        }
       s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
       if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
-	{
-	  if (debug_level & DEBUG_TRACE_DEREF)
-	    m4_warn (0, me, _("undefined macro %s"),
-		     quotearg_style_mem (locale_quoting_style, ARG (i),
-					 ARG_LEN (i)));
-	  continue;
-	}
+        {
+          if (debug_level & DEBUG_TRACE_DEREF)
+            m4_warn (0, me, _("undefined macro %s"),
+                     quotearg_style_mem (locale_quoting_style, ARG (i),
+                                         ARG_LEN (i)));
+          continue;
+        }
 
       switch (SYMBOL_TYPE (s))
-	{
-	case TOKEN_TEXT:
-	  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
-	  obstack_grow (obs, SYMBOL_TEXT (s), SYMBOL_TEXT_LEN (s));
-	  obstack_grow (obs, curr_quote.str2, curr_quote.len2);
-	  break;
+        {
+        case TOKEN_TEXT:
+          obstack_grow (obs, curr_quote.str1, curr_quote.len1);
+          obstack_grow (obs, SYMBOL_TEXT (s), SYMBOL_TEXT_LEN (s));
+          obstack_grow (obs, curr_quote.str2, curr_quote.len2);
+          break;
 
-	case TOKEN_FUNC:
-	  b = SYMBOL_FUNC (s);
-	  if (b == m4_placeholder)
-	    m4_warn (0, me,
-		     _("builtin %s requested by frozen file not found"),
-		     quotearg_style_mem (locale_quoting_style, ARG (i),
-					 ARG_LEN (i)));
-	  else
-	    push_macro (obs, b);
-	  break;
+        case TOKEN_FUNC:
+          b = SYMBOL_FUNC (s);
+          if (b == m4_placeholder)
+            m4_warn (0, me,
+                     _("builtin %s requested by frozen file not found"),
+                     quotearg_style_mem (locale_quoting_style, ARG (i),
+                                         ARG_LEN (i)));
+          else
+            push_macro (obs, b);
+          break;
 
-	default:
-	  assert (!"m4_defn");
-	  abort ();
-	}
+        default:
+          assert (!"m4_defn");
+          abort ();
+        }
     }
 }
 
@@ -1121,7 +1121,7 @@ m4_syscmd (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
 
   if (strlen (cmd) != len)
     m4_warn (0, me, _("argument %s truncated"),
-	     quotearg_style_mem (locale_quoting_style, cmd, len));
+             quotearg_style_mem (locale_quoting_style, cmd, len));
   if (bad_argc (me, argc, 1, 1) || !*cmd)
     {
       /* The empty command is successful.  */
@@ -1141,7 +1141,7 @@ m4_syscmd (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
   status = execute (caller, SYSCMD_SHELL, (char **) prog_args, false,
-		    false, false, false, true, false, &sig_status);
+                    false, false, false, true, false, &sig_status);
   if (sig_status)
     {
       assert (status == 127);
@@ -1150,8 +1150,8 @@ m4_syscmd (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
   else
     {
       if (status == 127 && errno)
-	m4_warn (errno, me, _("cannot run command %s"),
-		 quotearg_style (locale_quoting_style, cmd));
+        m4_warn (errno, me, _("cannot run command %s"),
+                 quotearg_style (locale_quoting_style, cmd));
       sysval = status;
     }
 }
@@ -1172,7 +1172,7 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
 
   if (strlen (cmd) != len)
     m4_warn (0, me, _("argument %s truncated"),
-	     quotearg_style_mem (locale_quoting_style, cmd, len));
+             quotearg_style_mem (locale_quoting_style, cmd, len));
   if (bad_argc (me, argc, 1, 1) || !*cmd)
     {
       /* The empty command is successful.  */
@@ -1192,11 +1192,11 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
   child = create_pipe_in (caller, SYSCMD_SHELL, (char **) prog_args,
-			  NULL, false, true, false, &fd);
+                          NULL, false, true, false, &fd);
   if (child == -1)
     {
       m4_warn (errno, me, _("cannot run command %s"),
-	       quotearg_style (locale_quoting_style, cmd));
+               quotearg_style (locale_quoting_style, cmd));
       sysval = 127;
       return;
     }
@@ -1204,7 +1204,7 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   if (!pin)
     {
       m4_warn (errno, me, _("cannot run command %s"),
-	       quotearg_style (locale_quoting_style, cmd));
+               quotearg_style (locale_quoting_style, cmd));
       sysval = 127;
       close (fd);
       return;
@@ -1213,26 +1213,26 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
     {
       size_t avail = obstack_room (obs);
       if (!avail)
-	{
-	  int ch = getc (pin);
-	  if (ch == EOF)
-	    break;
-	  obstack_1grow (obs, ch);
-	}
+        {
+          int ch = getc (pin);
+          if (ch == EOF)
+            break;
+          obstack_1grow (obs, ch);
+        }
       else
-	{
-	  len = fread (obstack_next_free (obs), 1, avail, pin);
-	  if (len <= 0)
-	    break;
-	  obstack_blank_fast (obs, len);
-	}
+        {
+          len = fread (obstack_next_free (obs), 1, avail, pin);
+          if (len <= 0)
+            break;
+          obstack_blank_fast (obs, len);
+        }
     }
   if (ferror (pin) || fclose (pin))
     m4_error (EXIT_FAILURE, errno, me, _("cannot read pipe to command %s"),
-	      quotearg_style (locale_quoting_style, cmd));
+              quotearg_style (locale_quoting_style, cmd));
   errno = 0;
   status = wait_subprocess (child, caller, false, true, true, false,
-			    &sig_status);
+                            &sig_status);
   if (sig_status)
     {
       assert (status == 127);
@@ -1241,15 +1241,15 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   else
     {
       if (status == 127 && errno)
-	m4_warn (errno, me, _("cannot run command %s"),
-		 quotearg_style (locale_quoting_style, cmd));
+        m4_warn (errno, me, _("cannot run command %s"),
+                 quotearg_style (locale_quoting_style, cmd));
       sysval = status;
     }
 }
 
 static void
 m4_sysval (struct obstack *obs, int argc M4_GNUC_UNUSED,
-	   macro_arguments *argv M4_GNUC_UNUSED)
+           macro_arguments *argv M4_GNUC_UNUSED)
 {
   shipout_int (obs, sysval);
 }
@@ -1295,16 +1295,16 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
   if (radix == 1)
     {
       if (value < 0)
-	{
-	  obstack_1grow (obs, '-');
-	  value = -value;
-	}
+        {
+          obstack_1grow (obs, '-');
+          value = -value;
+        }
       if (value + 0U < min + 0U)
-	{
-	  obstack_blank (obs, min - value);
-	  memset ((char *) obstack_next_free (obs) - (min - value), '0',
-		  min - value);
-	}
+        {
+          obstack_blank (obs, min - value);
+          memset ((char *) obstack_next_free (obs) - (min - value), '0',
+                  min - value);
+        }
       obstack_blank (obs, value);
       memset ((char *) obstack_next_free (obs) - value, '1', value);
       return;
@@ -1399,7 +1399,7 @@ m4_divnum (struct obstack *obs, int argc, macro_arguments *argv)
 
 static void
 m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	     macro_arguments *argv)
+             macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   int i;
@@ -1412,31 +1412,31 @@ m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc,
   else
     for (i = 1; i < argc; i++)
       {
-	const char *str = ARG (i);
-	size_t len = ARG_LEN (i);
-	file = strtol (str, &endp, 10);
-	if (endp - str + 0UL == len && !isspace (to_uchar (*str)))
-	  insert_diversion (file);
-	else if (no_gnu_extensions)
-	  m4_warn (0, me, _("non-numeric argument %s"),
-		   quotearg_style_mem (locale_quoting_style, str, len));
-	else if (strlen (str) != len)
-	  m4_warn (0, me, _("invalid file name %s"),
-		   quotearg_style_mem (locale_quoting_style, str, len));
-	else
-	  {
-	    fp = m4_path_search (str, NULL);
-	    if (fp != NULL)
-	      {
-		insert_file (fp);
-		if (fclose (fp) == EOF)
-		  m4_warn (errno, me, _("error undiverting %s"),
-			   quotearg_style (locale_quoting_style, str));
-	      }
-	    else
-	      m4_warn (errno, me, _("cannot undivert %s"),
-		       quotearg_style (locale_quoting_style, str));
-	  }
+        const char *str = ARG (i);
+        size_t len = ARG_LEN (i);
+        file = strtol (str, &endp, 10);
+        if (endp - str + 0UL == len && !isspace (to_uchar (*str)))
+          insert_diversion (file);
+        else if (no_gnu_extensions)
+          m4_warn (0, me, _("non-numeric argument %s"),
+                   quotearg_style_mem (locale_quoting_style, str, len));
+        else if (strlen (str) != len)
+          m4_warn (0, me, _("invalid file name %s"),
+                   quotearg_style_mem (locale_quoting_style, str, len));
+        else
+          {
+            fp = m4_path_search (str, NULL);
+            if (fp != NULL)
+              {
+                insert_file (fp);
+                if (fclose (fp) == EOF)
+                  m4_warn (errno, me, _("error undiverting %s"),
+                           quotearg_style (locale_quoting_style, str));
+              }
+            else
+              m4_warn (errno, me, _("cannot undivert %s"),
+                       quotearg_style (locale_quoting_style, str));
+          }
       }
 }
 
@@ -1477,13 +1477,13 @@ m4_shift (struct obstack *obs, int argc, macro_arguments *argv)
 
 static void
 m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
-		macro_arguments *argv)
+                macro_arguments *argv)
 {
   bad_argc (arg_info (argv), argc, 0, 2);
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
   set_quotes ((argc >= 2) ? ARG (1) : NULL, ARG_LEN (1),
-	      (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
+              (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
 }
 
 /*--------------------------------------------------------------------.
@@ -1493,13 +1493,13 @@ m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
 
 static void
 m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	      macro_arguments *argv)
+              macro_arguments *argv)
 {
   bad_argc (arg_info (argv), argc, 0, 2);
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
   set_comment ((argc >= 2) ? ARG (1) : NULL, ARG_LEN (1),
-	       (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
+               (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
 }
 
 #ifdef ENABLE_CHANGEWORD
@@ -1511,7 +1511,7 @@ m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc,
 
 static void
 m4_changeword (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	       macro_arguments *argv)
+               macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
 
@@ -1547,13 +1547,13 @@ include (int argc, macro_arguments *argv, bool silent)
   len = ARG_LEN (1);
   if (strlen (arg) != len)
     m4_warn (0, me, _("argument %s truncated"),
-	     quotearg_style_mem (locale_quoting_style, arg, len));
+             quotearg_style_mem (locale_quoting_style, arg, len));
   fp = m4_path_search (arg, &name);
   if (fp == NULL)
     {
       if (!silent)
-	m4_error (0, errno, me, _("cannot open %s"),
-		  quotearg_style (locale_quoting_style, arg));
+        m4_error (0, errno, me, _("cannot open %s"),
+                  quotearg_style (locale_quoting_style, arg));
       return;
     }
 
@@ -1567,7 +1567,7 @@ include (int argc, macro_arguments *argv, bool silent)
 
 static void
 m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	    macro_arguments *argv)
+            macro_arguments *argv)
 {
   include (argc, argv, false);
 }
@@ -1578,7 +1578,7 @@ m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc,
 
 static void
 m4_sinclude (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	     macro_arguments *argv)
+             macro_arguments *argv)
 {
   include (argc, argv, true);
 }
@@ -1595,7 +1595,7 @@ m4_sinclude (struct obstack *obs M4_GNUC_UNUSED, int argc,
    OBS.  Report errors on behalf of ME.  */
 static void
 mkstemp_helper (struct obstack *obs, const call_info *me, const char *pattern,
-		size_t len)
+                size_t len)
 {
   int fd;
   int i;
@@ -1608,7 +1608,7 @@ mkstemp_helper (struct obstack *obs, const call_info *me, const char *pattern,
   if (strlen (pattern) < len)
     {
       m4_warn (0, me, _("argument %s truncated"),
-	       quotearg_style_mem (locale_quoting_style, pattern, len));
+               quotearg_style_mem (locale_quoting_style, pattern, len));
       len = strlen (pattern);
     }
   obstack_grow (obs, pattern, len);
@@ -1623,7 +1623,7 @@ mkstemp_helper (struct obstack *obs, const call_info *me, const char *pattern,
   if (fd < 0)
     {
       m4_warn (errno, me, _("cannot create file from template %s"),
-	       quotearg_style (locale_quoting_style, pattern));
+               quotearg_style (locale_quoting_style, pattern));
       obstack_free (obs, obstack_finish (obs));
     }
   else
@@ -1646,32 +1646,32 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
   if (no_gnu_extensions)
     {
       /* POSIX states "any trailing 'X' characters [are] replaced with
-	 the current process ID as a string", without referencing the
-	 file system.  Horribly insecure, but we have to do it when we
-	 are in traditional mode.
+         the current process ID as a string", without referencing the
+         file system.  Horribly insecure, but we have to do it when we
+         are in traditional mode.
 
-	 For reference, Solaris m4 does:
-	   maketemp() -> `'
-	   maketemp(X) -> `X'
-	   maketemp(XX) -> `Xn', where n is last digit of pid
-	   maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
+         For reference, Solaris m4 does:
+           maketemp() -> `'
+           maketemp(X) -> `X'
+           maketemp(XX) -> `Xn', where n is last digit of pid
+           maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
       */
       const char *str = ARG (1);
       size_t len = ARG_LEN (1);
       size_t i;
       struct obstack *scratch = arg_scratch ();
       size_t pid_len = obstack_printf (scratch, "%lu",
-				       (unsigned long) getpid ());
+                                       (unsigned long) getpid ());
       char *pid = (char *) obstack_copy0 (scratch, "", 0);
 
       for (i = len; i > 1; i--)
-	if (str[i - 1] != 'X')
-	  break;
+        if (str[i - 1] != 'X')
+          break;
       obstack_grow (obs, str, i);
       if (len - i < pid_len)
-	obstack_grow (obs, pid + pid_len - (len - i), len - i);
+        obstack_grow (obs, pid + pid_len - (len - i), len - i);
       else
-	obstack_printf (obs, "%.*d%s", (int) (len - i - pid_len), 0, pid);
+        obstack_printf (obs, "%.*d%s", (int) (len - i - pid_len), 0, pid);
     }
   else
     mkstemp_helper (obs, me, ARG (1), ARG_LEN (1));
@@ -1814,15 +1814,15 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
   else
     for (i = 1; i < argc; i++)
       {
-	if (arg_type (argv, i) != TOKEN_TEXT)
-	  {
-	    m4_warn (0, me, _("invalid macro name ignored"));
-	    continue;
-	  }
-	s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
-	if (!s)
-	  s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_INSERT);
-	set_trace (s, obs);
+        if (arg_type (argv, i) != TOKEN_TEXT)
+          {
+            m4_warn (0, me, _("invalid macro name ignored"));
+            continue;
+          }
+        s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
+        if (!s)
+          s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_INSERT);
+        set_trace (s, obs);
       }
 }
 
@@ -1832,7 +1832,7 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
 
 static void
 m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	     macro_arguments *argv)
+             macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   symbol *s;
@@ -1843,14 +1843,14 @@ m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc,
   else
     for (i = 1; i < argc; i++)
       {
-	if (arg_type (argv, i) != TOKEN_TEXT)
-	  {
-	    m4_warn (0, me, _("invalid macro name ignored"));
-	    continue;
-	  }
-	s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
-	if (s != NULL)
-	  set_trace (s, NULL);
+        if (arg_type (argv, i) != TOKEN_TEXT)
+          {
+            m4_warn (0, me, _("invalid macro name ignored"));
+            continue;
+          }
+        s = lookup_symbol (ARG (i), ARG_LEN (i), SYMBOL_LOOKUP);
+        if (s != NULL)
+          set_trace (s, NULL);
       }
 }
 
@@ -1862,7 +1862,7 @@ m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc,
 
 static void
 m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	      macro_arguments *argv)
+              macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   const char *str = ARG (1);
@@ -1874,7 +1874,7 @@ m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc,
     debug_level = 0;
   else if (debug_decode (str, len) < 0)
     m4_warn (0, me, _("bad debug flags: %s"),
-	     quotearg_style_mem (locale_quoting_style, str, len));
+             quotearg_style_mem (locale_quoting_style, str, len));
 }
 
 /*-------------------------------------------------------------------------.
@@ -1884,7 +1884,7 @@ m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc,
 
 static void
 m4_debugfile (struct obstack *obs M4_GNUC_UNUSED, int argc,
-	      macro_arguments *argv)
+              macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
 
@@ -1897,11 +1897,11 @@ m4_debugfile (struct obstack *obs M4_GNUC_UNUSED, int argc,
       const char *str = ARG (1);
       size_t len = ARG_LEN (1);
       if (strlen (str) < len)
-	m4_warn (0, me, _("argument %s truncated"),
-		 quotearg_style_mem (locale_quoting_style, str, len));
+        m4_warn (0, me, _("argument %s truncated"),
+                 quotearg_style_mem (locale_quoting_style, str, len));
       if (!debug_set_output (me, str))
-	m4_warn (errno, me, _("cannot set debug file %s"),
-		 quotearg_style (locale_quoting_style, str));
+        m4_warn (errno, me, _("cannot set debug file %s"),
+                 quotearg_style (locale_quoting_style, str));
     }
 }
 
@@ -1941,7 +1941,7 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`index') is blank, but index(`abc') is 0.  */
       if (argc == 2)
-	shipout_int (obs, 0);
+        shipout_int (obs, 0);
       return;
     }
 
@@ -1955,7 +1955,7 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
     {
       offset += haystack_len;
       if (offset < 0)
-	offset = 0;
+        offset = 0;
     }
   else if (haystack_len < offset + 0UL)
     {
@@ -1966,7 +1966,7 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
   /* Rely on the optimizations guaranteed by gnulib's memmem
      module.  */
   result = (char *) memmem (haystack + offset, haystack_len - offset, needle,
-			    ARG_LEN (2));
+                            ARG_LEN (2));
   if (result)
     retval = result - haystack;
 
@@ -1996,7 +1996,7 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`substr') is blank, but substr(`abc') is abc.  */
       if (argc == 2)
-	push_arg (obs, argv, 1);
+        push_arg (obs, argv, 1);
       return;
     }
 
@@ -2011,27 +2011,27 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
   else
     {
       if (!numeric_arg (me, ARG (3), ARG_LEN (3), &end))
-	return;
+        return;
       if (end < 0)
-	end += length;
+        end += length;
       else
-	end += start;
+        end += start;
     }
 
   if (argc >= 5)
     {
       /* Replacement text provided.  */
       if (end < start)
-	end = start;
+        end = start;
       if (end < 0 || length < start)
-	{
-	  m4_warn (0, me, _("substring out of range"));
-	  return;
-	}
+        {
+          m4_warn (0, me, _("substring out of range"));
+          return;
+        }
       if (start < 0)
-	start = 0;
+        start = 0;
       if (length < end)
-	end = length;
+        end = length;
       obstack_grow (obs, ARG (1), start);
       push_arg (obs, argv, 4);
       obstack_grow (obs, ARG (1) + end, length - end);
@@ -2075,27 +2075,27 @@ expand_ranges (const char *s, size_t *len, struct obstack *obs)
   for ( ; s != end; from = *s++)
     {
       if (*s == '-')
-	{
-	  if (++s == end)
-	    {
-	      /* trailing dash */
-	      obstack_1grow (obs, '-');
-	      break;
-	    }
-	  to = *s;
-	  if (from <= to)
-	    {
-	      while (from++ < to)
-		obstack_1grow (obs, from);
-	    }
-	  else
-	    {
-	      while (--from >= to)
-		obstack_1grow (obs, from);
-	    }
-	}
+        {
+          if (++s == end)
+            {
+              /* trailing dash */
+              obstack_1grow (obs, '-');
+              break;
+            }
+          to = *s;
+          if (from <= to)
+            {
+              while (from++ < to)
+                obstack_1grow (obs, from);
+            }
+          else
+            {
+              while (--from >= to)
+                obstack_1grow (obs, from);
+            }
+        }
       else
-	obstack_1grow (obs, *s);
+        obstack_1grow (obs, *s);
     }
   *len = obstack_object_size (obs);
   return (char *) obstack_finish (obs);
@@ -2128,7 +2128,7 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
       if (argc >= 2)
-	push_arg (obs, argv, 1);
+        push_arg (obs, argv, 1);
       return;
     }
 
@@ -2150,15 +2150,15 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
       int second = from[from_len / 2];
       data = ARG (1);
       while ((p = (char *) memchr2 (data, from[0], second, len)))
-	{
-	  obstack_grow (obs, data, p - data);
-	  len -= p - data + 1;
-	  data = p + 1;
-	  if (*p == from[0] && to_len)
-	    obstack_1grow (obs, to[0]);
-	  else if (*p == second && 1 < to_len)
-	    obstack_1grow (obs, to[1]);
-	}
+        {
+          obstack_grow (obs, data, p - data);
+          len -= p - data + 1;
+          data = p + 1;
+          if (*p == from[0] && to_len)
+            obstack_1grow (obs, to[0]);
+          else if (*p == second && 1 < to_len)
+            obstack_1grow (obs, to[1]);
+        }
       obstack_grow (obs, data, len);
       return;
     }
@@ -2178,20 +2178,20 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
     {
       ch = *from++;
       if (found[ch] == ASIS)
-	{
-	  if (to_len)
-	    {
-	      found[ch] = REPLACE;
-	      map[ch] = *to;
-	    }
-	  else
-	    found[ch] = DELETE;
-	}
+        {
+          if (to_len)
+            {
+              found[ch] = REPLACE;
+              map[ch] = *to;
+            }
+          else
+            found[ch] = DELETE;
+        }
       if (to_len)
-	{
-	  to++;
-	  to_len--;
-	}
+        {
+          to++;
+          to_len--;
+        }
     }
 
   data = ARG (1);
@@ -2200,19 +2200,19 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
     {
       ch = *data++;
       switch (found[ch])
-	{
-	case ASIS:
-	  obstack_1grow (obs, ch);
-	  break;
-	case REPLACE:
-	  obstack_1grow (obs, map[ch]);
-	  break;
-	case DELETE:
-	  break;
-	default:
-	  assert (!"m4_translit");
-	  abort ();
-	}
+        {
+        case ASIS:
+          obstack_1grow (obs, ch);
+          break;
+        case REPLACE:
+          obstack_1grow (obs, map[ch]);
+          break;
+        case DELETE:
+          break;
+        default:
+          assert (!"m4_translit");
+          abort ();
+        }
     }
 }
 
@@ -2242,7 +2242,7 @@ static int substitute_warned = 0;
 
 static void
 substitute (struct obstack *obs, const call_info *me, const char *victim,
-	    const char *repl, size_t repl_len, struct re_registers *regs)
+            const char *repl, size_t repl_len, struct re_registers *regs)
 {
   int ch;
   __re_size_t ind;
@@ -2250,51 +2250,51 @@ substitute (struct obstack *obs, const call_info *me, const char *victim,
     {
       const char *backslash = (char *) memchr (repl, '\\', repl_len);
       if (!backslash)
-	{
-	  obstack_grow (obs, repl, repl_len);
-	  return;
-	}
+        {
+          obstack_grow (obs, repl, repl_len);
+          return;
+        }
       obstack_grow (obs, repl, backslash - repl);
       repl_len -= backslash - repl + 1;
       if (!repl_len)
-	{
-	  m4_warn (0, me, _("trailing \\ ignored in replacement"));
-	  return;
-	}
+        {
+          m4_warn (0, me, _("trailing \\ ignored in replacement"));
+          return;
+        }
       repl = backslash + 1;
       repl_len--;
       ch = *repl++;
       switch (ch)
-	{
-	case '0':
-	  if (!substitute_warned)
-	    {
-	      m4_warn (0, me, _("\
+        {
+        case '0':
+          if (!substitute_warned)
+            {
+              m4_warn (0, me, _("\
 \\0 will disappear, use \\& instead in replacements"));
-	      substitute_warned = 1;
-	    }
-	  /* Fall through.  */
+              substitute_warned = 1;
+            }
+          /* Fall through.  */
 
-	case '&':
-	  if (regs)
-	    obstack_grow (obs, victim + regs->start[0],
-			  regs->end[0] - regs->start[0]);
-	  break;
+        case '&':
+          if (regs)
+            obstack_grow (obs, victim + regs->start[0],
+                          regs->end[0] - regs->start[0]);
+          break;
 
-	case '1': case '2': case '3': case '4': case '5': case '6':
-	case '7': case '8': case '9':
-	  ind = ch -= '0';
-	  if (!regs || regs->num_regs - 1 <= ind)
-	    m4_warn (0, me, _("sub-expression %d not present"), ch);
-	  else if (regs->end[ch] > 0)
-	    obstack_grow (obs, victim + regs->start[ch],
-			  regs->end[ch] - regs->start[ch]);
-	  break;
+        case '1': case '2': case '3': case '4': case '5': case '6':
+        case '7': case '8': case '9':
+          ind = ch -= '0';
+          if (!regs || regs->num_regs - 1 <= ind)
+            m4_warn (0, me, _("sub-expression %d not present"), ch);
+          else if (regs->end[ch] > 0)
+            obstack_grow (obs, victim + regs->start[ch],
+                          regs->end[ch] - regs->start[ch]);
+          break;
 
-	default:
-	  obstack_1grow (obs, ch);
-	  break;
-	}
+        default:
+          obstack_1grow (obs, ch);
+          break;
+        }
     }
 }
 
@@ -2341,7 +2341,7 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`regexp') is blank, but regexp(`abc') is 0.  */
       if (argc == 2)
-	shipout_int (obs, 0);
+        shipout_int (obs, 0);
       return;
     }
 
@@ -2353,9 +2353,9 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* The empty regex matches everything!  */
       if (argc == 3)
-	shipout_int (obs, 0);
+        shipout_int (obs, 0);
       else
-	substitute (obs, me, victim, repl, ARG_LEN (3), NULL);
+        substitute (obs, me, victim, repl, ARG_LEN (3), NULL);
       return;
     }
 
@@ -2365,10 +2365,10 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
       fputs ("r:{", trace_file);
       xfwrite (regexp, 1, ARG_LEN (2), trace_file);
       if (argc > 3)
-	{
-	  fputs ("}:{", trace_file);
-	  xfwrite (repl, 1, ARG_LEN (3), trace_file);
-	}
+        {
+          fputs ("}:{", trace_file);
+          xfwrite (repl, 1, ARG_LEN (3), trace_file);
+        }
       fputs ("}\n", trace_file);
     }
 #endif /* DEBUG_REGEX */
@@ -2377,19 +2377,19 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
   if (msg != NULL)
     {
       m4_warn (0, me, _("bad regular expression %s: %s"),
-	       quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)),
-	       msg);
+               quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)),
+               msg);
       return;
     }
 
   length = ARG_LEN (1);
   /* Avoid overhead of allocating regs if we won't use it.  */
   startpos = re_search (buf, victim, length, 0, length,
-			argc == 3 ? NULL : regs);
+                        argc == 3 ? NULL : regs);
 
   if (startpos == -2)
     m4_warn (0, me, _("problem matching regular expression %s"),
-	     quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)));
+             quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)));
   else if (argc == 3)
     shipout_int (obs, startpos);
   else if (startpos >= 0)
@@ -2424,7 +2424,7 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
     {
       /* builtin(`patsubst') is blank, but patsubst(`abc') is abc.  */
       if (argc == 2)
-	push_arg (obs, argv, 1);
+        push_arg (obs, argv, 1);
       return;
     }
 
@@ -2456,8 +2456,8 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
   if (msg != NULL)
     {
       m4_warn (0, me, _("bad regular expression %s: %s"),
-	       quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)),
-	       msg);
+               quotearg_style_mem (locale_quoting_style, regexp, ARG_LEN (2)),
+               msg);
       return;
     }
 
@@ -2468,43 +2468,43 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
   while (offset <= length)
     {
       matchpos = re_search (buf, victim, length,
-			    offset, length - offset, regs);
+                            offset, length - offset, regs);
       if (matchpos < 0)
-	{
+        {
 
-	  /* Match failed -- either error or there is no match in the
-	     rest of the string, in which case the rest of the string is
-	     copied verbatim.  */
+          /* Match failed -- either error or there is no match in the
+             rest of the string, in which case the rest of the string is
+             copied verbatim.  */
 
-	  if (matchpos == -2)
-	    m4_warn (0, me, _("problem matching regular expression %s"),
-		     quotearg_style_mem (locale_quoting_style, regexp,
-					 ARG_LEN (2)));
-	  else if (offset < length)
-	    obstack_grow (obs, victim + offset, length - offset);
-	  break;
-	}
+          if (matchpos == -2)
+            m4_warn (0, me, _("problem matching regular expression %s"),
+                     quotearg_style_mem (locale_quoting_style, regexp,
+                                         ARG_LEN (2)));
+          else if (offset < length)
+            obstack_grow (obs, victim + offset, length - offset);
+          break;
+        }
 
       /* Copy the part of the string that was skipped by re_search ().  */
 
       if (matchpos > offset)
-	obstack_grow (obs, victim + offset, matchpos - offset);
+        obstack_grow (obs, victim + offset, matchpos - offset);
 
       /* Handle the part of the string that was covered by the match.  */
 
       substitute (obs, me, victim, repl, repl_len, regs);
 
       /* Update the offset to the end of the match.  If the regexp
-	 matched a null string, advance offset one more, to avoid
-	 infinite loops.  */
+         matched a null string, advance offset one more, to avoid
+         infinite loops.  */
 
       offset = regs->end[0];
       if (regs->start[0] == regs->end[0])
-	{
-	  if (offset < length)
-	    obstack_1grow (obs, victim[offset]);
-	  offset++;
-	}
+        {
+          if (offset < length)
+            obstack_1grow (obs, victim[offset]);
+          offset++;
+        }
     }
 }
 
@@ -2525,10 +2525,10 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 
 void
 m4_placeholder (struct obstack *obs M4_GNUC_UNUSED, int argc M4_GNUC_UNUSED,
-		macro_arguments *argv)
+                macro_arguments *argv)
 {
   m4_warn (0, NULL, _("builtin %s requested by frozen file not found"),
-	   quotearg_style_mem (locale_quoting_style, ARG (0), ARG_LEN (0)));
+           quotearg_style_mem (locale_quoting_style, ARG (0), ARG_LEN (0)));
 }
 
 /*-------------------------------------------------------------------------.
@@ -2541,7 +2541,7 @@ m4_placeholder (struct obstack *obs M4_GNUC_UNUSED, int argc M4_GNUC_UNUSED,
 
 void
 expand_user_macro (struct obstack *obs, symbol *sym,
-		   int argc, macro_arguments *argv)
+                   int argc, macro_arguments *argv)
 {
   const char *text = SYMBOL_TEXT (sym);
   size_t len = SYMBOL_TEXT_LEN (sym);
@@ -2550,52 +2550,52 @@ expand_user_macro (struct obstack *obs, symbol *sym,
     {
       const char *dollar = (char *) memchr (text, '$', len);
       if (!dollar)
-	{
-	  obstack_grow (obs, text, len);
-	  return;
-	}
+        {
+          obstack_grow (obs, text, len);
+          return;
+        }
       obstack_grow (obs, text, dollar - text);
       len -= dollar - text;
       text = dollar;
       if (len == 1)
-	{
-	  obstack_1grow (obs, '$');
-	  return;
-	}
+        {
+          obstack_1grow (obs, '$');
+          return;
+        }
       len--;
       switch (*++text)
-	{
-	case '0': case '1': case '2': case '3': case '4':
-	case '5': case '6': case '7': case '8': case '9':
-	  if (no_gnu_extensions)
-	    {
-	      i = *text++ - '0';
-	      len--;
-	    }
-	  else
-	    {
-	      for (i = 0; len && isdigit (to_uchar (*text)); text++, len--)
-		i = i * 10 + (*text - '0');
-	    }
-	  push_arg (obs, argv, i);
-	  break;
+        {
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+          if (no_gnu_extensions)
+            {
+              i = *text++ - '0';
+              len--;
+            }
+          else
+            {
+              for (i = 0; len && isdigit (to_uchar (*text)); text++, len--)
+                i = i * 10 + (*text - '0');
+            }
+          push_arg (obs, argv, i);
+          break;
 
-	case '#':		/* number of arguments */
-	  shipout_int (obs, argc - 1);
-	  text++;
-	  len--;
-	  break;
+        case '#':		/* number of arguments */
+          shipout_int (obs, argc - 1);
+          text++;
+          len--;
+          break;
 
-	case '*':		/* all arguments */
-	case '@':		/* ... same, but quoted */
-	  push_args (obs, argv, false, *text == '@');
-	  text++;
-	  len--;
-	  break;
+        case '*':		/* all arguments */
+        case '@':		/* ... same, but quoted */
+          push_args (obs, argv, false, *text == '@');
+          text++;
+          len--;
+          break;
 
-	default:
-	  obstack_1grow (obs, '$');
-	  break;
-	}
+        default:
+          obstack_1grow (obs, '$');
+          break;
+        }
     }
 }
