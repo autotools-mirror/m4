@@ -1,5 +1,20 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Use gnulib maintainer-makefile module.
+	* ltdl/m4/gnulib-cache.m4: Import maintainer-makefile module.
+	* cfg.mk (local-checks-to-skip): Drop changelog-check; add
+	sc_cast_of_x_alloc_return_value.
+	(gnu_ftp_host-alpha, gnu_ftp_host-beta, gnu_ftp_host-major)
+	(gnu_rel_host): Delete; provided by maint.mk.
+	(old_NEWS_hash): New macro.
+	* .prev-version: New file.
+	* .x-sc_require_config_h: Likewise.
+	* .x-sc_require_config_h_first: Likewise.
+	* Makefile.am (syntax_check_exceptions, EXTRA_DIST): Ship new
+	files.
+	* maint.mk: Remove from version control; use gnulib instead.
+	* .gitignore: Update.
+
 	Update to latest gnulib.
 	* gnulib: Update.
 	* ltdl/m4/gnulib-cache.m4: Import xoset.

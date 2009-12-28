@@ -52,10 +52,15 @@ include ltdl/Makefile.inc
 
 # Additional configuration.  Version management comes from suggestions
 # given in build-aux/git-version-gen.
+syntax_check_exceptions = \
+	.x-sc_require_config_h \
+	.x-sc_require_config_h_first
+
 AM_CPPFLAGS    += -Ignu -I$(srcdir)/gnu \
 		  -Im4 -I$(srcdir)/m4
-EXTRA_DIST     += bootstrap cfg.mk maint.mk .version \
-		  $(config_macro_dir)/gnulib-cache.m4
+EXTRA_DIST     += bootstrap cfg.mk maint.mk .version .prev-version \
+		  $(config_macro_dir)/gnulib-cache.m4 \
+		  $(syntax_check_exceptions)
 BUILT_SOURCES  += .version
 .version:
 	echo $(VERSION) > $@-t && mv $@-t $@
