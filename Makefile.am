@@ -53,6 +53,7 @@ include ltdl/Makefile.inc
 # Additional configuration.  Version management comes from suggestions
 # given in build-aux/git-version-gen.
 syntax_check_exceptions = \
+	.x-sc_prohibit_tab_based_indentation \
 	.x-sc_require_config_h \
 	.x-sc_require_config_h_first \
 	.x-update-copyright

@@ -1,5 +1,11 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Document new indentation policy.
+	* HACKING: Document indentation policy.
+	* .x-sc_prohibit_tab_based_indentation: New file.
+	* cfg.mk (sc_prohibit_tab_based_indentation): New rule.
+	* Makefile.am (syntax_check_exceptions): Ship exception.
+
 	Switch to indentation by space, not tab.
 	* .gitmodules: Convert leading tabs to spaces.
 	* TODO: Likewise.

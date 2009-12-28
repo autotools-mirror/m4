@@ -28,3 +28,9 @@ old_NEWS_hash = b63892a79436f9f3cd05e10c3c4657ef
 update-copyright-env = \
   UPDATE_COPYRIGHT_USE_INTERVALS=0 \
   UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
+
+# Indent only with spaces.
+sc_prohibit_tab_based_indentation:
+ @re='^ *    '                                               \
+ msg='TAB in indentation; use only spaces'                   \
+   $(_prohibit_regexp)
