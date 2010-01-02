@@ -1,3 +1,13 @@
+2010-01-05  Eric Blake  <ebb9@byu.net>
+
+	Drop hard-coding of GPG id.
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Regenerate.
+	* cfg.mk (gpg_key_ID): Delete, now that maint.mk provides a
+	sensible default.
+	(update-copyright-env): Don't let environment interfere with wrap
+	column.
+
 2010-01-01  Eric Blake  <ebb9@byu.net>
 
 	Update copyright year.

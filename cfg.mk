@@ -18,11 +18,10 @@
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
 
-# The GnuPG ID of the key used to sign the tarballs.
-gpg_key_ID = F4850180
-
 # Always use longhand copyrights.
-update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=0
+update-copyright-env = \
+  UPDATE_COPYRIGHT_USE_INTERVALS=0 \
+  UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
 
 # Tests not to run as part of "make syntax-check".
 # M4 intentionally uses a coding style that compiles under C++.
