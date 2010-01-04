@@ -1,7 +1,8 @@
 #                                                            -*- Autoconf -*-
 # stackovf.m4 -- how do we deal with stack overflow?
 #
-# Copyright (C) 2000, 2003, 2006, 2007 Free Software Foundation, Inc.
+# Copyright (C) 2000, 2003, 2006, 2007, 2010 Free Software Foundation,
+# Inc.
 #
 # This file is part of GNU M4.
 #

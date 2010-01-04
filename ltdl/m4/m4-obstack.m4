@@ -1,7 +1,7 @@
 #                                                            -*- Autoconf -*-
 # m4-obstack.m4 -- the libc supplied version of obstacks if available.
 #
-# Copyright (C) 2000, 2001, 2003, 2004, 2006, 2007 Free Software
+# Copyright (C) 2000, 2001, 2003, 2004, 2006, 2007, 2010 Free Software
 # Foundation, Inc.
 # Written by Gary V. Vaughan <gary@gnu.org>
 #

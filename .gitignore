@@ -1,6 +1,7 @@
 *~
 .#*
 *.a
+*.bak
 .deps
 .dirstamp
 *.exe

@@ -1,7 +1,7 @@
 ##                                                           -*- Autoconf -*-
 ## debug.m4 -- massage compiler flags for debugging/optimisation
 ##
-## Copyright (C) 2000, 2001, 2003, 2005, 2006, 2007 Free Software
+## Copyright (C) 2000, 2001, 2003, 2005, 2006, 2007, 2010 Free Software
 ## Foundation, Inc.
 ## Copyright (C) 1999-2000 Ralf S. Engelschall
 ## Written by <rse@engelschall.com>

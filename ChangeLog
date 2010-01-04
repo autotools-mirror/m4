@@ -1,5 +1,9 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Update copyright year.
+	All files impacted, via 'make update-copyright'.  Additionally:
+	* .gitignore: Ignore backup files.
+
 	Prepare to bulk update copyright year.
 	* gnulib: Update.
 	* ltdl/m4/gnulib-cache.m4: Import update-copyright module.
