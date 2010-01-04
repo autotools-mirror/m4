@@ -378,10 +378,10 @@ m4_symbol_value_delete (m4_symbol_value *value)
       switch (value->type)
         {
         case M4_SYMBOL_TEXT:
-          free ((char *) m4_get_symbol_value_text (value));
+          DELETE (value->u.u_t.text);
           break;
         case M4_SYMBOL_PLACEHOLDER:
-          free ((char *) m4_get_symbol_value_placeholder (value));
+          DELETE (value->u.u_t.text);
           break;
         case M4_SYMBOL_VOID:
         case M4_SYMBOL_FUNC:
@@ -469,10 +469,10 @@ m4_symbol_value_copy (m4 *context, m4_symbol_value *dest, m4_symbol_value *src)
   switch (dest->type)
     {
     case M4_SYMBOL_TEXT:
-      free ((char *) m4_get_symbol_value_text (dest));
+      DELETE (dest->u.u_t.text);
       break;
     case M4_SYMBOL_PLACEHOLDER:
-      free ((char *) m4_get_symbol_value_placeholder (dest));
+      DELETE (dest->u.u_t.text);
       break;
     case M4_SYMBOL_VOID:
     case M4_SYMBOL_FUNC:

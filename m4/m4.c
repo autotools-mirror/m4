@@ -74,7 +74,7 @@ m4_delete (m4 *context)
           m4__search_path *stale = path;
           path = path->next;
 
-          free ((void*) stale->dir);
+          DELETE (stale->dir); /* Cast away const.  */
           free (stale);
         }
       free (context->search_path);

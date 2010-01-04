@@ -615,8 +615,9 @@ extern void m4__include_init (m4 *);
 
 
 
-/* Convenience macro to zero a variable after freeing it.  */
-#define DELETE(Expr)    ((Expr) = (free ((void *) Expr), (void *) 0))
+/* Convenience macro to zero a variable after freeing it, as well as
+   casting away any const.  */
+#define DELETE(Expr)    ((Expr) = (free ((void *) (Expr)), (void *) 0))
 
 
 #if DEBUG

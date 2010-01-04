@@ -152,7 +152,7 @@ install_builtin_table (m4 *context, m4_module *module)
       m4_symbol_pushdef (M4SYMTAB, name, strlen (name), value);
 
       if (m4_get_prefix_builtins_opt (context))
-        free ((char *) name);
+        DELETE (name);
     }
   if (i)
     m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
@@ -649,7 +649,7 @@ module_remove (m4 *context, m4_module *module, m4_obstack *obs)
     {
       size_t i;
       for (i = 0; i < module->builtins_len; i++)
-        free ((char *) module->builtins[i].builtin.name);
+        DELETE (module->builtins[i].builtin.name);
       free (module->builtins);
       free (module);
     }
