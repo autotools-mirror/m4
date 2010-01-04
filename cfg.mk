@@ -15,20 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Use alpha.gnu.org for alpha and beta releases.
-# Use ftp.gnu.org for major releases.
-gnu_ftp_host-alpha = alpha.gnu.org
-gnu_ftp_host-beta = alpha.gnu.org
-gnu_ftp_host-major = ftp.gnu.org
-gnu_rel_host = $(gnu_ftp_host-$(RELEASE_TYPE))
-
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
-
-url_dir_list = ftp://$(gnu_rel_host)/gnu/m4
-
-# The GnuPG ID of the key used to sign the tarballs.
-gpg_key_ID = F4850180
 
 # Tests not to run as part of "make syntax-check".
 # M4 intentionally uses a coding style that compiles under C++.
@@ -41,7 +29,9 @@ config_h_header = "m4\.h"
 old_NEWS_hash = 0330971054cd4fb4e94b85fe367980f2
 
 # Always use longhand copyrights.
-update-copyright-env = UPDATE_COPYRIGHT_USE_INTERVALS=0
+update-copyright-env = \
+  UPDATE_COPYRIGHT_USE_INTERVALS=0 \
+  UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
