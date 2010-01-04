@@ -390,7 +390,7 @@ main (int argc, char *const *argv, char *const *envp)
         case HASHSIZE_OPTION:
           /* -H was supported in 1.4.x, but is a no-op now.  FIXME -
              remove support for -H after 2.0.  */
-          error (0, 0, _("Warning: `%s' is deprecated"),
+          error (0, 0, _("warning: `%s' is deprecated"),
                  optchar == 'H' ? "-H" : "--hashsize");
           break;
 
@@ -399,13 +399,13 @@ main (int argc, char *const *argv, char *const *envp)
           /* Compatibility junk: options that other implementations
              support, but which we ignore as no-ops and don't list in
              --help.  */
-          error (0, 0, _("Warning: `-%c' is deprecated"),
+          error (0, 0, _("warning: `-%c' is deprecated"),
                  optchar);
           break;
 
         case WORD_REGEXP_OPTION:
           /* Supported in 1.4.x as -W, but no longer present.  */
-          error (0, 0, _("Warning: `%s' is deprecated"), "--word-regexp");
+          error (0, 0, _("warning: `%s' is deprecated"), "--word-regexp");
           break;
 
         case 's':
@@ -451,7 +451,7 @@ main (int argc, char *const *argv, char *const *envp)
               errno = 0;
               strtol (optarg, &end, 10);
               if (*end == '\0' && errno == 0)
-                error (0, 0, _("Warning: recommend using `-B ./%s' instead"),
+                error (0, 0, _("warning: recommend using `-B ./%s' instead"),
                        optarg);
             }
           /* fall through */
@@ -541,7 +541,7 @@ main (int argc, char *const *argv, char *const *envp)
           break;
 
         case 'e':
-          error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+          error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
                  "-e", "-i");
           /* fall through */
         case 'i':
@@ -553,7 +553,7 @@ main (int argc, char *const *argv, char *const *envp)
           break;
 
         case ARGLENGTH_OPTION:
-          error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+          error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
                  "--arglength", "--debuglen");
           /* fall through */
         case 'l':
@@ -579,7 +579,7 @@ main (int argc, char *const *argv, char *const *envp)
              stdout, and --error-output is misnamed since it does not
              affect error messages to stderr.  Change the meaning of -o
              after 2.1.  */
-          error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
+          error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
                  optchar == 'o' ? "-o" : "--error-output", "--debugfile");
           /* Don't call m4_debug_set_output here, as it has side effects.  */
           debugfile = optarg;

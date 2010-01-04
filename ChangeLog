@@ -1,5 +1,27 @@
 2010-01-07  Eric Blake  <ebb9@byu.net>
 
+	Address 'make sc_error_message_uppercase' failures.
+	* m4/output.c (m4_freeze_diversions): Silence false positive.
+	* src/main.c (main): Use 'warning', not 'Warning', in messages.
+	* m4/utility.c (m4_verror_at_line): Likewise.
+	* doc/m4.texinfo (Operation modes, Macro Arguments, Undefine)
+	(Defn, Pushdef, Indir, Builtin, Ifdef, Ifelse, Dumpdef, Trace)
+	(Debuglen, Debugfile, Dnl, Changeresyntax, Standard Modules)
+	(Index macro, Regexp, Substr, Translit, Patsubst, Format, Incr)
+	(Eval, Mkstemp, Syncoutput, Improved forloop)
+	(Improved fatal_error): Adjust expected output.
+	* tests/builtins.at (define, mkdtemp, mkstemp): Likewise.
+	* tests/freeze.at (loading format 1, reloading unknown builtin):
+	Likewise.
+	* tests/macros.at (Arity and defn, 'Arity, defn, and freeze')
+	(pushdef/popdef): Likewise.
+	* tests/null.err: Likewise.
+	* tests/options.at (deprecated options, POSIXLY_CORRECT)
+	(--fatal-warnings, --regexp-syntax, --syncoutput): Likewise.
+	* tests/others.at (nul character, stdin seekable): Likewise.
+	* tests/modules.at (AT_CHECK_M4_MODTEST, modules: text):
+	Likewise.
+
 	Address 'make sc_cast_of_argument_to_free' failures.
 	* m4/m4private.h (DELETE): Adjust comment and fix parentheses.
 	* m4/m4.c (m4_delete): Use it to avoid warning.

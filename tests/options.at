@@ -35,55 +35,55 @@ Try `m4 --help' for more information.
 
 dnl -H/--hashsize are no-ops since 2.0
 AT_CHECK_M4([-H1 --hashsize=1], [0], [],
-[[m4: Warning: `-H' is deprecated
-m4: Warning: `--hashsize' is deprecated
+[[m4: warning: `-H' is deprecated
+m4: warning: `--hashsize' is deprecated
 ]])
 
 dnl -S/-T are no-ops for compatibility
 AT_CHECK_M4([-S1 -T1], [0], [],
-[[m4: Warning: `-S' is deprecated
-m4: Warning: `-T' is deprecated
+[[m4: warning: `-S' is deprecated
+m4: warning: `-T' is deprecated
 ]])
 
 dnl -Bint can be confused with its no-op meaning in 1.4.x, but all other
 dnl uses of -B or its long option are okay
 AT_CHECK_M4([-B1], [0], [],
-[[m4: Warning: recommend using `-B ./1' instead
+[[m4: warning: recommend using `-B ./1' instead
 ]])
 AT_CHECK_M4([-B./1 --prepend-include=1], [0], [],
 [[]])
 
 dnl --error-output is a misleading name
 AT_CHECK_M4([--error-output=trace], [0], [],
-[[m4: Warning: `--error-output' is deprecated, use `--debugfile' instead
+[[m4: warning: `--error-output' is deprecated, use `--debugfile' instead
 ]])
 AT_CHECK([rm trace])
 
 dnl -o will change meaning in the future
 AT_CHECK_M4([-otrace], [0], [],
-[[m4: Warning: `-o' is deprecated, use `--debugfile' instead
+[[m4: warning: `-o' is deprecated, use `--debugfile' instead
 ]])
 AT_CHECK([rm trace])
 
 dnl -e is an odd spelling for --interactive
 AT_CHECK_M4([-e], [0], [],
-[[m4: Warning: `-e' is deprecated, use `-i' instead
+[[m4: warning: `-e' is deprecated, use `-i' instead
 ]])
 
 dnl --arglength is an older spelling for --debuglen
 AT_CHECK_M4([--arglength=10], [0], [],
-[[m4: Warning: `--arglength' is deprecated, use `--debuglen' instead
+[[m4: warning: `--arglength' is deprecated, use `--debuglen' instead
 ]])
 
 AT_CHECK_M4([--arglength=x], [1], [],
-[[m4: Warning: `--arglength' is deprecated, use `--debuglen' instead
+[[m4: warning: `--arglength' is deprecated, use `--debuglen' instead
 m4: invalid --arglength argument `x'
 ]])
 
 dnl --word-regexp from 1.4.x is no longer supported.  Can't test for its
 dnl alternate spelling -W, as that now means --warnings.
 AT_CHECK_M4([[--word-regexp='[a-zA-Z0-9_]+']], [0], [],
-[[m4: Warning: `--word-regexp' is deprecated
+[[m4: warning: `--word-regexp' is deprecated
 ]])
 
 AT_CLEANUP
@@ -214,16 +214,16 @@ AT_DATA([in], [[__line__
 dnl()
 ]])
 AT_CHECK_M4([in], [0], [[1
-]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]], [[m4:in:2: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 AT_CHECK_M4([in -g], [0], [[1
-]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]], [[m4:in:2: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 AT_CHECK_M4([in -G], [0], [[__line__
-]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]], [[m4:in:2: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 AT_CHECK_M4([in -W], [0], [[1
-]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]], [[m4:in:2: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 AT_CHECK_M4([in -Q], [0], [[1
 ]])
@@ -243,7 +243,7 @@ AT_CHECK_M4([in -g], [0], [[1
 AT_CHECK_M4([in -G], [0], [[__line__
 ]])
 AT_CHECK_M4([in -W], [0], [[__line__
-]], [[m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
+]], [[m4:in:2: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 AT_CHECK_M4([in -Q], [0], [[__line__
 ]])
@@ -528,21 +528,21 @@ dnl()
 
 dnl By default, warnings don't affect exit status
 AT_CHECK_M4([in], [0], [],
-[[m4:in:1: Warning: dnl: extra arguments ignored: 1 > 0
-m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
-m4:in:3: Warning: dnl: extra arguments ignored: 1 > 0
+[[m4:in:1: warning: dnl: extra arguments ignored: 1 > 0
+m4:in:2: warning: dnl: extra arguments ignored: 1 > 0
+m4:in:3: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 
 dnl With one -E, exit status changes, but execution continues
 AT_CHECK_M4([-E in], [1], [],
-[[m4:in:1: Warning: dnl: extra arguments ignored: 1 > 0
-m4:in:2: Warning: dnl: extra arguments ignored: 1 > 0
-m4:in:3: Warning: dnl: extra arguments ignored: 1 > 0
+[[m4:in:1: warning: dnl: extra arguments ignored: 1 > 0
+m4:in:2: warning: dnl: extra arguments ignored: 1 > 0
+m4:in:3: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 
 dnl With two -E, execution halts immediately
 AT_CHECK_M4([--fatal-warnings --fatal-warnings in], [1], [],
-[[m4:in:1: Warning: dnl: extra arguments ignored: 1 > 0
+[[m4:in:1: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 
 dnl Exit status can't be affected if there were no warnings
@@ -730,7 +730,7 @@ AT_CHECK_M4([--regexp-syntax= in], [0], [[0
 ]])
 
 AT_CHECK_M4([-rEXTENDED in], [0], [[
-]], [[m4:in:1: Warning: regexp: bad regular expression `(': Unmatched ( or \(
+]], [[m4:in:1: warning: regexp: bad regular expression `(': Unmatched ( or \(
 ]])
 
 AT_CHECK_M4([-rgnu-m4 in], [0], [[0
@@ -742,7 +742,7 @@ AT_CHECK_M4([-r"gnu M4" in], [0], [[0
 dnl Test behavior of -r intermixed with files
 AT_CHECK_M4([-rEXTENDED in --regexp-syntax in], [0], [[
 0
-]], [[m4:in:1: Warning: regexp: bad regular expression `(': Unmatched ( or \(
+]], [[m4:in:1: warning: regexp: bad regular expression `(': Unmatched ( or \(
 ]])
 
 AT_CLEANUP
@@ -821,7 +821,7 @@ hi
 dnl test parse error
 AT_CHECK_M4([--syncoutput=huh in], [0],
 [[hi
-]], [[m4: Warning: --syncoutput: unknown directive `huh'
+]], [[m4: warning: --syncoutput: unknown directive `huh'
 ]])
 
 AT_CLEANUP

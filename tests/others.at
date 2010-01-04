@@ -437,7 +437,7 @@ AT_CHECK_M4(["$abs_srcdir/null.m4"], [1],
 [[# This file tests m4 behavior on NUL bytes.
 ]], [stderr])
 AT_CHECK([sed "s|$abs_srcdir/||" stderr], [0],
-[[m4:null.m4:5: Warning: m4exit: non-numeric argument `2\0002'
+[[m4:null.m4:5: warning: m4exit: non-numeric argument `2\0002'
 ]])
 
 AT_CLEANUP
@@ -706,7 +706,7 @@ AT_DATA([in.m4], [[dnl(
 AT_CHECK([($M4 -EE; cat) < in.m4], [0], [[trailing data
 ]], [stderr])
 AT_CHECK([[$SED 's/^[^:]*[lt-]*m4[.ex]*:/m4:/' stderr]], [0],
-[[m4:stdin:1: Warning: dnl: extra arguments ignored: 1 > 0
+[[m4:stdin:1: warning: dnl: extra arguments ignored: 1 > 0
 ]])
 
 dnl Not all sed and libc combinations get the remaining tests right (for

@@ -167,7 +167,7 @@ const char *m4_info_name (const m4_call_info *caller)
    ARGS, on behalf of CALLER (if any), otherwise at the global
    position in CONTEXT.  If ERRNUM, decode the errno value as part of
    the message.  If STATUS, exit immediately with that status.  If
-   WARN, prepend 'Warning: '.  */
+   WARN, prepend 'warning: '.  */
 static void
 m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
                    const m4_call_info *caller, const char *format,
@@ -206,9 +206,9 @@ m4_verror_at_line (m4 *context, bool warn, int status, int errnum,
      for non-memory reasons (unlikely), then still use the original
      format.  */
   if (warn && macro)
-    full = xasprintf (_("Warning: %s: %s"), macro, format);
+    full = xasprintf (_("warning: %s: %s"), macro, format);
   else if (warn)
-    full = xasprintf (_("Warning: %s"), format);
+    full = xasprintf (_("warning: %s"), format);
   else if (macro)
     full = xasprintf (_("%s: %s"), macro, format);
   verror_at_line (status, errnum, line ? file : NULL, line,
@@ -243,7 +243,7 @@ m4_error (m4 *context, int status, int errnum, const m4_call_info *caller,
 /* Issue a warning, if they are not being suppressed.  The message is
    printf-style, based on FORMAT and any other arguments, and the
    program name, location (if we are currently parsing an input file),
-   and "Warning:" are automatically prepended.  If ERRNUM is non-zero,
+   and "warning:" are automatically prepended.  If ERRNUM is non-zero,
    include strerror output in the message.  If CALLER, prepend the
    message with the macro where the message occurred.  If warnings are
    fatal, call exit immediately, otherwise exit status is

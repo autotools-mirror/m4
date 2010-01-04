@@ -1098,7 +1098,7 @@ m4_freeze_diversions (m4 *context, FILE *file)
                   || file_stat.st_size != (unsigned long int) file_stat.st_size)
                 m4_error (context, EXIT_FAILURE, errno, NULL,
                           _("diversion too large"));
-              xfprintf (file, "D%d,%lu\n", diversion->divnum,
+              xfprintf (file, "%c%d,%lu\n", 'D', diversion->divnum,
                         (unsigned long int) file_stat.st_size);
             }
 
