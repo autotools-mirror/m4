@@ -1,3 +1,9 @@
+2010-01-05  Eric Blake  <ebb9@byu.net>
+
+	Update copyright year.
+	All files impacted, via 'make update-copyright'.  Additionally:
+	* .gitignore: Ignore backup files.
+
 2009-12-29  Eric Blake  <ebb9@byu.net>
 
 	Document new indentation policy.
@@ -6406,7 +6412,8 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	End:
 
 	Copyright (C) 1990, 1991, 1992, 1993, 1994, 2000, 2001, 2003,
-	2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+	2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation,
+	Inc.
 
 	Copying and distribution of this file, with or without
 	modification, are permitted provided the copyright notice

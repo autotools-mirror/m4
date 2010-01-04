@@ -1,6 +1,6 @@
 /* Detect stack overflow (when getrlimit and sigaction or sigvec are available)
 
-   Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009 Free Software
+   Copyright (C) 1993, 1994, 2006, 2007, 2008, 2009, 2010 Free Software
    Foundation, Inc.
    Jim Avera <jima@netcom.com>, October 1993.
 
