@@ -2,7 +2,7 @@
 # m4-regex.m4 -- Use the installed regex if it is good enough.
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
-# Copyright (C) 2003, 2004, 2006, 2007 Free Software Foundation, Inc
+# Copyright (C) 2003, 2004, 2006, 2007 Free Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #

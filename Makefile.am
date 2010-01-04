@@ -54,7 +54,8 @@ include ltdl/Makefile.inc
 # given in build-aux/git-version-gen.
 syntax_check_exceptions = \
 	.x-sc_require_config_h \
-	.x-sc_require_config_h_first
+	.x-sc_require_config_h_first \
+	.x-update-copyright
 
 AM_CPPFLAGS    += -Ignu -I$(srcdir)/gnu \
 		  -Im4 -I$(srcdir)/m4

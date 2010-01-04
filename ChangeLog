@@ -1,5 +1,27 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Prepare to bulk update copyright year.
+	* gnulib: Update.
+	* ltdl/m4/gnulib-cache.m4: Import update-copyright module.
+	* cfg.mk (update-copyright-env): Enforce longhand behavior.
+	* .x-update-copyright: New file.
+	* Makefile.am (syntax_check_exceptions): Distribute exception.
+	* ltdl/m4/debug.m4: Add FSF copyright.
+	* ltdl/m4/m4-error.m4: Fix FSF name in copyright.
+	* ltdl/m4/m4-getopt.m4: Likewise.
+	* ltdl/m4/m4-gettext.m4: Likewise.
+	* ltdl/m4/m4-obstack.m4: Likewise.
+	* ltdl/m4/m4-regex.m4: Likewise.
+	* ltdl/m4/m4-rename.m4: Likewise.
+	* ltdl/m4/m4-syscmd.m4: Likewise.
+	* modules/modtest.m4: Likewise.
+	* modules/perl.m4: Likewise.
+	* modules/shadow.m4: Likewise.
+	* modules/stdlib.m4: Likewise.
+	* modules/time.m4: Likewise.
+	* modules/time2.m4: Likewise.
+	* tests/iso8859.m4: Likewise.
+
 	Use gnulib maintainer-makefile module.
 	* ltdl/m4/gnulib-cache.m4: Import maintainer-makefile module.
 	* cfg.mk (local-checks-to-skip): Drop changelog-check; add

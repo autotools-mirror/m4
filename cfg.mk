@@ -23,3 +23,8 @@ local-checks-to-skip = sc_cast_of_x_alloc_return_value
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
 old_NEWS_hash = b63892a79436f9f3cd05e10c3c4657ef
+
+# Always use longhand copyrights.
+update-copyright-env = \
+  UPDATE_COPYRIGHT_USE_INTERVALS=0 \
+  UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
