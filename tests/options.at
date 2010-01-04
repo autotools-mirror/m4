@@ -1,5 +1,5 @@
 # Hand crafted tests for GNU M4.                               -*- Autotest -*-
-# Copyright (C) 2001, 2006, 2007, 2008, 2009 Free Software Foundation,
+# Copyright (C) 2001, 2006, 2007, 2008, 2009, 2010 Free Software Foundation,
 # Inc.
 
 # This file is part of GNU M4.
@@ -29,7 +29,7 @@ AT_SETUP([deprecated options])
 dnl -N/--diversions was removed after 1.4.x
 AT_CHECK_M4([--diversions=1], [1], [], [stderr])
 AT_CHECK([$SED 's/Try.*help/Try `m4 --help/' stderr], [0],
-[[m4: unrecognized option `--diversions=1'
+[[m4: bad option
 Try `m4 --help' for more information.
 ]])
 
@@ -258,7 +258,7 @@ AT_SETUP([unknown option])
 
 AT_CHECK_M4([--unknown], [1], [], [stderr])
 AT_CHECK([$SED 's/Try.*help/Try `m4 --help/' stderr], [0],
-[[m4: unrecognized option `--unknown'
+[[m4: bad option
 Try `m4 --help' for more information.
 ]])
 
@@ -474,7 +474,7 @@ m4trace: -1- id 6: divnum
 dnl Test that shorter prefix is ambiguous.
 AT_CHECK_M4([--debu], [1], [], [stderr])
 AT_CHECK([$SED -e 's/Try.*--help/Try `m4 --help/' stderr], [0],
-[[m4: option `--debu' is ambiguous
+[[m4: bad option
 Try `m4 --help' for more information.
 ]])
 
