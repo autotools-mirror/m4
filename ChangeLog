@@ -1,5 +1,12 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Security fix by requiring newer automake features.
+	* configure.ac (AM_INIT_AUTOMAKE): Bump minimum to 1.11.1.
+	(AC_PREREQ): Bump autoconf requirement to 2.62, per automake.
+	* HACKING: Update minimum requirements.
+	* NEWS: Document the fix.
+	* bootstrap: Avoid out-of-date duplicated data.
+
 	Drop hard-coding of GPG id.
 	* gnulib: Update to latest.
 	* m4/gnulib-cache.m4: Regenerate.

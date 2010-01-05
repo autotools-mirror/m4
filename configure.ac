@@ -17,13 +17,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ([2.60])
+AC_PREREQ([2.62])
 AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
   [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.10b dist-bzip2 dist-xz color-tests
-parallel-tests silent-rules gnu])
+AM_INIT_AUTOMAKE([1.11.1 dist-bzip2 dist-xz color-tests parallel-tests
+silent-rules gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
 

@@ -149,7 +149,7 @@ contains the following beta features that were deemed worth deferring until
 
 ** A number of portability improvements inherited from gnulib.
 
-* Noteworthy changes in Version 1.4.14 (2009-??-??) [stable]
+* Noteworthy changes in Version 1.4.14 (2010-??-??) [stable]
   Released by Eric Blake, based on git version 1.4.13.*
 
 ** Fix regression introduced in 1.4.12 where executing with stdout closed
@@ -158,6 +158,10 @@ contains the following beta features that were deemed worth deferring until
 ** Fix regressions introduced in 1.4.13 in the `esyscmd' builtin, where
    closed file descriptors could interfere with child execution, and where
    a child status of 127 made m4 print a spurious message to stderr.
+
+** Fix a security hole in 'make dist', present since at least M4 1.4, that
+   could affect anybody attempting to redistribute modified sources (see
+   Automake CVE-2009-4029).
 
 ** A number of portability improvements inherited from gnulib.
 
