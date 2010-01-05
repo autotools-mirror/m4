@@ -3,7 +3,7 @@ include(`setup.m4')
 \set_author([René Seindal])
 \set_title([The Road Ahead])
 
-\define([originator], 
+\define([originator],
 [\p([Idea contributed by [$1]]\ifelse($#, 2, [ (\mailto([$2]))])[.])])
 
 \define([noone], [\p([There is no-one working on this now.  Do you want
@@ -21,7 +21,7 @@ and small.  The order here is fairly random.])
 
 \ul([
 
-\item([guile], [Guile as an extension language], 
+\item([guile], [Guile as an extension language],
 
 [\p([\link([http://www.red-bean.com/guile/], [Guile]) can be used as an
 extension language so complicated macros can be written in Scheme while
@@ -32,7 +32,7 @@ base code, as guile cannot be used from a module.])
 ])
 
 
-\item([utf8], [UTF-8 or wide characters], 
+\item([utf8], [UTF-8 or wide characters],
 
 [\p([GNU m4 should be able to handle UTF-8 input or wide characters so
 it can be more usable for different environments.])
@@ -41,7 +41,7 @@ it can be more usable for different environments.])
 ])
 
 
-\item([pquote], [Syntax: persistent quotes], 
+\item([pquote], [Syntax: persistent quotes],
 
 [\p([Persistent quotes is a way of getting text unharmed through m4's
 processing.  While normal quotes are stripped when a quoted string is
@@ -61,7 +61,7 @@ macro.c).])
 
 
 
-\item([comment2], [Syntax: removable comments], 
+\item([comment2], [Syntax: removable comments],
 
 [\p([With the syntax table a category for discardable comments can be
 defined, causing that type of comments to be discarded.])
@@ -72,17 +72,17 @@ defined, causing that type of comments to be discarded.])
 
 
 
-\item([comment1], [Option:  remove comments], 
+\item([comment1], [Option:  remove comments],
 
 [\p([There should be an option (--discard-comments) to get m4 to discard
-comments instead of passing them to the output.])  
+comments instead of passing them to the output.])
 
 \done(n)
 ])
 
 
 
-\item([deps], [Option: show dependencies], 
+\item([deps], [Option: show dependencies],
 
 [\p([There should be an options to generate makefile dependencies for an
 M4 input file.])
@@ -99,7 +99,7 @@ generated on the fly.])
 ])
 
 
-\item([safer], [Option: render GNU m4 safer], 
+\item([safer], [Option: render GNU m4 safer],
 
 [\p([There should be a --safer option that disables all functions, that
 could compromise system security if used by root.  It will have to
@@ -111,7 +111,7 @@ loading, ...])
 
 
 
-\item([import], [Option: import environment], 
+\item([import], [Option: import environment],
 
 [\p([An option to defined each environment variable as a macro on
 startup would be useful in many cases.])
@@ -121,7 +121,7 @@ startup would be useful in many cases.])
 
 
 
-\item([m4expand], [Builtin: quote expanded text], 
+\item([m4expand], [Builtin: quote expanded text],
 
 [\p([A builtin to quote expanded text would be useful.  Now it is not
 possible to quote the expansion of a macro; the macro itself has to
@@ -138,7 +138,7 @@ expands this argument fully and returns the quoted expansion.])
 
 
 
-\item([perl], [Module: embedded perl], 
+\item([perl], [Module: embedded perl],
 
 [\p([Perl could be embedded in m4, giving users a powerful programming
 language for writing macros.  A single builtin "perleval" could do the
@@ -162,7 +162,7 @@ would be minimal.])
 
 
 
-\item([output], [Module: better output control], 
+\item([output], [Module: better output control],
 
 [\p([It has been suggested a couple of times that it should be possible
 to divert to named files, in order to create several output files.])
@@ -191,7 +191,7 @@ different, as it cannot be undiverted.)])
 
 
 
-\item([require], [Module: require/provide functionality], 
+\item([require], [Module: require/provide functionality],
 
 [\p([Two new builtins \tt(require) and \tt(provide) could provide a
 handy interface to include.  It has proven difficult to write these
@@ -222,7 +222,7 @@ the search path.])
 
 
 
-\item([], [], 
+\item([], [],
 
 [\p([])
 

@@ -4,6 +4,10 @@ Before all else this code follows the GNU coding standards and
 indentation style described in standards.info.  Additionally the
 following restrictions on coding style apply:
 
+* SPACING
+
+  + Avoid TABs in .h and .c files.  See HACKING for details.
+
 * C STANDARD
 
   + All of this code is ANSI-C, GNU C extensions are conditional so that

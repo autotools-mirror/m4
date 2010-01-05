@@ -29,16 +29,16 @@
 #endif
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	modtest_LTX_m4_builtin_table
-#define m4_macro_table		modtest_LTX_m4_macro_table
+#define m4_builtin_table        modtest_LTX_m4_builtin_table
+#define m4_macro_table          modtest_LTX_m4_macro_table
 
-#define export_test		modtest_LTX_export_test
+#define export_test             modtest_LTX_export_test
 
 extern bool export_test (const char *foo);
 
-/*	   function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (test,	false,	false,	false,	0,	0)
+/*         function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (test,        false,  false,  false,  0,      0)
 
 #define BUILTIN(handler, macros, blind, side, min, max) M4BUILTIN (handler)
   builtin_functions
@@ -46,7 +46,7 @@ extern bool export_test (const char *foo);
 
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -57,11 +57,11 @@ const m4_builtin m4_builtin_table[] =
 
 const m4_macro m4_macro_table[] =
 {
-  /* name		text		min	max */
-  { "__test__",		"`modtest'",	0,	0 },
-  { "onearg",		"$1",		1,	1 },
-  { "manyargs",		"$@",		0,	SIZE_MAX },
-  { NULL,		NULL,		0,	0 },
+  /* name               text            min     max */
+  { "__test__",         "`modtest'",    0,      0 },
+  { "onearg",           "$1",           1,      1 },
+  { "manyargs",         "$@",           0,      SIZE_MAX },
+  { NULL,               NULL,           0,      0 },
 };
 
 

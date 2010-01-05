@@ -29,9 +29,9 @@ BEGIN_C_DECLS
    from call to call in m4_dump_symbols.  */
 typedef struct
 {
-  m4_obstack *obs;		/* obstack for table */
-  const m4_string *base;	/* base of table */
-  int size;			/* size of table */
+  m4_obstack *obs;              /* obstack for table */
+  const m4_string *base;        /* base of table */
+  int size;                     /* size of table */
 } m4_dump_symbol_data;
 
 

@@ -2,30 +2,30 @@
 ])
 
 \define([concat], [\ifelse($#, 0, ,
-                        $#, 1, [$1],
-                        [$1 \concat(\shift($@))])])
+  $#, 1, [$1],
+  [$1 \concat(\shift($@))])])
 
 \define([toupper], [\translit([$*], [a-z], [A-Z])])
 
-\define([container], 
+\define([container],
 [\pushdef([_tag], \toupper([$1]))\dnl
 \ifelse($#, 1, [<\_tag></[\_tag]>],
-        $#, 2, [<\_tag>$2</\_tag>],
-        $#, 3, [<\_tag $2>$3</\_tag>],
-               [<\_tag $2>\concat(\shift(\shift($@)))</\_tag>])\dnl
+  $#, 2, [<\_tag>$2</\_tag>],
+  $#, 3, [<\_tag $2>$3</\_tag>],
+    [<\_tag $2>\concat(\shift(\shift($@)))</\_tag>])\dnl
 \popdef([_tag])\dnl
 ])
 
-\define([large_container], 
+\define([large_container],
 [\pushdef([_tag], \toupper([$1]))\dnl
 \ifelse($#, 1, [<\_tag></\_tag>\n],
-         $#, 2, [<\_tag>\n[]$2\n</\_tag>\n],
-         $#, 3, [<\_tag $2>\n[]$3\n</\_tag>\n],
-                [<\_tag $2>\n\concat(\shift(\shift($@)))\n</\_tag>\n])\dnl
+  $#, 2, [<\_tag>\n[]$2\n</\_tag>\n],
+  $#, 3, [<\_tag $2>\n[]$3\n</\_tag>\n],
+    [<\_tag $2>\n\concat(\shift(\shift($@)))\n</\_tag>\n])\dnl
 \popdef([_tag])\dnl
 ])
 
-\define([large_simple_container], 
+\define([large_simple_container],
 [\pushdef([_tag], \toupper([$1]))\dnl
 <\_tag>\n\concat(\shift($@))\n</\_tag>\n\dnl
 \popdef([_tag])\dnl
@@ -37,7 +37,7 @@
 \popdef([_tag])\dnl
 ])
 
-\define([simple_tag], 
+\define([simple_tag],
 [\pushdef([_tag], \toupper([$1]))\dnl
 \ifelse([$2], [], [<\_tag>], [<\_tag $2>])\dnl
 \popdef([_tag])\dnl
@@ -117,6 +117,6 @@
 \define([set_body], [\define([_BODY], [$*])])
 \set_body()
 
-\define([meta_if_set], 
+\define([meta_if_set],
   [\ifelse(\defn([_$1]), [], [], \meta([$1], \defn([_$1])))]\dnl
 )

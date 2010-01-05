@@ -119,10 +119,10 @@
 typedef void (*handler_t) (void);
 
 #if defined(__ultrix) && defined(__vax)
-extern char    *sbrk		(int);
-extern int	getrlimit	(int, struct rlimit *);
-extern int	sigstack	(struct sigstack *, struct sigstack *);
-extern int	sigvec		(int, struct sigvec *, struct sigvec *);
+extern char    *sbrk            (int);
+extern int      getrlimit       (int, struct rlimit *);
+extern int      sigstack        (struct sigstack *, struct sigstack *);
+extern int      sigvec          (int, struct sigvec *, struct sigvec *);
 #endif
 
 static void *stackbuf;
@@ -204,7 +204,7 @@ process_sigsegv (int signo, const char *p)
 
           /* We have determined that this is indeed a stack overflow.  */
 
-          (*stackovf_handler) ();	/* should call exit() */
+          (*stackovf_handler) ();       /* should call exit() */
         }
     }
   if (p == NULL)

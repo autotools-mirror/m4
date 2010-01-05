@@ -45,20 +45,20 @@
    symbols (with empty value stacks) are invisible to the users of
    this module.  */
 
-#define M4_SYMTAB_DEFAULT_SIZE		2047
+#define M4_SYMTAB_DEFAULT_SIZE          2047
 
 struct m4_symbol_table {
   m4_hash *table;
 };
 
-static m4_symbol *symtab_fetch		(m4_symbol_table*, const char *,
+static m4_symbol *symtab_fetch          (m4_symbol_table*, const char *,
                                          size_t);
-static void	  symbol_popval		(m4_symbol *);
-static void *	  symbol_destroy_CB	(m4_symbol_table *, const char *,
+static void       symbol_popval         (m4_symbol *);
+static void *     symbol_destroy_CB     (m4_symbol_table *, const char *,
                                          size_t, m4_symbol *, void *);
-static void *	  arg_destroy_CB	(m4_hash *, const void *, void *,
+static void *     arg_destroy_CB        (m4_hash *, const void *, void *,
                                          void *);
-static void *	  arg_copy_CB		(m4_hash *, const void *, void *,
+static void *     arg_copy_CB           (m4_hash *, const void *, void *,
                                          m4_hash *);
 
 
@@ -98,7 +98,7 @@ m4_symtab_apply (m4_symbol_table *symtab, bool include_trace,
                  m4_symtab_apply_func *func, void *userdata)
 {
   m4_hash_iterator *place  = NULL;
-  void *	    result = NULL;
+  void *            result = NULL;
 
   assert (symtab);
   assert (symtab->table);
@@ -268,9 +268,9 @@ m4_symbol_pushdef (m4_symbol_table *symtab, const char *name, size_t len,
   assert (name);
   assert (value);
 
-  symbol		= symtab_fetch (symtab, name, len);
-  VALUE_NEXT (value)	= m4_get_symbol_value (symbol);
-  symbol->value		= value;
+  symbol                = symtab_fetch (symtab, name, len);
+  VALUE_NEXT (value)    = m4_get_symbol_value (symbol);
+  symbol->value         = value;
 
   assert (m4_get_symbol_value (symbol));
 
@@ -400,7 +400,7 @@ m4_symbol *
 m4_symbol_rename (m4_symbol_table *symtab, const char *name, size_t len1,
                   const char *newname, size_t len2)
 {
-  m4_symbol *symbol	= NULL;
+  m4_symbol *symbol     = NULL;
   m4_symbol **psymbol;
   m4_string key;
   m4_string *pkey;
@@ -928,7 +928,7 @@ m4_set_symbol_value_placeholder (m4_symbol_value *value, const char *text)
 
 #ifdef DEBUG_SYM
 
-static void *dump_symbol_CB	(m4_symbol_table *symtab, const char *name,
+static void *dump_symbol_CB     (m4_symbol_table *symtab, const char *name,
                                  m4_symbol *symbol, void *userdata);
 static M4_GNUC_UNUSED void *
 symtab_dump (m4 *context, m4_symbol_table *symtab)
@@ -940,11 +940,11 @@ static void *
 dump_symbol_CB (m4_symbol_table *symtab, const char *name,
                 m4_symbol *symbol, void *ptr)
 {
-  m4 *		   context	= (m4 *) ptr;
-  m4_symbol_value *value	= m4_get_symbol_value (symbol);
-  int		   flags	= value ? SYMBOL_FLAGS (symbol) : 0;
-  m4_module *      module	= value ? SYMBOL_MODULE (symbol) : NULL;
-  const char *     module_name	= module ? m4_get_module_name (module) : "NONE";
+  m4 *             context      = (m4 *) ptr;
+  m4_symbol_value *value        = m4_get_symbol_value (symbol);
+  int              flags        = value ? SYMBOL_FLAGS (symbol) : 0;
+  m4_module *      module       = value ? SYMBOL_MODULE (symbol) : NULL;
+  const char *     module_name  = module ? m4_get_module_name (module) : "NONE";
 
   xfprintf (stderr, "%10s: (%d%s) %s=", module_name, flags,
             m4_get_symbol_traced (symbol) ? "!" : "", name);

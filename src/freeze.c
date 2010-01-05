@@ -30,15 +30,15 @@
 #include "verify.h"
 #include "xmemdup0.h"
 
-static	void  produce_mem_dump		(FILE *, const char *, size_t);
-static	void  produce_resyntax_dump	(m4 *, FILE *);
-static	void  produce_syntax_dump	(FILE *, m4_syntax_table *, char);
-static	void  produce_module_dump	(FILE *, m4_module *);
-static	void  produce_symbol_dump	(m4 *, FILE *, m4_symbol_table *);
-static	void *dump_symbol_CB		(m4_symbol_table *, const char *,
+static  void  produce_mem_dump          (FILE *, const char *, size_t);
+static  void  produce_resyntax_dump     (m4 *, FILE *);
+static  void  produce_syntax_dump       (FILE *, m4_syntax_table *, char);
+static  void  produce_module_dump       (FILE *, m4_module *);
+static  void  produce_symbol_dump       (m4 *, FILE *, m4_symbol_table *);
+static  void *dump_symbol_CB            (m4_symbol_table *, const char *,
                                          size_t, m4_symbol *, void *);
-static	void  issue_expect_message	(m4 *, int);
-static	int   decode_char		(m4 *, FILE *, bool *);
+static  void  issue_expect_message      (m4 *, int);
+static  int   decode_char               (m4 *, FILE *, bool *);
 
 
 /* Dump an ASCII-encoded representation of LEN bytes at MEM to FILE.
@@ -459,110 +459,110 @@ reload_frozen_state (m4 *context, const char *name)
   int number[3] = {0};
   bool advance_line = true;
 
-#define GET_CHARACTER							\
-  do									\
-    {									\
-      if (advance_line)							\
-        {								\
-          m4_set_current_line (context,					\
-                               m4_get_current_line (context) + 1);	\
-          advance_line = false;						\
-        }								\
-      character = getc (file);						\
-      if (character == '\n')						\
-        advance_line = true;						\
-    }									\
+#define GET_CHARACTER                                                   \
+  do                                                                    \
+    {                                                                   \
+      if (advance_line)                                                 \
+        {                                                               \
+          m4_set_current_line (context,                                 \
+                               m4_get_current_line (context) + 1);      \
+          advance_line = false;                                         \
+        }                                                               \
+      character = getc (file);                                          \
+      if (character == '\n')                                            \
+        advance_line = true;                                            \
+    }                                                                   \
   while (0)
 
-#define GET_NUMBER(Number, AllowNeg)				\
-  do								\
-    {								\
-      unsigned int n = 0;					\
-      while (isdigit (character) && n <= INT_MAX / 10)		\
-        {							\
-          n = 10 * n + character - '0';				\
-          GET_CHARACTER;					\
-        }							\
-      if (((AllowNeg) ? INT_MIN: INT_MAX) < n			\
-          || isdigit (character))				\
-        m4_error (context, EXIT_FAILURE, 0, NULL,		\
-                  _("integer overflow in frozen file"));	\
-      (Number) = n;						\
-    }								\
+#define GET_NUMBER(Number, AllowNeg)                            \
+  do                                                            \
+    {                                                           \
+      unsigned int n = 0;                                       \
+      while (isdigit (character) && n <= INT_MAX / 10)          \
+        {                                                       \
+          n = 10 * n + character - '0';                         \
+          GET_CHARACTER;                                        \
+        }                                                       \
+      if (((AllowNeg) ? INT_MIN: INT_MAX) < n                   \
+          || isdigit (character))                               \
+        m4_error (context, EXIT_FAILURE, 0, NULL,               \
+                  _("integer overflow in frozen file"));        \
+      (Number) = n;                                             \
+    }                                                           \
   while (0)
 
-#define GET_STRING(File, Buf, BufSize, StrLen, UseChar)		\
-  do								\
-    {								\
-      size_t len = (StrLen);					\
-      char *p;							\
-      int ch;							\
-      if (UseChar)						\
-        {							\
-          ungetc (character, File);				\
-          if (advance_line)					\
-            {							\
-              assert (character == '\n');			\
-              advance_line = false;				\
-            }							\
-        }							\
-      CHECK_ALLOCATION ((Buf), (BufSize), len);			\
-      p = (Buf);						\
-      while (len-- > 0)						\
-        {							\
-          ch = (version > 1					\
-                ? decode_char (context, File, &advance_line)	\
-                : getc (File));					\
-          if (ch == EOF)					\
-            m4_error (context, EXIT_FAILURE, 0, NULL,		\
-                      _("premature end of frozen file"));	\
-          *p++ = ch;						\
-        }							\
-      *p = '\0';						\
-      GET_CHARACTER;						\
-      while (version > 1 && character == '\\')			\
-        {							\
-          GET_CHARACTER;					\
-          VALIDATE ('\n');					\
-          GET_CHARACTER;					\
-        }							\
-    }								\
+#define GET_STRING(File, Buf, BufSize, StrLen, UseChar)         \
+  do                                                            \
+    {                                                           \
+      size_t len = (StrLen);                                    \
+      char *p;                                                  \
+      int ch;                                                   \
+      if (UseChar)                                              \
+        {                                                       \
+          ungetc (character, File);                             \
+          if (advance_line)                                     \
+            {                                                   \
+              assert (character == '\n');                       \
+              advance_line = false;                             \
+            }                                                   \
+        }                                                       \
+      CHECK_ALLOCATION ((Buf), (BufSize), len);                 \
+      p = (Buf);                                                \
+      while (len-- > 0)                                         \
+        {                                                       \
+          ch = (version > 1                                     \
+                ? decode_char (context, File, &advance_line)    \
+                : getc (File));                                 \
+          if (ch == EOF)                                        \
+            m4_error (context, EXIT_FAILURE, 0, NULL,           \
+                      _("premature end of frozen file"));       \
+          *p++ = ch;                                            \
+        }                                                       \
+      *p = '\0';                                                \
+      GET_CHARACTER;                                            \
+      while (version > 1 && character == '\\')                  \
+        {                                                       \
+          GET_CHARACTER;                                        \
+          VALIDATE ('\n');                                      \
+          GET_CHARACTER;                                        \
+        }                                                       \
+    }                                                           \
   while (0)
 
-#define VALIDATE(Expected)					\
-  do								\
-    {								\
-      if (character != (Expected))				\
-        issue_expect_message (context, (Expected));		\
-    }								\
+#define VALIDATE(Expected)                                      \
+  do                                                            \
+    {                                                           \
+      if (character != (Expected))                              \
+        issue_expect_message (context, (Expected));             \
+    }                                                           \
   while (0)
 
-#define CHECK_ALLOCATION(Where, Allocated, Needed)		\
-  do								\
-    {								\
-      if ((Needed) + 1 > (Allocated))				\
-        {							\
-          free (Where);						\
-          (Allocated) = (Needed) + 1;				\
-          (Where) = xcharalloc (Allocated);			\
-        }							\
-    }								\
+#define CHECK_ALLOCATION(Where, Allocated, Needed)              \
+  do                                                            \
+    {                                                           \
+      if ((Needed) + 1 > (Allocated))                           \
+        {                                                       \
+          free (Where);                                         \
+          (Allocated) = (Needed) + 1;                           \
+          (Where) = xcharalloc (Allocated);                     \
+        }                                                       \
+    }                                                           \
   while (0)
 
   /* Skip comments (`#' at beginning of line) and blank lines, setting
      character to the next directive or to EOF.  */
 
-#define GET_DIRECTIVE						\
-  do								\
-    {								\
-      GET_CHARACTER;						\
-      if (character == '#')					\
-        {							\
-          while (character != EOF && character != '\n')		\
-            GET_CHARACTER;					\
-          VALIDATE ('\n');					\
-        }							\
-    }								\
+#define GET_DIRECTIVE                                           \
+  do                                                            \
+    {                                                           \
+      GET_CHARACTER;                                            \
+      if (character == '#')                                     \
+        {                                                       \
+          while (character != EOF && character != '\n')         \
+            GET_CHARACTER;                                      \
+          VALIDATE ('\n');                                      \
+        }                                                       \
+    }                                                           \
   while (character == '\n')
 
   file = m4_path_search (context, name, (char **)NULL);

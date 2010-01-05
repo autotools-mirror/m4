@@ -35,15 +35,15 @@
 #include "version-etc.h"
 #include "xstrtol.h"
 
-#define AUTHORS							\
-  proper_name_utf8 ("Rene' Seindal", "Ren\xc3\xa9 Seindal"),	\
-  proper_name ("Gary V. Vaughan"),				\
+#define AUTHORS                                                 \
+  proper_name_utf8 ("Rene' Seindal", "Ren\xc3\xa9 Seindal"),    \
+  proper_name ("Gary V. Vaughan"),                              \
   proper_name ("Eric Blake")
 
 typedef struct deferred
 {
   struct deferred *next;
-  int code;			/* deferred optchar */
+  int code;                     /* deferred optchar */
   const char *value;
 } deferred;
 
@@ -201,21 +201,21 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
 enum
 {
-  ARGLENGTH_OPTION = CHAR_MAX + 1,	/* not quite -l, because of message */
-  DEBUGFILE_OPTION,			/* no short opt */
-  ERROR_OUTPUT_OPTION,			/* not quite -o, because of message */
-  HASHSIZE_OPTION,			/* not quite -H, because of message */
-  IMPORT_ENVIRONMENT_OPTION,		/* no short opt */
-  POPDEF_OPTION,			/* no short opt */
-  PREPEND_INCLUDE_OPTION,		/* not quite -B, because of message */
-  SAFER_OPTION,				/* -S still has old no-op semantics */
-  SYNCOUTPUT_OPTION,			/* not quite -s, because of opt arg */
-  TRACEOFF_OPTION,			/* no short opt */
-  UNLOAD_MODULE_OPTION,			/* no short opt */
-  WORD_REGEXP_OPTION,			/* deprecated, used to be -W */
+  ARGLENGTH_OPTION = CHAR_MAX + 1,      /* not quite -l, because of message */
+  DEBUGFILE_OPTION,                     /* no short opt */
+  ERROR_OUTPUT_OPTION,                  /* not quite -o, because of message */
+  HASHSIZE_OPTION,                      /* not quite -H, because of message */
+  IMPORT_ENVIRONMENT_OPTION,            /* no short opt */
+  POPDEF_OPTION,                        /* no short opt */
+  PREPEND_INCLUDE_OPTION,               /* not quite -B, because of message */
+  SAFER_OPTION,                         /* -S still has old no-op semantics */
+  SYNCOUTPUT_OPTION,                    /* not quite -s, because of opt arg */
+  TRACEOFF_OPTION,                      /* no short opt */
+  UNLOAD_MODULE_OPTION,                 /* no short opt */
+  WORD_REGEXP_OPTION,                   /* deprecated, used to be -W */
 
-  HELP_OPTION,				/* no short opt */
-  VERSION_OPTION			/* no short opt */
+  HELP_OPTION,                          /* no short opt */
+  VERSION_OPTION                        /* no short opt */
 };
 
 /* Decode options and launch execution.  */
@@ -278,9 +278,9 @@ static const struct option long_options[] =
 /* For determining whether to be interactive.  */
 enum interactive_choice
 {
-  INTERACTIVE_UNKNOWN,	/* Still processing arguments, no -b or -i yet */
-  INTERACTIVE_YES,	/* -i specified last */
-  INTERACTIVE_NO	/* -b specified last */
+  INTERACTIVE_UNKNOWN,  /* Still processing arguments, no -b or -i yet */
+  INTERACTIVE_YES,      /* -i specified last */
+  INTERACTIVE_NO        /* -b specified last */
 };
 
 /* Convert OPT to size_t, reporting an error using long option index
@@ -327,10 +327,10 @@ process_file (m4 *context, const char *name)
 int
 main (int argc, char *const *argv, char *const *envp)
 {
-  deferred *head = NULL;	/* head of deferred argument list */
+  deferred *head = NULL;        /* head of deferred argument list */
   deferred *tail = NULL;
   deferred *defn;
-  size_t size;			/* for parsing numeric option arguments */
+  size_t size;                  /* for parsing numeric option arguments */
 
   bool import_environment = false; /* true to import environment */
   bool seen_file = false;
@@ -532,7 +532,7 @@ main (int argc, char *const *argv, char *const *envp)
         case 'd':
           /* Staggered handling of 'd', since -dm is useful prior to
              first file and prior to reloading, but other -d must also
-             have effect between files.	 */
+             have effect between files.  */
           if (seen_file || frozen_file_to_read)
             goto defer;
           if (m4_debug_decode (context, optarg, SIZE_MAX) < 0)
@@ -578,7 +578,7 @@ main (int argc, char *const *argv, char *const *envp)
              -o/--output for creating an output file instead of using
              stdout, and --error-output is misnamed since it does not
              affect error messages to stderr.  Change the meaning of -o
-             after 2.1.	 */
+             after 2.1.  */
           error (0, 0, _("Warning: `%s' is deprecated, use `%s' instead"),
                  optchar == 'o' ? "-o" : "--error-output", "--debugfile");
           /* Don't call m4_debug_set_output here, as it has side effects.  */

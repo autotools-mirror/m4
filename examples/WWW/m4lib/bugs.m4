@@ -15,7 +15,7 @@ this myself.])])
 
 \ul([
 
-\item([undivert], [undivert(0) might read from standard output], 
+\item([undivert], [undivert(0) might read from standard output],
 
 [\p([If calling \tt(undivert(0)) when diverting to a non-zero diversion
 will cause m4 to read from standard output in an attempt to bring back
@@ -25,7 +25,7 @@ diversion 0, which is not possible.])
 
 ])
 
-\item([sigaltstack], [failure if sigaltstack or sigstack returns ENOSYS], 
+\item([sigaltstack], [failure if sigaltstack or sigstack returns ENOSYS],
 
 [\p([If stack overflow detection is configured but the system doesn't
 support sigaltstack(2) or sigstack(2), m4 fails when the system call
@@ -45,7 +45,7 @@ returns ENOSYS.  It should silently revert to default behaviour.])
 \divert(-1)
 
 
-\item([], [], 
+\item([], [],
 
 [\p([])
 

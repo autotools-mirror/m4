@@ -39,13 +39,13 @@
 #include <modules/m4.h>
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	m4_LTX_m4_builtin_table
+#define m4_builtin_table        m4_LTX_m4_builtin_table
 
-#define m4_set_sysval		m4_LTX_m4_set_sysval
-#define m4_sysval_flush		m4_LTX_m4_sysval_flush
-#define m4_dump_symbols		m4_LTX_m4_dump_symbols
-#define m4_expand_ranges	m4_LTX_m4_expand_ranges
-#define m4_make_temp		m4_LTX_m4_make_temp
+#define m4_set_sysval           m4_LTX_m4_set_sysval
+#define m4_sysval_flush         m4_LTX_m4_sysval_flush
+#define m4_dump_symbols         m4_LTX_m4_dump_symbols
+#define m4_expand_ranges        m4_LTX_m4_expand_ranges
+#define m4_make_temp            m4_LTX_m4_make_temp
 
 extern void m4_set_sysval    (int);
 extern void m4_sysval_flush  (m4 *, bool);
@@ -58,53 +58,53 @@ extern void m4_make_temp     (m4 *, m4_obstack *, const m4_call_info *,
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-           function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (changecom,	false,	false,	false,	0,	2  )	\
-  BUILTIN (changequote,	false,	false,	false,	0,	2  )	\
-  BUILTIN (decr,	false,	true,	true,	1,	1  )	\
-  BUILTIN (define,	true,	true,	false,	1,	2  )	\
-  BUILTIN (defn,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (divert,	false,	false,	false,	0,	2  )	\
-  BUILTIN (divnum,	false,	false,	false,	0,	0  )	\
-  BUILTIN (dnl,		false,	false,	false,	0,	0  )	\
-  BUILTIN (dumpdef,	true,	false,	false,	0,	-1 )	\
-  BUILTIN (errprint,	false,	true,	false,	1,	-1 )	\
-  BUILTIN (eval,	false,	true,	true,	1,	3  )	\
-  BUILTIN (ifdef,	true,	true,	false,	2,	3  )	\
-  BUILTIN (ifelse,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (include,	false,	true,	false,	1,	1  )	\
-  BUILTIN (incr,	false,	true,	true,	1,	1  )	\
-  BUILTIN (index,	false,	true,	true,	2,	3  )	\
-  BUILTIN (len,		false,	true,	true,	1,	1  )	\
-  BUILTIN (m4exit,	false,	false,	false,	0,	1  )	\
-  BUILTIN (m4wrap,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (maketemp,	false,	true,	false,	1,	1  )	\
-  BUILTIN (mkstemp,	false,	true,	false,	1,	1  )	\
-  BUILTIN (popdef,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (pushdef,	true,	true,	false,	1,	2  )	\
-  BUILTIN (shift,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (sinclude,	false,	true,	false,	1,	1  )	\
-  BUILTIN (substr,	false,	true,	true,	2,	4  )	\
-  BUILTIN (syscmd,	false,	true,	true,	1,	1  )	\
-  BUILTIN (sysval,	false,	false,	false,	0,	0  )	\
-  BUILTIN (traceoff,	true,	false,	false,	0,	-1 )	\
-  BUILTIN (traceon,	true,	false,	false,	0,	-1 )	\
-  BUILTIN (translit,	false,	true,	true,	2,	3  )	\
-  BUILTIN (undefine,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (undivert,	false,	false,	false,	0,	-1 )	\
+           function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (changecom,   false,  false,  false,  0,      2  )    \
+  BUILTIN (changequote, false,  false,  false,  0,      2  )    \
+  BUILTIN (decr,        false,  true,   true,   1,      1  )    \
+  BUILTIN (define,      true,   true,   false,  1,      2  )    \
+  BUILTIN (defn,        true,   true,   false,  1,      -1 )    \
+  BUILTIN (divert,      false,  false,  false,  0,      2  )    \
+  BUILTIN (divnum,      false,  false,  false,  0,      0  )    \
+  BUILTIN (dnl,         false,  false,  false,  0,      0  )    \
+  BUILTIN (dumpdef,     true,   false,  false,  0,      -1 )    \
+  BUILTIN (errprint,    false,  true,   false,  1,      -1 )    \
+  BUILTIN (eval,        false,  true,   true,   1,      3  )    \
+  BUILTIN (ifdef,       true,   true,   false,  2,      3  )    \
+  BUILTIN (ifelse,      true,   true,   false,  1,      -1 )    \
+  BUILTIN (include,     false,  true,   false,  1,      1  )    \
+  BUILTIN (incr,        false,  true,   true,   1,      1  )    \
+  BUILTIN (index,       false,  true,   true,   2,      3  )    \
+  BUILTIN (len,         false,  true,   true,   1,      1  )    \
+  BUILTIN (m4exit,      false,  false,  false,  0,      1  )    \
+  BUILTIN (m4wrap,      true,   true,   false,  1,      -1 )    \
+  BUILTIN (maketemp,    false,  true,   false,  1,      1  )    \
+  BUILTIN (mkstemp,     false,  true,   false,  1,      1  )    \
+  BUILTIN (popdef,      true,   true,   false,  1,      -1 )    \
+  BUILTIN (pushdef,     true,   true,   false,  1,      2  )    \
+  BUILTIN (shift,       true,   true,   false,  1,      -1 )    \
+  BUILTIN (sinclude,    false,  true,   false,  1,      1  )    \
+  BUILTIN (substr,      false,  true,   true,   2,      4  )    \
+  BUILTIN (syscmd,      false,  true,   true,   1,      1  )    \
+  BUILTIN (sysval,      false,  false,  false,  0,      0  )    \
+  BUILTIN (traceoff,    true,   false,  false,  0,      -1 )    \
+  BUILTIN (traceon,     true,   false,  false,  0,      -1 )    \
+  BUILTIN (translit,    false,  true,   true,   2,      3  )    \
+  BUILTIN (undefine,    true,   true,   false,  1,      -1 )    \
+  BUILTIN (undivert,    false,  false,  false,  0,      -1 )    \
 
 
 typedef intmax_t number;
 typedef uintmax_t unumber;
 
-static void	include		(m4 *context, int argc, m4_macro_args *argv,
+static void     include         (m4 *context, int argc, m4_macro_args *argv,
                                  bool silent);
-static int	dumpdef_cmp_CB	(const void *s1, const void *s2);
-static void *	dump_symbol_CB  (m4_symbol_table *, const char *, size_t,
+static int      dumpdef_cmp_CB  (const void *s1, const void *s2);
+static void *   dump_symbol_CB  (m4_symbol_table *, const char *, size_t,
                                  m4_symbol *symbol, void *userdata);
-static const char *ntoa		(number value, int radix);
-static void	numb_obstack	(m4_obstack *obs, number value,
+static const char *ntoa         (number value, int radix);
+static void     numb_obstack    (m4_obstack *obs, number value,
                                  int radix, int min);
 
 
@@ -117,7 +117,7 @@ static void	numb_obstack	(m4_obstack *obs, number value,
 /* Generate a table for mapping m4 symbol names to handler functions. */
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -1230,11 +1230,11 @@ M4BUILTIN_HANDLER (translit)
 
 #define numb_times(x, y)     ((x) = ((x) * (y)))
 /* Be careful of x86 SIGFPE.  */
-#define numb_ratio(x, y)						\
+#define numb_ratio(x, y)                                                \
   (((y) == -1) ? (numb_negate (x)) : ((x) /= (y)))
-#define numb_divide(x, y)						\
+#define numb_divide(x, y)                                               \
   ((*(y) == -1) ? (numb_negate (*(y))) : (*(x) /= *(y)))
-#define numb_modulo(c, x, y)						\
+#define numb_modulo(c, x, y)                                            \
   ((*(y) == -1) ? (*(x) = numb_ZERO) : (*(x) %= *(y)))
 /* numb_invert is only used in the context of x**-y, which integral math
    does not support.  */
@@ -1247,13 +1247,13 @@ M4BUILTIN_HANDLER (translit)
    implementation-defined overflow when casting unsigned to signed is
    a silent twos-complement wrap-around.  */
 #define shift_mask (sizeof (number) * CHAR_BIT - 1)
-#define numb_lshift(c, x, y)					\
+#define numb_lshift(c, x, y)                                    \
   (*(x) = (number) ((unumber) *(x) << (*(y) & shift_mask)))
-#define numb_rshift(c, x, y)					\
-  (*(x) = (number) (*(x) < 0					\
+#define numb_rshift(c, x, y)                                    \
+  (*(x) = (number) (*(x) < 0                                    \
                     ? ~(~(unumber) *(x) >> (*(y) & shift_mask)) \
                     : (unumber) *(x) >> (*(y) & shift_mask)))
-#define numb_urshift(c, x, y)					\
+#define numb_urshift(c, x, y)                                   \
   (*(x) = (number) ((unumber) *(x) >> (*(y) & shift_mask)))
 
 
@@ -1350,5 +1350,5 @@ numb_initialise (void)
 /* This macro defines the top level code for the "eval" builtin.  The
    actual work is done in the function m4_evaluate (), which lives in
    evalparse.c.  */
-#define m4_evaluate	builtin_eval
+#define m4_evaluate     builtin_eval
 #include "evalparse.c"

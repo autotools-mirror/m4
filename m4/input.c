@@ -100,54 +100,54 @@
 
 typedef struct m4_input_block m4_input_block;
 
-static	int		file_peek	(m4_input_block *, m4 *, bool);
-static	int		file_read	(m4_input_block *, m4 *, bool, bool,
+static  int             file_peek       (m4_input_block *, m4 *, bool);
+static  int             file_read       (m4_input_block *, m4 *, bool, bool,
                                          bool);
-static	void		file_unget	(m4_input_block *, int);
-static	bool		file_clean	(m4_input_block *, m4 *, bool);
-static	void		file_print	(m4_input_block *, m4 *, m4_obstack *,
+static  void            file_unget      (m4_input_block *, int);
+static  bool            file_clean      (m4_input_block *, m4 *, bool);
+static  void            file_print      (m4_input_block *, m4 *, m4_obstack *,
                                          int);
-static	const char *	file_buffer	(m4_input_block *, m4 *, size_t *,
+static  const char *    file_buffer     (m4_input_block *, m4 *, size_t *,
                                          bool);
-static	void		file_consume	(m4_input_block *, m4 *, size_t);
-static	int		string_peek	(m4_input_block *, m4 *, bool);
-static	int		string_read	(m4_input_block *, m4 *, bool, bool,
+static  void            file_consume    (m4_input_block *, m4 *, size_t);
+static  int             string_peek     (m4_input_block *, m4 *, bool);
+static  int             string_read     (m4_input_block *, m4 *, bool, bool,
                                          bool);
-static	void		string_unget	(m4_input_block *, int);
-static	void		string_print	(m4_input_block *, m4 *, m4_obstack *,
+static  void            string_unget    (m4_input_block *, int);
+static  void            string_print    (m4_input_block *, m4 *, m4_obstack *,
                                          int);
-static	const char *	string_buffer	(m4_input_block *, m4 *, size_t *,
+static  const char *    string_buffer   (m4_input_block *, m4 *, size_t *,
                                          bool);
-static	void		string_consume	(m4_input_block *, m4 *, size_t);
-static	int		composite_peek	(m4_input_block *, m4 *, bool);
-static	int		composite_read	(m4_input_block *, m4 *, bool, bool,
+static  void            string_consume  (m4_input_block *, m4 *, size_t);
+static  int             composite_peek  (m4_input_block *, m4 *, bool);
+static  int             composite_read  (m4_input_block *, m4 *, bool, bool,
                                          bool);
-static	void		composite_unget	(m4_input_block *, int);
-static	bool		composite_clean	(m4_input_block *, m4 *, bool);
-static	void		composite_print	(m4_input_block *, m4 *, m4_obstack *,
+static  void            composite_unget (m4_input_block *, int);
+static  bool            composite_clean (m4_input_block *, m4 *, bool);
+static  void            composite_print (m4_input_block *, m4 *, m4_obstack *,
                                          int);
-static	const char *	composite_buffer (m4_input_block *, m4 *, size_t *,
+static  const char *    composite_buffer (m4_input_block *, m4 *, size_t *,
                                           bool);
-static	void		composite_consume (m4_input_block *, m4 *, size_t);
-static	int		eof_peek	(m4_input_block *, m4 *, bool);
-static	int		eof_read	(m4_input_block *, m4 *, bool, bool,
+static  void            composite_consume (m4_input_block *, m4 *, size_t);
+static  int             eof_peek        (m4_input_block *, m4 *, bool);
+static  int             eof_read        (m4_input_block *, m4 *, bool, bool,
                                          bool);
-static	void		eof_unget	(m4_input_block *, int);
-static	const char *	eof_buffer	(m4_input_block *, m4 *, size_t *,
+static  void            eof_unget       (m4_input_block *, int);
+static  const char *    eof_buffer      (m4_input_block *, m4 *, size_t *,
                                          bool);
 
-static	void	init_builtin_token	(m4 *, m4_obstack *,
+static  void    init_builtin_token      (m4 *, m4_obstack *,
                                          m4_symbol_value *);
-static	void	append_quote_token	(m4 *, m4_obstack *,
+static  void    append_quote_token      (m4 *, m4_obstack *,
                                          m4_symbol_value *);
-static	bool	match_input		(m4 *, const char *, size_t, bool);
-static	int	next_char		(m4 *, bool, bool, bool);
-static	int	peek_char		(m4 *, bool);
-static	bool	pop_input		(m4 *, bool);
-static	void	unget_input		(int);
-static	const char * next_buffer	(m4 *, size_t *, bool);
-static	void	consume_buffer		(m4 *, size_t);
-static	bool	consume_syntax		(m4 *, m4_obstack *, unsigned int);
+static  bool    match_input             (m4 *, const char *, size_t, bool);
+static  int     next_char               (m4 *, bool, bool, bool);
+static  int     peek_char               (m4 *, bool);
+static  bool    pop_input               (m4 *, bool);
+static  void    unget_input             (int);
+static  const char * next_buffer        (m4 *, size_t *, bool);
+static  void    consume_buffer          (m4 *, size_t);
+static  bool    consume_syntax          (m4 *, m4_obstack *, unsigned int);
 
 #ifdef DEBUG_INPUT
 # include "quotearg.h"
@@ -162,28 +162,28 @@ struct input_funcs
   /* Peek at input, return an unsigned char, CHAR_BUILTIN if it is a
      builtin, or CHAR_RETRY if none available.  If ALLOW_ARGV, then
      CHAR_ARGV may be returned.  */
-   int	(*peek_func)	(m4_input_block *, m4 *, bool);
+   int  (*peek_func)    (m4_input_block *, m4 *, bool);
 
   /* Read input, return an unsigned char, CHAR_BUILTIN if it is a
      builtin, or CHAR_RETRY if none available.  If ALLOW_QUOTE, then
      CHAR_QUOTE may be returned.  If ALLOW_ARGV, then CHAR_ARGV may be
      returned.  If ALLOW_UNGET, then ensure that the next unget_func
      will work with the returned character.  */
-  int	(*read_func)	(m4_input_block *, m4 *, bool allow_quote,
+  int   (*read_func)    (m4_input_block *, m4 *, bool allow_quote,
                          bool allow_argv, bool allow_unget);
 
   /* Unread a single unsigned character or CHAR_BUILTIN, must be the
      same character previously read by read_func.  */
-  void	(*unget_func)	(m4_input_block *, int);
+  void  (*unget_func)   (m4_input_block *, int);
 
   /* Optional function to perform cleanup at end of input.  If
      CLEANUP, it is safe to perform non-recoverable cleanup actions.
      Return true only if no cleanup remains to be done.  */
-  bool	(*clean_func)	(m4_input_block *, m4 *, bool cleanup);
+  bool  (*clean_func)   (m4_input_block *, m4 *, bool cleanup);
 
   /* Add a representation of the input block to the obstack, for use
      in trace expansion output.  */
-  void	(*print_func)	(m4_input_block *, m4 *, m4_obstack *, int);
+  void  (*print_func)   (m4_input_block *, m4 *, m4_obstack *, int);
 
   /* Return a pointer to the current readahead buffer, and set LEN to
      the length of the result.  If ALLOW_QUOTE, do not return a buffer
@@ -203,33 +203,33 @@ struct input_funcs
 /* A block of input to be scanned.  */
 struct m4_input_block
 {
-  m4_input_block *prev;		/* Previous input_block on the input stack.  */
-  struct input_funcs *funcs;	/* Virtual functions of this input_block.  */
-  const char *file;		/* File where this input is from.  */
-  int line;			/* Line where this input is from.  */
+  m4_input_block *prev;         /* Previous input_block on the input stack.  */
+  struct input_funcs *funcs;    /* Virtual functions of this input_block.  */
+  const char *file;             /* File where this input is from.  */
+  int line;                     /* Line where this input is from.  */
 
   union
     {
       struct
         {
-          char *str;		/* String value.  */
-          size_t len;		/* Remaining length.  */
+          char *str;            /* String value.  */
+          size_t len;           /* Remaining length.  */
         }
-      u_s;	/* See string_funcs.  */
+      u_s;      /* See string_funcs.  */
       struct
         {
-          FILE *fp;			/* Input file handle.  */
-          bool_bitfield end : 1;	/* True iff peek returned EOF.  */
-          bool_bitfield close : 1;	/* True to close file on pop.  */
-          bool_bitfield line_start : 1;	/* Saved start_of_input_line state.  */
+          FILE *fp;                     /* Input file handle.  */
+          bool_bitfield end : 1;        /* True iff peek returned EOF.  */
+          bool_bitfield close : 1;      /* True to close file on pop.  */
+          bool_bitfield line_start : 1; /* Saved start_of_input_line state.  */
         }
-      u_f;	/* See file_funcs.  */
+      u_f;      /* See file_funcs.  */
       struct
         {
-          m4__symbol_chain *chain;	/* Current link in chain.  */
-          m4__symbol_chain *end;	/* Last link in chain.  */
+          m4__symbol_chain *chain;      /* Current link in chain.  */
+          m4__symbol_chain *end;        /* Last link in chain.  */
         }
-      u_c;	/* See composite_funcs.  */
+      u_c;      /* See composite_funcs.  */
     }
   u;
 };
@@ -1240,7 +1240,7 @@ pop_input (m4 *context, bool cleanup)
 
   obstack_free (current_input, isp);
   m4__quote_uncache (M4SYNTAX);
-  next = NULL;	/* might be set in m4_push_string_init () */
+  next = NULL; /* might be set in m4_push_string_init () */
 
   isp = tmp;
   input_change = true;
@@ -1477,8 +1477,8 @@ peek_char (m4 *context, bool allow_argv)
       ch = block->funcs->peek_func (block, context, allow_argv);
       if (ch != CHAR_RETRY)
         {
-/*	  if (IS_IGNORE (ch)) */
-/*	    return next_char (context, false, true, false); */
+/*        if (IS_IGNORE (ch)) */
+/*          return next_char (context, false, true, false); */
           return ch;
         }
 
@@ -1591,8 +1591,8 @@ m4_skip_line (m4 *context, const m4_call_info *caller)
 static bool
 match_input (m4 *context, const char *s, size_t len, bool consume)
 {
-  int n;			/* number of characters matched */
-  int ch;			/* input character */
+  int n; /* number of characters matched */
+  int ch; /* input character */
   const char *t;
   m4_obstack *st;
   bool result = false;
@@ -1621,7 +1621,7 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
     {
       if (consume)
         next_char (context, false, false, false);
-      return true;			/* short match */
+      return true; /* short match */
     }
 
   next_char (context, false, false, false);
@@ -1629,7 +1629,7 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
     {
       next_char (context, false, false, false);
       n++;
-      if (--len == 1)		/* long match */
+      if (--len == 1) /* long match */
         {
           if (consume)
             return true;
@@ -1657,9 +1657,9 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
    successful match will discard the matched string.  Otherwise, CH is
    the result of peek_char, and the input stream is effectively
    unchanged.  */
-#define MATCH(C, ch, cat, s, len, consume)				\
-  (m4_has_syntax (m4_get_syntax_table (C), ch, cat)			\
-   || (to_uchar ((s)[0]) == (ch)					\
+#define MATCH(C, ch, cat, s, len, consume)                              \
+  (m4_has_syntax (m4_get_syntax_table (C), ch, cat)                     \
+   || (to_uchar ((s)[0]) == (ch)                                        \
        && ((len) >> 1 ? match_input (C, s, len, consume) : (len))))
 
 /* While the current input character has the given SYNTAX, append it
@@ -1800,7 +1800,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
         *line = m4_get_current_line (context);
         file = m4_get_current_file (context);
       }
-    if (ch == CHAR_EOF)			/* EOF */
+    if (ch == CHAR_EOF) /* EOF */
       {
 #ifdef DEBUG_INPUT
         xfprintf (stderr, "next_token -> EOF\n");
@@ -1808,7 +1808,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
         return M4_TOKEN_EOF;
       }
 
-    if (ch == CHAR_BUILTIN)		/* BUILTIN TOKEN */
+    if (ch == CHAR_BUILTIN) /* BUILTIN TOKEN */
       {
         init_builtin_token (context, obs, token);
 #ifdef DEBUG_INPUT
@@ -1826,7 +1826,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
       }
 
     if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ESCAPE))
-      {					/* ESCAPED WORD */
+      { /* ESCAPED WORD */
         obstack_1grow (&token_stack, ch);
         if ((ch = next_char (context, false, false, false)) < CHAR_EOF)
           {
@@ -1837,7 +1837,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
             type = M4_TOKEN_WORD;
           }
         else
-          type = M4_TOKEN_SIMPLE;	/* escape before eof */
+          type = M4_TOKEN_SIMPLE; /* escape before eof */
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ALPHA))
       {
@@ -1851,7 +1851,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
     else if (MATCH (context, ch, M4_SYNTAX_LQUOTE,
                     context->syntax->quote.str1,
                     context->syntax->quote.len1, true))
-      {					/* QUOTED STRING */
+      { /* QUOTED STRING */
         if (obs)
           obs_safe = obs;
         quote_level = 1;
@@ -1961,7 +1961,7 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
     else if (MATCH (context, ch, M4_SYNTAX_BCOMM,
                     context->syntax->comm.str1,
                     context->syntax->comm.len1, true))
-      {					/* COMMENT */
+      { /* COMMENT */
         if (obs && !m4_get_discard_comments_opt (context))
           obs_safe = obs;
         if (1 < context->syntax->comm.len1)
@@ -2044,27 +2044,27 @@ m4__next_token (m4 *context, m4_symbol_value *token, int *line,
                 ? M4_TOKEN_NONE : M4_TOKEN_COMMENT);
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_ACTIVE))
-      {					/* ACTIVE CHARACTER */
+      { /* ACTIVE CHARACTER */
         obstack_1grow (&token_stack, ch);
         type = M4_TOKEN_WORD;
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OPEN))
-      {					/* OPEN PARENTHESIS */
+      { /* OPEN PARENTHESIS */
         obstack_1grow (&token_stack, ch);
         type = M4_TOKEN_OPEN;
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_COMMA))
-      {					/* COMMA */
+      { /* COMMA */
         obstack_1grow (&token_stack, ch);
         type = M4_TOKEN_COMMA;
       }
     else if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_CLOSE))
-      {					/* CLOSE PARENTHESIS */
+      { /* CLOSE PARENTHESIS */
         obstack_1grow (&token_stack, ch);
         type = M4_TOKEN_CLOSE;
       }
     else
-      {					/* EVERYTHING ELSE */
+      { /* EVERYTHING ELSE */
         assert (ch < CHAR_EOF);
         obstack_1grow (&token_stack, ch);
         if (m4_has_syntax (M4SYNTAX, ch, M4_SYNTAX_OTHER | M4_SYNTAX_NUM))
@@ -2163,7 +2163,7 @@ m4_print_token (m4 *context, const char *s, m4__token_type type,
     s = "m4input";
   xfprintf (stderr, "%s: ", s);
   switch (type)
-    {				/* TOKSW */
+    { /* TOKSW */
     case M4_TOKEN_EOF:
       fputs ("eof", stderr);
       token = NULL;

@@ -26,19 +26,19 @@
 
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	load_LTX_m4_builtin_table
-#define m4_macro_table		load_LTX_m4_macro_table
+#define m4_builtin_table        load_LTX_m4_builtin_table
+#define m4_macro_table          load_LTX_m4_macro_table
 
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-           function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (load,	false,	true,	false,	1,	1  )	\
-  BUILTIN (m4modules,	false,	false,	false,	0,	0  )	\
-  BUILTIN (refcount,	false,	true,	false,	1,	1  )	\
-  BUILTIN (unload,	false,	true,	false,	1,	1  )	\
+           function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (load,        false,  true,   false,  1,      1  )    \
+  BUILTIN (m4modules,   false,  false,  false,  0,      0  )    \
+  BUILTIN (refcount,    false,  true,   false,  1,      1  )    \
+  BUILTIN (unload,      false,  true,   false,  1,      1  )    \
 
 
 /* Generate prototypes for each builtin handler function. */
@@ -50,7 +50,7 @@
 /* Generate a table for mapping m4 symbol names to handler functions. */
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -63,9 +63,9 @@ const m4_builtin m4_builtin_table[] =
 /* A table for mapping m4 symbol names to simple expansion text. */
 const m4_macro m4_macro_table[] =
 {
-  /* name		text	min	max */
-  { "__load__",		"",	0,	0 },
-  { NULL,		NULL,	0,	0 },
+  /* name               text    min     max */
+  { "__load__",         "",     0,      0 },
+  { NULL,               NULL,   0,      0 },
 };
 
 

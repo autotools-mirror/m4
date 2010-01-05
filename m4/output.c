@@ -66,13 +66,13 @@ struct m4_diversion
   {
     union
       {
-        FILE *file;		/* Diversion file on disk.  */
-        char *buffer;		/* Malloc'd diversion buffer.  */
-        m4_diversion *next;	/* Free-list pointer */
+        FILE *file;             /* Diversion file on disk.  */
+        char *buffer;           /* Malloc'd diversion buffer.  */
+        m4_diversion *next;     /* Free-list pointer */
       } u;
-    int divnum;			/* Which diversion this represents.  */
-    size_t size;		/* Usable size before reallocation.  */
-    size_t used;		/* Used buffer length, or tmp file exists.  */
+    int divnum;                 /* Which diversion this represents.  */
+    size_t size;                /* Usable size before reallocation.  */
+    size_t used;                /* Used buffer length, or tmp file exists.  */
   };
 
 /* Sorted set of diversions 1 through INT_MAX.  */
@@ -539,12 +539,12 @@ make_room_for (m4 *context, size_t length)
 /* Output one character CHAR, when it is known that it goes to a
    diversion file or an in-memory diversion buffer.  A variable m4
    *context must be in scope.  */
-#define OUTPUT_CHARACTER(Char)			 \
-  if (output_file)				 \
-    putc ((Char), output_file);			 \
-  else if (output_unused == 0)			 \
-    output_character_helper (context, (Char));	 \
-  else						 \
+#define OUTPUT_CHARACTER(Char)                   \
+  if (output_file)                               \
+    putc ((Char), output_file);                  \
+  else if (output_unused == 0)                   \
+    output_character_helper (context, (Char));   \
+  else                                           \
     (output_unused--, *output_cursor++ = (Char))
 
 static void
@@ -1068,7 +1068,7 @@ m4_freeze_diversions (m4 *context, FILE *file)
   saved_number = m4_get_current_diversion (context);
   last_inserted = 0;
   m4_make_diversion (context, 0);
-  output_file = file;		/* kludge in the frozen file */
+  output_file = file; /* kludge in the frozen file */
 
   iter = gl_oset_iterator (diversion_table);
   while (gl_oset_iterator_next (&iter, &elt))

@@ -14,7 +14,7 @@ M4LIB	= m4lib/bugs.m4 m4lib/changelog.m4 m4lib/download.m4 \
 	  m4lib/modules.m4 m4lib/news.m4 m4lib/readme.m4 \
 	  m4lib/setup.m4 m4lib/test.m4 m4lib/thanks.m4 \
 	  m4lib/thissite.m4 m4lib/tmpl.m4 m4lib/todo.m4 m4lib/uses.m4 \
-	  m4lib/visions.m4 m4lib/whatis.m4 
+	  m4lib/visions.m4 m4lib/whatis.m4
 
 all: ./m4 $(HTM)
 

@@ -127,13 +127,13 @@ static bool    expand_token      (m4 *, m4_obstack *, m4__token_type,
                                   m4_symbol_value *, int, bool);
 static bool    expand_argument   (m4 *, m4_obstack *, m4_symbol_value *,
                                   const m4_call_info *);
-static void    process_macro	 (m4 *, m4_symbol_value *, m4_obstack *, int,
+static void    process_macro     (m4 *, m4_symbol_value *, m4_obstack *, int,
                                   m4_macro_args *);
 
-static unsigned int trace_pre	 (m4 *, m4_macro_args *);
-static void    trace_post	 (m4 *, unsigned int, const m4_call_info *);
+static unsigned int trace_pre    (m4 *, m4_macro_args *);
+static void    trace_post        (m4 *, unsigned int, const m4_call_info *);
 static unsigned int trace_header (m4 *, const m4_call_info *);
-static void    trace_flush	 (m4 *, unsigned int);
+static void    trace_flush       (m4 *, unsigned int);
 
 
 /* The number of the current call of expand_macro ().  */
@@ -151,9 +151,9 @@ static int debug_macro_level;
 #else
 # define debug_macro_level 0
 #endif /* !DEBUG_MACRO */
-#define PRINT_ARGCOUNT_CHANGES	1	/* Any change to argcount > 1.  */
-#define PRINT_REFCOUNT_INCREASE	2	/* Any increase to refcount.  */
-#define PRINT_REFCOUNT_DECREASE	4	/* Any decrease to refcount.  */
+#define PRINT_ARGCOUNT_CHANGES  1       /* Any change to argcount > 1.  */
+#define PRINT_REFCOUNT_INCREASE 2       /* Any increase to refcount.  */
+#define PRINT_REFCOUNT_DECREASE 4       /* Any decrease to refcount.  */
 
 
 
@@ -201,7 +201,7 @@ expand_token (m4 *context, m4_obstack *obs, m4__token_type type,
                       ? m4_get_symbol_value_text (token) : NULL);
 
   switch (type)
-    {				/* TOKSW */
+    { /* TOKSW */
     case M4_TOKEN_EOF:
     case M4_TOKEN_MACDEF:
       /* Always safe, since there is no text to rescan.  */
@@ -330,7 +330,7 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
       if (VALUE_MAX_ARGS (&token) < VALUE_MAX_ARGS (argp))
         VALUE_MAX_ARGS (argp) = VALUE_MAX_ARGS (&token);
       switch (type)
-        {			/* TOKSW */
+        { /* TOKSW */
         case M4_TOKEN_COMMA:
         case M4_TOKEN_CLOSE:
           if (paren_level == 0)
@@ -447,15 +447,15 @@ expand_argument (m4 *context, m4_obstack *obs, m4_symbol_value *argp,
 static void
 expand_macro (m4 *context, const char *name, size_t len, m4_symbol *symbol)
 {
-  void *args_base;		/* Base of stack->args on entry.  */
-  void *args_scratch;		/* Base of scratch space for m4_macro_call.  */
-  void *argv_base;		/* Base of stack->argv on entry.  */
-  m4_macro_args *argv;		/* Arguments to the called macro.  */
-  m4_obstack *expansion;	/* Collects the macro's expansion.  */
-  m4_symbol_value *value;	/* Original value of this macro.  */
-  size_t level;			/* Expansion level of this macro.  */
-  m4__macro_arg_stacks *stack;	/* Storage for this macro.  */
-  m4_call_info info;		/* Context of this macro call.  */
+  void *args_base;              /* Base of stack->args on entry.  */
+  void *args_scratch;           /* Base of scratch space for m4_macro_call.  */
+  void *argv_base;              /* Base of stack->argv on entry.  */
+  m4_macro_args *argv;          /* Arguments to the called macro.  */
+  m4_obstack *expansion;        /* Collects the macro's expansion.  */
+  m4_symbol_value *value;       /* Original value of this macro.  */
+  size_t level;                 /* Expansion level of this macro.  */
+  m4__macro_arg_stacks *stack;  /* Storage for this macro.  */
+  m4_call_info info;            /* Context of this macro call.  */
 
   /* Obstack preparation.  */
   level = context->expansion_level;
@@ -757,14 +757,14 @@ process_macro (m4 *context, m4_symbol_value *value, m4_obstack *obs,
             m4_push_arg (context, obs, argv, i);
           break;
 
-        case '#':		/* number of arguments */
+        case '#': /* number of arguments */
           m4_shipout_int (obs, argc - 1);
           text++;
           len--;
           break;
 
-        case '*':		/* all arguments */
-        case '@':		/* ... same, but quoted */
+        case '*': /* all arguments */
+        case '@': /* ... same, but quoted */
           m4_push_args (context, obs, argv, false, *text == '@');
           text++;
           len--;

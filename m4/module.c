@@ -80,16 +80,16 @@
  * have been made (nor will the symbol table be purged).
  **/
 
-#define MODULE_SELF_NAME	"!myself!"
+#define MODULE_SELF_NAME        "!myself!"
 
 static const char*  module_dlerror (void);
-static int	    module_remove  (m4 *context, m4_module *module,
+static int          module_remove  (m4 *context, m4_module *module,
                                     m4_obstack *obs);
 
-static void	    install_builtin_table (m4*, m4_module *);
-static void	    install_macro_table   (m4*, m4_module *);
+static void         install_builtin_table (m4*, m4_module *);
+static void         install_macro_table   (m4*, m4_module *);
 
-static int	    m4__module_interface	(lt_dlhandle handle,
+static int          m4__module_interface        (lt_dlhandle handle,
                                                  const char *id_string);
 
 static lt_dlinterface_id iface_id = NULL;
@@ -110,8 +110,8 @@ void *
 m4_module_import (m4 *context, const char *module_name,
                   const char *symbol_name, m4_obstack *obs)
 {
-  m4_module *	module		= m4__module_find (module_name);
-  void *	symbol_address	= NULL;
+  m4_module *   module          = m4__module_find (module_name);
+  void *        symbol_address  = NULL;
 
   /* Try to load the module if it is not yet available (errors are
      diagnosed by m4_module_load).  */
@@ -221,8 +221,8 @@ m4_module_makeresident (m4_module *module)
 void
 m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
 {
-  m4_module *	module  = NULL;
-  int		errors	= 0;
+  m4_module *   module  = NULL;
+  int           errors  = 0;
 
   assert (context);
 
@@ -390,12 +390,12 @@ compare_builtin_CB (const void *a, const void *b)
 m4_module *
 m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 {
-  lt_dlhandle		handle		= lt_dlopenext (name);
-  m4_module *		module		= NULL;
-  m4_module_init_func *	init_func	= NULL;
+  lt_dlhandle           handle          = lt_dlopenext (name);
+  m4_module *           module          = NULL;
+  m4_module_init_func * init_func       = NULL;
 
   assert (context);
-  assert (iface_id);		/* need to have called m4__module_init */
+  assert (iface_id);            /* need to have called m4__module_init */
 
   if (handle)
     {
@@ -511,12 +511,12 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 void
 m4__module_exit (m4 *context)
 {
-  m4_module *	module	= m4__module_next (NULL);
-  int		errors	= 0;
+  m4_module *   module  = m4__module_next (NULL);
+  int           errors  = 0;
 
   while (module && !errors)
     {
-      m4_module *      pending	= module;
+      m4_module *pending = module;
 
       /* If we are about to unload the final reference, move on to the
          next module before we unload the current one.  */
@@ -526,7 +526,7 @@ m4__module_exit (m4 *context)
       errors = module_remove (context, pending, NULL);
     }
 
-  assert (iface_id);		/* need to have called m4__module_init */
+  assert (iface_id);            /* need to have called m4__module_init */
   lt_dlinterface_free (iface_id);
   iface_id = NULL;
 
@@ -561,13 +561,13 @@ module_dlerror (void)
 static int
 module_remove (m4 *context, m4_module *module, m4_obstack *obs)
 {
-  const lt_dlinfo *		info;
-  int				errors	= 0;
-  const char *			name;
-  lt_dlhandle			handle;
-  bool				last_reference = false;
-  bool				resident = false;
-  m4_module_finish_func *	finish_func;
+  const lt_dlinfo *             info;
+  int                           errors = 0;
+  const char *                  name;
+  lt_dlhandle                   handle;
+  bool                          last_reference = false;
+  bool                          resident = false;
+  m4_module_finish_func *       finish_func;
 
   assert (module && module->handle);
 

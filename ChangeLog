@@ -1,3 +1,57 @@
+2010-01-07  Eric Blake  <ebb9@byu.net>
+
+	More whitespace cleanup.
+	* HACKING: Nuke trailing whitespace.
+	* examples/WWW/Makefile: Likewise.
+	* examples/WWW/_footer.htm: Likewise.
+	* examples/WWW/_header.htm: Likewise.
+	* examples/WWW/m4lib/bugs.m4: Likewise.
+	* examples/WWW/m4lib/html.m4: Likewise.
+	* examples/WWW/m4lib/menu.m4: Likewise.
+	* examples/WWW/m4lib/visions.m4: Likewise.
+	* examples/esyscmd.m4: Likewise.
+	* examples/fstab.m4: Avoid space-tab.
+	* examples/patsubst.m4: Likewise.
+	* NEWS: Prefer space over tab for alignment.
+	* THANKS: Likewise.
+	* TODO: Likewise.
+	* bootstrap: Likewise.
+	* configure.ac: Likewise.
+	* ltdl/m4/stackovf.m4: Likewise.
+	* m4/hash.c: Likewise.
+	* m4/hash.h: Likewise.
+	* m4/input.c: Likewise.
+	* m4/m4.c: Likewise.
+	* m4/m4module.h: Likewise.
+	* m4/m4private.h: Likewise.
+	* m4/macro.c: Likewise.
+	* m4/module.c: Likewise.
+	* m4/output.c: Likewise.
+	* m4/path.c: Likewise.
+	* m4/resyntax.c: Likewise.
+	* m4/symtab.c: Likewise.
+	* m4/syntax.c: Likewise.
+	* m4/system_.h: Likewise.
+	* modules/evalparse.c: Likewise.
+	* modules/format.c: Likewise.
+	* modules/gnu.c: Likewise.
+	* modules/import.c: Likewise.
+	* modules/load.c: Likewise.
+	* modules/m4.c: Likewise.
+	* modules/m4.h: Likewise.
+	* modules/modtest.c: Likewise.
+	* modules/mpeval.c: Likewise.
+	* modules/perl.c: Likewise.
+	* modules/shadow.c: Likewise.
+	* modules/stdlib.c: Likewise.
+	* modules/time.c: Likewise.
+	* modules/traditional.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/main.c: Likewise.
+	* src/stackovf.c: Likewise.
+	* tests/stackovf.test: Likewise.
+	* doc/STYLE: Mention the change.
+
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
 	Document new indentation policy.

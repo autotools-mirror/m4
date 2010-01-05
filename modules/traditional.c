@@ -29,21 +29,21 @@
 #endif
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_macro_table		traditional_LTX_m4_macro_table
+#define m4_macro_table          traditional_LTX_m4_macro_table
 
 /* A table for mapping m4 symbol names to simple expansion text. */
 const m4_macro m4_macro_table[] =
 {
-  /* name		text	min	max */
+  /* name               text    min     max */
 #if UNIX
-  { "unix",		"",	0,	0 },
+  { "unix",             "",     0,      0 },
 #elif W32_NATIVE
-  { "windows",		"",	0,	0 },
+  { "windows",          "",     0,      0 },
 #elif OS2
-  { "os2",		"",	0,	0 },
+  { "os2",              "",     0,      0 },
 #else
 # warning Platform macro not provided
 #endif
-  { "__traditional__",	"",	0,	0 },
-  { NULL,		NULL,	0,	0 },
+  { "__traditional__",  "",     0,      0 },
+  { NULL,               NULL,   0,      0 },
 };

@@ -158,7 +158,7 @@ m4_path_search (m4 *context, const char *file, char **expanded_name)
 {
   FILE *fp;
   m4__search_path *incl;
-  char *name;			/* buffer for constructed name */
+  char *name; /* buffer for constructed name */
   int e = 0;
 
   if (expanded_name != NULL)

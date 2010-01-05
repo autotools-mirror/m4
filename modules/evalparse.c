@@ -71,22 +71,22 @@ typedef enum eval_error
   }
 eval_error;
 
-static eval_error comma_term		(m4 *, eval_token, number *);
-static eval_error condition_term	(m4 *, eval_token, number *);
-static eval_error logical_or_term	(m4 *, eval_token, number *);
-static eval_error logical_and_term	(m4 *, eval_token, number *);
-static eval_error or_term		(m4 *, eval_token, number *);
-static eval_error xor_term		(m4 *, eval_token, number *);
-static eval_error and_term		(m4 *, eval_token, number *);
-static eval_error equality_term		(m4 *, eval_token, number *);
-static eval_error cmp_term		(m4 *, eval_token, number *);
-static eval_error shift_term		(m4 *, eval_token, number *);
-static eval_error add_term		(m4 *, eval_token, number *);
-static eval_error mult_term		(m4 *, eval_token, number *);
-static eval_error exp_term		(m4 *, eval_token, number *);
-static eval_error unary_term		(m4 *, eval_token, number *);
-static eval_error simple_term		(m4 *, eval_token, number *);
-static eval_error numb_pow		(number *, number *);
+static eval_error comma_term            (m4 *, eval_token, number *);
+static eval_error condition_term        (m4 *, eval_token, number *);
+static eval_error logical_or_term       (m4 *, eval_token, number *);
+static eval_error logical_and_term      (m4 *, eval_token, number *);
+static eval_error or_term               (m4 *, eval_token, number *);
+static eval_error xor_term              (m4 *, eval_token, number *);
+static eval_error and_term              (m4 *, eval_token, number *);
+static eval_error equality_term         (m4 *, eval_token, number *);
+static eval_error cmp_term              (m4 *, eval_token, number *);
+static eval_error shift_term            (m4 *, eval_token, number *);
+static eval_error add_term              (m4 *, eval_token, number *);
+static eval_error mult_term             (m4 *, eval_token, number *);
+static eval_error exp_term              (m4 *, eval_token, number *);
+static eval_error unary_term            (m4 *, eval_token, number *);
+static eval_error simple_term           (m4 *, eval_token, number *);
+static eval_error numb_pow              (number *, number *);
 
 
 
@@ -893,12 +893,12 @@ void
 m4_evaluate (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
 {
   const m4_call_info *me = m4_arg_info (argv);
-  const char *	str	= M4ARG (1);
-  int		radix	= 10;
-  int		min	= 1;
-  number	val;
-  eval_token	et;
-  eval_error	err	= NO_ERROR;
+  const char *  str     = M4ARG (1);
+  int           radix   = 10;
+  int           min     = 1;
+  number        val;
+  eval_token    et;
+  eval_error    err     = NO_ERROR;
 
   if (!m4_arg_empty (argv, 2)
       && !m4_numeric_arg (context, me, M4ARG (2), M4ARGLEN (2), &radix))

@@ -35,20 +35,20 @@
 #endif
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	time_LTX_m4_builtin_table
+#define m4_builtin_table        time_LTX_m4_builtin_table
 
-/*	   function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (currenttime,	false,	false,	false,	0,	0  )	\
-  BUILTIN (ctime,	false,	false,	false,	0,	1  )	\
-  BUILTIN (gmtime,	false,	true,	false,	1,	1  )	\
-  BUILTIN (localtime,	false,	true,	false,	1,	1  )	\
+/*         function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (currenttime, false,  false,  false,  0,      0  )    \
+  BUILTIN (ctime,       false,  false,  false,  0,      1  )    \
+  BUILTIN (gmtime,      false,  true,   false,  1,      1  )    \
+  BUILTIN (localtime,   false,  true,   false,  1,      1  )    \
 
-#define mktime_functions					\
-  BUILTIN (mktime,	false,	true,	false,	6,	7  )	\
+#define mktime_functions                                        \
+  BUILTIN (mktime,      false,  true,   false,  6,      7  )    \
 
-#define strftime_functions					\
-  BUILTIN (strftime,	false,	true,	false,	2,	2  )	\
+#define strftime_functions                                      \
+  BUILTIN (strftime,    false,  true,   false,  2,      2  )    \
 
 
 #define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN (handler)
@@ -63,7 +63,7 @@
 
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions

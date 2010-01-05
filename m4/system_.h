@@ -77,11 +77,11 @@
 
 #ifndef BEGIN_C_DECLS
 # ifdef __cplusplus
-#  define BEGIN_C_DECLS	extern "C" {
-#  define END_C_DECLS		}
+#  define BEGIN_C_DECLS extern "C" {
+#  define END_C_DECLS           }
 # else /* !__cplusplus */
-#  define BEGIN_C_DECLS	/* empty */
-#  define END_C_DECLS		/* empty */
+#  define BEGIN_C_DECLS /* empty */
+#  define END_C_DECLS           /* empty */
 # endif /* __cplusplus */
 #endif /* !BEGIN_C_DECLS */
 
@@ -132,23 +132,23 @@ BEGIN_C_DECLS
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-# define M4_GNUC_ATTRIBUTE(args)	__attribute__ (args)
+# define M4_GNUC_ATTRIBUTE(args)        __attribute__ (args)
 #else
 # define M4_GNUC_ATTRIBUTE(args)
 #endif  /* __GNUC__ */
 
-#define M4_GNUC_PRINTF(fmt, arg)				\
+#define M4_GNUC_PRINTF(fmt, arg)                                \
   M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
-#define M4_GNUC_SCANF(fmt, arg)					\
+#define M4_GNUC_SCANF(fmt, arg)                                 \
   M4_GNUC_ATTRIBUTE ((__format__ (__scanf__, fmt, arg)))
-#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE ((__noreturn__))
-#define M4_GNUC_CONST		M4_GNUC_ATTRIBUTE ((__const__))
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE ((__unused__))
+#define M4_GNUC_NORETURN        M4_GNUC_ATTRIBUTE ((__noreturn__))
+#define M4_GNUC_CONST           M4_GNUC_ATTRIBUTE ((__const__))
+#define M4_GNUC_UNUSED          M4_GNUC_ATTRIBUTE ((__unused__))
 
 
 
 #if !defined __PRETTY_FUNCTION__
-# define __PRETTY_FUNCTION__	"<unknown>"
+# define __PRETTY_FUNCTION__    "<unknown>"
 #endif
 
 
@@ -158,13 +158,13 @@ BEGIN_C_DECLS
    if the arguments to STR() (or CONC()) are themselves macros, they will
    be expanded before being quoted.   */
 #ifndef STR
-# define _STR(arg)	#arg
-# define STR(arg)	_STR (arg)
+# define _STR(arg)      #arg
+# define STR(arg)       _STR (arg)
 #endif
 
 #ifndef CONC
-# define _CONC(a, b)	a##b
-# define CONC(a, b)	_CONC (a, b)
+# define _CONC(a, b)    a##b
+# define CONC(a, b)     _CONC (a, b)
 #endif
 
 END_C_DECLS

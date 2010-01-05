@@ -25,8 +25,8 @@
 #include "m4private.h"
 
 typedef struct {
-  const char	*spec;
-  const int	code;
+  const char    *spec;
+  const int     code;
 } m4_resyntax;
 
 /* The syntaxes named in this table are saved into frozen files.  Changing
@@ -37,36 +37,36 @@ static m4_resyntax const m4_resyntax_map[] =
 {
   /* First, the canonical definitions for reverse lookups:  */
 
-  { "AWK",			RE_SYNTAX_AWK },
-  { "ED",			RE_SYNTAX_ED },
-  { "EGREP",			RE_SYNTAX_EGREP },
-  { "EMACS",			RE_SYNTAX_EMACS },
-  { "GNU_AWK",			RE_SYNTAX_GNU_AWK },
-  { "GREP",			RE_SYNTAX_GREP },
-  { "POSIX_AWK",		RE_SYNTAX_POSIX_AWK },
-  { "POSIX_BASIC",		RE_SYNTAX_POSIX_BASIC },
-  { "POSIX_EGREP",		RE_SYNTAX_POSIX_EGREP },
-  { "POSIX_EXTENDED",		RE_SYNTAX_POSIX_EXTENDED },
-  { "POSIX_MINIMAL_BASIC",	RE_SYNTAX_POSIX_MINIMAL_BASIC },
-  { "SED",			RE_SYNTAX_SED },
+  { "AWK",                      RE_SYNTAX_AWK },
+  { "ED",                       RE_SYNTAX_ED },
+  { "EGREP",                    RE_SYNTAX_EGREP },
+  { "EMACS",                    RE_SYNTAX_EMACS },
+  { "GNU_AWK",                  RE_SYNTAX_GNU_AWK },
+  { "GREP",                     RE_SYNTAX_GREP },
+  { "POSIX_AWK",                RE_SYNTAX_POSIX_AWK },
+  { "POSIX_BASIC",              RE_SYNTAX_POSIX_BASIC },
+  { "POSIX_EGREP",              RE_SYNTAX_POSIX_EGREP },
+  { "POSIX_EXTENDED",           RE_SYNTAX_POSIX_EXTENDED },
+  { "POSIX_MINIMAL_BASIC",      RE_SYNTAX_POSIX_MINIMAL_BASIC },
+  { "SED",                      RE_SYNTAX_SED },
 
   /* The rest are aliases, for forward lookups only:  */
 
-  { "",				RE_SYNTAX_EMACS },
-  { "BASIC",			RE_SYNTAX_POSIX_BASIC },
-  { "BSD_M4",			RE_SYNTAX_POSIX_EXTENDED },
-  { "EXTENDED",			RE_SYNTAX_POSIX_EXTENDED },
-  { "GAWK",			RE_SYNTAX_GNU_AWK },
-  { "GNU_EGREP",		RE_SYNTAX_EGREP },
-  { "GNU_EMACS",		RE_SYNTAX_EMACS },
-  { "GNU_M4",			RE_SYNTAX_EMACS },
-  { "MINIMAL",			RE_SYNTAX_POSIX_MINIMAL_BASIC },
-  { "MINIMAL_BASIC",		RE_SYNTAX_POSIX_MINIMAL_BASIC },
-  { "POSIX_MINIMAL",		RE_SYNTAX_POSIX_MINIMAL_BASIC },
+  { "",                         RE_SYNTAX_EMACS },
+  { "BASIC",                    RE_SYNTAX_POSIX_BASIC },
+  { "BSD_M4",                   RE_SYNTAX_POSIX_EXTENDED },
+  { "EXTENDED",                 RE_SYNTAX_POSIX_EXTENDED },
+  { "GAWK",                     RE_SYNTAX_GNU_AWK },
+  { "GNU_EGREP",                RE_SYNTAX_EGREP },
+  { "GNU_EMACS",                RE_SYNTAX_EMACS },
+  { "GNU_M4",                   RE_SYNTAX_EMACS },
+  { "MINIMAL",                  RE_SYNTAX_POSIX_MINIMAL_BASIC },
+  { "MINIMAL_BASIC",            RE_SYNTAX_POSIX_MINIMAL_BASIC },
+  { "POSIX_MINIMAL",            RE_SYNTAX_POSIX_MINIMAL_BASIC },
 
   /* End marker:  */
 
-  { NULL,			-1 }
+  { NULL,                       -1 }
 };
 
 

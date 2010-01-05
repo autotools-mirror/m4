@@ -214,14 +214,14 @@ func_update ()
     opt="$1"
     shift
     case $opt in
-      -f|--force)	vcs_only_file=					;;
-      --skip-po)	SKIP_PO=t					;;
-      -\?|-h)		func_usage					;;
-      --help)		func_help					;;
-      --version)	func_version					;;
-      --)		break						;;
-      -*)		func_fatal_help "unrecognized option \`$opt'"	;;
-      *)		set -- "$opt" ${1+"$@"};	break		;;
+      -f|--force)       vcs_only_file=                                  ;;
+      --skip-po)        SKIP_PO=t                                       ;;
+      -\?|-h)           func_usage                                      ;;
+      --help)           func_help                                       ;;
+      --version)        func_version                                    ;;
+      --)               break                                           ;;
+      -*)               func_fatal_help "unrecognized option \`$opt'"   ;;
+      *)                set -- "$opt" ${1+"$@"};        break           ;;
     esac
   done
 

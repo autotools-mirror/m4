@@ -29,13 +29,13 @@
 #endif
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	shadow_LTX_m4_builtin_table
-#define m4_macro_table		shadow_LTX_m4_macro_table
+#define m4_builtin_table        shadow_LTX_m4_builtin_table
+#define m4_macro_table          shadow_LTX_m4_macro_table
 
-/*	   function	macros	blind	side	minargs	maxargs */
-#define builtin_functions			\
-  BUILTIN (shadow,	false,	false,	false,	0,	-1 )	\
-  BUILTIN (test,	false,	false,	false,	0,	-1 )	\
+/*         function     macros  blind   side    minargs maxargs */
+#define builtin_functions                       \
+  BUILTIN (shadow,      false,  false,  false,  0,      -1 )    \
+  BUILTIN (test,        false,  false,  false,  0,      -1 )    \
 
 
 #define BUILTIN(handler, macros, blind, side, min, max) M4BUILTIN (handler)
@@ -44,7 +44,7 @@
 
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -55,9 +55,9 @@ const m4_builtin m4_builtin_table[] =
 
 const m4_macro m4_macro_table[] =
 {
-  /* name		text		min	max */
-  { "__test__",		"`shadow'",	0,	0 },
-  { NULL,		NULL,		0,	0 },
+  /* name               text            min     max */
+  { "__test__",         "`shadow'",     0,      0 },
+  { NULL,               NULL,           0,      0 },
 };
 
 

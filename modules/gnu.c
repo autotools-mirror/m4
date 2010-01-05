@@ -34,33 +34,33 @@
 #include "wait-process.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	gnu_LTX_m4_builtin_table
-#define m4_macro_table		gnu_LTX_m4_macro_table
+#define m4_builtin_table        gnu_LTX_m4_builtin_table
+#define m4_macro_table          gnu_LTX_m4_macro_table
 
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-           function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (__file__,	false,	false,	false,	0,	0 )	\
-  BUILTIN (__line__,	false,	false,	false,	0,	0  )	\
-  BUILTIN (__program__,	false,	false,	false,	0,	0  )	\
-  BUILTIN (builtin,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (changeresyntax,false,true,	false,	1,	1  )	\
-  BUILTIN (changesyntax,false,	true,	false,	1,	-1 )	\
-  BUILTIN (debugfile,	false,	false,	false,	0,	1  )	\
-  BUILTIN (debuglen,	false,	true,	false,	1,	1  )	\
-  BUILTIN (debugmode,	false,	false,	false,	0,	1  )	\
-  BUILTIN (esyscmd,	false,	true,	true,	1,	1  )	\
-  BUILTIN (format,	false,	true,	false,	1,	-1 )	\
-  BUILTIN (indir,	true,	true,	false,	1,	-1 )	\
-  BUILTIN (mkdtemp,	false,	true,	false,	1,	1  )	\
-  BUILTIN (patsubst,	false,	true,	true,	2,	4  )	\
-  BUILTIN (regexp,	false,	true,	true,	2,	4  )	\
-  BUILTIN (renamesyms,	false,	true,	false,	2,	3  )	\
-  BUILTIN (m4symbols,	true,	false,	false,	0,	-1 )	\
-  BUILTIN (syncoutput,	false,  true,	false,	1,	1  )	\
+           function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (__file__,    false,  false,  false,  0,      0 )     \
+  BUILTIN (__line__,    false,  false,  false,  0,      0  )    \
+  BUILTIN (__program__, false,  false,  false,  0,      0  )    \
+  BUILTIN (builtin,     true,   true,   false,  1,      -1 )    \
+  BUILTIN (changeresyntax,false,true,   false,  1,      1  )    \
+  BUILTIN (changesyntax,false,  true,   false,  1,      -1 )    \
+  BUILTIN (debugfile,   false,  false,  false,  0,      1  )    \
+  BUILTIN (debuglen,    false,  true,   false,  1,      1  )    \
+  BUILTIN (debugmode,   false,  false,  false,  0,      1  )    \
+  BUILTIN (esyscmd,     false,  true,   true,   1,      1  )    \
+  BUILTIN (format,      false,  true,   false,  1,      -1 )    \
+  BUILTIN (indir,       true,   true,   false,  1,      -1 )    \
+  BUILTIN (mkdtemp,     false,  true,   false,  1,      1  )    \
+  BUILTIN (patsubst,    false,  true,   true,   2,      4  )    \
+  BUILTIN (regexp,      false,  true,   true,   2,      4  )    \
+  BUILTIN (renamesyms,  false,  true,   false,  2,      3  )    \
+  BUILTIN (m4symbols,   true,   false,  false,  0,      -1 )    \
+  BUILTIN (syncoutput,  false,  true,   false,  1,      1  )    \
 
 
 /* Generate prototypes for each builtin handler function. */
@@ -72,7 +72,7 @@
 /* Generate a table for mapping m4 symbol names to handler functions. */
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -85,20 +85,20 @@ const m4_builtin m4_builtin_table[] =
 /* A table for mapping m4 symbol names to simple expansion text. */
 const m4_macro m4_macro_table[] =
 {
-  /* name		text	min	max */
+  /* name               text    min     max */
 #if UNIX
-  { "__unix__",		"",	0,	0 },
+  { "__unix__",         "",     0,      0 },
 #endif
 #if W32_NATIVE
-  { "__windows__",	"",	0,	0 },
+  { "__windows__",      "",     0,      0 },
 #endif
 #if OS2
-  { "__os2__",		"",	0,	0 },
+  { "__os2__",          "",     0,      0 },
 #endif
-  { "__gnu__",		"",	0,	0 },
-  { "__m4_version__",	VERSION,0,	0 },
+  { "__gnu__",          "",     0,      0 },
+  { "__m4_version__",   VERSION,0,      0 },
 
-  { NULL,		NULL,	0,	0 },
+  { NULL,               NULL,   0,      0 },
 };
 
 
@@ -117,12 +117,12 @@ const m4_macro m4_macro_table[] =
 /* Structure for using a compiled regex, as well as making it easier
    to cache frequently used expressions.  */
 typedef struct {
-  unsigned count;			/* usage counter */
-  int resyntax;				/* flavor of regex */
-  size_t len;				/* length of string */
-  char *str;				/* copy of compiled string */
-  struct re_pattern_buffer *pat;	/* compiled regex, allocated */
-  struct re_registers regs;		/* match registers, reused */
+  unsigned count;                       /* usage counter */
+  int resyntax;                         /* flavor of regex */
+  size_t len;                           /* length of string */
+  char *str;                            /* copy of compiled string */
+  struct re_pattern_buffer *pat;        /* compiled regex, allocated */
+  struct re_registers regs;             /* match registers, reused */
 } m4_pattern_buffer;
 
 /* Storage for the cache of regular expressions.  */
@@ -146,10 +146,10 @@ regexp_compile (m4 *context, const m4_call_info *caller, const char *regexp,
      use a static variable.  To be reentrant, we would need a mutex in
      this method, and move the storage for regex_cache into context.  */
 
-  const char *msg;		/* error message from re_compile_pattern */
-  int i;			/* iterator */
-  m4_pattern_buffer *victim;	/* cache slot to replace */
-  unsigned victim_count;	/* track which victim to replace */
+  const char *msg;              /* error message from re_compile_pattern */
+  int i;                        /* iterator */
+  m4_pattern_buffer *victim;    /* cache slot to replace */
+  unsigned victim_count;        /* track which victim to replace */
   struct re_pattern_buffer *pat;/* newly compiled regex */
 
   /* First, check if REGEXP is already cached with the given RESYNTAX.
@@ -300,9 +300,9 @@ regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
                    size_t regexp_len, m4_pattern_buffer *buf,
                    const char *replace, size_t repl_len, bool optimize)
 {
-  regoff_t matchpos = 0;	/* start position of match */
-  size_t offset = 0;		/* current match offset */
-  bool subst = !optimize;	/* if a substitution has been made */
+  regoff_t matchpos = 0;        /* start position of match */
+  size_t offset = 0;            /* current match offset */
+  bool subst = !optimize;       /* if a substitution has been made */
 
   while (offset <= len)
     {
@@ -834,13 +834,13 @@ M4BUILTIN_HANDLER (mkdtemp)
 M4BUILTIN_HANDLER (patsubst)
 {
   const m4_call_info *me = m4_arg_info (argv);
-  const char *pattern;		/* regular expression */
-  const char *replace;		/* replacement */
-  m4_pattern_buffer *buf;	/* compiled regular expression */
+  const char *pattern;          /* regular expression */
+  const char *replace;          /* replacement */
+  m4_pattern_buffer *buf;       /* compiled regular expression */
   int resyntax;
 
   resyntax = m4_get_regexp_syntax_opt (context);
-  if (argc >= 5)		/* additional args ignored */
+  if (argc >= 5)                /* additional args ignored */
     {
       resyntax = m4_resyntax_encode_safe (context, me, M4ARG (4),
                                           M4ARGLEN (4));
@@ -881,12 +881,12 @@ M4BUILTIN_HANDLER (patsubst)
 M4BUILTIN_HANDLER (regexp)
 {
   const m4_call_info *me = m4_arg_info (argv);
-  const char *victim;		/* string to search */
-  const char *pattern;		/* regular expression */
-  const char *replace;		/* optional replacement string */
-  m4_pattern_buffer *buf;	/* compiled regular expression */
-  regoff_t startpos;		/* start position of match */
-  size_t len;			/* length of first argument */
+  const char *victim;           /* string to search */
+  const char *pattern;          /* regular expression */
+  const char *replace;          /* optional replacement string */
+  m4_pattern_buffer *buf;       /* compiled regular expression */
+  regoff_t startpos;            /* start position of match */
+  size_t len;                   /* length of first argument */
   int resyntax;
 
   pattern = M4ARG (2);
@@ -966,14 +966,14 @@ M4BUILTIN_HANDLER (renamesyms)
   if (m4_dump_symbols)
     {
       const m4_call_info *me = m4_arg_info (argv);
-      const char *regexp;	/* regular expression string */
+      const char *regexp;       /* regular expression string */
       size_t regexp_len;
-      const char *replace;	/* replacement expression string */
+      const char *replace;      /* replacement expression string */
       size_t replace_len;
 
-      m4_pattern_buffer *buf;	/* compiled regular expression */
+      m4_pattern_buffer *buf;   /* compiled regular expression */
 
-      m4_dump_symbol_data	data;
+      m4_dump_symbol_data       data;
 
       int resyntax;
 

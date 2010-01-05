@@ -29,17 +29,17 @@
 #endif
 
 #undef PACKAGE
-#include "perlxsi.c"			/* Perl stuff */
+#include "perlxsi.c"                    /* Perl stuff */
 #undef try
 #undef _
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	perl_LTX_m4_builtin_table
-#define m4_macro_table		perl_LTX_m4_macro_table
+#define m4_builtin_table        perl_LTX_m4_builtin_table
+#define m4_macro_table          perl_LTX_m4_macro_table
 
-/*	   function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (perleval,	false,	false,	false,	0,	-1  )	\
+/*         function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (perleval,    false,  false,  false,  0,      -1  )   \
 
 
 #define BUILTIN(handler, macros, blind, side, min, max)  M4BUILTIN (handler)
@@ -48,7 +48,7 @@
 
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -60,9 +60,9 @@ const m4_builtin m4_builtin_table[] =
 /* A table for mapping m4 symbol names to simple expansion text. */
 const m4_macro m4_macro_table[] =
 {
-  /* name		text	min	max */
-  { "__perleval__",	"",	0,	0 },
-  { NULL,		NULL,	0,	0 },
+  /* name               text    min     max */
+  { "__perleval__",     "",     0,      0 },
+  { NULL,               NULL,   0,      0 },
 };
 
 

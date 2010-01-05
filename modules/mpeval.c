@@ -35,16 +35,16 @@
 #include "quotearg.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	mpeval_LTX_m4_builtin_table
-#define m4_macro_table		mpeval_LTX_m4_macro_table
+#define m4_builtin_table        mpeval_LTX_m4_builtin_table
+#define m4_macro_table          mpeval_LTX_m4_macro_table
 
 
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
-           function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (mpeval,	false,	true,	true,	1,	3  )	\
+           function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (mpeval,      false,  true,   true,   1,      3  )    \
 
 
 
@@ -69,25 +69,25 @@
 #define numb_lior(x, y) numb_set (x, numb_zerop (x) ? y : x)
 #define numb_land(x, y) numb_set (x, numb_zerop (x) ? numb_ZERO : y)
 
-#define reduce1(f1, x)							\
-  do									\
-    {									\
-      number T;								\
-      mpq_init (T);							\
-      f1 (T, x);							\
-      mpq_set (x, T);							\
-      mpq_clear (T);							\
-    }									\
+#define reduce1(f1, x)                                                  \
+  do                                                                    \
+    {                                                                   \
+      number T;                                                         \
+      mpq_init (T);                                                     \
+      f1 (T, x);                                                        \
+      mpq_set (x, T);                                                   \
+      mpq_clear (T);                                                    \
+    }                                                                   \
   while (0)
-#define reduce2(f2,x,y)							\
-  do									\
-    {									\
-      number T;								\
-      mpq_init (T);							\
-      f2 (T, (x), (y));							\
-      mpq_set ((x), T);							\
-      mpq_clear (T);							\
-    }									\
+#define reduce2(f2,x,y)                                                 \
+  do                                                                    \
+    {                                                                   \
+      number T;                                                         \
+      mpq_init (T);                                                     \
+      f2 (T, (x), (y));                                                 \
+      mpq_set ((x), T);                                                 \
+      mpq_clear (T);                                                    \
+    }                                                                   \
   while (0)
 
 #define numb_plus(x, y)  reduce2 (mpq_add, x, y)
@@ -110,7 +110,7 @@
 /* Generate a table for mapping m4 symbol names to handler functions. */
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -123,9 +123,9 @@ const m4_builtin m4_builtin_table[] =
 /* A table for mapping m4 symbol names to simple expansion text. */
 const m4_macro m4_macro_table[] =
 {
-  /* name		text	min	max */
-  { "__mpeval__",	"",	0,	0 },
-  { NULL,		NULL,	0,	0 },
+  /* name               text    min     max */
+  { "__mpeval__",       "",     0,      0 },
+  { NULL,               NULL,   0,      0 },
 };
 
 
@@ -448,5 +448,5 @@ numb_rshift (m4 *context, number * x, number * y)
   mpz_clear (res);
 }
 
-#define m4_evaluate	builtin_mpeval
+#define m4_evaluate     builtin_mpeval
 #include "evalparse.c"

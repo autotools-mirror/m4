@@ -37,24 +37,24 @@
 #endif
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table	stdlib_LTX_m4_builtin_table
+#define m4_builtin_table        stdlib_LTX_m4_builtin_table
 
-/*	   function	macros	blind	side	minargs	maxargs */
-#define builtin_functions					\
-  BUILTIN (getcwd,	false,	false,	false,	0,	0  )	\
-    BUILTIN (getenv,	false,	true,	false,	1,	1  )	\
-    BUILTIN (getlogin,	false,	false,	false,	0,	0  )	\
-    BUILTIN (getpid,	false,	false,	false,	0,	0  )	\
-    BUILTIN (getppid,	false,	false,	false,	0,	0  )	\
-    BUILTIN (getuid,	false,	false,	false,	0,	0  )	\
-    BUILTIN (getpwnam,	false,	true,	false,	1,	1  )	\
-    BUILTIN (getpwuid,	false,	true,	false,	1,	1  )	\
-    BUILTIN (hostname,	false,	false,	false,	0,	0  )	\
-    BUILTIN (rand,	false,	false,	false,	0,	0  )	\
-    BUILTIN (srand,	false,	false,	false,	0,	1  )	\
-    BUILTIN (setenv,	false,	true,	false,	2,	3  )	\
-    BUILTIN (unsetenv,	false,	true,	false,	1,	1  )	\
-    BUILTIN (uname,	false,	false,	false,	0,	0  )	\
+/*         function     macros  blind   side    minargs maxargs */
+#define builtin_functions                                       \
+  BUILTIN (getcwd,      false,  false,  false,  0,      0  )    \
+    BUILTIN (getenv,    false,  true,   false,  1,      1  )    \
+    BUILTIN (getlogin,  false,  false,  false,  0,      0  )    \
+    BUILTIN (getpid,    false,  false,  false,  0,      0  )    \
+    BUILTIN (getppid,   false,  false,  false,  0,      0  )    \
+    BUILTIN (getuid,    false,  false,  false,  0,      0  )    \
+    BUILTIN (getpwnam,  false,  true,   false,  1,      1  )    \
+    BUILTIN (getpwuid,  false,  true,   false,  1,      1  )    \
+    BUILTIN (hostname,  false,  false,  false,  0,      0  )    \
+    BUILTIN (rand,      false,  false,  false,  0,      0  )    \
+    BUILTIN (srand,     false,  false,  false,  0,      1  )    \
+    BUILTIN (setenv,    false,  true,   false,  2,      3  )    \
+    BUILTIN (unsetenv,  false,  true,   false,  1,      1  )    \
+    BUILTIN (uname,     false,  false,  false,  0,      0  )    \
 
 
 #define BUILTIN(handler, macros, blind, side, min, max) M4BUILTIN (handler);
@@ -63,7 +63,7 @@
 
 const m4_builtin m4_builtin_table[] =
 {
-#define BUILTIN(handler, macros, blind, side, min, max)			\
+#define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
 
   builtin_functions
@@ -83,7 +83,7 @@ M4BUILTIN_HANDLER (getcwd)
 
   bp = getcwd (buf, sizeof buf);
 
-  if (bp != NULL)		/* in case of error return null string */
+  if (bp != NULL)               /* in case of error return null string */
     m4_shipout_string (context, obs, buf, SIZE_MAX, false);
 }
 
