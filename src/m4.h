@@ -96,8 +96,8 @@ struct string_pair
 typedef struct string_pair string_pair;
 
 /* Memory allocation.  */
-#define obstack_chunk_alloc	xmalloc
-#define obstack_chunk_free	free
+#define obstack_chunk_alloc     xmalloc
+#define obstack_chunk_free      free
 
 /* These must come first.  */
 typedef struct token_data token_data;
@@ -116,29 +116,29 @@ typedef unsigned int bool_bitfield;
 /* Take advantage of GNU C compiler source level optimization hints,
    using portable macros.  */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-#  define M4_GNUC_ATTRIBUTE(args)	__attribute__ (args)
+#  define M4_GNUC_ATTRIBUTE(args)       __attribute__ (args)
 #else
 #  define M4_GNUC_ATTRIBUTE(args)
 #endif  /* __GNUC__ */
 
-#define M4_GNUC_UNUSED		M4_GNUC_ATTRIBUTE ((__unused__))
-#define M4_GNUC_PRINTF(fmt, arg)			\
+#define M4_GNUC_UNUSED          M4_GNUC_ATTRIBUTE ((__unused__))
+#define M4_GNUC_PRINTF(fmt, arg)                        \
   M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
-#define M4_GNUC_NORETURN	M4_GNUC_ATTRIBUTE ((__noreturn__))
+#define M4_GNUC_NORETURN        M4_GNUC_ATTRIBUTE ((__noreturn__))
 
 /* File: m4.c  --- global definitions.  */
 
 /* Option flags.  */
-extern int sync_output;			/* -s */
-extern int debug_level;			/* -d */
-extern int no_gnu_extensions;		/* -G */
-extern int prefix_all_builtins;		/* -P */
+extern int sync_output;                 /* -s */
+extern int debug_level;                 /* -d */
+extern int no_gnu_extensions;           /* -G */
+extern int prefix_all_builtins;         /* -P */
 extern size_t max_debug_argument_length;/* -l */
-extern int suppress_warnings;		/* -Q */
-extern int warning_status;		/* -E */
-extern int nesting_limit;		/* -L */
+extern int suppress_warnings;           /* -Q */
+extern int warning_status;              /* -E */
+extern int nesting_limit;               /* -L */
 #ifdef ENABLE_CHANGEWORD
-extern const char *user_word_regexp;	/* -W */
+extern const char *user_word_regexp;    /* -W */
 #endif
 
 /* Error handling.  */
@@ -148,13 +148,13 @@ extern const char *user_word_regexp;	/* -W */
    even when the global context changes in the meantime.  */
 struct call_info
 {
-  const char *file;	/* The file containing the macro invocation.  */
-  int line;		/* The line the macro was called on.  */
-  int call_id;		/* The unique sequence call id of the macro.  */
-  int trace : 1;	/* True to trace this macro.  */
-  int debug_level : 31;	/* The debug level for tracing the macro call.  */
-  const char *name;	/* The macro name.  */
-  size_t name_len;	/* The length of name.  */
+  const char *file;     /* The file containing the macro invocation.  */
+  int line;             /* The line the macro was called on.  */
+  int call_id;          /* The unique sequence call id of the macro.  */
+  int trace : 1;        /* True to trace this macro.  */
+  int debug_level : 31; /* The debug level for tracing the macro call.  */
+  const char *name;     /* The macro name.  */
+  size_t name_len;      /* The length of name.  */
 };
 typedef struct call_info call_info;
 
@@ -226,33 +226,33 @@ typedef struct token_chain token_chain;
 enum token_type
 {
   TOKEN_EOF = 4,/* End of file, TOKEN_VOID.  */
-  TOKEN_STRING,	/* Quoted string, TOKEN_TEXT or TOKEN_COMP.  */
+  TOKEN_STRING, /* Quoted string, TOKEN_TEXT or TOKEN_COMP.  */
   TOKEN_COMMENT,/* Comment, TOKEN_TEXT or TOKEN_COMP.  */
-  TOKEN_WORD,	/* An identifier, TOKEN_TEXT.  */
-  TOKEN_OPEN,	/* Active character `(', TOKEN_TEXT.  */
-  TOKEN_COMMA,	/* Active character `,', TOKEN_TEXT.  */
-  TOKEN_CLOSE,	/* Active character `)', TOKEN_TEXT.  */
-  TOKEN_SIMPLE,	/* Any other single character, TOKEN_TEXT.  */
-  TOKEN_MACDEF,	/* A builtin macro, TOKEN_FUNC or TOKEN_COMP.  */
-  TOKEN_ARGV	/* A series of parameters, TOKEN_COMP.  */
+  TOKEN_WORD,   /* An identifier, TOKEN_TEXT.  */
+  TOKEN_OPEN,   /* Active character `(', TOKEN_TEXT.  */
+  TOKEN_COMMA,  /* Active character `,', TOKEN_TEXT.  */
+  TOKEN_CLOSE,  /* Active character `)', TOKEN_TEXT.  */
+  TOKEN_SIMPLE, /* Any other single character, TOKEN_TEXT.  */
+  TOKEN_MACDEF, /* A builtin macro, TOKEN_FUNC or TOKEN_COMP.  */
+  TOKEN_ARGV    /* A series of parameters, TOKEN_COMP.  */
 };
 
 /* The data for a token, a macro argument, and a macro definition.  */
 enum token_data_type
 {
-  TOKEN_VOID,	/* Token still being constructed, u is invalid.  */
-  TOKEN_TEXT,	/* Straight text, u.u_t is valid.  */
-  TOKEN_FUNC,	/* Builtin function definition, u.func is valid.  */
-  TOKEN_COMP	/* Composite argument, u.u_c is valid.  */
+  TOKEN_VOID,   /* Token still being constructed, u is invalid.  */
+  TOKEN_TEXT,   /* Straight text, u.u_t is valid.  */
+  TOKEN_FUNC,   /* Builtin function definition, u.func is valid.  */
+  TOKEN_COMP    /* Composite argument, u.u_c is valid.  */
 };
 
 /* A link in a chain of token data.  */
 enum token_chain_type
 {
-  CHAIN_STR,	/* Link contains a string, u.u_s is valid.  */
-  CHAIN_FUNC,	/* Builtin function definition, u.func is valid.  */
-  CHAIN_ARGV,	/* Link contains a $@ reference, u.u_a is valid.  */
-  CHAIN_LOC	/* Link contains location of m4wrap, u.u_l is valid.  */
+  CHAIN_STR,    /* Link contains a string, u.u_s is valid.  */
+  CHAIN_FUNC,   /* Builtin function definition, u.func is valid.  */
+  CHAIN_ARGV,   /* Link contains a $@ reference, u.u_a is valid.  */
+  CHAIN_LOC     /* Link contains location of m4wrap, u.u_l is valid.  */
 };
 
 /* Composite tokens are built of a linked list of chains.  Each link
@@ -260,34 +260,34 @@ enum token_chain_type
    reference (ie. $@).  */
 struct token_chain
 {
-  token_chain *next;		/* Pointer to next link of chain.  */
-  enum token_chain_type type;	/* Type of this link.  */
-  unsigned int quote_age;	/* Quote_age of this link of chain, or 0.  */
+  token_chain *next;            /* Pointer to next link of chain.  */
+  enum token_chain_type type;   /* Type of this link.  */
+  unsigned int quote_age;       /* Quote_age of this link of chain, or 0.  */
   union
     {
       struct
         {
-          const char *str;	/* Pointer to text.  */
-          size_t len;		/* Remaining length of str.  */
-          int level;		/* Expansion level of link content, or -1.  */
+          const char *str;      /* Pointer to text.  */
+          size_t len;           /* Remaining length of str.  */
+          int level;            /* Expansion level of link content, or -1.  */
         }
       u_s;
-      builtin_func *func;		/* Builtin token from defn.  */
+      builtin_func *func;               /* Builtin token from defn.  */
       struct
         {
-          macro_arguments *argv;	/* Reference to earlier $@.  */
-          unsigned int index;		/* Argument index within argv.  */
-          bool_bitfield flatten : 1;	/* True to treat builtins as text.  */
-          bool_bitfield comma : 1;	/* True when `,' is next input.  */
-          bool_bitfield skip_last : 1;	/* True if last argument omitted.  */
-          bool_bitfield has_func : 1;	/* True if argv includes func.  */
-          const string_pair *quotes;	/* NULL for $*, quotes for $@.  */
+          macro_arguments *argv;        /* Reference to earlier $@.  */
+          unsigned int index;           /* Argument index within argv.  */
+          bool_bitfield flatten : 1;    /* True to treat builtins as text.  */
+          bool_bitfield comma : 1;      /* True when `,' is next input.  */
+          bool_bitfield skip_last : 1;  /* True if last argument omitted.  */
+          bool_bitfield has_func : 1;   /* True if argv includes func.  */
+          const string_pair *quotes;    /* NULL for $*, quotes for $@.  */
         }
       u_a;
       struct
         {
-          const char *file;	/* File where subsequent links originate.  */
-          int line;		/* Line where subsequent links originate.  */
+          const char *file;     /* File where subsequent links originate.  */
+          int line;             /* Line where subsequent links originate.  */
         }
       u_l;
     }
@@ -330,25 +330,25 @@ struct token_data
          placeholders.  */
       struct
         {
-          token_chain *chain;		/* First link of the chain.  */
-          token_chain *end;		/* Last link of the chain.  */
-          bool_bitfield wrapper : 1;	/* True if this is a $@ ref.  */
-          bool_bitfield has_func : 1;	/* True if chain includes func.  */
+          token_chain *chain;           /* First link of the chain.  */
+          token_chain *end;             /* Last link of the chain.  */
+          bool_bitfield wrapper : 1;    /* True if this is a $@ ref.  */
+          bool_bitfield has_func : 1;   /* True if chain includes func.  */
         }
       u_c;
     }
   u;
 };
 
-#define TOKEN_DATA_TYPE(Td)		((Td)->type)
-#define TOKEN_DATA_LEN(Td)		((Td)->u.u_t.len)
-#define TOKEN_DATA_TEXT(Td)		((Td)->u.u_t.text)
-#define TOKEN_DATA_QUOTE_AGE(Td)	((Td)->u.u_t.quote_age)
+#define TOKEN_DATA_TYPE(Td)             ((Td)->type)
+#define TOKEN_DATA_LEN(Td)              ((Td)->u.u_t.len)
+#define TOKEN_DATA_TEXT(Td)             ((Td)->u.u_t.text)
+#define TOKEN_DATA_QUOTE_AGE(Td)        ((Td)->u.u_t.quote_age)
 #ifdef ENABLE_CHANGEWORD
-# define TOKEN_DATA_ORIG_TEXT(Td)	((Td)->u.u_t.original_text)
-# define TOKEN_DATA_ORIG_LEN(Td)	((Td)->u.u_t.original_len)
+# define TOKEN_DATA_ORIG_TEXT(Td)       ((Td)->u.u_t.original_text)
+# define TOKEN_DATA_ORIG_LEN(Td)        ((Td)->u.u_t.original_len)
 #endif
-#define TOKEN_DATA_FUNC(Td)		((Td)->u.func)
+#define TOKEN_DATA_FUNC(Td)             ((Td)->u.func)
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
@@ -437,23 +437,23 @@ struct symbol
   token_data data;  /* Type should be only TOKEN_TEXT or TOKEN_FUNC.  */
 };
 
-#define SYMBOL_TRACED(S)	((S)->traced)
-#define SYMBOL_MACRO_ARGS(S)	((S)->macro_args)
-#define SYMBOL_BLIND_NO_ARGS(S)	((S)->blind_no_args)
-#define SYMBOL_DELETED(S)	((S)->deleted)
+#define SYMBOL_TRACED(S)        ((S)->traced)
+#define SYMBOL_MACRO_ARGS(S)    ((S)->macro_args)
+#define SYMBOL_BLIND_NO_ARGS(S) ((S)->blind_no_args)
+#define SYMBOL_DELETED(S)       ((S)->deleted)
 #define SYMBOL_PENDING_EXPANSIONS(S) ((S)->pending_expansions)
-#define SYMBOL_NAME(S)		((S)->name)
-#define SYMBOL_NAME_LEN(S)	((S)->len)
-#define SYMBOL_TYPE(S)		(TOKEN_DATA_TYPE (&(S)->data))
-#define SYMBOL_TEXT(S)		(TOKEN_DATA_TEXT (&(S)->data))
-#define SYMBOL_TEXT_LEN(S)	(TOKEN_DATA_LEN (&(S)->data))
-#define SYMBOL_FUNC(S)		(TOKEN_DATA_FUNC (&(S)->data))
+#define SYMBOL_NAME(S)          ((S)->name)
+#define SYMBOL_NAME_LEN(S)      ((S)->len)
+#define SYMBOL_TYPE(S)          (TOKEN_DATA_TYPE (&(S)->data))
+#define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))
+#define SYMBOL_TEXT_LEN(S)      (TOKEN_DATA_LEN (&(S)->data))
+#define SYMBOL_FUNC(S)          (TOKEN_DATA_FUNC (&(S)->data))
 
 typedef enum symbol_lookup symbol_lookup;
 typedef struct symbol symbol;
 typedef void hack_symbol (symbol *, void *);
 
-#define HASHMAX 509		/* default, overridden by -Hsize */
+#define HASHMAX 509             /* default, overridden by -Hsize */
 
 void free_symbol (symbol *);
 void symtab_init (size_t);

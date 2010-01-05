@@ -1,4 +1,4 @@
-# Configure template for GNU M4.			-*-Autoconf-*-
+# Configure template for GNU M4.           -*-Autoconf-*-
 # Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009,
 # 2010 Free Software Foundation, Inc.
 #
@@ -133,7 +133,7 @@ if test "$ac_cv_func_sigaction" = yes || test "$ac_cv_func_sigvec" = yes; then
 ]], [[struct rlimit r; getrlimit (RLIMIT_STACK, &r);
 #if (!defined HAVE_SIGACTION || !defined SA_ONSTACK) \
     && (!defined HAVE_SIGVEC || !defined SV_ONSTACK)
-choke me		/* SA_ONSTACK and/or SV_ONSTACK are not defined */
+choke me /* SA_ONSTACK and/or SV_ONSTACK are not defined */
 #endif
 ]])], [M4_cv_use_stackovf=yes])
   fi

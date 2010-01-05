@@ -26,16 +26,16 @@
 
 struct includes
 {
-  struct includes *next;	/* next directory to search */
-  const char *dir;		/* directory */
+  struct includes *next;        /* next directory to search */
+  const char *dir;              /* directory */
   int len;
 };
 
 typedef struct includes includes;
 
-static includes *dir_list;		/* the list of path directories */
-static includes *dir_list_end;		/* the end of same */
-static int dir_max_length;		/* length of longest directory name */
+static includes *dir_list;              /* the list of path directories */
+static includes *dir_list_end;          /* the end of same */
+static int dir_max_length;              /* length of longest directory name */
 
 
 void
@@ -137,7 +137,7 @@ m4_path_search (const char *file, char **result)
 {
   FILE *fp;
   includes *incl;
-  char *name;			/* buffer for constructed name */
+  char *name; /* buffer for constructed name */
   int e;
 
   if (result)

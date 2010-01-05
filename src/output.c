@@ -58,13 +58,13 @@ struct m4_diversion
   {
     union
       {
-        FILE *file;		/* Diversion file on disk.  */
-        char *buffer;		/* Malloc'd diversion buffer.  */
-        m4_diversion *next;	/* Free-list pointer */
+        FILE *file;             /* Diversion file on disk.  */
+        char *buffer;           /* Malloc'd diversion buffer.  */
+        m4_diversion *next;     /* Free-list pointer */
       } u;
-    int divnum;			/* Which diversion this represents.  */
-    int size;			/* Usable size before reallocation.  */
-    int used;			/* Used buffer length, or tmp file exists.  */
+    int divnum;                 /* Which diversion this represents.  */
+    int size;                   /* Usable size before reallocation.  */
+    int used;                   /* Used buffer length, or tmp file exists.  */
   };
 
 /* Table of diversions 1 through INT_MAX.  */
@@ -527,11 +527,11 @@ make_room_for (int length)
 /* Output one character CHAR, when it is known that it goes to a
    diversion file or an in-memory diversion buffer.  */
 #define OUTPUT_CHARACTER(Char) \
-  if (output_file)							\
-    putc ((Char), output_file);						\
-  else if (output_unused == 0)						\
-    output_character_helper ((Char));					\
-  else									\
+  if (output_file)                                                      \
+    putc ((Char), output_file);                                         \
+  else if (output_unused == 0)                                          \
+    output_character_helper ((Char));                                   \
+  else                                                                  \
     (output_unused--, *output_cursor++ = (Char))
 
 static void
@@ -968,7 +968,7 @@ freeze_diversions (FILE *file)
   saved_number = current_diversion;
   last_inserted = 0;
   make_diversion (0);
-  output_file = file;		/* kludge in the frozen file */
+  output_file = file; /* kludge in the frozen file */
 
   iter = gl_oset_iterator (diversion_table);
   while (gl_oset_iterator_next (&iter, &elt))

@@ -69,7 +69,7 @@ int retcode;
 struct macro_definition
 {
   struct macro_definition *next;
-  int code;			/* See label `defer'.  */
+  int code;                     /* See label `defer'.  */
   const char *arg;
 };
 typedef struct macro_definition macro_definition;
@@ -286,11 +286,11 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
 enum
 {
-  DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
-  WARN_MACRO_SEQUENCE_OPTION,		/* no short opt */
+  DEBUGFILE_OPTION = CHAR_MAX + 1,      /* no short opt */
+  WARN_MACRO_SEQUENCE_OPTION,           /* no short opt */
 
-  HELP_OPTION,				/* no short opt */
-  VERSION_OPTION			/* no short opt */
+  HELP_OPTION,                          /* no short opt */
+  VERSION_OPTION                        /* no short opt */
 };
 
 static const struct option long_options[] =
@@ -378,10 +378,10 @@ FILE *trace_file;
 int
 main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
 {
-  macro_definition *head;	/* head of deferred argument list */
+  macro_definition *head;       /* head of deferred argument list */
   macro_definition *tail;
   macro_definition *defn;
-  int optchar;			/* option character */
+  int optchar;                  /* option character */
 
   macro_definition *defines;
   bool interactive = false;
@@ -544,7 +544,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
       case 'o':
         /* -o/--error-output are deprecated synonyms of --debugfile,
            so issue a warning.  Don't call debug_set_output here, as
-           it has side effects.	 */
+           it has side effects.  */
         error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
                optchar == 'o' ? "-o" : "--error-output", "--debugfile");
         debugfile = optarg;

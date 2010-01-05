@@ -91,82 +91,82 @@ DECLARE (m4_undivert);
 static builtin const builtin_tab[] =
 {
 
-  /* name		GNUext	macros	blind	function */
+  /* name               GNUext  macros  blind   function */
 
-  { "__file__",		true,	false,	false,	m4___file__ },
-  { "__line__",		true,	false,	false,	m4___line__ },
-  { "__program__",	true,	false,	false,	m4___program__ },
-  { "builtin",		true,	true,	true,	m4_builtin },
-  { "changecom",	false,	false,	false,	m4_changecom },
-  { "changequote",	false,	false,	false,	m4_changequote },
+  { "__file__",         true,   false,  false,  m4___file__ },
+  { "__line__",         true,   false,  false,  m4___line__ },
+  { "__program__",      true,   false,  false,  m4___program__ },
+  { "builtin",          true,   true,   true,   m4_builtin },
+  { "changecom",        false,  false,  false,  m4_changecom },
+  { "changequote",      false,  false,  false,  m4_changequote },
 #ifdef ENABLE_CHANGEWORD
-  { "changeword",	true,	false,	true,	m4_changeword },
+  { "changeword",       true,   false,  true,   m4_changeword },
 #endif
-  { "debugmode",	true,	false,	false,	m4_debugmode },
-  { "debugfile",	true,	false,	false,	m4_debugfile },
-  { "decr",		false,	false,	true,	m4_decr },
-  { "define",		false,	true,	true,	m4_define },
-  { "defn",		false,	true,	true,	m4_defn },
-  { "divert",		false,	false,	false,	m4_divert },
-  { "divnum",		false,	false,	false,	m4_divnum },
-  { "dnl",		false,	false,	false,	m4_dnl },
-  { "dumpdef",		false,	true,	false,	m4_dumpdef },
-  { "errprint",		false,	false,	true,	m4_errprint },
-  { "esyscmd",		true,	false,	true,	m4_esyscmd },
-  { "eval",		false,	false,	true,	m4_eval },
-  { "format",		true,	false,	true,	m4_format },
-  { "ifdef",		false,	true,	true,	m4_ifdef },
-  { "ifelse",		false,	true,	true,	m4_ifelse },
-  { "include",		false,	false,	true,	m4_include },
-  { "incr",		false,	false,	true,	m4_incr },
-  { "index",		false,	false,	true,	m4_index },
-  { "indir",		true,	true,	true,	m4_indir },
-  { "len",		false,	false,	true,	m4_len },
-  { "m4exit",		false,	false,	false,	m4_m4exit },
-  { "m4wrap",		false,	true,	true,	m4_m4wrap },
-  { "maketemp",		false,	false,	true,	m4_maketemp },
-  { "mkstemp",		false,	false,	true,	m4_mkstemp },
-  { "patsubst",		true,	false,	true,	m4_patsubst },
-  { "popdef",		false,	true,	true,	m4_popdef },
-  { "pushdef",		false,	true,	true,	m4_pushdef },
-  { "regexp",		true,	false,	true,	m4_regexp },
-  { "shift",		false,	true,	true,	m4_shift },
-  { "sinclude",		false,	false,	true,	m4_sinclude },
-  { "substr",		false,	false,	true,	m4_substr },
-  { "syscmd",		false,	false,	true,	m4_syscmd },
-  { "sysval",		false,	false,	false,	m4_sysval },
-  { "traceoff",		false,	true,	false,	m4_traceoff },
-  { "traceon",		false,	true,	false,	m4_traceon },
-  { "translit",		false,	false,	true,	m4_translit },
-  { "undefine",		false,	true,	true,	m4_undefine },
-  { "undivert",		false,	false,	false,	m4_undivert },
+  { "debugmode",        true,   false,  false,  m4_debugmode },
+  { "debugfile",        true,   false,  false,  m4_debugfile },
+  { "decr",             false,  false,  true,   m4_decr },
+  { "define",           false,  true,   true,   m4_define },
+  { "defn",             false,  true,   true,   m4_defn },
+  { "divert",           false,  false,  false,  m4_divert },
+  { "divnum",           false,  false,  false,  m4_divnum },
+  { "dnl",              false,  false,  false,  m4_dnl },
+  { "dumpdef",          false,  true,   false,  m4_dumpdef },
+  { "errprint",         false,  false,  true,   m4_errprint },
+  { "esyscmd",          true,   false,  true,   m4_esyscmd },
+  { "eval",             false,  false,  true,   m4_eval },
+  { "format",           true,   false,  true,   m4_format },
+  { "ifdef",            false,  true,   true,   m4_ifdef },
+  { "ifelse",           false,  true,   true,   m4_ifelse },
+  { "include",          false,  false,  true,   m4_include },
+  { "incr",             false,  false,  true,   m4_incr },
+  { "index",            false,  false,  true,   m4_index },
+  { "indir",            true,   true,   true,   m4_indir },
+  { "len",              false,  false,  true,   m4_len },
+  { "m4exit",           false,  false,  false,  m4_m4exit },
+  { "m4wrap",           false,  true,   true,   m4_m4wrap },
+  { "maketemp",         false,  false,  true,   m4_maketemp },
+  { "mkstemp",          false,  false,  true,   m4_mkstemp },
+  { "patsubst",         true,   false,  true,   m4_patsubst },
+  { "popdef",           false,  true,   true,   m4_popdef },
+  { "pushdef",          false,  true,   true,   m4_pushdef },
+  { "regexp",           true,   false,  true,   m4_regexp },
+  { "shift",            false,  true,   true,   m4_shift },
+  { "sinclude",         false,  false,  true,   m4_sinclude },
+  { "substr",           false,  false,  true,   m4_substr },
+  { "syscmd",           false,  false,  true,   m4_syscmd },
+  { "sysval",           false,  false,  false,  m4_sysval },
+  { "traceoff",         false,  true,   false,  m4_traceoff },
+  { "traceon",          false,  true,   false,  m4_traceon },
+  { "translit",         false,  false,  true,   m4_translit },
+  { "undefine",         false,  true,   true,   m4_undefine },
+  { "undivert",         false,  false,  false,  m4_undivert },
 
-  { 0,			false,	false,	false,	0 },
+  { 0,                  false,  false,  false,  0 },
 
   /* placeholder is intentionally stuck after the table end delimiter,
      so that we can easily find it, while not treating it as a real
      builtin.  */
-  { "placeholder",	true,	false,	false,	m4_placeholder },
+  { "placeholder",      true,   false,  false,  m4_placeholder },
 };
 
 static predefined const predefined_tab[] =
 {
 #if UNIX
-  { "unix",	"__unix__",	"" },
+  { "unix",     "__unix__",     "" },
 #endif
 #if W32_NATIVE
-  { "windows",	"__windows__",	"" },
+  { "windows",  "__windows__",  "" },
 #endif
 #if OS2
-  { "os2",	"__os2__",	"" },
+  { "os2",      "__os2__",      "" },
 #endif
 #if !UNIX && !W32_NATIVE && !OS2
 # warning Platform macro not provided
 #endif
-  { NULL,	"__gnu__",	"" },
-  { NULL,	"__m4_version__", VERSION },
+  { NULL,       "__gnu__",      "" },
+  { NULL,       "__m4_version__", VERSION },
 
-  { NULL,	NULL,		NULL },
+  { NULL,       NULL,           NULL },
 };
 
 
@@ -260,11 +260,11 @@ static bool macro_sequence_inuse;
 
 /* Structure for caching compiled regex.  */
 struct m4_regex {
-  unsigned count;			/* usage counter */
-  size_t len;				/* length of string */
-  char *str;				/* copy of compiled string */
-  struct re_pattern_buffer *buf;	/* compiled regex, allocated */
-  struct re_registers regs;		/* match registers, reused */
+  unsigned count;                       /* usage counter */
+  size_t len;                           /* length of string */
+  char *str;                            /* copy of compiled string */
+  struct re_pattern_buffer *buf;        /* compiled regex, allocated */
+  struct re_registers regs;             /* match registers, reused */
 };
 typedef struct m4_regex m4_regex;
 
@@ -798,9 +798,9 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
 
 struct dump_symbol_data
 {
-  struct obstack *obs;		/* obstack for table */
-  symbol **base;		/* base of table */
-  int size;			/* size of table */
+  struct obstack *obs;          /* obstack for table */
+  symbol **base;                /* base of table */
+  int size;                     /* size of table */
 };
 
 static void
@@ -2187,15 +2187,15 @@ static void
 m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
-  const char *victim;		/* first argument */
-  const char *regexp;		/* regular expression */
-  const char *repl;		/* replacement string */
+  const char *victim;           /* first argument */
+  const char *regexp;           /* regular expression */
+  const char *repl;             /* replacement string */
 
   struct re_pattern_buffer *buf;/* compiled regular expression */
-  struct re_registers *regs;	/* for subexpression matches */
-  const char *msg;		/* error message from re_compile_pattern */
-  int startpos;			/* start position of match */
-  int length;			/* length of first argument */
+  struct re_registers *regs;    /* for subexpression matches */
+  const char *msg;              /* error message from re_compile_pattern */
+  int startpos;                 /* start position of match */
+  int length;                   /* length of first argument */
 
   if (bad_argc (me, argc, 2, 3))
     {
@@ -2265,17 +2265,17 @@ static void
 m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
-  const char *victim;		/* First argument.  */
-  const char *regexp;		/* Regular expression.  */
-  const char *repl;		/* Replacement text.  */
+  const char *victim;           /* First argument.  */
+  const char *regexp;           /* Regular expression.  */
+  const char *repl;             /* Replacement text.  */
 
   struct re_pattern_buffer *buf;/* Compiled regular expression.  */
-  struct re_registers *regs;	/* For subexpression matches.  */
-  const char *msg;		/* Error message from re_compile_pattern.  */
-  int matchpos;			/* Start position of match.  */
-  int offset;			/* Current match offset.  */
-  int length;			/* Length of first argument.  */
-  size_t repl_len;		/* Length of replacement.  */
+  struct re_registers *regs;    /* For subexpression matches.  */
+  const char *msg;              /* Error message from re_compile_pattern.  */
+  int matchpos;                 /* Start position of match.  */
+  int offset;                   /* Current match offset.  */
+  int length;                   /* Length of first argument.  */
+  size_t repl_len;              /* Length of replacement.  */
 
   if (bad_argc (me, argc, 2, 3))
     {
@@ -2431,14 +2431,14 @@ expand_user_macro (struct obstack *obs, symbol *sym,
           push_arg (obs, argv, i);
           break;
 
-        case '#':		/* number of arguments */
+        case '#': /* number of arguments */
           shipout_int (obs, argc - 1);
           text++;
           len--;
           break;
 
-        case '*':		/* all arguments */
-        case '@':		/* ... same, but quoted */
+        case '*': /* all arguments */
+        case '@': /* ... same, but quoted */
           push_args (obs, argv, false, *text == '@');
           text++;
           len--;

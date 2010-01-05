@@ -193,84 +193,84 @@ reload_frozen_state (const char *name)
   const builtin *bp;
   bool advance_line = true;
 
-#define GET_CHARACTER						\
-  do								\
-    {								\
-      if (advance_line)						\
-        {							\
-          current_line++;					\
-          advance_line = false;					\
-        }							\
-      (character = getc (file));				\
-      if (character == '\n')					\
-        advance_line = true;					\
-    }								\
+#define GET_CHARACTER                                           \
+  do                                                            \
+    {                                                           \
+      if (advance_line)                                         \
+        {                                                       \
+          current_line++;                                       \
+          advance_line = false;                                 \
+        }                                                       \
+      (character = getc (file));                                \
+      if (character == '\n')                                    \
+        advance_line = true;                                    \
+    }                                                           \
   while (0)
 
-#define GET_NUMBER(Number, AllowNeg)				\
-  do								\
-    {								\
-      unsigned int n = 0;					\
-      while (isdigit (character) && n <= INT_MAX / 10U)		\
-        {							\
-          n = 10 * n + character - '0';				\
-          GET_CHARACTER;					\
-        }							\
-      if (((AllowNeg) ? INT_MIN : INT_MAX) + 0U < n		\
-          || isdigit (character))				\
-        m4_error (EXIT_FAILURE, 0, NULL,			\
-                  _("integer overflow in frozen file"));	\
-      (Number) = n;						\
-    }								\
+#define GET_NUMBER(Number, AllowNeg)                            \
+  do                                                            \
+    {                                                           \
+      unsigned int n = 0;                                       \
+      while (isdigit (character) && n <= INT_MAX / 10U)         \
+        {                                                       \
+          n = 10 * n + character - '0';                         \
+          GET_CHARACTER;                                        \
+        }                                                       \
+      if (((AllowNeg) ? INT_MIN : INT_MAX) + 0U < n             \
+          || isdigit (character))                               \
+        m4_error (EXIT_FAILURE, 0, NULL,                        \
+                  _("integer overflow in frozen file"));        \
+      (Number) = n;                                             \
+    }                                                           \
   while (0)
 
-#define VALIDATE(Expected)					\
-  do								\
-    {								\
-      if (character != (Expected))				\
-        issue_expect_message (Expected);			\
-    }								\
+#define VALIDATE(Expected)                                      \
+  do                                                            \
+    {                                                           \
+      if (character != (Expected))                              \
+        issue_expect_message (Expected);                        \
+    }                                                           \
   while (0)
 
   /* Skip comments (`#' at beginning of line) and blank lines, setting
      character to the next directive or to EOF.  */
 
-#define GET_DIRECTIVE						\
-  do								\
-    {								\
-      GET_CHARACTER;						\
-      if (character == '#')					\
-        {							\
-          while (character != EOF && character != '\n')		\
-            GET_CHARACTER;					\
-          VALIDATE ('\n');					\
-        }							\
-    }								\
+#define GET_DIRECTIVE                                           \
+  do                                                            \
+    {                                                           \
+      GET_CHARACTER;                                            \
+      if (character == '#')                                     \
+        {                                                       \
+          while (character != EOF && character != '\n')         \
+            GET_CHARACTER;                                      \
+          VALIDATE ('\n');                                      \
+        }                                                       \
+    }                                                           \
   while (character == '\n')
 
-#define GET_STRING(i)							\
-  do									\
-    {									\
-      void *tmp;							\
-      char *p;								\
-      if (number[(i)] + 1 > allocated[(i)])				\
-        {								\
-          free (string[(i)]);						\
-          allocated[(i)] = number[(i)] + 1;				\
-          string[(i)] = xcharalloc ((size_t) allocated[(i)]);		\
-        }								\
-      if (number[(i)] > 0						\
-          && !fread (string[(i)], (size_t) number[(i)], 1, file))	\
-        m4_error (EXIT_FAILURE, 0, NULL,				\
-                  _("premature end of frozen file"));			\
-      string[(i)][number[(i)]] = '\0';					\
-      p = string[(i)];							\
-      while ((tmp = memchr(p, '\n', number[(i)] - (p - string[(i)]))))	\
-        {								\
-          current_line++;						\
-          p = (char *) tmp + 1;						\
-        }								\
-    }									\
+#define GET_STRING(i)                                                   \
+  do                                                                    \
+    {                                                                   \
+      void *tmp;                                                        \
+      char *p;                                                          \
+      if (number[(i)] + 1 > allocated[(i)])                             \
+        {                                                               \
+          free (string[(i)]);                                           \
+          allocated[(i)] = number[(i)] + 1;                             \
+          string[(i)] = xcharalloc ((size_t) allocated[(i)]);           \
+        }                                                               \
+      if (number[(i)] > 0                                               \
+          && !fread (string[(i)], (size_t) number[(i)], 1, file))       \
+        m4_error (EXIT_FAILURE, 0, NULL,                                \
+                  _("premature end of frozen file"));                   \
+      string[(i)][number[(i)]] = '\0';                                  \
+      p = string[(i)];                                                  \
+      while ((tmp = memchr(p, '\n', number[(i)] - (p - string[(i)]))))  \
+        {                                                               \
+          current_line++;                                               \
+          p = (char *) tmp + 1;                                         \
+        }                                                               \
+    }                                                                   \
   while (0)
 
   file = m4_path_search (name, NULL);

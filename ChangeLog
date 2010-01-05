@@ -1,5 +1,21 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Remove more TAB characters.
+	* THANKS: Use space for alignment.
+	* bootstrap: Likewise.
+	* configure.ac: Likewise.
+	* examples/stackovf.sh: Likewise.
+	* src/builtin.c: Likewise.  Also update some stale comments.
+	* src/format.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+	* src/m4.h: Likewise.
+	* src/macro.c: Likewise.
+	* src/output.c: Likewise.
+	* src/path.c: Likewise.
+	* src/stackovf.c: Likewise.
+
 	Use consistent comment style.
 	* c-boxes.el: Delete.
 	* Makefile.am (EXTRA_DIST): Drop unused file.

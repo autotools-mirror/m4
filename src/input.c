@@ -76,10 +76,10 @@
 /* Type of an input block.  */
 enum input_type
 {
-  INPUT_STRING,	/* String resulting from macro expansion.  */
-  INPUT_FILE,	/* File from command line or include.  */
-  INPUT_CHAIN,	/* FIFO chain of separate strings, builtins, and $@ refs.  */
-  INPUT_EOF	/* Placeholder at bottom of input stack.  */
+  INPUT_STRING, /* String resulting from macro expansion.  */
+  INPUT_FILE,   /* File from command line or include.  */
+  INPUT_CHAIN,  /* FIFO chain of separate strings, builtins, and $@ refs.  */
+  INPUT_EOF     /* Placeholder at bottom of input stack.  */
 };
 
 typedef enum input_type input_type;
@@ -89,32 +89,32 @@ typedef struct input_block input_block;
 /* A block of input to be scanned.  */
 struct input_block
 {
-  input_block *prev;		/* Previous input_block on the input stack.  */
-  input_type type;		/* See enum values.  */
-  const char *file;		/* File where this input is from.  */
-  int line;			/* Line where this input is from.  */
+  input_block *prev;            /* Previous input_block on the input stack.  */
+  input_type type;              /* See enum values.  */
+  const char *file;             /* File where this input is from.  */
+  int line;                     /* Line where this input is from.  */
   union
     {
       struct
         {
-          char *str;		/* Remaining string value.  */
-          size_t len;		/* Remaining length.  */
+          char *str;            /* Remaining string value.  */
+          size_t len;           /* Remaining length.  */
         }
-        u_s;	/* INPUT_STRING */
+        u_s;    /* INPUT_STRING */
       struct
         {
-          FILE *fp;		     /* Input file handle.  */
+          FILE *fp;                  /* Input file handle.  */
           bool_bitfield end : 1;     /* True if peek has seen EOF.  */
           bool_bitfield close : 1;   /* True to close file on pop.  */
           bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
         }
-        u_f;	/* INPUT_FILE */
+        u_f;    /* INPUT_FILE */
       struct
         {
-          token_chain *chain;	/* Current link in chain.  */
-          token_chain *end;	/* Last link in chain.  */
+          token_chain *chain;   /* Current link in chain.  */
+          token_chain *end;     /* Last link in chain.  */
         }
-        u_c;	/* INPUT_CHAIN */
+        u_c;    /* INPUT_CHAIN */
     }
   u;
 };
@@ -160,10 +160,10 @@ static bool start_of_input_line;
 /* Flag for next_char () to recognize change in input block.  */
 static bool input_change;
 
-#define CHAR_EOF	(UCHAR_MAX + 1)	/* Return on EOF.  */
-#define CHAR_MACRO	(UCHAR_MAX + 2)	/* Return for MACRO token.  */
-#define CHAR_QUOTE	(UCHAR_MAX + 3)	/* Return for quoted string.  */
-#define CHAR_ARGV	(UCHAR_MAX + 4)	/* Return for $@ reference.  */
+#define CHAR_EOF        (UCHAR_MAX + 1) /* Return on EOF.  */
+#define CHAR_MACRO      (UCHAR_MAX + 2) /* Return for MACRO token.  */
+#define CHAR_QUOTE      (UCHAR_MAX + 3) /* Return for quoted string.  */
+#define CHAR_ARGV       (UCHAR_MAX + 4) /* Return for $@ reference.  */
 
 /* Quote chars.  */
 string_pair curr_quote;
@@ -661,7 +661,7 @@ pop_input (bool cleanup)
     }
   obstack_free (current_input, isp);
   cached_quote = NULL;
-  next = NULL;			/* might be set in push_string_init () */
+  next = NULL; /* might be set in push_string_init () */
 
   isp = tmp;
   input_change = true;
@@ -1028,9 +1028,9 @@ peek_input (bool allow_argv)
    ALLOW_ARGV and the current input matches an argv reference with the
    correct quoting, return CHAR_ARGV and leave consumption of data for
    init_argv_token.  */
-#define next_char(AQ, AA)						\
-  (isp->type == INPUT_STRING && isp->u.u_s.len && !input_change		\
-   ? (isp->u.u_s.len--, to_uchar (*isp->u.u_s.str++))			\
+#define next_char(AQ, AA)                                               \
+  (isp->type == INPUT_STRING && isp->u.u_s.len && !input_change         \
+   ? (isp->u.u_s.len--, to_uchar (*isp->u.u_s.str++))                   \
    : next_char_1 (AQ, AA))
 
 static int
@@ -1339,8 +1339,8 @@ init_argv_token (struct obstack *obs, token_data *td)
 static bool
 match_input (const char *s, size_t slen, bool consume)
 {
-  int n;			/* number of characters matched */
-  int ch;			/* input character */
+  int n;                        /* number of characters matched */
+  int ch;                       /* input character */
   const char *t;
   bool result = false;
   size_t len;
@@ -1369,7 +1369,7 @@ match_input (const char *s, size_t slen, bool consume)
     {
       if (consume)
         next_char (false, false);
-      return true;			/* short match */
+      return true;                      /* short match */
     }
 
   next_char (false, false);
@@ -1377,7 +1377,7 @@ match_input (const char *s, size_t slen, bool consume)
     {
       next_char (false, false);
       n++;
-      if (--slen == 1)		/* long match */
+      if (--slen == 1)          /* long match */
         {
           if (consume)
             return true;
@@ -1403,8 +1403,8 @@ match_input (const char *s, size_t slen, bool consume)
    next_char, and a successful match will discard the matched string.
    Otherwise, CH is the result of peek_input, and the input stream is
    effectively unchanged.  */
-#define MATCH(ch, s, slen, consume)					\
-  (to_uchar ((s)[0]) == (ch)						\
+#define MATCH(ch, s, slen, consume)                                     \
+  (to_uchar ((s)[0]) == (ch)                                            \
    && ((slen) >> 1 ? match_input (s, slen, consume) : (slen)))
 
 
@@ -2151,7 +2151,7 @@ static const char *
 token_type_string (token_type t)
 {
  switch (t)
-    {				/* TOKSW */
+    { /* TOKSW */
     case TOKEN_EOF:
       return "EOF";
     case TOKEN_STRING:
@@ -2180,7 +2180,7 @@ print_token (const char *s, token_type t, token_data *td)
 {
   xfprintf (stderr, "%s: ", s);
   switch (t)
-    {				/* TOKSW */
+    { /* TOKSW */
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:

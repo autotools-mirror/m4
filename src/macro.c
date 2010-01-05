@@ -153,12 +153,12 @@ struct macro_arguments
 */
 struct macro_arg_stacks
 {
-  size_t refcount;	/* Number of active $@ references at this level.  */
-  size_t argcount;	/* Number of argv at this level.  */
-  struct obstack *args;	/* Content of arguments.  */
-  struct obstack *argv;	/* Argv pointers into args.  */
-  void *args_base;	/* Location for clearing the args obstack.  */
-  void *argv_base;	/* Location for clearing the argv obstack.  */
+  size_t refcount;      /* Number of active $@ references at this level.  */
+  size_t argcount;      /* Number of argv at this level.  */
+  struct obstack *args; /* Content of arguments.  */
+  struct obstack *argv; /* Argv pointers into args.  */
+  void *args_base;      /* Location for clearing the args obstack.  */
+  void *argv_base;      /* Location for clearing the argv obstack.  */
 };
 
 typedef struct macro_arg_stacks macro_arg_stacks;
@@ -259,7 +259,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
   bool result = false;
 
   switch (t)
-    {				/* TOKSW */
+    { /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
       /* Always safe, since there is no text to rescan.  */
@@ -374,7 +374,7 @@ expand_argument (struct obstack *obs, token_data *argp,
     {
 
       switch (t)
-        {			/* TOKSW */
+        { /* TOKSW */
         case TOKEN_COMMA:
         case TOKEN_CLOSE:
           if (paren_level == 0)
@@ -609,13 +609,13 @@ call_macro (symbol *sym, macro_arguments *argv, struct obstack *expansion)
 static void
 expand_macro (symbol *sym)
 {
-  void *args_base;		/* Base of stacks[i].args on entry.  */
-  void *args_scratch;		/* Base of scratch space for call_macro.  */
-  void *argv_base;		/* Base of stacks[i].argv on entry.  */
-  macro_arguments *argv;	/* Arguments to the called macro.  */
-  struct obstack *expansion;	/* Collects the macro's expansion.  */
-  int level = expansion_level;	/* Expansion level of this macro.  */
-  call_info my_call_info;	/* Context of this macro.  */
+  void *args_base;              /* Base of stacks[i].args on entry.  */
+  void *args_scratch;           /* Base of scratch space for call_macro.  */
+  void *argv_base;              /* Base of stacks[i].argv on entry.  */
+  macro_arguments *argv;        /* Arguments to the called macro.  */
+  struct obstack *expansion;    /* Collects the macro's expansion.  */
+  int level = expansion_level;  /* Expansion level of this macro.  */
+  call_info my_call_info;       /* Context of this macro.  */
 
   /* Obstack preparation.  */
   if (level + 0UL >= stacks_count)

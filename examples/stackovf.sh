@@ -67,7 +67,7 @@ else
     *ut*of*emory*)
         echo "*** Test is INCONCLUSIVE (ran out of heap before stack overflow)";
         ;;
-    *)	echo "*** Test FAILED.  $M4 aborted unexpectedly.  Output:";
+    *)  echo "*** Test FAILED.  $M4 aborted unexpectedly.  Output:";
         ;;
     esac
 fi

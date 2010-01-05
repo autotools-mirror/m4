@@ -77,7 +77,7 @@
       dump in the usual way.  It seems important (to me) that internal m4
       bugs not be reported as user recursion errors, or vice-versa."  */
 
-#include "m4.h"			/* stdlib.h, xmalloc() */
+#include "m4.h" /* stdlib.h, xmalloc() */
 
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -184,7 +184,7 @@ process_sigsegv (int signo, const char *p)
 
           /* We have determined that this is indeed a stack overflow.  */
 
-          (*stackovf_handler) ();	/* should call exit() */
+          (*stackovf_handler) (); /* should call exit() */
         }
     }
   if (p == NULL)
