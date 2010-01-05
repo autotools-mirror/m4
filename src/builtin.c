@@ -169,10 +169,8 @@ static predefined const predefined_tab[] =
   { NULL,	NULL,		NULL },
 };
 
-/*----------------------------------------.
-| Find the builtin, which lives on ADDR.  |
-`----------------------------------------*/
 
+/* Find the builtin that owns FUNC.  */
 const builtin *
 find_builtin_by_addr (builtin_func *func)
 {
@@ -186,11 +184,8 @@ find_builtin_by_addr (builtin_func *func)
   return NULL;
 }
 
-/*----------------------------------------------------------.
-| Find the builtin, which has NAME.  On failure, return the |
-| placeholder builtin.                                      |
-`----------------------------------------------------------*/
-
+/* Find the builtin matching NAME.  On failure, return the placeholder
+   builtin.  */
 const builtin *
 find_builtin_by_name (const char *name)
 {
@@ -202,11 +197,9 @@ find_builtin_by_name (const char *name)
   return bp + 1;
 }
 
-/*------------------------------------------------------------------.
-| Print a representation of FUNC to OBS.  If FLATTEN, output QUOTES |
-| around an empty string instead; else if CHAIN, append the builtin |
-| to the chain; otherwise print the name of FUNC.                   |
-`------------------------------------------------------------------*/
+/* Print a representation of FUNC to OBS.  If FLATTEN, output QUOTES
+   around an empty string instead; else if CHAIN, append the builtin
+   to the chain; otherwise print the name of FUNC.  */
 void
 func_print (struct obstack *obs, const builtin *func, bool flatten,
             token_chain **chain, const string_pair *quotes)
@@ -230,12 +223,10 @@ func_print (struct obstack *obs, const builtin *func, bool flatten,
     }
 }
 
-/*----------------------------------------------------------------.
-| Install a builtin macro with name NAME and length LEN, bound to |
-| the C function given in BP.  MODE is SYMBOL_INSERT or		  |
-| SYMBOL_PUSHDEF.						  |
-`----------------------------------------------------------------*/
 
+/* Install a builtin macro with name NAME and length LEN, bound to the
+   C function given in BP.  MODE is SYMBOL_INSERT or
+   SYMBOL_PUSHDEF.  */
 void
 define_builtin (const char *name, size_t len, const builtin *bp,
                 symbol_lookup mode)
@@ -284,12 +275,10 @@ static m4_regex regex_cache[REGEX_CACHE_SIZE];
 extern FILE *trace_file;
 #endif /* DEBUG_REGEX */
 
-/*------------------------------------------------------------------.
-| Compile STR, with length LEN, into a regex.  On success, set BUF  |
-| and REGS to the compiled regex.  Compilation is cached, so do not |
-| free the results here; rather, use free_regex at the end of the   |
-| program.  Return NULL on success, or an error message.	    |
-`------------------------------------------------------------------*/
+/* Compile STR, with length LEN, into a regex.  On success, set BUF
+   and REGS to the compiled regex.  Compilation is cached, so do not
+   free the results here; rather, use free_regex at the end of the
+   program.  Return NULL on success, or an error message.  */
 static const char *
 compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
                  struct re_registers **regs)
@@ -385,10 +374,7 @@ compile_pattern (const char *str, size_t len, struct re_pattern_buffer **buf,
   return NULL;
 }
 
-/*----------------------------------------.
-| Clean up regular expression variables.  |
-`----------------------------------------*/
-
+/* Clean up regular expression variables BUF and REGS.  */
 static void
 free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
 {
@@ -397,10 +383,8 @@ free_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
   free (regs->end);
 }
 
-/*-----------------------------------------------------------------.
-| Set the regular expression of --warn-macro-sequence that will be |
-| checked during define and pushdef.  Exit on failure.             |
-`-----------------------------------------------------------------*/
+/* Set the regular expression of --warn-macro-sequence that will be
+   checked during define and pushdef to REGEXP.  Exit on failure.  */
 void
 set_macro_sequence (const char *regexp)
 {
@@ -425,9 +409,7 @@ set_macro_sequence (const char *regexp)
   macro_sequence_inuse = true;
 }
 
-/*------------------------------------------------------.
-| Free dynamic memory utilized by regular expressions.  |
-`------------------------------------------------------*/
+/* Free dynamic memory utilized by regular expressions.  */
 void
 free_regex (void)
 {
@@ -442,14 +424,11 @@ free_regex (void)
       }
 }
 
-/*------------------------------------------------------------------.
-| Define a predefined or user-defined macro, with name NAME of      |
-| length NAME_LEN, and expansion TEXT of length LEN.  LEN may be    |
-| SIZE_MAX, to use the string length of TEXT instead.  MODE is      |
-| SYMBOL_INSERT for "define" or SYMBOL_PUSHDEF for "pushdef".  This |
-| function is also used from main ().                               |
-`------------------------------------------------------------------*/
-
+/* Define a predefined or user-defined macro, with name NAME of length
+   NAME_LEN, and expansion TEXT of length LEN.  LEN may be SIZE_MAX,
+   to use the string length of TEXT instead.  MODE is SYMBOL_INSERT
+   for "define" or SYMBOL_PUSHDEF for "pushdef".  This function is
+   also used from main ().  */
 void
 define_user_macro (const char *name, size_t name_len, const char *text,
                    size_t len, symbol_lookup mode)
@@ -503,10 +482,7 @@ define_user_macro (const char *name, size_t name_len, const char *text,
     }
 }
 
-/*-----------------------------------------------.
-| Initialize all builtin and predefined macros.	 |
-`-----------------------------------------------*/
-
+/* Initialize all builtin and predefined macros.  */
 void
 builtin_init (void)
 {
@@ -543,15 +519,12 @@ builtin_init (void)
       }
 }
 
-/*------------------------------------------------------------------.
-| Give friendly warnings if a builtin macro is passed an            |
-| inappropriate number of arguments.  NAME is macro name for        |
-| messages.  ARGC is one more than the number of arguments.  MIN is |
-| the 0-based minimum number of acceptable arguments.  MAX is the   |
-| 0-based maximum number of arguments, UINT_MAX if not applicable.  |
-| Return true if there are not enough arguments.                    |
-`------------------------------------------------------------------*/
-
+/* Give friendly warnings if a builtin macro is passed an
+   inappropriate number of arguments.  NAME is the macro name for
+   messages.  ARGC is one more than the number of arguments.  MIN is
+   the 0-based minimum number of acceptable arguments.  MAX is the
+   0-based maximum number of arguments, UINT_MAX if not applicable.
+   Return true if there are not enough arguments.  */
 bool
 bad_argc (const call_info *name, int argc, unsigned int min, unsigned int max)
 {
@@ -565,12 +538,9 @@ bad_argc (const call_info *name, int argc, unsigned int min, unsigned int max)
   return false;
 }
 
-/*------------------------------------------------------------------.
-| The function numeric_arg () converts ARG of length LEN to an int  |
-| pointed to by VALUEP.  If the conversion fails, print error       |
-| message on behalf of NAME.  Return true iff conversion succeeds.  |
-`------------------------------------------------------------------*/
-
+/* The function numeric_arg () converts ARG of length LEN to an int
+   pointed to by VALUEP.  If the conversion fails, print error message
+   on behalf of NAME.  Return true iff conversion succeeds.  */
 static bool
 numeric_arg (const call_info *name, const char *arg, size_t len, int *valuep)
 {
@@ -599,14 +569,11 @@ numeric_arg (const call_info *name, const char *arg, size_t len, int *valuep)
   return true;
 }
 
-/*------------------------------------------------------------------------.
-| The function ntoa () converts VALUE to a signed ASCII representation in |
-| radix RADIX.								  |
-`------------------------------------------------------------------------*/
-
 /* Digits for number to ASCII conversions.  */
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
+/* The function ntoa () converts VALUE to a signed ASCII
+   representation in radix RADIX.  */
 static const char *
 ntoa (int32_t value, int radix)
 {
@@ -641,11 +608,8 @@ ntoa (int32_t value, int radix)
   return s;
 }
 
-/*----------------------------------------------------------------------.
-| Format an int VAL, and stuff it into an obstack OBS.  Used for macros |
-| expanding to numbers.						        |
-`----------------------------------------------------------------------*/
-
+/* Format an int VAL, and stuff it into an obstack OBS.  Used for
+   macros expanding to numbers.  */
 static void
 shipout_int (struct obstack *obs, int val)
 {
@@ -670,13 +634,10 @@ shipout_int (struct obstack *obs, int val)
 /* The first section are macros for defining, undefining, examining,
    changing, ... other macros.  */
 
-/*-------------------------------------------------------------------------.
-| The function define_macro is common for the builtins "define",	   |
-| "undefine", "pushdef" and "popdef".  ARGC and ARGV is as for the caller, |
-| and MODE argument determines how the macro name is entered into the	   |
-| symbol table.								   |
-`-------------------------------------------------------------------------*/
-
+/* The function define_macro is common for the builtins "define",
+   "undefine", "pushdef" and "popdef".  ARGC and ARGV is as for the
+   caller, and MODE argument determines how the macro name is entered
+   into the symbol table.  */
 static void
 define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 {
@@ -770,9 +731,7 @@ m4_popdef (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
                                    ARG_LEN (i)));
 }
 
-/*---------------------.
-| Conditionals of m4.  |
-`---------------------*/
+/* Conditionals of m4.  */
 
 static void
 m4_ifdef (struct obstack *obs, int argc, macro_arguments *argv)
@@ -831,10 +790,8 @@ m4_ifelse (struct obstack *obs, int argc, macro_arguments *argv)
     }
 }
 
-/*---------------------------------------------------------------------.
-| The function dump_symbol () is for use by "dumpdef".  It builds up a |
-| table of all defined, un-shadowed, symbols.			       |
-`---------------------------------------------------------------------*/
+/* The function dump_symbol () is for use by "dumpdef".  It builds
+   up a table of all defined, un-shadowed, symbols.  */
 
 /* The structure dump_symbol_data is used to pass the information needed
    from call to call to dump_symbol.  */
@@ -858,9 +815,8 @@ dump_symbol (symbol *sym, void *arg)
     }
 }
 
-/*------------------------------------------------------------------------.
-| qsort comparison routine, for sorting the table made in m4_dumpdef ().  |
-`------------------------------------------------------------------------*/
+/* qsort comparison routine, for sorting the table made in
+   m4_dumpdef ().  */
 
 static int
 dumpdef_cmp (const void *s1, const void *s2)
@@ -871,11 +827,8 @@ dumpdef_cmp (const void *s1, const void *s2)
                   SYMBOL_NAME (sym2), SYMBOL_NAME_LEN (sym2));
 }
 
-/*-------------------------------------------------------------------------.
-| Implementation of "dumpdef" itself.  It builds up a table of pointers to |
-| symbols, sorts it and prints the sorted table.			   |
-`-------------------------------------------------------------------------*/
-
+/* Implementation of "dumpdef" itself.  It builds up a table of
+   pointers to symbols, sorts it and prints the sorted table.  */
 static void
 m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -960,13 +913,10 @@ m4_dumpdef (struct obstack *obs, int argc, macro_arguments *argv)
     }
 }
 
-/*---------------------------------------------------------------------.
-| The builtin "builtin" allows calls to builtin macros, even if their  |
-| definition has been overridden or shadowed.  It is thus possible to  |
-| redefine builtins, and still access their original definition.  This |
-| macro is not available in compatibility mode.			       |
-`---------------------------------------------------------------------*/
-
+/* The builtin "builtin" allows calls to builtin macros, even if their
+   definition has been overridden or shadowed.  It is thus possible to
+   redefine builtins, and still access their original definition.
+   This macro is not available in compatibility mode.  */
 static void
 m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -998,13 +948,10 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
     }
 }
 
-/*------------------------------------------------------------------------.
-| The builtin "indir" allows indirect calls to macros, even if their name |
-| is not a proper macro name.  It is thus possible to define macros with  |
-| ill-formed names for internal use in larger macro packages.  This macro |
-| is not available in compatibility mode.				  |
-`------------------------------------------------------------------------*/
-
+/* The builtin "indir" allows indirect calls to macros, even if their
+   name is not a proper macro name.  It is thus possible to define
+   macros with ill-formed names for internal use in larger macro
+   packages.  This macro is not available in compatibility mode.  */
 static void
 m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1040,12 +987,9 @@ m4_indir (struct obstack *obs, int argc, macro_arguments *argv)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| The macro "defn" returns the quoted definition of the macro named by the |
-| first argument.  If the macro is builtin, it will push a special	   |
-| macro-definition token on the input stack.				   |
-`-------------------------------------------------------------------------*/
-
+/* The macro "defn" returns the quoted definition of the macro named
+   by the first argument.  If the macro is builtin, it will push a
+   special macro-definition token on the input stack.  */
 static void
 m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1100,10 +1044,8 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
     }
 }
 
-/*------------------------------------------------------------------------.
-| This section contains macros to handle the builtins "syscmd", "esyscmd" |
-| and "sysval".  "esyscmd" is GNU specific.				  |
-`------------------------------------------------------------------------*/
+/* This section contains macros to handle the builtins "syscmd",
+   "esyscmd" and "sysval".  "esyscmd" is GNU specific.  */
 
 /* Exit code from last "syscmd" command.  */
 static int sysval;
@@ -1254,11 +1196,9 @@ m4_sysval (struct obstack *obs, int argc M4_GNUC_UNUSED,
   shipout_int (obs, sysval);
 }
 
-/*-------------------------------------------------------------------------.
-| This section contains the top level code for the "eval" builtin.  The	   |
-| actual work is done in the function evaluate (), which lives in eval.c.  |
-`-------------------------------------------------------------------------*/
-
+/* This section contains the top level code for the "eval" builtin.
+   The actual work is done in the function evaluate (), which lives in
+   eval.c.  */
 static void
 m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1360,11 +1300,8 @@ m4_decr (struct obstack *obs, int argc, macro_arguments *argv)
 /* This section contains the macros "divert", "undivert" and "divnum" for
    handling diversion.  The utility functions used lives in output.c.  */
 
-/*-----------------------------------------------------------------------.
-| Divert further output to the diversion given by ARGV[1].  Out of range |
-| means discard further output.						 |
-`-----------------------------------------------------------------------*/
-
+/* Divert further output to the diversion given by ARGV[1].  Out of
+   range means discard further output.  */
 static void
 m4_divert (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
 {
@@ -1379,10 +1316,7 @@ m4_divert (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
   divert_text (NULL, ARG (2), ARG_LEN (2), current_line);
 }
 
-/*-----------------------------------------------------.
-| Expand to the current diversion number, -1 if none.  |
-`-----------------------------------------------------*/
-
+/* Expand to the current diversion number, -1 if none.  */
 static void
 m4_divnum (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1390,13 +1324,10 @@ m4_divnum (struct obstack *obs, int argc, macro_arguments *argv)
   shipout_int (obs, current_diversion);
 }
 
-/*-----------------------------------------------------------------------.
-| Bring back the diversion given by the argument list.  If none is	 |
-| specified, bring back all diversions.  GNU specific is the option of	 |
-| undiverting named files, by passing a non-numeric argument to undivert |
-| ().									 |
-`-----------------------------------------------------------------------*/
-
+/* Bring back the diversion given by the argument list.  If none is
+   specified, bring back all diversions.  GNU specific is the option
+   of undiverting named files, by passing a non-numeric argument to
+   undivert ().  */
 static void
 m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc,
              macro_arguments *argv)
@@ -1444,11 +1375,8 @@ m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc,
    specific group.  These are "dnl", "shift", "changequote", "changecom"
    and "changeword".  */
 
-/*------------------------------------------------------------------------.
-| Delete all subsequent whitespace from input.  The function skip_line () |
-| lives in input.c.							  |
-`------------------------------------------------------------------------*/
-
+/* Delete all subsequent whitespace from input.  The function
+   skip_line () lives in input.c.  */
 static void
 m4_dnl (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
 {
@@ -1458,11 +1386,8 @@ m4_dnl (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
   skip_line (me);
 }
 
-/*--------------------------------------------------------------------.
-| Shift all arguments one to the left, discarding the first	      |
-| argument.  Each output argument is quoted with the current quotes.  |
-`--------------------------------------------------------------------*/
-
+/* Shift all arguments one to the left, discarding the first argument.
+   Each output argument is quoted with the current quotes.  */
 static void
 m4_shift (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1471,10 +1396,8 @@ m4_shift (struct obstack *obs, int argc, macro_arguments *argv)
   push_args (obs, argv, true, true);
 }
 
-/*--------------------------------------------------------------------------.
-| Change the current quotes.  The function set_quotes () lives in input.c.  |
-`--------------------------------------------------------------------------*/
-
+/* Change the current quotes.  The function set_quotes () lives in
+   input.c.  */
 static void
 m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
                 macro_arguments *argv)
@@ -1486,11 +1409,8 @@ m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
               (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
 }
 
-/*--------------------------------------------------------------------.
-| Change the current comment delimiters.  The function set_comment () |
-| lives in input.c.						      |
-`--------------------------------------------------------------------*/
-
+/* Change the current comment delimiters.  The function set_comment ()
+   lives in input.c.  */
 static void
 m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc,
               macro_arguments *argv)
@@ -1504,11 +1424,8 @@ m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc,
 
 #ifdef ENABLE_CHANGEWORD
 
-/*-----------------------------------------------------------------------.
-| Change the regular expression used for breaking the input into words.	 |
-| The function set_word_regexp () lives in input.c.			 |
-`-----------------------------------------------------------------------*/
-
+/* Change the regular expression used for breaking the input into
+   words.  The function set_word_regexp () lives in input.c.  */
 static void
 m4_changeword (struct obstack *obs M4_GNUC_UNUSED, int argc,
                macro_arguments *argv)
@@ -1526,11 +1443,9 @@ m4_changeword (struct obstack *obs M4_GNUC_UNUSED, int argc,
    and "sinclude".  This differs from bringing back diversions, in that
    the input is scanned before being copied to the output.  */
 
-/*-------------------------------------------------------------------------.
-| Generic include function.  Include the file given by the first argument, |
-| if it exists.  Complain about inaccessible files iff SILENT is false.    |
-`-------------------------------------------------------------------------*/
-
+/* Generic include function.  Include the file given by the first
+   argument, if it exists.  Complain about inaccessible files iff
+   SILENT is false.  */
 static void
 include (int argc, macro_arguments *argv, bool silent)
 {
@@ -1561,10 +1476,7 @@ include (int argc, macro_arguments *argv, bool silent)
   free (name);
 }
 
-/*------------------------------------------------.
-| Include a file, complaining in case of errors.  |
-`------------------------------------------------*/
-
+/* Include a file, complaining in case of errors.  */
 static void
 m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc,
             macro_arguments *argv)
@@ -1572,10 +1484,7 @@ m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc,
   include (argc, argv, false);
 }
 
-/*----------------------------------.
-| Include a file, ignoring errors.  |
-`----------------------------------*/
-
+/* Include a file, ignoring errors.  */
 static void
 m4_sinclude (struct obstack *obs M4_GNUC_UNUSED, int argc,
              macro_arguments *argv)
@@ -1586,11 +1495,8 @@ m4_sinclude (struct obstack *obs M4_GNUC_UNUSED, int argc,
 /* More miscellaneous builtins -- "maketemp", "errprint", "__file__",
    "__line__", and "__program__".  The last three are GNU specific.  */
 
-/*-----------------------------------------------------------------.
-| Use the first argument as a template for a temporary file name.  |
-`-----------------------------------------------------------------*/
-
-/* Add trailing 'X' to PATTERN of length LEN as necessary, then
+/* Use the first argument as a template for a temporary file name.
+   Add trailing 'X' to PATTERN of length LEN as necessary, then
    securely create the file, and place the quoted new file name on
    OBS.  Report errors on behalf of ME.  */
 static void
@@ -1687,10 +1593,7 @@ m4_mkstemp (struct obstack *obs, int argc, macro_arguments *argv)
   mkstemp_helper (obs, me, ARG (1), ARG_LEN (1));
 }
 
-/*----------------------------------------.
-| Print all arguments on standard error.  |
-`----------------------------------------*/
-
+/* Print all arguments on standard error.  */
 static void
 m4_errprint (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1736,11 +1639,8 @@ m4___program__ (struct obstack *obs, int argc, macro_arguments *argv)
    EOF is seen, and tracing macro calls.  That is: "m4exit", "m4wrap",
    "traceon" and "traceoff".  */
 
-/*-------------------------------------------------------------------------.
-| Exit immediately, with exitcode specified by the first argument, 0 if no |
-| arguments are present.						   |
-`-------------------------------------------------------------------------*/
-
+/* Exit immediately, with exit status specified by the first argument,
+   or 0 if no arguments are present.  */
 static void M4_GNUC_NORETURN
 m4_m4exit (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
 {
@@ -1768,12 +1668,9 @@ m4_m4exit (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
   exit (exit_code);
 }
 
-/*-----------------------------------------------------------------.
-| Save the argument text in FIFO order until EOF has been seen,    |
-| allowing for user specified cleanup action.  Extra arguments are |
-| saved when not in POSIX mode.                                    |
-`-----------------------------------------------------------------*/
-
+/* Save the argument text in FIFO order until EOF has been seen,
+   allowing for user specified cleanup action.  Extra arguments are
+   saved when not in POSIX mode.  */
 static void
 m4_m4wrap (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
 {
@@ -1787,12 +1684,9 @@ m4_m4wrap (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
    Tracing is disabled by default, when a macro is defined.  This can be
    overridden by the "t" debug flag.  */
 
-/*-----------------------------------------------------------------------.
-| Set_trace () is used by "traceon" and "traceoff" to enable and disable |
-| tracing of a macro.  It disables tracing if DATA is NULL, otherwise it |
-| enable tracing.							 |
-`-----------------------------------------------------------------------*/
-
+/* Set_trace () is used by "traceon" and "traceoff" to enable and
+   disable tracing of a macro.  It disables tracing if DATA is NULL,
+   otherwise it enables tracing.  */
 static void
 set_trace (symbol *sym, void *data)
 {
@@ -1826,10 +1720,8 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
       }
 }
 
-/*------------------------------------------------------------------------.
-| Disable tracing of all specified macros, or all, if none is specified.  |
-`------------------------------------------------------------------------*/
-
+/* Disable tracing of all specified macros, or all, if none is
+   specified.  */
 static void
 m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc,
              macro_arguments *argv)
@@ -1854,12 +1746,9 @@ m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc,
       }
 }
 
-/*----------------------------------------------------------------------.
-| On-the-fly control of the format of the tracing output.  It takes one |
-| argument, which is a character string like given to the -d option, or |
-| none in which case the debug_level is zeroed.			        |
-`----------------------------------------------------------------------*/
-
+/* On-the-fly control of the format of the tracing output.  It takes
+   one argument, which is a character string like that given to the -d
+   option, or none in which case the debug_level is zeroed.  */
 static void
 m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc,
               macro_arguments *argv)
@@ -1877,11 +1766,9 @@ m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc,
              quotearg_style_mem (locale_quoting_style, str, len));
 }
 
-/*-------------------------------------------------------------------------.
-| Specify the destination of the debugging output.  With one argument, the |
-| argument is taken as a file name, with no arguments, revert to stderr.   |
-`-------------------------------------------------------------------------*/
-
+/* Specify the destination of the debugging output.  With one
+   argument, the argument is taken as a file name, with no arguments,
+   revert to stderr.  */
 static void
 m4_debugfile (struct obstack *obs M4_GNUC_UNUSED, int argc,
               macro_arguments *argv)
@@ -1909,10 +1796,7 @@ m4_debugfile (struct obstack *obs M4_GNUC_UNUSED, int argc,
    "substr", "translit", "format", "regexp" and "patsubst".  The last
    three are GNU specific.  */
 
-/*---------------------------------------------.
-| Expand to the length of the first argument.  |
-`---------------------------------------------*/
-
+/* Expand to the length of the first argument.  */
 static void
 m4_len (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1921,12 +1805,9 @@ m4_len (struct obstack *obs, int argc, macro_arguments *argv)
   shipout_int (obs, ARG_LEN (1));
 }
 
-/*-------------------------------------------------------------------.
-| The macro expands to the first index of the second argument in the |
-| first argument.  As an extension, start the search at the index    |
-| indicated by the third argument.				     |
-`-------------------------------------------------------------------*/
-
+/* The macro expands to the first index of the second argument in the
+   first argument.  As an extension, start the search at the index
+   indicated by the third argument.  */
 static void
 m4_index (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -1973,17 +1854,14 @@ m4_index (struct obstack *obs, int argc, macro_arguments *argv)
   shipout_int (obs, retval);
 }
 
-/*-------------------------------------------------------------------.
-| The macro "substr" extracts substrings from the first argument,    |
-| starting from the index given by the second argument, extending    |
-| for a length given by the third argument.  If the third argument   |
-| is missing or empty, the substring extends to the end of the first |
-| argument.  As an extension, negative arguments are treated as	     |
-| indices relative to the string length.  Also, if a fourth argument |
-| is supplied, the original string is output with the selected	     |
-| substring replaced by the argument.				     |
-`-------------------------------------------------------------------*/
-
+/* The macro "substr" extracts substrings from the first argument,
+   starting from the index given by the second argument, extending for
+   a length given by the third argument.  If the third argument is
+   missing or empty, the substring extends to the end of the first
+   argument.  As an extension, negative arguments are treated as
+   indices relative to the string length.  Also, if a fourth argument
+   is supplied, the original string is output with the selected
+   substring replaced by the argument.  */
 static void
 m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -2048,19 +1926,16 @@ m4_substr (struct obstack *obs, int argc, macro_arguments *argv)
   obstack_grow (obs, ARG (1) + start, end - start);
 }
 
-/*------------------------------------------------------------------.
-| For "translit", ranges are allowed in the second and third        |
-| argument.  They are expanded in the following function, and the   |
-| expanded strings, without any ranges left, are used to translate  |
-| the characters of the first argument.  A single - (dash) can be   |
-| included in the strings by being the first or the last character  |
-| in the string.  If the first character in a range is after the    |
-| first in the character set, the range is made backwards, thus 9-0 |
-| is the string 9876543210.  This function expands S of length *LEN |
-| using OBS for the expansion, sets *LEN to the new length, and     |
-| returns the expansion.                                            |
-`------------------------------------------------------------------*/
-
+/* For "translit", ranges are allowed in the second and third
+   argument.  They are expanded in the following function, and the
+   expanded strings, without any ranges left, are used to translate
+   the characters of the first argument.  A single - (dash) can be
+   included in the strings by being the first or the last character in
+   the string.  If the first character in a range is after the first
+   in the character set, the range is made backwards, thus 9-0 is the
+   string 9876543210.  This function expands S of length *LEN using
+   OBS for the expansion, sets *LEN to the new length, and returns the
+   expansion.  */
 static const char *
 expand_ranges (const char *s, size_t *len, struct obstack *obs)
 {
@@ -2101,14 +1976,11 @@ expand_ranges (const char *s, size_t *len, struct obstack *obs)
   return (char *) obstack_finish (obs);
 }
 
-/*----------------------------------------------------------------------.
-| The macro "translit" translates all characters in the first argument, |
-| which are present in the second argument, into the corresponding      |
-| character from the third argument.  If the third argument is shorter  |
-| than the second, the extra characters in the second argument, are     |
-| deleted from the first (pueh).				        |
-`----------------------------------------------------------------------*/
-
+/* The macro "translit" translates all characters in the first
+   argument, which are present in the second argument, into the
+   corresponding character from the third argument.  If the third
+   argument is shorter than the second, the extra characters in the
+   second argument are deleted from the first.  */
 static void
 m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -2216,11 +2088,8 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
     }
 }
 
-/*--------------------------------------------------------------.
-| Frontend for *printf like formatting.  The function format () |
-| lives in the file format.c.                                   |
-`--------------------------------------------------------------*/
-
+/* Frontend for *printf like formatting.  The function format () lives
+   in the file format.c.  */
 static void
 m4_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -2229,15 +2098,12 @@ m4_format (struct obstack *obs, int argc, macro_arguments *argv)
   expand_format (obs, argc, argv);
 }
 
-/*-------------------------------------------------------------------------.
-| Function to perform substitution by regular expressions.  Used by the	   |
-| builtins regexp and patsubst.  The changed text is placed on the	   |
-| obstack.  The substitution is REPL, with \& substituted by this part of  |
-| VICTIM matched by the last whole regular expression, taken from REGS[0], |
-| and \N substituted by the text matched by the Nth parenthesized	   |
-| sub-expression, taken from REGS[N].					   |
-`-------------------------------------------------------------------------*/
-
+/* Function to perform substitution by regular expressions.  Used by
+   the builtins regexp and patsubst.  The changed text is placed on
+   the obstack.  The substitution is REPL, with \& substituted by this
+   part of VICTIM matched by the last whole regular expression, taken
+   from REGS[0], and \N substituted by the text matched by the Nth
+   parenthesized sub-expression, taken from REGS[N].  */
 static int substitute_warned = 0;
 
 static void
@@ -2298,10 +2164,7 @@ substitute (struct obstack *obs, const call_info *me, const char *victim,
     }
 }
 
-/*------------------------------------------.
-| Initialize regular expression variables.  |
-`------------------------------------------*/
-
+/* Initialize regular expression variables.  */
 void
 init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
 {
@@ -2316,13 +2179,10 @@ init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
     }
 }
 
-/*------------------------------------------------------------------.
-| Regular expression version of index.  Given two arguments, expand |
-| to the index of the first match of the second argument (a regexp) |
-| in the first.  Expand to -1 if there is no match.  Given a third  |
-| argument, a match is substituted according to this argument.      |
-`------------------------------------------------------------------*/
-
+/* Regular expression version of index.  Given two arguments, expand
+   to the index of the first match of the second argument (a regexp)
+   in the first.  Expand to -1 if there is no match.  Given a third
+   argument, a match is substituted according to this argument.  */
 static void
 m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -2396,14 +2256,11 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
     substitute (obs, me, victim, repl, ARG_LEN (3), regs);
 }
 
-/*------------------------------------------------------------------.
-| Substitute all matches of a regexp occurring in a string.  Each   |
-| match of the second argument (a regexp) in the first argument is  |
-| changed to the third argument, with \& substituted by the matched |
-| text, and \N substituted by the text matched by the Nth           |
-| parenthesized sub-expression.                                     |
-`------------------------------------------------------------------*/
-
+/* Substitute all matches of a regexp occurring in a string.  Each
+   match of the second argument (a regexp) in the first argument is
+   changed to the third argument, with \& substituted by the matched
+   text, and \N substituted by the text matched by the Nth
+   parenthesized sub-expression.  */
 static void
 m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 {
@@ -2518,11 +2375,8 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
    while still flagging it as a potential error if an attempt is made
    to actually use the builtin.  */
 
-/*--------------------------------------------------------------------.
-| Issue a warning that this macro is a placeholder for an unsupported |
-| builtin that was requested while reloading a frozen file.           |
-`--------------------------------------------------------------------*/
-
+/* Issue a warning that this macro is a placeholder for an unsupported
+   builtin that was requested while reloading a frozen file.  */
 void
 m4_placeholder (struct obstack *obs M4_GNUC_UNUSED, int argc M4_GNUC_UNUSED,
                 macro_arguments *argv)
@@ -2531,14 +2385,11 @@ m4_placeholder (struct obstack *obs M4_GNUC_UNUSED, int argc M4_GNUC_UNUSED,
            quotearg_style_mem (locale_quoting_style, ARG (0), ARG_LEN (0)));
 }
 
-/*-------------------------------------------------------------------------.
-| This function handles all expansion of user defined and predefined	   |
-| macros.  It is called with an obstack OBS, where the macros expansion	   |
-| will be placed, as an unfinished object.  SYM points to the macro	   |
-| definition, giving the expansion text.  ARGC and ARGV are the arguments, |
-| as usual.								   |
-`-------------------------------------------------------------------------*/
-
+/* This function handles all expansion of user defined and predefined
+   macros.  It is called with an obstack OBS, where the macros
+   expansion will be placed, as an unfinished object.  SYM points to
+   the macro definition, giving the expansion text.  ARGC and ARGV are
+   the arguments, as usual.  */
 void
 expand_user_macro (struct obstack *obs, symbol *sym,
                    int argc, macro_arguments *argv)

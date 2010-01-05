@@ -76,15 +76,12 @@ typedef struct macro_definition macro_definition;
 
 /* Error handling functions.  */
 
-/*------------------------------------------------------------------.
-| Helper for all the error reporting, as a wrapper around	    |
-| error_at_line.  Report error message based on FORMAT and ARGS, on |
-| behalf of CALLER (if any), otherwise at the global current	    |
-| location.  If ERRNUM, decode the errno value that caused the      |
-| error.  If STATUS, exit immediately with that status.  If WARN,   |
-| prepend 'warning: '.						    |
-`------------------------------------------------------------------*/
-
+/* Helper for all the error reporting, as a wrapper around
+   error_at_line.  Report error message based on FORMAT and ARGS, on
+   behalf of CALLER (if any), otherwise at the global current
+   location.  If ERRNUM, decode the errno value that caused the error.
+   If STATUS, exit immediately with that status.  If WARN, prepend
+   'warning: '.  */
 static void M4_GNUC_PRINTF (5, 0)
 m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
                    const char *format, va_list args)
@@ -134,13 +131,10 @@ m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
     retcode = EXIT_FAILURE;
 }
 
-/*------------------------------------------------------------------.
-| Wrapper around error.  Report error message based on FORMAT and   |
-| subsequent args, on behalf of CALLER (if any), and the current    |
-| input line (if any).  If ERRNUM, decode the errno value that      |
-| caused the error.  If STATUS, exit immediately with that status.  |
-`------------------------------------------------------------------*/
-
+/* Wrapper around error.  Report error message based on FORMAT and
+   subsequent args, on behalf of CALLER (if any), and the current
+   input line (if any).  If ERRNUM, decode the errno value that caused
+   the error.  If STATUS, exit immediately with that status.  */
 void
 m4_error (int status, int errnum, const call_info *caller,
           const char *format, ...)
@@ -153,13 +147,10 @@ m4_error (int status, int errnum, const call_info *caller,
   va_end (args);
 }
 
-/*------------------------------------------------------------------.
-| Wrapper around error.  Report warning message based on FORMAT and |
-| subsequent args, on behalf of CALLER (if any), and the current    |
-| input line (if any).  If ERRNUM, decode the errno value that      |
-| caused the warning.						    |
-`------------------------------------------------------------------*/
-
+/* Wrapper around error.  Report warning message based on FORMAT and
+   subsequent args, on behalf of CALLER (if any), and the current
+   input line (if any).  If ERRNUM, decode the errno value that caused
+   the warning.  */
 void
 m4_warn (int errnum, const call_info *caller, const char *format, ...)
 {
@@ -174,10 +165,7 @@ m4_warn (int errnum, const call_info *caller, const char *format, ...)
 
 #ifdef USE_STACKOVF
 
-/*---------------------------------------.
-| Tell user stack overflowed and abort.	 |
-`---------------------------------------*/
-
+/* Tell user stack overflowed and abort.  */
 static void
 stackovf_handler (void)
 {
@@ -188,10 +176,7 @@ stackovf_handler (void)
 #endif /* USE_STACKOVF */
 
 
-/*---------------------------------------------.
-| Print a usage message and exit with STATUS.  |
-`---------------------------------------------*/
-
+/* Print a usage message and exit with STATUS.  */
 static void M4_GNUC_NORETURN
 usage (int status)
 {
@@ -295,9 +280,7 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
   exit (status);
 }
 
-/*--------------------------------------.
-| Decode options and launch execution.  |
-`--------------------------------------*/
+/* Decode options and launch execution.  */
 
 /* For long options that have no equivalent short option, use a
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */

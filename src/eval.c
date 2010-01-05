@@ -80,9 +80,7 @@ static eval_error exp_term (const call_info *, eval_token, int32_t *);
 static eval_error unary_term (const call_info *, eval_token, int32_t *);
 static eval_error simple_term (const call_info *, eval_token, int32_t *);
 
-/*--------------------.
-| Lexical functions.  |
-`--------------------*/
+/* Lexical functions.  */
 
 /* Pointer to next character of input text.  */
 static const char *eval_text;
@@ -295,10 +293,7 @@ eval_lex (int32_t *val)
     }
 }
 
-/*---------------------------------------.
-| Main entry point, called from "eval".	 |
-`---------------------------------------*/
-
+/* Main entry point, called from "eval".  */
 bool
 evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
 {
@@ -377,10 +372,7 @@ evaluate (const call_info *me, const char *expr, size_t len, int32_t *val)
   return true;
 }
 
-/*---------------------------.
-| Recursive descent parser.  |
-`---------------------------*/
-
+/* Recursive descent parser.  */
 static eval_error
 condition_term (const call_info *me, eval_token et, int32_t *v1)
 {

@@ -1,5 +1,20 @@
 2010-01-05  Eric Blake  <ebb9@byu.net>
 
+	Use consistent comment style.
+	* c-boxes.el: Delete.
+	* Makefile.am (EXTRA_DIST): Drop unused file.
+	* src/builtin.c: Reformat all old boxed comments into a more
+	consistent style.  Fix some typos in the process.
+	* src/debug.c: Likewise.
+	* src/eval.c: Likewise.
+	* src/format.c: Likewise.
+	* src/freeze.c: Likewise.
+	* src/input.c: Likewise.
+	* src/m4.c: Likewise.
+	* src/macro.c: Likewise.
+	* src/output.c: Likewise.
+	* src/symtab.c: Likewise.
+
 	Security fix by requiring newer automake features.
 	* configure.ac (AM_INIT_AUTOMAKE): Bump minimum to 1.11.1.
 	(AC_PREREQ): Bump autoconf requirement to 2.62, per automake.

@@ -23,10 +23,8 @@
 
 #include "m4.h"
 
-/*-------------------------------------------------------------------.
-| Destructively reverse a symbol list and return the reversed list.  |
-`-------------------------------------------------------------------*/
-
+/* Destructively reverse a symbol list and return the reversed
+   list.  */
 static symbol *
 reverse_symbol_list (symbol *sym)
 {
@@ -51,11 +49,8 @@ reverse_symbol_list (symbol *sym)
   return result;
 }
 
-/*-------------------------------------------------------------------.
-| Dump a stack of pushdef references to the stream F.  Designed as a |
-| callback for hack_all_symbols.                                     |
-`-------------------------------------------------------------------*/
-
+/* Dump a stack of pushdef references to the stream F.  Designed as a
+   callback for hack_all_symbols.  */
 static void
 dump_symbol_CB (symbol *sym, void *f)
 {
@@ -112,10 +107,7 @@ dump_symbol_CB (symbol *sym, void *f)
   reverse_symbol_list (stack);
 }
 
-/*------------------------------------------------.
-| Produce a frozen state to the given file NAME.  |
-`------------------------------------------------*/
-
+/* Produce a frozen state to the given file NAME.  */
 void
 produce_frozen_state (const char *name)
 {
@@ -175,10 +167,8 @@ produce_frozen_state (const char *name)
     m4_error (EXIT_FAILURE, errno, NULL, _("unable to create frozen state"));
 }
 
-/*----------------------------------------------------------------------.
-| Issue a message saying that some character is an EXPECTED character.  |
-`----------------------------------------------------------------------*/
-
+/* Issue a message saying that some character is an EXPECTED
+   character.  */
 static void
 issue_expect_message (int expected)
 {
@@ -189,12 +179,8 @@ issue_expect_message (int expected)
               _("expecting character `%c' in frozen file"), expected);
 }
 
-/*-------------------------------------------------.
-| Reload a frozen state from the given file NAME.  |
-`-------------------------------------------------*/
-
-/* We are seeking speed, here.  */
-
+/* Reload a frozen state from the given file NAME.  We are seeking
+   speed, here.  */
 void
 reload_frozen_state (const char *name)
 {

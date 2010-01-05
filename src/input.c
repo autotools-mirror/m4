@@ -205,11 +205,9 @@ static const char *token_type_string (token_type);
 #endif /* DEBUG_INPUT */
 
 
-/*-------------------------------------------------------------------.
-| Given an obstack OBS, capture any unfinished text as a link in the |
-| chain that starts at *START and ends at *END.  START may be NULL   |
-| if *END is non-NULL.                                               |
-`-------------------------------------------------------------------*/
+/* Given an obstack OBS, capture any unfinished text as a link in the
+   chain that starts at *START and ends at *END.  START may be NULL if
+   *END is non-NULL.  */
 void
 make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
 {
@@ -235,15 +233,12 @@ make_text_link (struct obstack *obs, token_chain **start, token_chain **end)
     }
 }
 
-/*-------------------------------------------------------------------.
-| push_file () pushes an input file on the input stack, saving the   |
-| current file name and line number.  If next is non-NULL, this push |
-| invalidates a call to push_string_init (), whose storage is	     |
-| consequently released.  If CLOSE_WHEN_DONE, then close FP after    |
-| EOF is detected.  TITLE is used as the location for text parsed    |
-| from the file (not necessarily the file name).		     |
-`-------------------------------------------------------------------*/
-
+/* push_file () pushes an input file on the input stack, saving the
+   current file name and line number.  If next is non-NULL, this push
+   invalidates a call to push_string_init (), whose storage is
+   consequently released.  If CLOSE_WHEN_DONE, then close FP after EOF
+   is detected.  TITLE is used as the location for text parsed from
+   the file (not necessarily the file name).  */
 void
 push_file (FILE *fp, const char *title, bool close_when_done)
 {
@@ -275,12 +270,10 @@ push_file (FILE *fp, const char *title, bool close_when_done)
   isp = i;
 }
 
-/*------------------------------------------------------------------.
-| Given an obstack OBS, capture any unfinished text as a link, then |
-| append the builtin FUNC as the next link in the chain that starts |
-| at *START and ends at *END.  START may be NULL if *END is         |
-| non-NULL.                                                         |
-`------------------------------------------------------------------*/
+/* Given an obstack OBS, capture any unfinished text as a link, then
+   append the builtin FUNC as the next link in the chain that starts
+   at *START and ends at *END.  START may be NULL if *END is
+   non-NULL.  */
 void
 append_macro (struct obstack *obs, builtin_func *func, token_chain **start,
               token_chain **end)
@@ -301,11 +294,8 @@ append_macro (struct obstack *obs, builtin_func *func, token_chain **start,
   chain->u.func = func;
 }
 
-/*------------------------------------------------------------------.
-| push_macro () pushes the builtin FUNC onto the obstack OBS, which |
-| is either the input or wrapup stack.                              |
-`------------------------------------------------------------------*/
-
+/* push_macro () pushes the builtin FUNC onto the obstack OBS, which
+   is either the input or wrapup stack.  */
 void
 push_macro (struct obstack *obs, builtin_func *func)
 {
@@ -321,11 +311,8 @@ push_macro (struct obstack *obs, builtin_func *func)
   append_macro (obs, func, &block->u.u_c.chain, &block->u.u_c.end);
 }
 
-/*--------------------------------------------------------------.
-| First half of push_string ().  The return value points to the |
-| obstack where expansion text should be placed.                |
-`--------------------------------------------------------------*/
-
+/* First half of push_string ().  The return value points to the
+   obstack where expansion text should be placed.  */
 struct obstack *
 push_string_init (const char *file, int line)
 {
@@ -343,30 +330,29 @@ push_string_init (const char *file, int line)
   return current_input;
 }
 
-/*--------------------------------------------------------------------.
-| This function allows gathering input from multiple locations,	      |
-| rather than copying everything consecutively onto the input stack.  |
-| Must be called between push_string_init and push_string_finish.     |
-|                                                                     |
-| Convert the current input block into a chain if it is not one	      |
-| already, and add the contents of TOKEN as a new link in the chain.  |
-| LEVEL describes the current expansion level, or -1 if TOKEN is      |
-| composite, its contents reside entirely on the current_input	      |
-| stack, and TOKEN lives in temporary storage.  If TOKEN is a simple  |
-| string, then it belongs to the current macro expansion.  If TOKEN   |
-| is composite, then each text link has a level of -1 if it belongs   |
-| to the current macro expansion, otherwise it is a back-reference    |
-| where level tracks which stack it came from.  The resulting input   |
-| block chain contains links with a level of -1 if the text belongs   |
-| to the input stack, otherwise the level where the back-reference    |
-| comes from.							      |
-|                                                                     |
-| Return true only if a reference was created to the contents of      |
-| TOKEN, in which case, LEVEL was non-negative and the lifetime of    |
-| TOKEN and its contents must last as long as the input engine can    |
-| parse references to it.  INUSE determines whether composite tokens  |
-| should favor creating back-references or copying text.	      |
-`--------------------------------------------------------------------*/
+/* This function allows gathering input from multiple locations,
+   rather than copying everything consecutively onto the input
+   stack.  Must be called between push_string_init and
+   push_string_finish.
+
+   Convert the current input block into a chain if it is not one
+   already, and add the contents of TOKEN as a new link in the
+   chain.  LEVEL describes the current expansion level, or -1 if
+   TOKEN is composite, its contents reside entirely on the
+   current_input stack, and TOKEN lives in temporary storage.  If
+   TOKEN is a simple string, then it belongs to the current macro
+   expansion.  If TOKEN is composite, then each text link has a
+   level of -1 if it belongs to the current macro expansion,
+   otherwise it is a back-reference where level tracks which stack
+   it came from.  The resulting input block chain contains links
+   with a level of -1 if the text belongs to the input stack,
+   otherwise the level where the back-reference comes from.
+
+   Return true only if a reference was created to the contents of
+   TOKEN, in which case, LEVEL was non-negative and the lifetime of
+   TOKEN and its contents must last as long as the input engine can
+   parse references to it.  INUSE determines whether composite
+   tokens should favor creating back-references or copying text.  */
 bool
 push_token (token_data *token, int level, bool inuse)
 {
@@ -508,12 +494,9 @@ push_token (token_data *token, int level, bool inuse)
   return inuse;
 }
 
-/*-------------------------------------------------------------------.
-| Last half of push_string ().  All remaining unfinished text on the |
-| obstack returned from push_string_init is collected into the input |
-| stack.                                                             |
-`-------------------------------------------------------------------*/
-
+/* Last half of push_string ().  All remaining unfinished text on
+   the obstack returned from push_string_init is collected into the
+   input stack.  */
 void
 push_string_finish (void)
 {
@@ -543,12 +526,9 @@ push_string_finish (void)
   next = NULL;
 }
 
-/*--------------------------------------------------------------.
-| The function push_wrapup_init () returns an obstack ready for |
-| direct expansion of wrapup text, and should be followed by    |
-| push_wrapup_finish ().                                        |
-`--------------------------------------------------------------*/
-
+/* The function push_wrapup_init () returns an obstack ready for
+   direct expansion of wrapup text, and should be followed by
+   push_wrapup_finish ().  */
 struct obstack *
 push_wrapup_init (const call_info *caller, token_chain ***end)
 {
@@ -587,10 +567,8 @@ push_wrapup_init (const call_info *caller, token_chain ***end)
   return wrapup_stack;
 }
 
-/*---------------------------------------------------------------.
-| After pushing wrapup text, push_wrapup_finish () completes the |
-| bookkeeping.                                                   |
-`---------------------------------------------------------------*/
+/* After pushing wrapup text, push_wrapup_finish () completes the
+   bookkeeping.  */
 void
 push_wrapup_finish (void)
 {
@@ -598,15 +576,12 @@ push_wrapup_finish (void)
 }
 
 
-/*-------------------------------------------------------------------.
-| The function pop_input () pops one level of input sources.  If     |
-| CLEANUP, and the popped input_block is a file, current_file and    |
-| current_line are reset to the saved values before the memory for   |
-| the input_block is released.  The return value is false if cleanup |
-| is still required, or if the current input source is not           |
-| exhausted.                                                         |
-`-------------------------------------------------------------------*/
-
+/* The function pop_input () pops one level of input sources.  If
+   CLEANUP, and the popped input_block is a file, current_file and
+   current_line are reset to the saved values before the memory for
+   the input_block is released.  The return value is false if cleanup
+   is still required, or if the current input source is not
+   exhausted.  */
 static bool
 pop_input (bool cleanup)
 {
@@ -693,12 +668,10 @@ pop_input (bool cleanup)
   return true;
 }
 
-/*------------------------------------------------------------------------.
-| To switch input over to the wrapup stack, main () calls pop_wrapup ().  |
-| Since wrapup text can install new wrapup text, pop_wrapup () returns	  |
-| false when there is no wrapup text on the stack, and true otherwise.	  |
-`------------------------------------------------------------------------*/
-
+/* To switch input over to the wrapup stack, main () calls pop_wrapup
+   ().  Since wrapup text can install new wrapup text, pop_wrapup ()
+   returns false when there is no wrapup text on the stack, and true
+   otherwise.  */
 bool
 pop_wrapup (void)
 {
@@ -731,10 +704,8 @@ pop_wrapup (void)
   return true;
 }
 
-/*--------------------------------------------------------------.
-| Dump a representation of INPUT to the obstack OBS, for use in |
-| tracing.                                                      |
-`--------------------------------------------------------------*/
+/* Dump a representation of INPUT to the obstack OBS, for use in
+   tracing.  */
 void
 input_print (struct obstack *obs)
 {
@@ -798,20 +769,17 @@ input_print (struct obstack *obs)
 }
 
 
-/*-------------------------------------------------------------------.
-| Return a pointer to the available bytes of the current input       |
-| block, and set *LEN to the length of the result.  If ALLOW_QUOTE,  |
-| do not return a buffer for a quoted string.  If the result of      |
-| next_char() would not fit in an unsigned char (for example,        |
-| CHAR_EOF or CHAR_QUOTE), or if the input block does not have an    |
-| available buffer at the moment (for example, when hitting a buffer |
-| block boundary of a file), return NULL, and the caller must fall   |
-| back on using next_char().  The buffer is only valid until the     |
-| next consume_buffer() or next_char().  When searching for a        |
-| particular byte, it is more efficient to search a buffer at a time |
-| than it is to repeatedly call next_char.                           |
-`-------------------------------------------------------------------*/
-
+/* Return a pointer to the available bytes of the current input block,
+   and set *LEN to the length of the result.  If ALLOW_QUOTE, do not
+   return a buffer for a quoted string.  If the result of next_char()
+   would not fit in an unsigned char (for example, CHAR_EOF or
+   CHAR_QUOTE), or if the input block does not have an available
+   buffer at the moment (for example, when hitting a buffer block
+   boundary of a file), return NULL, and the caller must fall back on
+   using next_char().  The buffer is only valid until the next
+   consume_buffer() or next_char().  When searching for a particular
+   byte, it is more efficient to search a buffer at a time than it is
+   to repeatedly call next_char.  */
 static const char *
 next_buffer (size_t *len, bool allow_quote)
 {
@@ -902,12 +870,9 @@ next_buffer (size_t *len, bool allow_quote)
     }
 }
 
-/*-----------------------------------------------------------------.
-| Consume LEN bytes from the current input block, as though by LEN |
-| calls to next_char().  LEN must be less than or equal to the     |
-| previous length returned by a successful call to next_buffer().  |
-`-----------------------------------------------------------------*/
-
+/* Consume LEN bytes from the current input block, as though by LEN
+   calls to next_char().  LEN must be less than or equal to the
+   previous length returned by a successful call to next_buffer().  */
 static void
 consume_buffer (size_t len)
 {
@@ -957,16 +922,13 @@ consume_buffer (size_t len)
     }
 }
 
-/*------------------------------------------------------------------.
-| Low level input is done a character at a time.  The function      |
-| peek_input () is used to look at the next character in the input  |
-| stream.  At any given time, it reads from the input_block on the  |
-| top of the current input stack.  The return value is an unsigned  |
-| char, CHAR_EOF if there is no more input, CHAR_MACRO if a builtin |
-| token occurs next, or CHAR_ARGV if ALLOW_ARGV and the input is    |
-| visiting an argv reference with the correct quoting.              |
-`------------------------------------------------------------------*/
-
+/* Low level input is done a character at a time.  The function
+   peek_input () is used to look at the next character in the input
+   stream.  At any given time, it reads from the input_block on the
+   top of the current input stack.  The return value is an unsigned
+   char, CHAR_EOF if there is no more input, CHAR_MACRO if a builtin
+   token occurs next, or CHAR_ARGV if ALLOW_ARGV and the input is
+   visiting an argv reference with the correct quoting.  */
 static int
 peek_input (bool allow_argv)
 {
@@ -1054,21 +1016,18 @@ peek_input (bool allow_argv)
     }
 }
 
-/*-------------------------------------------------------------------.
-| The function next_char () is used to read and advance the input to |
-| the next character.  It also manages line numbers for error        |
-| messages, so they do not get wrong due to lookahead.  The token    |
-| consisting of a newline alone is taken as belonging to the line it |
-| ends, and the current line number is not incremented until the     |
-| next character is read.  99.9% of all calls will read from a       |
-| string, so factor that out into a macro for speed.  If             |
-| ALLOW_QUOTE, and the current input matches the current quote age,  |
-| return CHAR_QUOTE and leave consumption of data for                |
-| append_quote_token; otherwise, if ALLOW_ARGV and the current input |
-| matches an argv reference with the correct quoting, return         |
-| CHAR_ARGV and leave consumption of data for init_argv_token.       |
-`-------------------------------------------------------------------*/
-
+/* The function next_char () is used to read and advance the input to
+   the next character.  It also manages line numbers for error
+   messages, so they do not get wrong due to lookahead.  The token
+   consisting of a newline alone is taken as belonging to the line it
+   ends, and the current line number is not incremented until the next
+   character is read.  99.9% of all calls will read from a string, so
+   factor that out into a macro for speed.  If ALLOW_QUOTE, and the
+   current input matches the current quote age, return CHAR_QUOTE and
+   leave consumption of data for append_quote_token; otherwise, if
+   ALLOW_ARGV and the current input matches an argv reference with the
+   correct quoting, return CHAR_ARGV and leave consumption of data for
+   init_argv_token.  */
 #define next_char(AQ, AA)						\
   (isp->type == INPUT_STRING && isp->u.u_s.len && !input_change		\
    ? (isp->u.u_s.len--, to_uchar (*isp->u.u_s.str++))			\
@@ -1198,12 +1157,9 @@ next_char_1 (bool allow_quote, bool allow_argv)
     }
 }
 
-/*-------------------------------------------------------------------.
-| skip_line () simply discards all immediately following characters, |
-| up to the first newline.  It is only used from m4_dnl ().  Report  |
-| warnings on behalf of NAME.                                        |
-`-------------------------------------------------------------------*/
-
+/* skip_line () simply discards all immediately following characters,
+   up to the first newline.  It is only used from m4_dnl ().  Report
+   warnings on behalf of NAME.  */
 void
 skip_line (const call_info *name)
 {
@@ -1235,15 +1191,12 @@ skip_line (const call_info *name)
     m4_warn (0, name, _("end of file treated as newline"));
 }
 
-/*------------------------------------------------------------------.
-| When next_token() sees a builtin token with peek_input, this	    |
-| retrieves the value of the function pointer, stores it in TD, and |
-| consumes the input so the caller does not need to do next_char.   |
-| If OBS, TD will be converted to a composite token using storage   |
-| from OBS as necessary; otherwise, if TD is NULL, the builtin is   |
-| discarded.                                                        |
-`------------------------------------------------------------------*/
-
+/* When next_token() sees a builtin token with peek_input, this
+   retrieves the value of the function pointer, stores it in TD, and
+   consumes the input so the caller does not need to do next_char.  If
+   OBS, TD will be converted to a composite token using storage from
+   OBS as necessary; otherwise, if TD is NULL, the builtin is
+   discarded.  */
 static void
 init_macro_token (struct obstack *obs, token_data *td)
 {
@@ -1274,12 +1227,10 @@ init_macro_token (struct obstack *obs, token_data *td)
   chain->u.func = NULL;
 }
 
-/*-------------------------------------------------------------------.
-| When a QUOTE token is seen, convert TD to a composite (if it is    |
-| not one already), consisting of any unfinished text on OBS, as     |
-| well as the quoted token from the top of the input stack.  Use OBS |
-| for any additional allocations needed to store the token chain.    |
-`-------------------------------------------------------------------*/
+/* When a QUOTE token is seen, convert TD to a composite (if it is not
+   one already), consisting of any unfinished text on OBS, as well as
+   the quoted token from the top of the input stack.  Use OBS for any
+   additional allocations needed to store the token chain.  */
 static void
 append_quote_token (struct obstack *obs, token_data *td)
 {
@@ -1321,11 +1272,9 @@ append_quote_token (struct obstack *obs, token_data *td)
 }
 
 
-/*-------------------------------------------------------------------.
-| When an ARGV token is seen, convert TD to point to it via a	     |
-| composite token.  Use OBS for any additional allocations needed to |
-| store the token chain.					     |
-`-------------------------------------------------------------------*/
+/* When an ARGV token is seen, convert TD to point to it via a
+   composite token.  Use OBS for any additional allocations needed to
+   store the token chain.  */
 static void
 init_argv_token (struct obstack *obs, token_data *td)
 {
@@ -1381,15 +1330,12 @@ init_argv_token (struct obstack *obs, token_data *td)
 }
 
 
-/*------------------------------------------------------------------.
-| If the string S of length SLEN matches the next characters of the |
-| input stream, return true.  If CONSUME, the first character has   |
-| already been matched.  If a match is found and CONSUME is true,   |
-| the input is discarded; otherwise any characters read are pushed  |
-| back again.  The function is used only when multicharacter quotes |
-| or comment delimiters are used.                                   |
-`------------------------------------------------------------------*/
-
+/* If the string S of length SLEN matches the next characters of the
+   input stream, return true.  If CONSUME, the first character has
+   already been matched.  If a match is found and CONSUME is true, the
+   input is discarded; otherwise any characters read are pushed back
+   again.  The function is used only when multicharacter quotes or
+   comment delimiters are used.  */
 static bool
 match_input (const char *s, size_t slen, bool consume)
 {
@@ -1447,28 +1393,22 @@ match_input (const char *s, size_t slen, bool consume)
   return result;
 }
 
-/*--------------------------------------------------------------------.
-| The macro MATCH() is used to match a string S of length SLEN        |
-| against the input.  The first character is handled inline for       |
-| speed, and S[SLEN] must be safe to dereference (it is faster to do  |
-| character comparison prior to length checks).  This improves        |
-| efficiency for the common case of single character quotes and       |
-| comment delimiters, while being safe for disabled delimiters as     |
-| well as longer delimiters.  If CONSUME, then CH is the result of    |
-| next_char, and a successful match will discard the matched string.  |
-| Otherwise, CH is the result of peek_input, and the input stream is  |
-| effectively unchanged.                                              |
-`--------------------------------------------------------------------*/
-
+/* The macro MATCH() is used to match a string S of length SLEN
+   against the input.  The first character is handled inline for
+   speed, and S[SLEN] must be safe to dereference (it is faster to do
+   character comparison prior to length checks).  This improves
+   efficiency for the common case of single character quotes and
+   comment delimiters, while being safe for disabled delimiters as
+   well as longer delimiters.  If CONSUME, then CH is the result of
+   next_char, and a successful match will discard the matched string.
+   Otherwise, CH is the result of peek_input, and the input stream is
+   effectively unchanged.  */
 #define MATCH(ch, s, slen, consume)					\
   (to_uchar ((s)[0]) == (ch)						\
    && ((slen) >> 1 ? match_input (s, slen, consume) : (slen)))
 
 
-/*--------------------------------------------------------.
-| Initialize input stacks, and quote/comment characters.  |
-`--------------------------------------------------------*/
-
+/* Initialize input stacks, and quote/comment characters.  */
 void
 input_init (void)
 {
@@ -1511,13 +1451,10 @@ input_init (void)
 }
 
 
-/*-----------------------------------------------------------------.
-| Set the quote delimiters to LQ and RQ, with respective lengths   |
-| LQ_LEN and RQ_LEN.  Used by m4_changequote ().  Pass NULL if the |
-| argument was not present, to distinguish from an explicit empty  |
-| string.                                                          |
-`-----------------------------------------------------------------*/
-
+/* Set the quote delimiters to LQ and RQ, with respective lengths
+   LQ_LEN and RQ_LEN.  Used by m4_changequote ().  Pass NULL if the
+   argument was not present, to distinguish from an explicit empty
+   string.  */
 void
 set_quotes (const char *lq, size_t lq_len, const char *rq, size_t rq_len)
 {
@@ -1556,13 +1493,10 @@ set_quotes (const char *lq, size_t lq_len, const char *rq, size_t rq_len)
   set_quote_age ();
 }
 
-/*-----------------------------------------------------------------.
-| Set the comment delimiters to BC and EC, with respective lengths |
-| BC_LEN and EC_LEN.  Used by m4_changecom ().  Pass NULL if the   |
-| argument was not present, to distinguish from an explicit empty  |
-| string.                                                          |
-`-----------------------------------------------------------------*/
-
+/* Set the comment delimiters to BC and EC, with respective lengths
+   BC_LEN and EC_LEN.  Used by m4_changecom ().  Pass NULL if the
+   argument was not present, to distinguish from an explicit empty
+   string.  */
 void
 set_comment (const char *bc, size_t bc_len, const char *ec, size_t ec_len)
 {
@@ -1601,13 +1535,10 @@ set_comment (const char *bc, size_t bc_len, const char *ec, size_t ec_len)
 
 #ifdef ENABLE_CHANGEWORD
 
-/*-----------------------------------------------------------------.
-| Set the regular expression for recognizing words to REGEXP of    |
-| length LEN, and report errors on behalf of CALLER.  If REGEXP is |
-| NULL, revert back to the default parsing rules.  If LEN is       |
-| SIZE_MAX, use strlen(REGEXP) instead.                            |
-`-----------------------------------------------------------------*/
-
+/* Set the regular expression for recognizing words to REGEXP of
+   length LEN, and report errors on behalf of CALLER.  If REGEXP is
+   NULL, revert back to the default parsing rules.  If LEN is
+   SIZE_MAX, use strlen(REGEXP) instead.  */
 void
 set_word_regexp (const call_info *caller, const char *regexp, size_t len)
 {
@@ -1788,29 +1719,26 @@ quote_cache (struct obstack *obs, unsigned int age, const string_pair *quotes)
 }
 
 
-/*--------------------------------------------------------------------.
-| Parse a single token from the input stream, set TD to its	      |
-| contents, and return its type.  A token is TOKEN_EOF if the	      |
-| input_stack is empty; TOKEN_STRING for a quoted string;	      |
-| TOKEN_COMMENT for a comment; TOKEN_WORD for something that is a     |
-| potential macro name; and TOKEN_SIMPLE for any single character     |
-| that is not a part of any of the previous types.  If LINE is not    |
-| NULL, set *LINE to the line where the token starts.  If OBS is not  |
-| NULL, expand TOKEN_STRING and TOKEN_COMMENT directly into OBS	      |
-| rather than in token_stack temporary storage area, and TD could be  |
-| a TOKEN_COMP instead of the usual TOKEN_TEXT.  If ALLOW_ARGV, OBS   |
-| must be non-NULL, and an entire series of arguments can be	      |
-| returned as TOKEN_ARGV when a $@ reference is encountered.  Report  |
-| errors (unterminated comments or strings) on behalf of CALLER, if   |
-| non-NULL.							      |
-|								      |
-| Next_token () returns the token type, and passes back a pointer to  |
-| the token data through TD.  Non-string token text is collected on   |
-| the obstack token_stack, which never contains more than one token   |
-| text at a time.  The storage pointed to by the fields in TD is      |
-| therefore subject to change the next time next_token () is called.  |
-`--------------------------------------------------------------------*/
+/* Parse a single token from the input stream, set TD to its contents,
+   and return its type.  A token is TOKEN_EOF if the input_stack is
+   empty; TOKEN_STRING for a quoted string; TOKEN_COMMENT for a
+   comment; TOKEN_WORD for something that is a potential macro name;
+   and TOKEN_SIMPLE for any single character that is not a part of any
+   of the previous types.  If LINE is not NULL, set *LINE to the line
+   where the token starts.  If OBS is not NULL, expand TOKEN_STRING
+   and TOKEN_COMMENT directly into OBS rather than in token_stack
+   temporary storage area, and TD could be a TOKEN_COMP instead of the
+   usual TOKEN_TEXT.  If ALLOW_ARGV, OBS must be non-NULL, and an
+   entire series of arguments can be returned as TOKEN_ARGV when a $@
+   reference is encountered.  Report errors (unterminated comments or
+   strings) on behalf of CALLER, if non-NULL.
 
+   Next_token () returns the token type, and passes back a pointer to
+   the token data through TD.  Non-string token text is collected on
+   the obstack token_stack, which never contains more than one token
+   text at a time.  The storage pointed to by the fields in TD is
+   therefore subject to change the next time next_token () is
+   called.  */
 token_type
 next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
             const call_info *caller)
@@ -2163,10 +2091,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
   return type;
 }
 
-/*-----------------------------------------------.
-| Peek at the next token from the input stream.  |
-`-----------------------------------------------*/
-
+/* Peek at the next token from the input stream.  */
 token_type
 peek_token (void)
 {

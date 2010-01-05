@@ -130,14 +130,11 @@ arg_double (const call_info *me, const char *str, size_t len)
   ((argc <= ++i) ? 0.0 : arg_double (me, ARG (i), ARG_LEN (i)))
 
 
-/*------------------------------------------------------------------.
-| The main formatting function.  Output is placed on the obstack    |
-| OBS, the first argument in ARGV is the formatting string, and the |
-| rest is arguments for the string.  Warn rather than invoke	    |
-| unspecified behavior in the underlying printf when we do not	    |
-| recognize a format.						    |
-`------------------------------------------------------------------*/
-
+/* The main formatting function.  Output is placed on the obstack OBS,
+   the first argument in ARGV is the formatting string, and the rest
+   is arguments for the string.  Warn, rather than invoke unspecified
+   behavior in the underlying printf, when we do not recognize a
+   format.  */
 void
 expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
