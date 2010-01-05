@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2009-12-14
+# bootstrap (GNU M4) version 2010-01-05
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software
@@ -31,10 +31,11 @@
 # locate the right tools:
 #   AUTORECONF, CONFIG_SHELL, GNULIB_SRCDIR, M4, RM, SED
 
-# This script bootstraps a git or CVS checkout of GNU M4 by correctly
-# calling out to parts of the GNU Build Platform.  Currently this
-# requires GNU Autoconf 2.60, GNU Automake 1.10.1, and bleeding edge
-# git or CVS snapshots of GNU Gnulib.
+# This script bootstraps a git checkout of GNU M4 by correctly calling
+# out to parts of the GNU Build Platform.  See HACKING for a list of
+# prerequisite tools and versions required.  If you are re-running
+# bootstrap on a release tarball rather than using a git checkout,
+# then see the release announcement for the prerequisite tools used.
 
 # Report bugs to <bug-m4@gnu.org>
 
