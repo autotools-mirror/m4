@@ -89,7 +89,7 @@ else
         *) echo "Failure - $m4 created unexpected core dump"
            ls -l "$tmpdir" ;;
       esac ;;
-    *)	echo "Failure - $m4 aborted unexpectedly";
+    *) echo "Failure - $m4 aborted unexpectedly";
         ;;
     esac
 fi

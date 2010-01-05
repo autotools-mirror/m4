@@ -80,7 +80,7 @@ int retcode;
 struct macro_definition
 {
   struct macro_definition *next;
-  int code;			/* D, U, s, t, '\1', or DEBUGFILE_OPTION.  */
+  int code; /* D, U, s, t, '\1', or DEBUGFILE_OPTION.  */
   const char *arg;
 };
 typedef struct macro_definition macro_definition;
@@ -277,12 +277,12 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
    non-character as a pseudo short option, starting with CHAR_MAX + 1.  */
 enum
 {
-  DEBUGFILE_OPTION = CHAR_MAX + 1,	/* no short opt */
-  DIVERSIONS_OPTION,			/* not quite -N, because of message */
-  WARN_MACRO_SEQUENCE_OPTION,		/* no short opt */
+  DEBUGFILE_OPTION = CHAR_MAX + 1,      /* no short opt */
+  DIVERSIONS_OPTION,                    /* not quite -N, because of message */
+  WARN_MACRO_SEQUENCE_OPTION,           /* no short opt */
 
-  HELP_OPTION,				/* no short opt */
-  VERSION_OPTION			/* no short opt */
+  HELP_OPTION,                          /* no short opt */
+  VERSION_OPTION                        /* no short opt */
 };
 
 static const struct option long_options[] =
@@ -364,10 +364,10 @@ int
 main (int argc, char *const *argv)
 {
   struct sigaction act;
-  macro_definition *head;	/* head of deferred argument list */
+  macro_definition *head;       /* head of deferred argument list */
   macro_definition *tail;
   macro_definition *defn;
-  int optchar;			/* option character */
+  int optchar;                  /* option character */
 
   macro_definition *defines;
   bool interactive = false;

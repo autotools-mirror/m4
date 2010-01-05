@@ -72,12 +72,12 @@ expand_input (void)
 }
 
 
-/*------------------------------------------------------------------------.
-| Expand one token, according to its type.  Potential macro names	  |
-| (TOKEN_WORD) are looked up in the symbol table, to see if they have a	  |
-| macro definition.  If they have, they are expanded as macros, otherwise |
-| the text are just copied to the output.				  |
-`------------------------------------------------------------------------*/
+/*----------------------------------------------------------------.
+| Expand one token, according to its type.  Potential macro names |
+| (TOKEN_WORD) are looked up in the symbol table, to see if they  |
+| have a macro definition.  If they have, they are expanded as    |
+| macros, otherwise the text is just copied to the output.        |
+`----------------------------------------------------------------*/
 
 static void
 expand_token (struct obstack *obs, token_type t, token_data *td, int line)
@@ -85,7 +85,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
   symbol *sym;
 
   switch (t)
-    {				/* TOKSW */
+    { /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
       break;
@@ -126,15 +126,15 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 }
 
 
-/*-------------------------------------------------------------------------.
-| This function parses one argument to a macro call.  It expects the first |
-| left parenthesis, or the separating comma to have been read by the	   |
-| caller.  It skips leading whitespace, and reads and expands tokens,	   |
-| until it finds a comma or an right parenthesis at the same level of	   |
-| parentheses.  It returns a flag indicating whether the argument read are |
-| the last for the active macro call.  The argument are build on the	   |
-| obstack OBS, indirectly through expand_token ().			   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| This function parses one argument to a macro call.  It expects the |
+| first left parenthesis, or the separating comma, to have been read |
+| by the caller.  It skips leading whitespace, and reads and expands |
+| tokens, until it finds a comma or an right parenthesis at the same |
+| level of parentheses.  It returns a flag indicating whether the    |
+| argument read is the last for the active macro call.  The argument |
+| is built on the obstack OBS, indirectly through expand_token ().   |
+`-------------------------------------------------------------------*/
 
 static bool
 expand_argument (struct obstack *obs, token_data *argp)
@@ -161,7 +161,7 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
 
       switch (t)
-        {			/* TOKSW */
+        { /* TOKSW */
         case TOKEN_COMMA:
         case TOKEN_CLOSE:
           if (paren_level == 0)
@@ -219,11 +219,11 @@ expand_argument (struct obstack *obs, token_data *argp)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| Collect all the arguments to a call of the macro SYM.  The arguments are |
-| stored on the obstack ARGUMENTS and a table of pointers to the arguments |
-| on the obstack ARGPTR.						   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------.
+| Collect all the arguments to a call of the macro SYM.  The   |
+| arguments are stored on the obstack ARGUMENTS and a table of |
+| pointers to the arguments on the obstack ARGPTR.             |
+`-------------------------------------------------------------*/
 
 static void
 collect_arguments (symbol *sym, struct obstack *argptr,
@@ -259,14 +259,15 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 }
 
 
-/*------------------------------------------------------------------------.
-| The actual call of a macro is handled by call_macro ().  call_macro ()  |
-| is passed a symbol SYM, whose type is used to call either a builtin	  |
-| function, or the user macro expansion function expand_user_macro ()	  |
-| (lives in builtin.c).  There are ARGC arguments to the call, stored in  |
-| the ARGV table.  The expansion is left on the obstack EXPANSION.  Macro |
-| tracing is also handled here.						  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The actual call of a macro is handled by call_macro ().            |
+| call_macro () is passed a symbol SYM, whose type is used to call   |
+| either a builtin function, or the user macro expansion function    |
+| expand_user_macro () (lives in builtin.c).  There are ARGC         |
+| arguments to the call, stored in the ARGV table.  The expansion is |
+| left on the obstack EXPANSION.  Macro tracing is also handled      |
+| here.                                                              |
+`-------------------------------------------------------------------*/
 
 void
 call_macro (symbol *sym, int argc, token_data **argv,
@@ -290,22 +291,24 @@ call_macro (symbol *sym, int argc, token_data **argv,
     }
 }
 
-/*-------------------------------------------------------------------------.
-| The macro expansion is handled by expand_macro ().  It parses the	   |
-| arguments, using collect_arguments (), and builds a table of pointers to |
-| the arguments.  The arguments themselves are stored on a local obstack.  |
-| Expand_macro () uses call_macro () to do the call of the macro.	   |
-|									   |
-| Expand_macro () is potentially recursive, since it calls expand_argument |
-| (), which might call expand_token (), which might call expand_macro ().  |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The macro expansion is handled by expand_macro ().  It parses the  |
+| arguments, using collect_arguments (), and builds a table of       |
+| pointers to the arguments.  The arguments themselves are stored on |
+| a local obstack.  Expand_macro () uses call_macro () to do the     |
+| call of the macro.                                                 |
+|                                                                    |
+| Expand_macro () is potentially recursive, since it calls           |
+| expand_argument (), which might call expand_token (), which might  |
+| call expand_macro ().                                              |
+`-------------------------------------------------------------------*/
 
 static void
 expand_macro (symbol *sym)
 {
-  struct obstack arguments;	/* Alternate obstack if argc_stack is busy.  */
-  unsigned argv_base;		/* Size of argv_stack on entry.  */
-  bool use_argc_stack = true;	/* Whether argc_stack is safe.  */
+  struct obstack arguments;     /* Alternate obstack if argc_stack is busy.  */
+  unsigned argv_base;           /* Size of argv_stack on entry.  */
+  bool use_argc_stack = true;   /* Whether argc_stack is safe.  */
   token_data **argv;
   int argc;
   struct obstack *expansion;

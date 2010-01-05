@@ -1,4 +1,4 @@
-# Configure template for GNU M4.			-*-Autoconf-*-
+# Configure template for GNU M4.           -*-Autoconf-*-
 # Copyright (C) 1991, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009,
 # 2010 Free Software Foundation, Inc.
 #

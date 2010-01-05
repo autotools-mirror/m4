@@ -87,10 +87,10 @@ profile_strcmp (const char *s1, const char *s2)
 #endif /* DEBUG_SYM */
 
 
-/*----------------------------------------------------------------------.
-| Initialise the symbol table, by allocating the necessary storage, and |
-| zeroing all the entries.					        |
-`----------------------------------------------------------------------*/
+/*------------------------------------------------------------------.
+| Initialise the symbol table, by allocating the necessary storage, |
+| and zeroing all the entries.                                      |
+`------------------------------------------------------------------*/
 
 /* Pointer to symbol table.  */
 symbol **symtab;
@@ -153,15 +153,15 @@ free_symbol (symbol *sym)
 
 /*-------------------------------------------------------------------.
 | Search in, and manipulation of the symbol table, are all done by   |
-| lookup_symbol ().  It basically hashes NAME to a list in the	     |
+| lookup_symbol ().  It basically hashes NAME to a list in the       |
 | symbol table, and searches this list for the first occurrence of a |
-| symbol with the name.						     |
-|								     |
+| symbol with the name.                                              |
+|                                                                    |
 | The MODE parameter determines what lookup_symbol () will do.  It   |
-| can either just do a lookup, do a lookup and insert if not	     |
+| can either just do a lookup, do a lookup and insert if not         |
 | present, do an insertion even if the name is already in the list,  |
 | delete the first occurrence of the name on the list, or delete all |
-| occurrences of the name on the list.				     |
+| occurrences of the name on the list.                               |
 `-------------------------------------------------------------------*/
 
 symbol *
@@ -317,12 +317,12 @@ lookup_symbol (const char *name, symbol_lookup mode)
 /*-----------------------------------------------------------------.
 | The following function is used for the cases where we want to do |
 | something to each and every symbol in the table.  The function   |
-| hack_all_symbols () traverses the symbol table, and calls a	   |
+| hack_all_symbols () traverses the symbol table, and calls a      |
 | specified function FUNC for each symbol in the table.  FUNC is   |
-| called with a pointer to the symbol, and the DATA argument.	   |
-|								   |
-| FUNC may safely call lookup_symbol with mode SYMBOL_POPDEF or	   |
-| SYMBOL_LOOKUP, but any other mode can break the iteration.	   |
+| called with a pointer to the symbol, and the DATA argument.      |
+|                                                                  |
+| FUNC may safely call lookup_symbol with mode SYMBOL_POPDEF or    |
+| SYMBOL_LOOKUP, but any other mode can break the iteration.       |
 `-----------------------------------------------------------------*/
 
 void

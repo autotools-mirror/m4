@@ -66,36 +66,36 @@
 
 enum input_type
 {
-  INPUT_STRING,		/* String resulting from macro expansion.  */
-  INPUT_FILE,		/* File from command line or include.  */
-  INPUT_MACRO		/* Builtin resulting from defn.  */
+  INPUT_STRING,         /* String resulting from macro expansion.  */
+  INPUT_FILE,           /* File from command line or include.  */
+  INPUT_MACRO           /* Builtin resulting from defn.  */
 };
 
 typedef enum input_type input_type;
 
 struct input_block
 {
-  struct input_block *prev;	/* previous input_block on the input stack */
-  input_type type;		/* see enum values */
-  const char *file;		/* file where this input is from */
-  int line;			/* line where this input is from */
+  struct input_block *prev;     /* previous input_block on the input stack */
+  input_type type;              /* see enum values */
+  const char *file;             /* file where this input is from */
+  int line;                     /* line where this input is from */
   union
     {
       struct
         {
-          char *string;		/* remaining string value */
-          char *end;		/* terminating NUL of string */
+          char *string;         /* remaining string value */
+          char *end;            /* terminating NUL of string */
         }
-        u_s;	/* INPUT_STRING */
+        u_s;    /* INPUT_STRING */
       struct
         {
-          FILE *fp;		     /* input file handle */
+          FILE *fp;                  /* input file handle */
           bool_bitfield end : 1;     /* true if peek has seen EOF */
           bool_bitfield close : 1;   /* true if we should close file on pop */
           bool_bitfield advance : 1; /* track previous start_of_input_line */
         }
-        u_f;	/* INPUT_FILE */
-      builtin_func *func;	/* pointer to macro's function */
+        u_f;    /* INPUT_FILE */
+      builtin_func *func;       /* pointer to macro's function */
     }
   u;
 };
@@ -139,8 +139,8 @@ static bool start_of_input_line;
 /* Flag for next_char () to recognize change in input block.  */
 static bool input_change;
 
-#define CHAR_EOF	256	/* character return on EOF */
-#define CHAR_MACRO	257	/* character return for MACRO token */
+#define CHAR_EOF        256     /* character return on EOF */
+#define CHAR_MACRO      257     /* character return for MACRO token */
 
 /* Quote chars.  */
 STRING rquote;
@@ -237,7 +237,7 @@ push_macro (builtin_func *func)
 
 /*------------------------------------------------------------------.
 | First half of push_string ().  The pointer next points to the new |
-| input_block.							    |
+| input_block.                                                      |
 `------------------------------------------------------------------*/
 
 struct obstack *
@@ -259,14 +259,15 @@ push_string_init (void)
   return current_input;
 }
 
-/*------------------------------------------------------------------------.
-| Last half of push_string ().  If next is now NULL, a call to push_file  |
-| () has invalidated the previous call to push_string_init (), so we just |
-| give up.  If the new object is void, we do not push it.  The function	  |
-| push_string_finish () returns a pointer to the finished object.  This	  |
-| pointer is only for temporary use, since reading the next token might	  |
-| release the memory used for the object.				  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| Last half of push_string ().  If next is now NULL, a call to       |
+| push_file () has invalidated the previous call to push_string_init |
+| (), so we just give up.  If the new object is void, we do not push |
+| it.  The function push_string_finish () returns a pointer to the   |
+| finished object.  This pointer is only for temporary use, since    |
+| reading the next token might release the memory used for the       |
+| object.                                                            |
+`-------------------------------------------------------------------*/
 
 const char *
 push_string_finish (void)
@@ -284,7 +285,7 @@ push_string_finish (void)
       next->u.u_s.end = next->u.u_s.string + len;
       next->prev = isp;
       isp = next;
-      ret = isp->u.u_s.string;	/* for immediate use only */
+      ret = isp->u.u_s.string; /* for immediate use only */
       input_change = true;
     }
   else
@@ -319,11 +320,12 @@ push_wrapup (const char *s)
 }
 
 
-/*-------------------------------------------------------------------------.
-| The function pop_input () pops one level of input sources.  If the	   |
-| popped input_block is a file, current_file and current_line are reset to |
-| the saved values before the memory for the input_block are released.	   |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The function pop_input () pops one level of input sources.  If the |
+| popped input_block is a file, current_file and current_line are    |
+| reset to the saved values before the memory for the input_block is |
+| released.                                                          |
+`-------------------------------------------------------------------*/
 
 static void
 pop_input (void)
@@ -368,17 +370,18 @@ pop_input (void)
       abort ();
     }
   obstack_free (current_input, isp);
-  next = NULL;			/* might be set in push_string_init () */
+  next = NULL; /* might be set in push_string_init () */
 
   isp = tmp;
   input_change = true;
 }
 
-/*------------------------------------------------------------------------.
-| To switch input over to the wrapup stack, main () calls pop_wrapup ().  |
-| Since wrapup text can install new wrapup text, pop_wrapup () returns	  |
-| false when there is no wrapup text on the stack, and true otherwise.	  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| To switch input over to the wrapup stack, main () calls pop_wrapup |
+| ().  Since wrapup text can install new wrapup text, pop_wrapup ()  |
+| returns false when there is no wrapup text on the stack, and true  |
+| otherwise.                                                         |
+`-------------------------------------------------------------------*/
 
 bool
 pop_wrapup (void)
@@ -432,12 +435,12 @@ init_macro_token (token_data *td)
 }
 
 
-/*------------------------------------------------------------------------.
-| Low level input is done a character at a time.  The function peek_input |
-| () is used to look at the next character in the input stream.  At any	  |
-| given time, it reads from the input_block on the top of the current	  |
-| input stack.								  |
-`------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------.
+| Low level input is done a character at a time.  The function     |
+| peek_input () is used to look at the next character in the input |
+| stream.  At any given time, it reads from the input_block on the |
+| top of the current input stack.                                  |
+`-----------------------------------------------------------------*/
 
 static int
 peek_input (void)
@@ -480,20 +483,20 @@ peek_input (void)
     }
 }
 
-/*-------------------------------------------------------------------------.
-| The function next_char () is used to read and advance the input to the   |
-| next character.  It also manages line numbers for error messages, so	   |
-| they do not get wrong, due to lookahead.  The token consisting of a	   |
-| newline alone is taken as belonging to the line it ends, and the current |
-| line number is not incremented until the next character is read.	   |
-| 99.9% of all calls will read from a string, so factor that out into a    |
-| macro for speed.                                                         |
-`-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| The function next_char () is used to read and advance the input to |
+| the next character.  It also manages line numbers for error        |
+| messages, so they do not get wrong, due to lookahead.  The token   |
+| consisting of a newline alone is taken as belonging to the line it |
+| ends, and the current line number is not incremented until the     |
+| next character is read.  99.9% of all calls will read from a       |
+| string, so factor that out into a macro for speed.                 |
+`-------------------------------------------------------------------*/
 
 #define next_char() \
-  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]	\
-   && !input_change						\
-   ? to_uchar (*isp->u.u_s.string++)				\
+  (isp && isp->type == INPUT_STRING && isp->u.u_s.string[0]     \
+   && !input_change                                             \
+   ? to_uchar (*isp->u.u_s.string++)                            \
    : next_char_1 ())
 
 static int
@@ -545,8 +548,7 @@ next_char_1 (void)
           break;
 
         case INPUT_MACRO:
-          pop_input ();		/* INPUT_MACRO input sources has only one
-                                   token */
+          pop_input (); /* INPUT_MACRO input sources has only one token */
           return CHAR_MACRO;
 
         default:
@@ -560,10 +562,10 @@ next_char_1 (void)
     }
 }
 
-/*------------------------------------------------------------------------.
-| skip_line () simply discards all immediately following characters, upto |
-| the first newline.  It is only used from m4_dnl ().			  |
-`------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------.
+| skip_line () simply discards all immediately following characters, |
+| upto the first newline.  It is only used from m4_dnl ().           |
+`-------------------------------------------------------------------*/
 
 void
 skip_line (void)
@@ -600,20 +602,20 @@ skip_line (void)
 static bool
 match_input (const char *s, bool consume)
 {
-  int n;			/* number of characters matched */
-  int ch;			/* input character */
+  int n;                        /* number of characters matched */
+  int ch;                       /* input character */
   const char *t;
   bool result = false;
 
   ch = peek_input ();
   if (ch != to_uchar (*s))
-    return false;			/* fail */
+    return false;                       /* fail */
 
   if (s[1] == '\0')
     {
       if (consume)
         (void) next_char ();
-      return true;			/* short match */
+      return true;                      /* short match */
     }
 
   (void) next_char ();
@@ -621,7 +623,7 @@ match_input (const char *s, bool consume)
     {
       (void) next_char ();
       n++;
-      if (*s == '\0')		/* long match */
+      if (*s == '\0')           /* long match */
         {
           if (consume)
             return true;
@@ -703,7 +705,7 @@ input_init (void)
 
 
 /*------------------------------------------------------------------.
-| Functions for setting quotes and comment delimiters.  Used by	    |
+| Functions for setting quotes and comment delimiters.  Used by     |
 | m4_changecom () and m4_changequote ().  Pass NULL if the argument |
 | was not present, to distinguish from an explicit empty string.    |
 `------------------------------------------------------------------*/
@@ -1089,7 +1091,7 @@ static const char *
 token_type_string (token_type t)
 {
  switch (t)
-    {				/* TOKSW */
+    { /* TOKSW */
     case TOKEN_EOF:
       return "EOF";
     case TOKEN_STRING:
@@ -1116,7 +1118,7 @@ print_token (const char *s, token_type t, token_data *td)
 {
   xfprintf (stderr, "%s: ", s);
   switch (t)
-    {				/* TOKSW */
+    { /* TOKSW */
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:

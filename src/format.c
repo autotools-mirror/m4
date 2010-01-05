@@ -119,36 +119,36 @@ arg_double (const char *str)
 /*------------------------------------------------------------------.
 | The main formatting function.  Output is placed on the obstack    |
 | OBS, the first argument in ARGV is the formatting string, and the |
-| rest is arguments for the string.  Warn rather than invoke	    |
-| unspecified behavior in the underlying printf when we do not	    |
-| recognize a format.						    |
+| rest is arguments for the string.  Warn rather than invoke        |
+| unspecified behavior in the underlying printf when we do not      |
+| recognize a format.                                               |
 `------------------------------------------------------------------*/
 
 void
 expand_format (struct obstack *obs, int argc, token_data **argv)
 {
-  const char *f;			/* format control string */
-  const char *fmt;			/* position within f */
-  char fstart[] = "%'+- 0#*.*hhd";	/* current format spec */
-  char *p;				/* position within fstart */
-  unsigned char c;			/* a simple character */
+  const char *f;                        /* format control string */
+  const char *fmt;                      /* position within f */
+  char fstart[] = "%'+- 0#*.*hhd";      /* current format spec */
+  char *p;                              /* position within fstart */
+  unsigned char c;                      /* a simple character */
 
   /* Flags.  */
-  char flags;				/* flags to use in fstart */
+  char flags;                           /* flags to use in fstart */
   enum {
-    THOUSANDS	= 0x01, /* ' */
-    PLUS	= 0x02, /* + */
-    MINUS	= 0x04, /* - */
-    SPACE	= 0x08, /*   */
-    ZERO	= 0x10, /* 0 */
-    ALT		= 0x20, /* # */
-    DONE	= 0x40  /* no more flags */
+    THOUSANDS   = 0x01, /* ' */
+    PLUS        = 0x02, /* + */
+    MINUS       = 0x04, /* - */
+    SPACE       = 0x08, /*   */
+    ZERO        = 0x10, /* 0 */
+    ALT         = 0x20, /* # */
+    DONE        = 0x40  /* no more flags */
   };
 
   /* Precision specifiers.  */
-  int width;			/* minimum field width */
-  int prec;			/* precision */
-  char lflag;			/* long flag */
+  int width;                    /* minimum field width */
+  int prec;                     /* precision */
+  char lflag;                   /* long flag */
 
   /* Specifiers we are willing to accept.  ok['x'] implies %x is ok.
      Various modifiers reduce the set, in order to avoid undefined
@@ -156,7 +156,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
   char ok[128];
 
   /* Buffer and stuff.  */
-  char *str;			/* malloc'd buffer of formatted text */
+  char *str;                    /* malloc'd buffer of formatted text */
   enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
 
   f = fmt = ARG_STR (argc, argv);
@@ -191,33 +191,33 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
         {
           switch (*fmt)
             {
-            case '\'':		/* thousands separator */
+            case '\'': /* thousands separator */
               ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E']
                 = ok['o'] = ok['s'] = ok['x'] = ok['X'] = 0;
               flags |= THOUSANDS;
               break;
 
-            case '+':		/* mandatory sign */
+            case '+': /* mandatory sign */
               ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
               flags |= PLUS;
               break;
 
-            case ' ':		/* space instead of positive sign */
+            case ' ': /* space instead of positive sign */
               ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
               flags |= SPACE;
               break;
 
-            case '0':		/* zero padding */
+            case '0': /* zero padding */
               ok['c'] = ok['s'] = 0;
               flags |= ZERO;
               break;
 
-            case '#':		/* alternate output */
+            case '#': /* alternate output */
               ok['c'] = ok['d'] = ok['i'] = ok['s'] = ok['u'] = 0;
               flags |= ALT;
               break;
 
-            case '-':		/* left justification */
+            case '-': /* left justification */
               flags |= MINUS;
               break;
 

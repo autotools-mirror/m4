@@ -189,13 +189,13 @@ func_update ()
     shift
     case $opt in
       # Separate optargs to short options:
-      -f|--force)	vcs_only_file=					;;
-      -\?|-h)		func_usage					;;
-      --help)		func_help					;;
-      --version)	func_version					;;
-      --)		break						;;
-      -*)		func_fatal_help "unrecognized option \`$opt'"	;;
-      *)		set -- "$opt" ${1+"$@"};	break		;;
+      -f|--force)       vcs_only_file=                                  ;;
+      -\?|-h)           func_usage                                      ;;
+      --help)           func_help                                       ;;
+      --version)        func_version                                    ;;
+      --)               break                                           ;;
+      -*)               func_fatal_help "unrecognized option \`$opt'"   ;;
+      *)                set -- "$opt" ${1+"$@"};        break           ;;
     esac
   done
 

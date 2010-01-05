@@ -283,7 +283,7 @@ eval_lex (int32_t *val)
 }
 
 /*---------------------------------------.
-| Main entry point, called from "eval".	 |
+| Main entry point, called from "eval".  |
 `---------------------------------------*/
 
 bool
