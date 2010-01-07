@@ -22,7 +22,7 @@ manual_title = GNU macro processor
 local-checks-to-skip = sc_cast_of_x_alloc_return_value
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = b63892a79436f9f3cd05e10c3c4657ef
+old_NEWS_hash = 0ef74b67f86e4f4ec20b67f02d9b1124
 
 # Always use longhand copyrights.
 update-copyright-env = \

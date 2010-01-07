@@ -1,5 +1,17 @@
 2010-01-07  Eric Blake  <ebb9@byu.net>
 
+	Use correct license on auxiliary documentation.
+	* gnulib: Update to latest.
+	* AUTHORS: Use GFDL 1.3, not 1.2.
+	* README-alpha: Likewise.
+	* README: Likewise.
+	* THANKS: Likewise.
+	* doc/STYLE: Likewise.
+	* modules/README: Likewise.
+	* NEWS: Place under GFDL.
+	* TODO: Likewise.
+	* cfg.mk (old_NEWS_hash): Update.
+
 	Address 'make sc_error_message_uppercase' failures.
 	* m4/output.c (m4_freeze_diversions): Silence false positive.
 	* src/main.c (main): Use 'warning', not 'Warning', in messages.
