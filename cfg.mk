@@ -26,7 +26,7 @@ local-checks-to-skip = sc_cast_of_x_alloc_return_value
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = 0330971054cd4fb4e94b85fe367980f2
+old_NEWS_hash = cc336e70015e3f8faf575099f18e4129
 
 # Always use longhand copyrights.
 update-copyright-env = \
