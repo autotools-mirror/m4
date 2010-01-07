@@ -116,19 +116,17 @@ BUILT_SOURCES  += src/$(GETOPT_H)
 endif
 EXTRA_DIST     += src/getopt.c src/getopt1.c src/getopt.in.h src/getopt_int.h
 
-LINK_WARNING_H = $(srcdir)/$(config_aux_dir)/link-warning.h
 ARG_NONNULL_H = $(srcdir)/$(config_aux_dir)/arg-nonnull.h
 
 # We need the following in order to create an <getopt.h> when the
 # system doesn't have one that works with the given compiler.
-src/getopt.h: src/getopt.in.h $(LINK_WARNING_H) $(ARG_NONNULL_H)
+src/getopt.h: src/getopt.in.h $(ARG_NONNULL_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''HAVE_GETOPT_H''@|$(HAVE_GETOPT_H)|g' \
 	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
 	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
 	      -e 's|@''NEXT_GETOPT_H''@|$(NEXT_GETOPT_H)|g' \
-	      -e '/definition of GL_LINK_WARNING/r $(LINK_WARNING_H)' \
 	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
 	      < $(srcdir)/src/getopt.in.h; \
 	} > $@-t && \

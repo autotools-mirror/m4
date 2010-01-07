@@ -1,3 +1,11 @@
+2010-01-29  Eric Blake  <ebb9@byu.net>
+
+	Document upcoming release.
+	* gnulib: Update to latest.
+	* doc/m4.texinfo (History): Mention 1.4.14.
+	* Makefile.am (src/getopt.h): Drop dependence on now-obsolete
+	link-warning.h.
+
 2010-01-08  Eric Blake  <ebb9@byu.net>
 
 	Address remaining 'make syntax-check' findings.
