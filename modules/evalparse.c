@@ -35,6 +35,8 @@
    both `eval' and `mpeval', but which is redefined appropriately when
    this file is #included into its clients.  */
 
+#include "quotearg.h"
+
 typedef enum eval_token
   {
     ERROR, BADOP,

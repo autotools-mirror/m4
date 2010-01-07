@@ -26,7 +26,6 @@
 
 #include "m4.h"
 
-#include "close-stream.h"
 #include "closein.h"
 #include "configmake.h"
 #include "getopt.h"
@@ -302,7 +301,7 @@ size_opt (char const *opt, int oi, int optchar)
 static void
 process_file (m4 *context, const char *name)
 {
-  if (strcmp (name, "-") == 0)
+  if (STREQ (name, "-"))
     /* TRANSLATORS: This is a short name for `standard input', used
        when a command line file was given as `-'.  */
     m4_push_file (context, stdin, _("stdin"), false);

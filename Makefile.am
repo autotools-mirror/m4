@@ -102,7 +102,7 @@ src_m4_SOURCES += src/stackovf.c
 endif
 src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src
 src_m4_LDFLAGS	= $(AM_LDFLAGS) $(DLPREOPEN)
-src_m4_LDADD	= m4/libm4.la
+src_m4_LDADD	= m4/libm4.la $(LTLIBICONV)
 src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES) m4/libm4.la
 
 ##                                                                      ##
@@ -383,11 +383,11 @@ $(srcdir)/tests/package.m4: .version
 	:; \
 	{ \
 	  echo '# Signature of the current package.'; \
-	  echo 'm4_define([AT_PACKAGE_NAME],      [@PACKAGE_NAME@])'; \
-	  echo 'm4_define([AT_PACKAGE_TARNAME],   [@PACKAGE_TARNAME@])'; \
-	  echo 'm4_define([AT_PACKAGE_VERSION],   [@PACKAGE_VERSION@])'; \
-	  echo 'm4_define([AT_PACKAGE_STRING],    [@PACKAGE_STRING@])'; \
-	  echo 'm4_define([AT_PACKAGE_BUGREPORT], [@PACKAGE_BUGREPORT@])'; \
+	  echo 'm4_define([AT_PACKAGE_NAME],      [$(PACKAGE_NAME)])'; \
+	  echo 'm4_define([AT_PACKAGE_TARNAME],   [$(PACKAGE_TARNAME)])'; \
+	  echo 'm4_define([AT_PACKAGE_VERSION],   [$(PACKAGE_VERSION)])'; \
+	  echo 'm4_define([AT_PACKAGE_STRING],    [$(PACKAGE_STRING)])'; \
+	  echo 'm4_define([AT_PACKAGE_BUGREPORT], [$(PACKAGE_BUGREPORT)])'; \
 	} > $(srcdir)/tests/package.m4
 
 tests/atconfig: config.status

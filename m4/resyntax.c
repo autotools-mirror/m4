@@ -99,7 +99,7 @@ m4_regexp_syntax_encode (const char *spec)
 
   for (resyntax = m4_resyntax_map; resyntax->spec != NULL; ++resyntax)
     {
-      if (!strcmp (resyntax->spec, canonical))
+      if (STREQ (resyntax->spec, canonical))
         break;
     }
 

@@ -619,6 +619,9 @@ extern void m4__include_init (m4 *);
    casting away any const.  */
 #define DELETE(Expr)    ((Expr) = (free ((void *) (Expr)), (void *) 0))
 
+/* Avoid negative logic when comparing two strings.  */
+#define STREQ(a, b) (strcmp (a, b) == 0)
+
 
 #if DEBUG
 # define DEBUG_INCL     1

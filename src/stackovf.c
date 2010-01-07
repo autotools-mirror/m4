@@ -118,7 +118,7 @@
 
 typedef void (*handler_t) (void);
 
-#if defined(__ultrix) && defined(__vax)
+#if defined __ultrix && defined __vax
 extern char    *sbrk            (int);
 extern int      getrlimit       (int, struct rlimit *);
 extern int      sigstack        (struct sigstack *, struct sigstack *);
@@ -313,7 +313,7 @@ Error - Do not know how to set up stack-ovf trap handler...
   /* Calculate the approximate expected addr for a stack-ovf trap.  */
 
   if (getrlimit (RLIMIT_STACK, &rl) < 0)
-    error (EXIT_FAILURE, errno, "getrlimit");
+    error (EXIT_FAILURE, errno, _("getrlimit"));
   stack_len = (rl.rlim_cur < rl.rlim_max ? rl.rlim_cur : rl.rlim_max);
   stackbot = (char *) argv;
   grows_upward = ((char *) &stack_len > stackbot);
@@ -386,7 +386,7 @@ Error - Do not know how to set up stack-ovf trap handler...
         free (stackbuf);
         if (errno == ENOSYS)
           return;
-        error (EXIT_FAILURE, errno, "sigaltstack");
+        error (EXIT_FAILURE, errno, _("sigaltstack"));
       }
   }
 
@@ -408,7 +408,7 @@ Error - Do not know how to set up stack-ovf trap handler...
         free (stackbuf);
         if (errno == ENOSYS)
           return;
-        error (EXIT_FAILURE, errno, "sigstack");
+        error (EXIT_FAILURE, errno, _("sigstack"));
       }
   }
 
@@ -431,7 +431,7 @@ Error - Do not know how to set up stack-ovf trap handler...
   sigemptyset (&act.sa_mask);
   act.sa_flags = (SA_ONSTACK | SA_RESETHAND | SA_SIGINFO);
   if (sigaction (SIGSEGV, &act, NULL) < 0)
-    error (EXIT_FAILURE, errno, "sigaction");
+    error (EXIT_FAILURE, errno, _("sigaction"));
 
 #else /* ! HAVE_SIGACTION */
 
@@ -439,7 +439,7 @@ Error - Do not know how to set up stack-ovf trap handler...
   vec.sv_mask = 0;
   vec.sv_flags = (SV_ONSTACK | SV_RESETHAND);
   if (sigvec (SIGSEGV, &vec, NULL) < 0)
-    error (EXIT_FAILURE, errno, "sigvec");
+    error (EXIT_FAILURE, errno, _("sigvec"));
 
 #endif /* ! HAVE_SIGACTION */
 

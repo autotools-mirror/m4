@@ -114,11 +114,11 @@ BEGIN_C_DECLS
    a way sympathetic to the compiler to maximise optimization.  */
 #undef M4_STMT_START
 #undef M4_STMT_END
-#if defined (__GNUC__) && !defined (__STRICT_ANSI__) && !defined (__cplusplus)
+#if defined __GNUC__ && !defined __STRICT_ANSI__ && !defined __cplusplus
 # define M4_STMT_START        (void)(
 # define M4_STMT_END          )
 #else
-# if (defined (sun) || defined (__sun__))
+# if defined sun || defined __sun__
 #  define M4_STMT_START      if (1)
 #  define M4_STMT_END        else (void)0
 # else

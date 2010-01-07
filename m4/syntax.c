@@ -63,7 +63,7 @@
    will not show up in the syntax-table.
 
    Having a syntax table allows new facilities.  The new builtin
-   "changesyntax" allows the the user to change the category of any
+   "changesyntax" allows the user to change the category of any
    character.
 
    By default, '\n' is both ECOMM and SPACE, depending on the context.

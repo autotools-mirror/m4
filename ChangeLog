@@ -1,3 +1,25 @@
+2010-01-08  Eric Blake  <ebb9@byu.net>
+
+	Address remaining 'make syntax-check' findings.
+	* gnulib: Update to latest.
+	* Makefile.am (tests/package.m4): Avoid @@ substitution.
+	(src_m4_LDADD): Link with libiconv.
+	* m4/m4private.h (STREQ): New macro.
+	* m4/resyntax.c (m4_regexp_syntax_encode): Use it.
+	* src/main.c (process_file): Likewise.
+	(includes): Drop unused header.
+	* m4/macro.c (m4_arg_equal): Adjust comment.
+	* m4/syntax.c: Likewise.
+	* m4/system_.h: Avoid useless preprocessor parenthesis.
+	* ltdl/m4/stackovf.m4 (M4_SYS_STACKOVF): Likewise.
+	* src/stackovf.c: Likewise.
+	(setup_stackovf_trap): Mark diagnostics.
+	* modules/mpeval.c (includes): Move quotearg.h inclusion...
+	* modules/evalparse.c (includes): ...to where it is used.
+	* cfg.mk (local-checks-to-skip): Exempt tests that cause spurious
+	failures, but first fix what they were intended to detect.
+	(_makefile_at_at_check_exceptions): Allow an exception.
+
 2010-01-07  Eric Blake  <ebb9@byu.net>
 
 	Use correct license on auxiliary documentation.

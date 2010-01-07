@@ -1272,8 +1272,8 @@ m4_arg_text (m4 *context, m4_macro_args *argv, size_t arg, bool flatten)
 /* Given ARGV, compare text arguments INDEXA and INDEXB for equality.
    Both indices must be non-zero.  Return true if the arguments
    contain the same contents; often more efficient than
-   !strcmp (m4_arg_text (context, argv, indexa),
-            m4_arg_text (context, argv, indexb)).  */
+   STREQ (m4_arg_text (context, argv, indexa),
+          m4_arg_text (context, argv, indexb)).  */
 bool
 m4_arg_equal (m4 *context, m4_macro_args *argv, size_t indexa, size_t indexb)
 {

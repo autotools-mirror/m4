@@ -19,7 +19,15 @@ manual_title = GNU macro processor
 
 # Tests not to run as part of "make syntax-check".
 # M4 intentionally uses a coding style that compiles under C++.
-local-checks-to-skip = sc_cast_of_x_alloc_return_value
+# sc_proper_name_utf8_requires_ICONV doesn't work with non-recursive Makefile
+# sc_po_check assumes a directory layout that we don't quite provide
+local-checks-to-skip = sc_cast_of_x_alloc_return_value \
+	sc_proper_name_utf8_requires_ICONV \
+	sc_po_check
+
+# PRAGMA_SYSTEM_HEADER includes #, which does not work through a
+# Makefile variable, so we exempt it.
+_makefile_at_at_check_exceptions = ' && !/PRAGMA_SYSTEM_HEADER/'
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
 old_NEWS_hash = 0ef74b67f86e4f4ec20b67f02d9b1124
