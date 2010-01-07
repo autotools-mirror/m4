@@ -1,9 +1,14 @@
+2010-01-29  Eric Blake  <ebb9@byu.net>
+
+	Document upcoming release.
+	* gnulib: Update to latest.
+	* doc/m4.texinfo (History): Mention 1.4.14.
+
 2010-01-07  Eric Blake  <ebb9@byu.net>
 
 	Use correct license on auxiliary documentation.
 	* gnulib: Update to latest.
 	* AUTHORS: Use GFDL 1.3, not 1.2.
-	* BACKLOG: Likewise.
 	* README: Likewise.
 	* THANKS: Likewise.
 	* TODO: Likewise.
