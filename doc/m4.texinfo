@@ -1392,13 +1392,15 @@ whitespace so that less whitespace is output (which, although harmless
 to shell scripts, can be visually unappealing), and fixes the quoting
 issues so that the capitalization occurs when the macro
 @samp{gl_STRING_MODULE_INDICATOR} is invoked, rather then when it is
-defined.
+defined.  It also adds another layer of quoting to the first argument of
+@code{translit}, to ensure that the output will be rescanned as a string
+rather than a potential uppercase macro name needing further expansion.
 
 @example
 changequote([,])dnl
 define([gl_STRING_MODULE_INDICATOR],
   [dnl comment
-  GNULIB_[]translit([$1], [a-z], [A-Z])=1dnl
+  GNULIB_[]translit([[$1]], [a-z], [A-Z])=1dnl
 ])dnl
   gl_STRING_MODULE_INDICATOR([strcase])
 @result{}    GNULIB_STRCASE=1
@@ -1407,7 +1409,7 @@ define([gl_STRING_MODULE_INDICATOR],
 The parsing of the first line is unchanged.  The second line sees the
 name of the macro to define, then sees the discarded @samp{@key{NL}}
 and two spaces, as before.  But this time, the next token is
-@samp{[dnl comment@key{NL}@ @ GNULIB_[]translit([$1], [a-z],
+@samp{[dnl comment@key{NL}@ @ GNULIB_[]translit([[$1]], [a-z],
 [A-Z])=1dnl@key{NL}]}, which includes nested quotes, followed by
 @samp{)} to end the macro definition and @samp{dnl} to skip the
 newline.  No early expansion of @code{translit} occurs, so the entire
@@ -1424,10 +1426,11 @@ output literally.  The token @samp{[]} is an empty string, so it does
 not affect output.  Then the token @samp{translit} is encountered.
 
 This time, the arguments to @code{translit} are parsed as @samp{(},
-@samp{[strcase]}, @samp{,}, @samp{ }, @samp{[a-z]}, @samp{,}, @samp{ },
+@samp{[[strcase]]}, @samp{,}, @samp{ }, @samp{[a-z]}, @samp{,}, @samp{ },
 @samp{[A-Z]}, and @samp{)}.  The two spaces are discarded, and the
-translit results in the desired result @samp{STRCASE}.  This is
-rescanned, but since it is not a macro name, it is output literally.
+translit results in the desired result @samp{[STRCASE]}.  This is
+rescanned, but since it is a string, the quotes are stripped and the
+only output is a literal @samp{STRCASE}.
 Then the scanner sees @samp{=} and @samp{1}, which are output
 literally, followed by @samp{dnl} which discards the rest of the
 definition of @code{gl_STRING_MODULE_INDICATOR}.  The newline at the
