@@ -27,7 +27,7 @@ the build of `m4' use /path/to/dir/include/sigsegv.h as appropriate.
 The use of this library is optional; the only difference in having it
 available is that it increases the number of platforms where `m4' can
 correctly distinguish stack overflow from an internal bug.  It is
-recommended that you use version 2.6 or newer.
+recommended that you use version 2.8 or newer.
 
 In the subdirectory `examples' you will find various m4 files, ranging
 from trivial test files to rather advanced macros.  If you intend to

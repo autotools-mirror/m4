@@ -1,5 +1,11 @@
 2010-02-24  Eric Blake  <eblake@redhat.com>
 
+	Release Version 1.4.14.
+	* gnulib: Update to latest.
+	* README: Increase libsigsegv recommendation.
+	* HACKING: Likewise.  Tweak release instructions.
+	* NEWS: Mention the release.
+
 	Improve parsing example.
 	* doc/m4.texinfo (Input processing): Double-quote argument to
 	translit, for robustness.
