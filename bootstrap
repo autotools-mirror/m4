@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2010-01-05
+# bootstrap (GNU M4) version 2010-03-02
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software
@@ -24,6 +24,12 @@
 # Usage: $progname [options]
 
 # -f      --force            bootstrap even when sources are not from git
+#         --gnulib-srcdir=DIRNAME
+#                            Specify the local directory where gnulib
+#                            sources reside.  Use this if you already
+#                            have gnulib sources on your machine, and
+#                            do not want to waste your bandwidth downloading
+#                            them again.  Defaults to $GNULIB_SRCDIR.
 # -v      --version          print version information
 # -h,-?   --help             print short or long help message
 
@@ -190,6 +196,8 @@ func_update ()
     case $opt in
       # Separate optargs to short options:
       -f|--force)       vcs_only_file=                                  ;;
+      --gnulib-srcdir=*)
+        GNULIB_SRCDIR=`expr "X$opt" : 'X--gnulib-srcdir=\(.*\)'`        ;;
       -\?|-h)           func_usage                                      ;;
       --help)           func_help                                       ;;
       --version)        func_version                                    ;;
