@@ -271,8 +271,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * Run `git tag -s -m <version> -u <gpg_key> v<version>' with the desired
   version number.  Do not push anything upstream at this point.
 
-* Run `make maintainer-distcheck'.  If there are any problems, fix them,
-  run `git tag -d v<version>' and start again from the `git commit' step.
+* Run `make distcheck'.  If there are any problems, fix them, then run
+  `git tag -d v<version>' and start again from the `git commit' step.
 
 * Run `make <target>', with target set to `stable, `alpha', or `beta' as
   appropriate.  This will run various additional checks and create diff
@@ -303,7 +303,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   to push the release tag and complete the release.
 
 * For stable releases, update the webpages.
-  Run`build-aux/gnu-web-doc-update', which runs `make web-manual' on a
+  Run `build-aux/gnu-web-doc-update', which runs `make web-manual' on a
   temporary git branch corresponding to the release, then copies the
   contents of doc/manual into a CVS checkout of the M4 manual
   repository.  Follow up with any needed edits to m4.html, using:
@@ -312,10 +312,10 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Post a news blurb on https://savannah.gnu.org/projects/m4.
 
-* Update the Free Software Directory.  Checkout the CVS sources:
-    cvs -d :pserver:anonymous@cvs.sv.gnu.org:/sources/directory \
-      co directory/m4.txt
-  After making edits, mail the diff to <bug-directory@gnu.org>.
+* Update the Free Software Directory.  Browse to:
+    http://directory.fsf.org/project/m4/
+  and send an email to <bug-directory@gnu.org> mentioning any content
+  that needs to be updated.
 
 -----------
 Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software

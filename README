@@ -16,8 +16,8 @@ process requires that you first install a released copy of GNU `m4'.
 If you are just trying to build `m4' from a released tarball, you
 should not normally need to run `./bootstrap' or `autoreconf'; just go
 ahead and start with `./configure'.  If you are trying to build `m4'
-from git or CVS, more information can be found in the file HACKING,
-only found in a version control checkout.
+from git, more information can be found in the version-control-only
+file HACKING.
 
 In the subdirectory `examples' you will find various m4 files, ranging
 from trivial test files to rather advanced macros.  If you intend to
