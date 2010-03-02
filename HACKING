@@ -88,7 +88,7 @@ and is not part of a release distribution.
   variable GNULIB_SRCDIR to point to the previous checkout to speed up
   the process.  Additionally, both the bootstrap script and gnulib-tool
   require a shell that supports functions, so you can set the
-  environment variable  CONFIG_SHELL to choose a better shell on systems
+  environment variable CONFIG_SHELL to choose a better shell on systems
   (like Solaris) where /bin/sh is lacking.  Thus, you may find it
   convenient to run:
     GNULIB_SRCDIR=path/to/gnulib CONFIG_SHELL=path/to/sh \
@@ -266,12 +266,18 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 * If you do not have access to the mailing list administrative interface,
   approach the list owners for the password.  Be sure to check the lists
   (esp. bug-m4) for outstanding bug reports also in the list of
-  pending moderation requests.  This step is not strictly necessary.
+  pending moderation requests.  This step is not strictly necessary, but
+  helps, since by default, m4-announce rejects all posts, so you have to
+  get an administrator to allow your announcement through.
 
 * Make sure you have rsync installed.
 
 * Make sure you have a copy of the previous release tarball in the build
   directory.
+
+* Make sure you have GNU make installed.
+
+* Make sure you have an up-to-date version of help2man installed.
 
 * Make sure your locale is sane, e.g. by exporting LC_ALL=C.
 
@@ -282,30 +288,35 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   In particular, ensure that the gnulib version is at least as new as
   the latest stable libtool release.
 
-* Update the version number in configure.ac.
-  See http://www.gnu.org/software/libtool/contribute.html for details of
-  the numbering scheme (m4 uses the same scheme as libtool).
-
-* Update NEWS, ChangeLog.
+* Update the version number in NEWS and ChangeLog, and mention in README
+  whether the release is stable.  See
+  http://www.gnu.org/software/libtool/contribute.html for details of the
+  numbering scheme (M4 uses a similar scheme to libtool, although
+  intra-release versions carry more information thanks to
+  git-version-gen).
 
 * Run ./bootstrap, perhaps with environment variables set.
 
-* Run ./configure (or create a build directory first and run configure
-  from there, if you want to keep the build tree separate).
+* Run ./configure (a VPATH build should work, but is less tested).
 
-* Run `make distcheck'.  If there are any problems, fix them and start
-  again.
+* Run `make'.  The file doc/m4.1 needs to exist for a distribution, and
+  be up-to-date with m4 --help output, but `make dist' intentionally
+  does not depend on running a built binary.
 
-* Run ./commit from the source tree.
+* Run `git commit' from the source tree if there are any changes from
+  the previous steps.
 
-* TODO - adjust this step to account for git:
-  Run `make cvs-dist', which will build a release tarball (with `make
-  distcheck') and tag the tree with release-$(VERSION).
+* Run `git tag -s -m <version> -u <gpg_key> v<version>' with the desired
+  version number.  Do not push anything upstream at this point.
 
-* Run 'make deltas' (pass LASTRELEASE=maj.min[.mic[alpha]] if needed) to
-  create diff files between the previous release tarball and the new.
+* Run `make distcheck'.  If there are any problems, fix them, then run
+  `git tag -d v<version>' and start again from the `git commit' step.
 
-* Run '[../]./gnupload --to [dest].gnu.org:m4 [files]' to create
+* Run `make <target>', with target set to `stable, `alpha', or `beta' as
+  appropriate.  This will run various additional checks and create diff
+  files from the previous version.
+
+* Run './build-aux/gnupload --to [dest].gnu.org:m4 [files]' to create
   detached gpg signature and clear signed directive files, and upload
   the combination to the correct location.  For an alpha release,
   gnupload will place files in alpha.gnu.org, in /incoming/alpha; for a
@@ -325,17 +336,22 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   See http://www.gnu.org/software/libtool/contribute.html for details of
   the numbering scheme.
 
-* Update NEWS, ChangeLog.
+* Update NEWS, README, and ChangeLog to start the intra-release changes,
+  and run `git commit'.  Then run `git push origin refs/tags/v<version>'
+  to push the release tag and complete the release.
 
-* Run ./commit.
-
-* For non-alpha releases, update the webpages.  Replace manual.html with
-  the new one (generate with `make web-manual').
+* For stable releases, update the webpages.
+  Run `build-aux/gnu-web-doc-update', which runs `make web-manual' on a
+  temporary git branch corresponding to the release, then copies the
+  contents of doc/manual into a CVS checkout of the M4 manual
+  repository.  Follow up with any needed edits to m4.html, using:
+    export CVS_RSH=ssh
+    cvs -z3 -d:ext:<user>@cvs.savannah.gnu.org:/web/m4 co m4
 
 * Update the Free Software Directory.  Browse to:
     http://directory.fsf.org/project/m4/
-  and send an email to <bug-directory@gnu.org> mentioning any
-  content that needs to be updated.
+  and send an email to <bug-directory@gnu.org> mentioning any content
+  that needs to be updated.
 
 -----------
 Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software

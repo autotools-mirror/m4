@@ -333,7 +333,7 @@ contains the following beta features that were deemed worth deferring until
 
 ** A number of portability improvements inherited from gnulib.
 
-* Noteworthy changes in Version 1.4.14 (2009-??-??) [stable]
+* Noteworthy changes in Version 1.4.14 (2010-02-24) [stable]
   Released by Eric Blake, based on git version 1.4.13.*
 
 ** Fix regression introduced in 1.4.12 where executing with stdout closed
