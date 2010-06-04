@@ -20,6 +20,8 @@
 
 #include <config.h>
 
+#include <sys/stat.h>
+
 #include "m4private.h"
 
 #include "binary-io.h"
