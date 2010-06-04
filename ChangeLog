@@ -1,3 +1,10 @@
+2010-06-04  Eric Blake  <eblake@redhat.com>
+
+	Fix build on newer glibc.
+	* src/m4.h (includes): Add <sys/stat.h>.
+	* THANKS: Update.
+	Reported by Todd Rinaldo.
+
 2010-03-02  Giuseppe Scrivano  <gscrivano@gnu.org>  (tiny change)
 
 	Support bootstrap --gnulib-srcdir=DIR.
