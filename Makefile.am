@@ -424,7 +424,10 @@ installcheck-local: tests/atconfig tests/atlocal $(TESTSUITE) \
 
 # Enough users install GNU M4 as gm4 that we make sure 'make installcheck'
 # will handle that, as part of making a release.
-DISTCHECK_CONFIGURE_FLAGS = --disable-assert --program-prefix=g
+DISTCHECK_CONFIGURE_FLAGS = \
+	--disable-assert \
+	--program-prefix=g \
+	--enable-cxx
 
 # We need to remove any file droppings left behind by testsuite.
 clean-local-tests:

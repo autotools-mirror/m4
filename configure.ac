@@ -64,6 +64,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 ## C compiler checks. ##
 ## ------------------ ##
 AC_PROG_CC
+AC_DEFUN([gl_CXX_CHOICE_DEFAULT_NO])
 M4_EARLY
 
 AC_SYS_LARGEFILE
