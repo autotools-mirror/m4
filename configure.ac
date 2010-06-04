@@ -31,6 +31,7 @@ AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_HEADERS([lib/config.h:lib/config.hin])
 
 AC_PROG_CC
+AC_DEFUN([gl_CXX_CHOICE_DEFAULT_NO])
 M4_EARLY
 
 # M4 is single-threaded; so we can optimize gnulib code by using this:
