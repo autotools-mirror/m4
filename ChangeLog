@@ -1,5 +1,13 @@
 2010-06-04  Eric Blake  <eblake@redhat.com>
 
+	Update to newer gnulib.
+	* gnulib: Update to latest, and include C++ tests.
+	* configure.ac (gl_CXX_CHOICE_DEFAULT_NO): Make default for C++
+	tests be disabled...
+	* Makefile.am (DISTCHECK_CONFIGURE_FLAGS): ...but run them when
+	building package.
+	* m4/gnulib-cache.m4: Regenerate.
+
 	Fix build on newer glibc.
 	* src/m4.h (includes): Add <sys/stat.h>.
 	* THANKS: Update.
