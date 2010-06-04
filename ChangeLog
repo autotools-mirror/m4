@@ -1,5 +1,8 @@
 2010-06-04  Eric Blake  <eblake@redhat.com>
 
+	Reflect recent copyright assignment.
+	* AUTHORS: Add David Warme.
+
 	Update to newer gnulib.
 	* gnulib: Update to latest, and include C++ tests.
 	* configure.ac (gl_CXX_CHOICE_DEFAULT_NO): Make default for C++
