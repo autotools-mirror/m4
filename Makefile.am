@@ -118,7 +118,7 @@ src_m4_SOURCES += src/stackovf.c
 endif
 src_m4_CPPFLAGS	= $(AM_CPPFLAGS) -Isrc -I$(srcdir)/src
 src_m4_LDFLAGS	= $(AM_LDFLAGS) $(DLPREOPEN)
-src_m4_LDADD	= m4/libm4.la $(LTLIBICONV)
+src_m4_LDADD	= m4/libm4.la $(LTLIBICONV) $(LTLIBTHREAD)
 src_m4_DEPENDENCIES = $(PREOPEN_DEPENDENCIES) m4/libm4.la
 
 ##                                                                      ##
