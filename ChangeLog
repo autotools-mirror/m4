@@ -1,3 +1,13 @@
+2010-07-30  Eric Blake  <eblake@redhat.com>
+
+	Update to newer gnulib.
+	* gnulib: Update to latest, for strtod fix.
+	* src/Makefile.am (m4_LDADD): Update link libraries accordingly.
+	* cfg.mk (local-checks-to-skip): Skip broken check.
+	* doc/m4.texinfo: Drop all use of @acronym{}.
+	* THANKS: Update.
+	Reported by Rainer Tammer.
+
 2010-06-04  Eric Blake  <eblake@redhat.com>
 
 	Reflect recent copyright assignment.
