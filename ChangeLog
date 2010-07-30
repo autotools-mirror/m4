@@ -1,3 +1,9 @@
+2010-08-30  Eric Blake  <eblake@redhat.com>
+
+	Document recent bug fixes.
+	* NEWS: Add some entries.
+	* gnulib: Update to latest, for more AIX fixes.
+
 2010-07-30  Eric Blake  <eblake@redhat.com>
 
 	Update to newer gnulib.
