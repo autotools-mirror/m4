@@ -1,3 +1,8 @@
+2010-08-30  Carlo Teubner  <carlo.teubner@gmail.com>  (tiny change)
+
+	Avoid a crash with bad format string.
+	* src/format.c (expand_format): Fix off-by-one error.
+
 2010-08-30  Eric Blake  <eblake@redhat.com>
 
 	Document recent bug fixes.
