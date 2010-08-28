@@ -333,7 +333,7 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
         }
 
       c = *fmt;
-      if (c > sizeof ok || !ok[c] || !f_len)
+      if (sizeof ok <= c || !ok[c] || !f_len)
         {
           m4_warn (context, 0, me, _("unrecognized specifier in %s"),
                    quotearg_style_mem (locale_quoting_style, f, M4ARGLEN (1)));
