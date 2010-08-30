@@ -329,7 +329,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
         }
 
       c = *fmt;
-      if (c > sizeof ok || !ok[c] || !f_len)
+      if (sizeof ok <= c || !ok[c] || !f_len)
         {
           m4_warn (0, me, _("unrecognized specifier in %s"),
                    quotearg_style_mem (locale_quoting_style, f, ARG_LEN (1)));
