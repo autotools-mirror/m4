@@ -1,5 +1,9 @@
 2010-08-30  Eric Blake  <eblake@redhat.com>
 
+	Document recent bug fixes.
+	* NEWS: Add some entries.
+	* gnulib: Update to latest, for more AIX fixes.
+
 	Update to newer gnulib.
 	* gnulib: Update to latest, for strtod fix.
 	* src/Makefile.am (m4_LDADD): Update link libraries accordingly.

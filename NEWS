@@ -3,10 +3,6 @@ GNU M4 NEWS - User visible changes.
 * Noteworthy changes in Version 1.6 (????-??-??) [stable]
   Released by ????, based on git versions 1.4.10b.x-* and 1.5.*
 
-** Fix regression introduced in 1.4.4b where using `traceon' could delete
-   a macro.  This was most noticeable with `traceon(`traceon')', but
-   would also happen in cases such as `foo(traceon(`foo'))'.
-
 ** Fix regressions introduced in 1.4.10b:
 *** Using `builtin' or `indir' to perform nested `shift' calls triggered
     an assertion failure (not present in 1.4.11).
@@ -144,6 +140,12 @@ contains the following beta features that were deemed worth deferring until
 ** Enhance the `ifelse' and `shift' builtins so that tail-recursive
    algorithms based on `$@' operate in linear, rather than quadratic, time
    and memory.
+
+** A number of portability improvements inherited from gnulib.
+
+* Noteworthy changes in release 1.4.15 (2010-08-??) [stable]
+
+** Fix compilation against newer glibc, and on AIX 7.1BETA.
 
 ** A number of portability improvements inherited from gnulib.
 
