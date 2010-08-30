@@ -1625,7 +1625,7 @@ match_input (m4 *context, const char *s, size_t len, bool consume)
     }
 
   next_char (context, false, false, false);
-  for (n = 1, t = s++; (ch = peek_char (context, false)) == to_uchar (*s++); )
+  for (n = 1, t = s++; peek_char (context, false) == to_uchar (*s++); )
     {
       next_char (context, false, false, false);
       n++;
