@@ -2130,7 +2130,6 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   length = strlen (victim);
 
   offset = 0;
-  matchpos = 0;
   while (offset <= length)
     {
       matchpos = re_search (&buf, victim, length,

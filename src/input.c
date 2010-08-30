@@ -614,14 +614,14 @@ match_input (const char *s, bool consume)
   if (s[1] == '\0')
     {
       if (consume)
-        (void) next_char ();
+        next_char ();
       return true;                      /* short match */
     }
 
-  (void) next_char ();
-  for (n = 1, t = s++; (ch = peek_input ()) == to_uchar (*s++); )
+  next_char ();
+  for (n = 1, t = s++; peek_input () == to_uchar (*s++); )
     {
-      (void) next_char ();
+      next_char ();
       n++;
       if (*s == '\0')           /* long match */
         {
@@ -883,7 +883,7 @@ next_token (token_data *td, int *line)
       while ((ch = peek_input ()) != CHAR_EOF && (isalnum (ch) || ch == '_'))
         {
           obstack_1grow (&token_stack, ch);
-          (void) next_char ();
+          next_char ();
         }
       type = TOKEN_WORD;
     }

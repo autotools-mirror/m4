@@ -789,12 +789,11 @@ exp_term (eval_token et, int32_t *v1)
 static eval_error
 unary_term (eval_token et, int32_t *v1)
 {
-  eval_token et2 = et;
   eval_error er;
 
   if (et == PLUS || et == MINUS || et == NOT || et == LNOT)
     {
-      et2 = eval_lex (v1);
+      eval_token et2 = eval_lex (v1);
       if (et2 == ERROR)
         return UNKNOWN_INPUT;
 
