@@ -145,6 +145,9 @@ contains the following beta features that were deemed worth deferring until
 
 * Noteworthy changes in release 1.4.15 (2010-08-??) [stable]
 
+** Fix regression introduced in 1.4.9b where the format builtin could
+   crash on an invalid format string.
+
 ** Fix compilation against newer glibc, and on AIX 7.1BETA.
 
 ** A number of portability improvements inherited from gnulib.

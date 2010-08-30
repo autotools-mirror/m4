@@ -1,3 +1,10 @@
+2010-08-30  Eric Blake  <eblake@redhat.com>
+
+	Test previous commit.
+	* doc/m4.texinfo (Format): Add a test.
+	* NEWS: Document the fix.
+	* THANKS: Update.
+
 2010-08-30  Carlo Teubner  <carlo.teubner@gmail.com>  (tiny change)
 
 	Avoid a crash with bad format string.
