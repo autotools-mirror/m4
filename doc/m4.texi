@@ -7522,6 +7522,18 @@ format(`%.1f', `2a')
 @result{}2.0
 @end example
 
+@ignore
+@comment Expose a crash with a bad format string fixed in 1.4.15.
+@comment Unfortunately, 8-bit bytes are hard to check for; but the
+@comment exit status is enough to sniff the crash in broken versions.
+
+@comment xerr: ignore
+@example
+format(`%'format(`%c', `128'))
+@result{}
+@end example
+@end ignore
+
 @node Arithmetic
 @chapter Macros for doing arithmetic
 
