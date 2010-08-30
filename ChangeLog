@@ -1,5 +1,12 @@
 2010-08-30  Eric Blake  <eblake@redhat.com>
 
+	Clean up compiler warnings.
+	* src/builtin.c (m4_patsubst): Drop dead store.
+	* src/eval.c (unary_term): Likewise.
+	* src/input.c (match_input): Likewise.
+	* src/symtab.c (symtab_debug): Drop useless casts to void.
+	* src/m4.c (main): Add hints to aid clang analysis.
+
 	Test previous commit.
 	* doc/m4.texinfo (Format): Add a test.
 	* NEWS: Document the fix.

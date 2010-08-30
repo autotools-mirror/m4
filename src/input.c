@@ -1373,7 +1373,7 @@ match_input (const char *s, size_t slen, bool consume)
     }
 
   next_char (false, false);
-  for (n = 1, t = s++; (ch = peek_input (false)) == to_uchar (*s++); )
+  for (n = 1, t = s++; peek_input (false) == to_uchar (*s++); )
     {
       next_char (false, false);
       n++;

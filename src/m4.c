@@ -606,6 +606,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
       switch (defines->code)
         {
         case 'D':
+          assert (arg);
           {
             const char *value = strchr (arg, '=');
             size_t len = value ? (size_t) (value - arg) : strlen (arg);
@@ -615,6 +616,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
           break;
 
         case 'U':
+          assert (arg);
           lookup_symbol (arg, strlen (arg), SYMBOL_DELETE);
           break;
 
@@ -625,6 +627,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
           break;
 
         case 't':
+          assert (arg);
           sym = lookup_symbol (arg, strlen (arg), SYMBOL_INSERT);
           SYMBOL_TRACED (sym) = true;
           break;
@@ -634,6 +637,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
           break;
 
         case '\1':
+          assert (arg);
           process_file (arg);
           break;
 

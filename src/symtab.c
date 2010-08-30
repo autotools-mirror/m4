@@ -438,10 +438,7 @@ symtab_debug (void)
       if (s == NULL)
         xprintf ("Name `%s' is unknown\n", text);
 
-      if (delete)
-        lookup_symbol (text, len, SYMBOL_DELETE);
-      else
-        lookup_symbol (text, len, SYMBOL_INSERT);
+      lookup_symbol (text, len, delete ? SYMBOL_DELETE : SYMBOL_INSERT);
     }
   symtab_print_list (i++);
 }
