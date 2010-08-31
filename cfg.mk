@@ -34,7 +34,7 @@ local-checks-to-skip += sc_copyright_check
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = eb4dc25baafabb69ad319dd6b981f37c
+old_NEWS_hash = cd89f6716f741756751054c484b7044b
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
