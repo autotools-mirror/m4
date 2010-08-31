@@ -1,8 +1,8 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release 1.4.15 (2010-08-??) [stable]
+* Noteworthy changes in release 1.4.15 (2010-08-31) [stable]
 
-** Fix regression introduced in 1.4.9b where the format builtin could
+** Fix regression introduced in 1.4.9b where the `format' builtin could
    crash on an invalid format string.
 
 ** Fix compilation against newer glibc, and on AIX 7.1BETA.

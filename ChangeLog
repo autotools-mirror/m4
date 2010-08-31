@@ -1,3 +1,9 @@
+2010-08-31  Eric Blake  <eblake@redhat.com>
+
+	Release Version 1.4.15.
+	* gnulib: Update to latest.
+	* NEWS: Mention the release.
+
 2010-08-30  Eric Blake  <eblake@redhat.com>
 
 	Clean up compiler warnings.
