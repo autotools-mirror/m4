@@ -29,7 +29,7 @@ local-checks-to-skip += sc_copyright_check
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = eb4dc25baafabb69ad319dd6b981f37c
+old_NEWS_hash = 0943f9ca58cb2b2b08fd1fbb8d4b7337
 
 # Always use longhand copyrights.
 update-copyright-env = \

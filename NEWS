@@ -142,14 +142,16 @@ contains the following beta features that were deemed worth deferring until
 
 ** A number of portability improvements inherited from gnulib.
 
-* Noteworthy changes in release 1.4.15 (2010-08-??) [stable]
 
-** Fix regression introduced in 1.4.9b where the format builtin could
+* Noteworthy changes in release 1.4.15 (2010-08-31) [stable]
+
+** Fix regression introduced in 1.4.9b where the `format' builtin could
    crash on an invalid format string.
 
 ** Fix compilation against newer glibc, and on AIX 7.1BETA.
 
 ** A number of portability improvements inherited from gnulib.
+
 
 * Noteworthy changes in Version 1.4.14 (2010-02-24) [stable]
   Released by Eric Blake, based on git version 1.4.13.*
@@ -166,6 +168,7 @@ contains the following beta features that were deemed worth deferring until
    Automake CVE-2009-4029).
 
 ** A number of portability improvements inherited from gnulib.
+
 
 * Noteworthy changes in Version 1.4.13 (2009-04-01) [stable]
   Released by Eric Blake, based on git version 1.4.12.*
@@ -191,6 +194,7 @@ contains the following beta features that were deemed worth deferring until
    alternate shell, via the new `configure' option `--with-syscmd-shell'.
 
 ** A number of portability improvements inherited from gnulib.
+
 
 * Noteworthy changes in Version 1.4.12 (2008-10-10) [stable]
   Released by Eric Blake, based on git version 1.4.11.*
@@ -228,6 +232,7 @@ contains the following beta features that were deemed worth deferring until
 
 ** A number of portability improvements inherited from gnulib.
 
+
 * Noteworthy changes in Version 1.4.11 (2008-04-02) [stable]
   Released by Eric Blake, based on git version 1.4.10a
 
@@ -263,6 +268,7 @@ contains the following beta features that were deemed worth deferring until
 
 ** A number of portability improvements inherited from gnulib.
 
+
 * Noteworthy changes in Version 1.4.10 (2007-07-09) [stable]
   Released by Eric Blake, based on CVS version 1.4.9c
 
@@ -274,6 +280,7 @@ contains the following beta features that were deemed worth deferring until
    when handling %c.  However, this area of code has never been documented,
    and currently does not match the POSIX behavior of printf(1), so it may
    have further changes in the next version.
+
 
 * Noteworthy changes in Version 1.4.9b (2007-05-29) [beta]
   Released by Eric Blake, based on CVS version 1.4.9a
