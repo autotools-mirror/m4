@@ -1,3 +1,17 @@
+2010-09-17  Gary V. Vaughan  <gary@gnu.org>
+
+	bootstrap: upgrade to canonical upstream version.
+	* bootstrap.conf: New file to configure gnulib bootstrap.
+	* gl: New gnulib overrides directory.
+	* gl/modules/bootstrap, gl/modules/extract-trace,
+	gl/modules/funclib.sh, gl/modules/inline-source,
+	gl/modules/options-parser: Import canonical bootstrap modules.
+	* gl/build-aux/bootstrap.in, gl/build-aux/extract-trace,
+	gl/build-aux/funclib.sh, gl/build-aix/inline-source,
+	gl/build-aux/options-parser: Import module implementations.
+	* bootstrap: Regenerate.
+	* m4/gnulib-cache.m4: Regenerate.
+
 2013-01-02  Eric Blake  <eblake@redhat.com>
 
 	maint: automake recommends *.texi now
