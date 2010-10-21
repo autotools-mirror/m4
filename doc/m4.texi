@@ -6888,6 +6888,17 @@ index(`abc', `bc', `-4')
 @result{}1
 @end example
 
+@ignore
+@comment Expose a bug in the strstr() algorithm present in glibc
+@comment 2.9 through 2.12 and in gnulib up to Sep 2010.
+
+@example
+index(`;:11-:12-:12-:12-:12-:12-:12-:12-:12.:12.:12.:12.:12.:12.:12.:12.:12-:',
+`:12-:12-:12-:12-:12-:12-:12-:12-')
+@result{}-1
+@end example
+@end ignore
+
 @node Regexp
 @section Searching for regular expressions
 
