@@ -1,3 +1,8 @@
+2010-10-21  Eric Blake  <eblake@redhat.com>
+
+	docs: mention more history
+	* doc/m4.texinfo (History): Add upcoming 1.4.16 release.
+
 2010-08-31  Eric Blake  <eblake@redhat.com>
 
 	Release Version 1.4.15.

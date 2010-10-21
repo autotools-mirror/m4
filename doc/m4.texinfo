@@ -399,7 +399,7 @@ released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, 1.4.6, 1.4.7, and 1.4.8.
 More bug fixes were incorporated in 2007, with releases 1.4.9 and
 1.4.10.  Eric continued with some portability fixes for 1.4.11 and
-1.4.12 in 2008, 1.4.13 in 2009, and 1.4.14 in 2010.
+1.4.12 in 2008, 1.4.13 in 2009, and 1.4.14, 1.4.15, and 1.4.16 in 2010.
 
 Meanwhile, development has continued on new features for @code{m4}, such
 as dynamic module loading and additional builtins.  When complete,
