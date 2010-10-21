@@ -1,5 +1,11 @@
 2010-10-21  Eric Blake  <eblake@redhat.com>
 
+	build: work around glibc and libsigsegv bugs
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Regenerate.
+	* docs/m4.texinfo (Index macro): Expose strstr bug.
+	* NEWS: Mention fixes.
+
 	docs: mention more history
 	* doc/m4.texinfo (History): Add upcoming 1.4.16 release.
 
