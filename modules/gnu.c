@@ -29,8 +29,8 @@
 #endif
 
 #include "modules/m4.h"
-#include "pipe.h"
 #include "quotearg.h"
+#include "spawn-pipe.h"
 #include "wait-process.h"
 
 /* Rename exported symbols for dlpreload()ing.  */
