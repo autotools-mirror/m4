@@ -947,7 +947,7 @@ insert_diversion (int divnum)
 
 /*----------------------------------------------------------------.
 | Get back all diversions.  This is done just before exiting from |
-| main (), and from m4_undivert (), if called without arguments.  |
+| main, and from m4_undivert (), if called without arguments.     |
 `----------------------------------------------------------------*/
 
 void

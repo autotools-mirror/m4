@@ -377,7 +377,7 @@ pop_input (void)
 }
 
 /*-------------------------------------------------------------------.
-| To switch input over to the wrapup stack, main () calls pop_wrapup |
+| To switch input over to the wrapup stack, main calls pop_wrapup    |
 | ().  Since wrapup text can install new wrapup text, pop_wrapup ()  |
 | returns false when there is no wrapup text on the stack, and true  |
 | otherwise.                                                         |
