@@ -20,6 +20,8 @@ manual_title = GNU macro processor
 
 # Tests not to run as part of "make syntax-check".
 local-checks-to-skip =
+# We haven't yet turned on i18n
+local-checks-to-skip += sc_bindtextdomain
 # M4 intentionally uses a coding style that compiles under C++.
 local-checks-to-skip += sc_cast_of_x_alloc_return_value
 # sc_copyright_check is currently broken for multi-line copyrights.
