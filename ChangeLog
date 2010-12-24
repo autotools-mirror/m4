@@ -1,3 +1,8 @@
+2010-12-24  Eric Blake  <eblake@redhat.com>
+
+	maint: reflect recent copyright assignment
+	* AUTHORS: Add Raphael Poss.
+
 2010-10-21  Eric Blake  <eblake@redhat.com>
 
 	build: work around glibc and libsigsegv bugs
