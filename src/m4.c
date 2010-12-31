@@ -397,7 +397,7 @@ main (int argc, char *const *argv)
   signal_message[SIGABRT] = xstrdup (strsignal (SIGABRT));
   signal_message[SIGILL] = xstrdup (strsignal (SIGILL));
   signal_message[SIGFPE] = xstrdup (strsignal (SIGFPE));
-  if (SIGBUS != SIGILL)
+  if (SIGBUS != SIGILL && SIGBUS != SIGSEGV)
     signal_message[SIGBUS] = xstrdup (strsignal (SIGBUS));
   sigemptyset (&act.sa_mask);
   /* One-shot - if we fault while handling a fault, we want to revert

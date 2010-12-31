@@ -1,3 +1,10 @@
+2010-12-31  Eric Blake  <eblake@redhat.com>
+
+	main: avoid leaking string on Haiku
+	* src/m4.c (main): Avoid leak when SIGBUS == SIGSEGV.
+	* THANKS: Update.
+	Reported by Scott McCreary.
+
 2010-12-24  Eric Blake  <eblake@redhat.com>
 
 	build: pull in various gnulib fixes
