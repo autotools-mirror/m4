@@ -27,7 +27,7 @@ the build of `m4' use /path/to/dir/include/sigsegv.h as appropriate.
 The use of this library is optional; the only difference in having it
 available is that it increases the number of platforms where `m4' can
 correctly distinguish stack overflow from an internal bug.  It is
-recommended that you use version 2.6 or newer.
+recommended that you use version 2.9 or newer.
 
 In the subdirectory `examples' you will find various m4 files, ranging
 from trivial test files to rather advanced macros.  If you intend to
@@ -60,6 +60,9 @@ Send bug reports to `bug-m4@gnu.org'.  A bug report is an adequate
 description of the problem: your input, what you expected, what you got,
 and why this is wrong.  Diffs are welcome, but they only describe a
 solution, from which the problem might be uneasy to infer.
+
+For any copyright year range specified as YYYY-ZZZZ in this package
+note that the range specifies every single year in that closed interval.
 
 ========================================================================
 

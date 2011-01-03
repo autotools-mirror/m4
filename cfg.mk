@@ -18,6 +18,11 @@
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
 
+# Always use shorthand copyrights.
+update-copyright-env = \
+  UPDATE_COPYRIGHT_USE_INTERVALS=1 \
+  UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
+
 # Tests not to run as part of "make syntax-check".
 local-checks-to-skip =
 # We haven't yet turned on i18n
@@ -32,11 +37,6 @@ config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
 old_NEWS_hash = 0943f9ca58cb2b2b08fd1fbb8d4b7337
-
-# Always use longhand copyrights.
-update-copyright-env = \
-  UPDATE_COPYRIGHT_USE_INTERVALS=1 \
-  UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
