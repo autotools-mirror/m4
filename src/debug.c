@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1991, 1992, 1993, 1994, 2004, 2006, 2007, 2009, 2010
-   Free Software Foundation, Inc.
+   Copyright (C) 1991-1994, 2004, 2006-2007, 2009-2011 Free Software
+   Foundation, Inc.
 
    This file is part of GNU M4.
 

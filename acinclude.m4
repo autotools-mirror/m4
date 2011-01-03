@@ -1,5 +1,5 @@
 # Local additions to Autoconf macros.
-# Copyright (C) 1992, 1994, 2004, 2006, 2008, 2009, 2010 Free Software
+# Copyright (C) 1992, 1994, 2004, 2006, 2008-2011 Free Software
 # Foundation, Inc.
 # Francois Pinard <pinard@iro.umontreal.ca>, 1992.
 #
