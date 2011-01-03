@@ -1,5 +1,5 @@
 # Customize maint.mk.                           -*- makefile -*-
-# Copyright (C) 2003-2010 Free Software Foundation, Inc.
+# Copyright (C) 2003-2011, 2013 Free Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,6 +17,11 @@
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
 
+# Always use shorthand copyrights.
+update-copyright-env = \
+  UPDATE_COPYRIGHT_USE_INTERVALS=1 \
+  UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
+
 # Tests not to run as part of "make syntax-check".
 # M4 intentionally uses a coding style that compiles under C++.
 # sc_proper_name_utf8_requires_ICONV doesn't work with non-recursive Makefile
@@ -31,11 +36,6 @@ _makefile_at_at_check_exceptions = ' && !/PRAGMA_SYSTEM_HEADER/'
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
 old_NEWS_hash = 63ea02337d29e0ce5574ec04d87df4f9
-
-# Always use longhand copyrights.
-update-copyright-env = \
-  UPDATE_COPYRIGHT_USE_INTERVALS=0 \
-  UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
