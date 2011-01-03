@@ -1,6 +1,6 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release 1.4.16 (2010-??-??) [?]
+* Noteworthy changes in release 1.4.16 (2011-01-??) [?]
 
 ** Ensure the `index' builtin cannot give false positive results.  On
    glibc platforms, this avoids a strstr bug in glibc 2.9 through 2.12;
@@ -701,8 +701,8 @@ mode: outline
 fill-column: 75
 End:
 
-Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009, 2010
-Free Software Foundation, Inc.
+Copyright (C) 1992, 1993, 1994, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+2011 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or

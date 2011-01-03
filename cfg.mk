@@ -1,5 +1,5 @@
 # Customize maint.mk.                           -*- makefile -*-
-# Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free
+# Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free
 # Software Foundation, Inc.
 
 # This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
 
-# Always use longhand copyrights.
+# Always use shorthand copyrights.
 update-copyright-env = \
-  UPDATE_COPYRIGHT_USE_INTERVALS=0 \
+  UPDATE_COPYRIGHT_USE_INTERVALS=1 \
   UPDATE_COPYRIGHT_MAX_LINE_LENGTH=72
 
 # Tests not to run as part of "make syntax-check".
