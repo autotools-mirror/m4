@@ -661,7 +661,7 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
   result = NULL;
   while (result == NULL)
 
-    if (strcmp (ARG (0), ARG (1)) == 0)
+    if (STREQ (ARG (0), ARG (1)))
       result = ARG (2);
 
     else
