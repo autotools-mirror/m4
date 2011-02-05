@@ -1,5 +1,12 @@
 2011-02-07  Eric Blake  <eblake@redhat.com>
 
+	maint: speed up configure, using latest gnulib
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Import fclose and rename modules.
+	* configure.ac (gl_ASSERT_NO_GNULIB_POSIXCHECK): Speed up normal
+	configure runs (and document how to rerun GNULIB_POSIXCHECK).
+	* HACKING: Document GNULIB_POSIXCHECK.
+
 	maint: update http git cloning instructions
 	* HACKING: Git http doesn't like the redirect at git.sv.gnu.org.
 	* THANKS: Update.
