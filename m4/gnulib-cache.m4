@@ -60,6 +60,7 @@
 #  dirname \
 #  error \
 #  execute \
+#  fclose \
 #  fdl-1.3 \
 #  fflush \
 #  filenamecat \
@@ -133,6 +134,7 @@ gl_MODULES([
   dirname
   error
   execute
+  fclose
   fdl-1.3
   fflush
   filenamecat
