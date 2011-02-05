@@ -132,6 +132,11 @@ and is not part of a release distribution.
   version of build-aux files with their newer counterpart; the fix to
   this is updating the submodule to a newer gnulib version.
 
+* If you would like to check that you are not missing out on any useful
+  gnulib modules, comment out the gl_ASSERT_NO_GNULIB_POSIXCHECK in
+  configure.ac, then run 'make CFLAGS='-DGNULIB_POSIXCHECK=1' with gcc,
+  and look at the resulting warnings.
+
 
 4. Test Suite
 =============

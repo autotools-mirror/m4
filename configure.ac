@@ -67,6 +67,11 @@ AC_PROG_CC
 AC_DEFUN([gl_CXX_CHOICE_DEFAULT_NO])
 M4_EARLY
 
+# Maintainer note - comment this line out if you plan to rerun
+# GNULIB_POSIXCHECK testing to see if M4 should be using more modules.
+# Leave it uncommented for normal releases, for faster ./configure.
+gl_ASSERT_NO_GNULIB_POSIXCHECK
+
 AC_SYS_LARGEFILE
 AC_PROG_CPP
 AM_PROG_CC_C_O
