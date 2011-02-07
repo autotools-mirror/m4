@@ -1,3 +1,10 @@
+2011-02-07  Eric Blake  <eblake@redhat.com>
+
+	maint: update http git cloning instructions
+	* HACKING: Git http doesn't like the redirect at git.sv.gnu.org.
+	* THANKS: Update.
+	Reported by Mike Dupont.
+
 2011-02-01  Eric Blake  <eblake@redhat.com>
 
 	maint: update to latest gnulib
