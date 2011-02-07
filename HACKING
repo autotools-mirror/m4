@@ -91,7 +91,7 @@ and is not part of a release distribution.
 
   If you are behind a firewall that blocks the git protocol, you may
   find it useful to do:
-    git config --global url.http://git.sv.gnu.org/r/.insteadof \
+    git config --global url.http://git.savannah.gnu.org/r/.insteadof \
       git://git.sv.gnu.org/
   to force git to transparently rewrite all savannah git references to
   instead use http.
