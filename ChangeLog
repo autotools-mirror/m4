@@ -1,3 +1,13 @@
+2011-02-26  Eric Blake  <eblake@redhat.com>
+
+	index: fix another regression from faulty strstr
+	* gnulib: Update to latest, for strstr fix.
+	* doc/m4.texinfo (Index macro): Test for the bug.
+	* NEWS: Document the fix.
+	* THANKS: Update.
+	Reported by Mike Stump, with additional analysis from Ralf
+	Wildenhues and Jim Meyering.
+
 2011-02-07  Eric Blake  <eblake@redhat.com>
 
 	maint: speed up configure, using latest gnulib
