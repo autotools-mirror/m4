@@ -1,3 +1,8 @@
+2011-02-28  Eric Blake  <eblake@redhat.com>
+
+	index: fix typo in previous commit
+	* doc/m4.texinfo (Index macro): Actually expose the bug.
+
 2011-02-26  Eric Blake  <eblake@redhat.com>
 
 	index: fix another regression from faulty strstr

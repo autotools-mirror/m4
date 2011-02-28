@@ -5657,7 +5657,7 @@ index(`;:11-:12-:12-:12-:12-:12-:12-:12-:12.:12.:12.:12.:12.:12.:12.:12.:12-',
 @comment present from Jun 2010 to Feb 2011, including m4 1.4.15.
 
 @example
-index(`..wi.d.', `.d')
+index(`..wi.d.', `.d.')
 @result{}4
 @end example
 @end ignore
