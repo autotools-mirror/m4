@@ -889,14 +889,16 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 {
   symbol *s;
   builtin_func *b;
-  int i;
+  unsigned int i;
 
   if (bad_argc (argv[0], argc, 2, -1))
     return;
 
-  for (i = 1; i < argc; i++)
+  assert (0 < argc && argc <= INT_MAX);
+  for (i = 1; i < (unsigned) argc; i++)
     {
-      s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+      const char *arg = ARG((int) i);
+      s = lookup_symbol (arg, SYMBOL_LOOKUP);
       if (s == NULL)
         continue;
 
@@ -912,11 +914,11 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
           b = SYMBOL_FUNC (s);
           if (b == m4_placeholder)
             M4ERROR ((warning_status, 0, "\
-builtin `%s' requested by frozen file is not supported", ARG (i)));
+builtin `%s' requested by frozen file is not supported", arg));
           else if (argc != 2)
             M4ERROR ((warning_status, 0,
                       "Warning: cannot concatenate builtin `%s'",
-                      ARG (i)));
+                      arg));
           else
             push_macro (b);
           break;

@@ -1,3 +1,11 @@
+2011-03-01  Eric Blake  <eblake@redhat.com>
+
+	Release Version 1.4.16.
+	* gnulib: Update to latest.
+	* NEWS: Mention the release.
+	* src/builtin.c (m4_defn): Silence spurious -Wstrict-overflow
+	warnings from gcc 4.5.1 at -O2.
+
 2011-02-28  Eric Blake  <eblake@redhat.com>
 
 	index: fix typo in previous commit

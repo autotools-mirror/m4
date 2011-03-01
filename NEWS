@@ -1,6 +1,6 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release 1.4.16 (2011-01-??) [?]
+* Noteworthy changes in release 1.4.16 (2011-03-01) [stable]
 
 ** Fix regressions in the `index' builtin.  On glibc platforms, this
    avoids false positives from a strstr bug in glibc 2.9 through 2.12;
