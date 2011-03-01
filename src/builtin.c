@@ -996,12 +996,13 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
   const call_info *me = arg_info (argv);
   symbol *s;
   builtin_func *b;
-  int i;
+  unsigned int i;
 
   if (bad_argc (me, argc, 1, -1))
     return;
 
-  for (i = 1; i < argc; i++)
+  assert (0 < argc && argc <= INT_MAX);
+  for (i = 1; i < (unsigned) argc; i++)
     {
       if (arg_type (argv, i) != TOKEN_TEXT)
         {
