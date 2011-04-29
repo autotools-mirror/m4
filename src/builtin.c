@@ -894,7 +894,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, -1))
     return;
 
-  assert (0 < argc && argc <= INT_MAX);
+  assert (0 < argc);
   for (i = 1; i < (unsigned) argc; i++)
     {
       const char *arg = ARG((int) i);
