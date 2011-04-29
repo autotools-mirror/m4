@@ -99,6 +99,7 @@ m4_error (int status, int errnum, const char *format, ...)
                   current_line, format, args);
   if (fatal_warnings && ! retcode)
     retcode = EXIT_FAILURE;
+  va_end (args);
 }
 
 /*-------------------------------.
@@ -114,6 +115,7 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
   verror_at_line (status, errnum, line ? file : NULL, line, format, args);
   if (fatal_warnings && ! retcode)
     retcode = EXIT_FAILURE;
+  va_end (args);
 }
 
 #ifndef SIGBUS

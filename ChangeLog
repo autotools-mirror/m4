@@ -1,3 +1,8 @@
+2011-04-29  Eric Blake  <eblake@redhat.com>
+
+	m4_error: fix missing va_end
+	* src/m4.c (m4_error, m4_error_at_line): Add missing va_end.
+
 2011-03-01  Eric Blake  <eblake@redhat.com>
 
 	Release Version 1.4.16.
