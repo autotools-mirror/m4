@@ -1001,7 +1001,7 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
   if (bad_argc (me, argc, 1, -1))
     return;
 
-  assert (0 < argc && argc <= INT_MAX);
+  assert (0 < argc);
   for (i = 1; i < (unsigned) argc; i++)
     {
       if (arg_type (argv, i) != TOKEN_TEXT)
