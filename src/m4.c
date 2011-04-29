@@ -130,6 +130,7 @@ m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
   free (safe_macro);
   if ((!warn || fatal_warnings) && !retcode)
     retcode = EXIT_FAILURE;
+  va_end (args);
 }
 
 /* Wrapper around error.  Report error message based on FORMAT and
