@@ -1,3 +1,9 @@
+2011-04-30  Eric Blake  <eblake@redhat.com>
+
+	build: improve SIGPIPE emulation on mingw
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Import sigpipe module, drop strtol.
+
 2011-04-29  Eric Blake  <eblake@redhat.com>
 
 	m4_defn: avoid compiler warning
