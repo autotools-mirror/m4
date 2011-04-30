@@ -94,6 +94,7 @@
 #  regex \
 #  rename \
 #  sigaction \
+#  sigpipe \
 #  snprintf-posix \
 #  spawn-pipe \
 #  stdbool \
@@ -101,7 +102,6 @@
 #  stdlib-safer \
 #  strsignal \
 #  strtod \
-#  strtol \
 #  unlocked-io \
 #  update-copyright \
 #  vasnprintf-posix \
@@ -168,6 +168,7 @@ gl_MODULES([
   regex
   rename
   sigaction
+  sigpipe
   snprintf-posix
   spawn-pipe
   stdbool
@@ -175,7 +176,6 @@ gl_MODULES([
   stdlib-safer
   strsignal
   strtod
-  strtol
   unlocked-io
   update-copyright
   vasnprintf-posix
