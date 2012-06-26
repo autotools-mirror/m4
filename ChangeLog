@@ -1,3 +1,8 @@
+2012-06-25  Eric Blake  <eblake@redhat.com>
+
+	build: deal with newer glibc vs. FORTIFY_SOURCE
+	* configure.ac (FORTIFY_SOURCE): Make conditional on optimization.
+
 2011-05-02  Eric Blake  <eblake@redhat.com>
 
 	build: pick up latest gnulib fixes
@@ -5316,7 +5321,7 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	coding: utf-8
 	End:
 
-	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2011 Free Software
+	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2012 Free Software
 	Foundation, Inc.
 
 	Copying and distribution of this file, with or without
