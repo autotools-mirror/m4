@@ -1,5 +1,5 @@
 # Configure template for GNU m4.           -*-Autoconf-*-
-# Copyright (C) 1991-1994, 2000-2002, 2004-2010, 2013 Free Software
+# Copyright (C) 1991-1994, 2000-2002, 2004-2013 Free Software
 # Foundation, Inc.
 #
 # This file is part of GNU M4.
@@ -142,8 +142,13 @@ if test "$gl_gcc_warnings" = yes; then
 
   AC_SUBST([WARN_CFLAGS])
 
-  AC_DEFINE([_FORTIFY_SOURCE], [2],
-    [enable compile-time and run-time bounds-checking, and some warnings])
+  AH_VERBATIM([FORTIFY_SOURCE],
+  [/* Enable compile-time and run-time bounds-checking, and some warnings,
+      without upsetting newer glibc. */
+   #if defined __OPTIMIZE__ && __OPTIMIZE__
+   # define _FORTIFY_SOURCE 2
+   #endif
+  ])
 fi
 
 # Use gcc's -pipe option if available: for faster compilation.
