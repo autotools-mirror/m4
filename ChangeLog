@@ -1,5 +1,8 @@
 2012-06-25  Eric Blake  <eblake@redhat.com>
 
+	maint: update copyright year
+	* all files: Run 'make update-copyright'.
+
 	build: deal with newer glibc vs. FORTIFY_SOURCE
 	* configure.ac (FORTIFY_SOURCE): Make conditional on optimization.
 

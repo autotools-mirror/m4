@@ -322,7 +322,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   After making edits, mail the diff to <bug-directory@gnu.org>.
 
 
-Copyright (C) 2004-2011 Free Software Foundation, Inc.
+Copyright (C) 2004-2012 Free Software Foundation, Inc.
 
 The canonical source of this file is maintained with the
 GNU M4 package.  Report bugs to bug-m4@gnu.org.

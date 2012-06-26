@@ -43,7 +43,7 @@ This manual (@value{UPDATED}) is for GNU M4 (version
 @value{VERSION}), a package containing an implementation of the m4 macro
 language.
 
-Copyright @copyright{} 1989-1994, 2004-2011 Free Software Foundation,
+Copyright @copyright{} 1989-1994, 2004-2012 Free Software Foundation,
 Inc.
 
 @quotation
