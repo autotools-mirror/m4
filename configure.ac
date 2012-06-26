@@ -87,8 +87,13 @@ if test "$gl_gcc_warnings" = yes; then
 
   AC_SUBST([WARN_CFLAGS])
 
-  AC_DEFINE([_FORTIFY_SOURCE], [2],
-    [enable compile-time and run-time bounds-checking, and some warnings])
+  AH_VERBATIM([FORTIFY_SOURCE],
+  [/* Enable compile-time and run-time bounds-checking, and some warnings,
+      without upsetting newer glibc. */
+   #if defined __OPTIMIZE__ && __OPTIMIZE__
+   # define _FORTIFY_SOURCE 2
+   #endif
+  ])
 fi
 
 # Tandem/NSK is broken - it has 'long long int' but not
