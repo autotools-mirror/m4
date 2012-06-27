@@ -1,3 +1,9 @@
+2012-06-26  Eric Blake  <eblake@redhat.com>
+
+	build: get missing from automake, not gnulib
+	* build-aux/missing: Break link to gnulib.
+	* .gitignore: Reflect this.
+
 2012-06-25  Eric Blake  <eblake@redhat.com>
 
 	maint: update copyright year
