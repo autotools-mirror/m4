@@ -1,3 +1,13 @@
+2012-07-21  Eric Blake  <eblake@redhat.com>
+
+	bootstrap: avoid undefined variables
+	* bootstrap (func_fatal_error, func_usage, func_help)
+	(func_version): Use constants, not undefined variables; propagate
+	any write failures.
+	(func_missing_arg): Drop duplicate declaration.  Preinitialize
+	exit_cmd.
+	Reported by Stefano Lattarini.
+
 2012-06-26  Eric Blake  <eblake@redhat.com>
 
 	build: get missing from automake, not gnulib

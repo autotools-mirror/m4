@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2010-03-02
+# bootstrap (GNU M4) version 2012-07-21
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004-2012 Free Software Foundation, Inc.
@@ -92,7 +92,7 @@ func_error ()
 func_fatal_error ()
 {
     func_error ${1+"$@"}
-    exit $EXIT_FAILURE
+    exit 1
 }
 
 # func_verbose arg...
@@ -120,15 +120,6 @@ func_fatal_help ()
     func_fatal_error "Try \`$progname --help' for more information."
 }
 
-# func_missing_arg argname
-# Echo program name prefixed message to standard error and set global
-# exit_cmd.
-func_missing_arg ()
-{
-   func_error "missing argument for $1"
-   exit_cmd=exit
-}
-
 # func_usage
 # Echo short help message to standard output and exit.
 func_usage ()
@@ -140,7 +131,7 @@ func_usage ()
     }; d' < "$progpath"
     echo
     echo "run \`$progname --help | more' for full usage"
-    exit $EXIT_SUCCESS
+    exit
 }
 
 # func_help
@@ -152,7 +143,7 @@ func_help ()
         s/\$progname/'$progname'/;
         p;
      }; d' < "$progpath"
-    exit $EXIT_SUCCESS
+    exit
 }
 
 # func_version
@@ -164,7 +155,7 @@ func_version ()
         s/\((C)\)[ 0-9,-]*\( [1-9][0-9]*\)/\1\2/;
         p;
      }; d' < "$progpath"
-     exit $EXIT_SUCCESS
+     exit
 }
 
 # func_update
@@ -182,6 +173,9 @@ func_update ()
 # Parse options once, thoroughly.  This comes as soon as possible in
 # the script to make things like `bootstrap --version' happen quickly.
 {
+  # Detect as many errors as possible before quitting
+  exit_cmd=:
+
   # sed scripts:
   my_sed_single_opt='1s/^\(..\).*$/\1/;q'
   my_sed_single_rest='1s/^..\(.*\)$/\1/;q'
@@ -207,7 +201,7 @@ func_update ()
   done
 
   # Bail if the options were screwed
-  $exit_cmd $EXIT_FAILURE
+  $exit_cmd 1
 
   if test -n "$vcs_only_file" && test ! -r "$vcs_only_file"; then
     func_fatal_error \
