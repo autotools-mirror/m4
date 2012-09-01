@@ -1,5 +1,11 @@
 2012-09-01  Eric Blake  <eblake@redhat.com>
 
+	build: silence gcc warning
+	* configure.ac (M4_cv_gcc_pragma_push_works): New test.
+	(-Wformat-nonliteral): Disable for older gcc.
+	* src/format.c (expand_format): Mark our only uses of nonliteral
+	format as being safe.
+
 	doc: fix misuse of @xref
 	* doc/m4.texinfo (Inhibiting Invocation): Reword.
 

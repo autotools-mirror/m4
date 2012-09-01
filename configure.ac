@@ -57,6 +57,20 @@ if test "$gl_gcc_warnings" = yes; then
   gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
   AC_SUBST([WERROR_CFLAGS])
 
+  # We use '#pragma GCC diagnostic push' to silence some
+  # warnings, but older gcc doesn't support this.
+  AC_CACHE_CHECK([whether pragma GCC diagnostic push works],
+    [M4_cv_gcc_pragma_push_works], [
+    save_CFLAGS=$CFLAGS
+    CFLAGS='-Wunknown-pragmas -Werror'
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic pop
+    ]])],
+    [M4_cv_gcc_pragma_push_works=yes],
+    [M4_cv_gcc_pragma_push_works=no])
+    CFLAGS=$save_CFLAGS])
+
   nw=
   nw="$nw -Waggregate-return"       # C90 is anachronistic
   nw="$nw -Wlong-long"              # C90 is anachronistic
@@ -65,7 +79,6 @@ if test "$gl_gcc_warnings" = yes; then
   nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
   nw="$nw -Wpadded"                 # Our structs are not packed
   nw="$nw -Wredundant-decls"        # Gnulib has multiple decls
-  nw="$nw -Wformat-nonliteral"      # Needed in builtin.c
   nw="$nw -Wunreachable-code"       # Needed in output.c
   nw="$nw -Wconversion"             # Too many warnings for now
   nw="$nw -Wsign-conversion"        # Too many warnings for now
@@ -79,6 +92,12 @@ if test "$gl_gcc_warnings" = yes; then
   for w in $ws; do
     gl_WARN_ADD([$w])
   done
+
+  # Gnulib turns on -Wformat=2, which implies -Wformat-nonliteral, but
+  # we temporarily override it in format.c if possible.
+  if test $M4_cv_gcc_pragma_push_works = no; then
+    gl_WARN_ADD([-Wno-format-nonliteral])
+  fi
 
   gl_WARN_ADD([-fdiagnostics-show-option])
   gl_WARN_ADD([-funit-at-a-time])
