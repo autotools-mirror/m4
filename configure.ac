@@ -72,17 +72,15 @@ if test "$gl_gcc_warnings" = yes; then
     CFLAGS=$save_CFLAGS])
 
   nw=
-  nw="$nw -Waggregate-return"       # C90 is anachronistic
+  nw="$nw -Waggregate-return"       # K&R is anachronistic
+  nw="$nw -Wtraditional-conversion" # K&R is anachronistic
+  nw="$nw -Wundef"                  # K&R is anachronistic
+  nw="$nw -Wtraditional"            # K&R is anachronistic
   nw="$nw -Wlong-long"              # C90 is anachronistic
-  nw="$nw -Wundef"                  # Warns on '#if GNULIB_FOO' etc in gnulib
-  nw="$nw -Wtraditional"            # Warns on #elif which we use often
   nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
   nw="$nw -Wpadded"                 # Our structs are not packed
-  nw="$nw -Wredundant-decls"        # Gnulib has multiple decls
-  nw="$nw -Wunreachable-code"       # Needed in output.c
   nw="$nw -Wconversion"             # Too many warnings for now
   nw="$nw -Wsign-conversion"        # Too many warnings for now
-  nw="$nw -Wtraditional-conversion" # Too many warnings for now
   nw="$nw -Wcast-qual"              # Too many warnings for now
   nw="$nw -Wswitch-enum"            # Too many warnings for now
   # This, $nw, is the list of warnings we disable.

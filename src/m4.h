@@ -138,7 +138,6 @@ extern const char *user_word_regexp;    /* -W */
 
 /* Error handling.  */
 extern int retcode;
-extern const char *program_name;
 
 void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
 void m4_error_at_line (int, int, const char *, int,
