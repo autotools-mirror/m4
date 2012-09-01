@@ -1428,7 +1428,7 @@ m4_eval(`1')
 @end example
 
 Another alternative is to redefine problematic macros to a name less
-likely to cause conflicts, @xref{Definitions}.
+likely to cause conflicts, using @ref{Definitions}.
 
 If your version of GNU @code{m4} has the @code{changeword} feature
 compiled in, it offers far more flexibility in specifying the

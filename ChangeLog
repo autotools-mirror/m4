@@ -1,3 +1,8 @@
+2012-09-01  Eric Blake  <eblake@redhat.com>
+
+	doc: fix misuse of @xref
+	* doc/m4.texinfo (Inhibiting Invocation): Reword.
+
 2012-07-21  Eric Blake  <eblake@redhat.com>
 
 	bootstrap: avoid undefined variables
