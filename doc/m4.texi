@@ -1539,9 +1539,9 @@ m4_eval(`1')
 @end example
 
 Another alternative is to redefine problematic macros to a name less
-likely to cause conflicts, @xref{Definitions}.  Or the parsing engine
-can be changed to redefine what constitutes a valid macro name,
-@xref{Changesyntax}.
+likely to cause conflicts, using @xref{Definitions}.  Or the parsing
+engine can be changed to redefine what constitutes a valid macro name,
+using @xref{Changesyntax}.
 
 Of course, the simplest way to prevent a name from being interpreted
 as a call to an existing macro is to quote it.  The remainder of
