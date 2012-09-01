@@ -377,6 +377,12 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
       *p++ = c;
       *p = '\0';
 
+      /* Our constructed format string in fstart is safe.  */
+#if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+
       switch (datatype)
         {
         case CHAR:
@@ -410,6 +416,11 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
       /* Since obstack_printf can only fail with EILSEQ or EINVAL, but
          we constructed fstart, the result should not be negative.  */
       assert (0 <= result);
+
+#if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
+# pragma GCC diagnostic pop
+#endif
+
     }
   if (valid_format)
     bad_argc (me, argc, i, i);
