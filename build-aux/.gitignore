@@ -1,6 +1,4 @@
 /announce-gen
-/arg-nonnull.h
-/c++defs.h
 /config.rpath
 /gendocs.sh
 /git-version-gen
@@ -10,4 +8,3 @@
 /update-copyright
 /useless-if-before-free
 /vc-list-files
-/warn-on-use.h

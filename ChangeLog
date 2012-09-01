@@ -1,5 +1,13 @@
 2012-09-04  Eric Blake  <eblake@redhat.com>
 
+	build: pick up latest gnulib fixes
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Regenerate.
+	* missing: Break symlink in order to work around automake version
+	mismatch issue.
+	* .gitignore: Update.
+	* .cvsignore: Likewise.
+
 	build: mark several pure functions
 	* src/m4.h (M4_GNUC_PURE): New macro.
 	* src/m4.c (fault_handler): Mark pure.
