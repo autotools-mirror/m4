@@ -163,7 +163,6 @@ struct call_info
 typedef struct call_info call_info;
 
 extern int retcode;
-extern const char *program_name;
 
 void m4_error (int, int, const call_info *, const char *, ...)
   M4_GNUC_PRINTF (4, 5);

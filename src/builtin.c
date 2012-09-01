@@ -27,6 +27,7 @@
 #include "execute.h"
 #include "memchr2.h"
 #include "memcmp2.h"
+#include "progname.h"
 #include "regex.h"
 #include "spawn-pipe.h"
 #include "wait-process.h"
