@@ -1,5 +1,13 @@
 2012-09-04  Eric Blake  <eblake@redhat.com>
 
+	maint: merge gitignore files
+	* build-aux/.gitignore: Delete.
+	* checks/.gitignore: Likewise.
+	* doc/.gitignore: Likewise.
+	* examples/.gitignore: Likewise.
+	* src/.gitignore: Likewise.
+	* .gitignore: Cover rules from deleted files.
+
 	maint: drop CVS cruft
 	* .cvsignore: Remove.
 	* build-aux/.cvsignore: Likewise.
