@@ -1,5 +1,13 @@
 2012-09-04  Eric Blake  <eblake@redhat.com>
 
+	maint: drop CVS cruft
+	* .cvsignore: Remove.
+	* build-aux/.cvsignore: Likewise.
+	* checks/.cvsignore: Likewise.
+	* doc/.cvsignore: Likewise.
+	* examples/.cvsignore: Likewise.
+	* src/.cvsignore: Likewise.
+
 	build: add more compiler checking
 	* configure.ac (nw): Turn on some warnings that no longer trigger
 	a gcc warning, or where we reduce the scope of unwarned code.
