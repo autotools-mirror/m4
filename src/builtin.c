@@ -171,7 +171,7 @@ static predefined const predefined_tab[] =
 
 
 /* Find the builtin that owns FUNC.  */
-const builtin *
+const builtin * M4_GNUC_PURE
 find_builtin_by_addr (builtin_func *func)
 {
   const builtin *bp;
@@ -186,7 +186,7 @@ find_builtin_by_addr (builtin_func *func)
 
 /* Find the builtin matching NAME.  On failure, return the placeholder
    builtin.  */
-const builtin *
+const builtin * M4_GNUC_PURE
 find_builtin_by_name (const char *name)
 {
   const builtin *bp;

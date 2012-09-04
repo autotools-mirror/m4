@@ -103,7 +103,7 @@ profile_memcmp (const char *s1, const char *s2, size_t l)
 static Hash_table *symtab;
 
 /* Return a hashvalue for a string S of length LEN.  */
-static size_t
+static size_t M4_GNUC_PURE
 hash (const char *s, size_t len)
 {
   size_t val = len;
