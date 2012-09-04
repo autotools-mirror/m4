@@ -118,6 +118,7 @@ typedef unsigned int bool_bitfield;
 #define M4_GNUC_PRINTF(fmt, arg)                        \
   M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
 #define M4_GNUC_NORETURN        M4_GNUC_ATTRIBUTE ((__noreturn__))
+#define M4_GNUC_PURE            M4_GNUC_ATTRIBUTE ((__pure__))
 
 /* File: m4.c  --- global definitions.  */
 

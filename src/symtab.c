@@ -120,7 +120,7 @@ symtab_init (void)
 | Return a hashvalue for a string, from GNU-emacs.  |
 `--------------------------------------------------*/
 
-static size_t
+static size_t M4_GNUC_PURE
 hash (const char *s)
 {
   register size_t val = 0;

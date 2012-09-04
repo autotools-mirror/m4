@@ -1,3 +1,12 @@
+2012-09-04  Eric Blake  <eblake@redhat.com>
+
+	build: mark several pure functions
+	* src/m4.h (M4_GNUC_PURE): New macro.
+	* src/m4.c (fault_handler): Mark pure.
+	* src/builtin.c (find_builtin_by_addr, find_builtin_by_name):
+	Likewise.
+	* src/symtab.c (hash): Likewise.
+
 2012-09-01  Eric Blake  <eblake@redhat.com>
 
 	build: silence gcc warning

@@ -140,7 +140,7 @@ static const char * volatile signal_message[NSIG];
    must be aysnc-signal safe, since it is executed as a signal
    handler.  If SIGNO is zero, this represents a stack overflow; in
    that case, we return to allow c_stack_action to handle things.  */
-static void
+static void M4_GNUC_PURE
 fault_handler (int signo)
 {
   if (signo)
