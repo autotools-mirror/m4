@@ -38,7 +38,7 @@ compare_builtin_name_CB (const void *name, const void *b)
    search only in MODULE's builtin table.  The result is a malloc'd
    symbol value, suitable for use in the symbol table or for an
    argument to m4_push_builtin.  */
-m4_symbol_value *
+m4_symbol_value * M4_GNUC_PURE
 m4_builtin_find_by_name (m4_module *module, const char *name)
 {
   m4_module *cur = module ? module : m4__module_next (NULL);
@@ -64,7 +64,7 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
    then search only in MODULE's builtin table.  The result is a
    malloc'd symbol value, suitable for use in the symbol table or for
    an argument to m4_push_builtin.  */
-m4_symbol_value *
+m4_symbol_value * M4_GNUC_PURE
 m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
 {
   m4_module *cur = module ? module : m4__module_next (NULL);

@@ -144,6 +144,7 @@ BEGIN_C_DECLS
 #define M4_GNUC_NORETURN        M4_GNUC_ATTRIBUTE ((__noreturn__))
 #define M4_GNUC_CONST           M4_GNUC_ATTRIBUTE ((__const__))
 #define M4_GNUC_UNUSED          M4_GNUC_ATTRIBUTE ((__unused__))
+#define M4_GNUC_PURE            M4_GNUC_ATTRIBUTE ((__pure__))
 
 
 
