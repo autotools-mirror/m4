@@ -1,3 +1,10 @@
+2012-09-05  Stefanno Lattarini  <stefano.lattarini@gmail.com>  (tiny change)
+
+	maint: convert the last hand-written Makefile to automake
+	* checks/Makefile.in: Rename ...
+	* checks/Makefile.am: ... like this, and simplify and adjust to
+	make it proper as Automake input.
+
 2012-09-04  Eric Blake  <eblake@redhat.com>
 
 	maint: merge gitignore files
