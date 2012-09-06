@@ -531,11 +531,11 @@ bad_argc (const call_info *name, int argc, unsigned int min, unsigned int max)
 {
   if (argc - 1U < min)
     {
-      m4_warn (0, name, _("too few arguments: %d < %d"), argc - 1, min);
+      m4_warn (0, name, _("too few arguments: %d < %u"), argc - 1, min);
       return true;
     }
   if (argc - 1U > max)
-    m4_warn (0, name, _("extra arguments ignored: %d > %d"), argc - 1, max);
+    m4_warn (0, name, _("extra arguments ignored: %d > %u"), argc - 1, max);
   return false;
 }
 

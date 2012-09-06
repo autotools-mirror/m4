@@ -823,6 +823,7 @@ arg_token (macro_arguments *argv, unsigned int arg, int *level, bool flatten)
       else if (--arg == 0)
         break;
     }
+  assert (token);
   return token;
 }
 
@@ -850,7 +851,7 @@ arg_mark (macro_arguments *argv)
 }
 
 /* Given ARGV, return how many arguments it refers to.  */
-unsigned int
+unsigned int M4_GNUC_PURE
 arg_argc (macro_arguments *argv)
 {
   return argv->argc;
@@ -859,7 +860,7 @@ arg_argc (macro_arguments *argv)
 /* Given ARGV, return the call context in effect when argument
    collection began.  Only safe to call while the macro is being
    expanded.  */
-const call_info *
+const call_info * M4_GNUC_PURE
 arg_info (macro_arguments *argv)
 {
   assert (argv->info);
@@ -868,7 +869,7 @@ arg_info (macro_arguments *argv)
 
 /* Given ARGV, return the type of argument ARG.  Arg 0 is always text,
    and indices beyond argc are likewise treated as text.  */
-token_data_type
+token_data_type M4_GNUC_PURE
 arg_type (macro_arguments *argv, unsigned int arg)
 {
   token_data_type type;
@@ -890,7 +891,7 @@ arg_type (macro_arguments *argv, unsigned int arg)
    the empty string.  If FLATTEN, builtins are ignored.  The result is
    always NUL-terminated, even if it includes embedded NUL
    characters.  */
-const char *
+const char * M4_GNUC_PURE
 arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
 {
   token_data *token;
@@ -952,7 +953,7 @@ arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
    Both indices must be non-zero and less than argc.  Return true if
    the arguments contain the same contents; often more efficient than
    strcmp (arg_text (argv, a, 1), arg_text (argv, b, 1)) == 0.  */
-bool
+bool M4_GNUC_PURE
 arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 {
   token_data *ta = arg_token (argv, indexa, NULL, false);
@@ -1100,7 +1101,7 @@ arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 /* Given ARGV, return true if argument ARG is the empty string.  This
    gives the same result as comparing arg_len against 0, but is often
    faster.  */
-bool
+bool M4_GNUC_PURE
 arg_empty (macro_arguments *argv, unsigned int arg)
 {
   if (arg == 0)
@@ -1116,7 +1117,7 @@ arg_empty (macro_arguments *argv, unsigned int arg)
 /* Given ARGV, return the length of argument ARG.  Abort if the
    argument is not text.  Indices beyond argc return 0.  If FLATTEN,
    builtins are ignored.  */
-size_t
+size_t M4_GNUC_PURE
 arg_len (macro_arguments *argv, unsigned int arg, bool flatten)
 {
   token_data *token;
@@ -1183,7 +1184,7 @@ arg_len (macro_arguments *argv, unsigned int arg, bool flatten)
 
 /* Given ARGV, return the builtin function referenced by argument ARG.
    Abort if it is not a builtin in isolation.  */
-builtin_func *
+builtin_func * M4_GNUC_PURE
 arg_func (macro_arguments *argv, unsigned int arg)
 {
   token_data *token;
@@ -1196,7 +1197,7 @@ arg_func (macro_arguments *argv, unsigned int arg)
 /* Return an obstack useful for scratch calculations that will not
    interfere with macro expansion.  The obstack will be reset when
    expand_macro completes.  */
-struct obstack *
+struct obstack * M4_GNUC_PURE
 arg_scratch (void)
 {
   assert (obstack_object_size (stacks[expansion_level - 1].args) == 0);

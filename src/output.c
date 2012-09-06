@@ -491,7 +491,7 @@ make_room_for (int length)
   if (output_diversion == selected_diversion)
     {
       /* The flushed diversion was current indeed.  */
-
+      assert (output_diversion);
       output_file = output_diversion->u.file;
       output_cursor = NULL;
       output_unused = 0;
@@ -569,6 +569,7 @@ output_text (const char *text, int length)
     }
   else
     {
+      assert (output_cursor);
       memcpy (output_cursor, text, (size_t) length);
       output_cursor += length;
       output_unused -= length;
@@ -614,13 +615,21 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
         /* In-line short texts.  */
 
       case 8: OUTPUT_CHARACTER (*text); text++;
+        FALLTHROUGH;
       case 7: OUTPUT_CHARACTER (*text); text++;
+        FALLTHROUGH;
       case 6: OUTPUT_CHARACTER (*text); text++;
+        FALLTHROUGH;
       case 5: OUTPUT_CHARACTER (*text); text++;
+        FALLTHROUGH;
       case 4: OUTPUT_CHARACTER (*text); text++;
+        FALLTHROUGH;
       case 3: OUTPUT_CHARACTER (*text); text++;
+        FALLTHROUGH;
       case 2: OUTPUT_CHARACTER (*text); text++;
+        FALLTHROUGH;
       case 1: OUTPUT_CHARACTER (*text);
+        FALLTHROUGH;
       case 0:
         return;
 

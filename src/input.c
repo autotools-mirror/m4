@@ -1652,7 +1652,7 @@ set_quote_age (void)
    skip parsing a single argument, quoted or unquoted, within the
    context of a quoted string, as well as skip parsing a series of
    quoted arguments within the context of argument collection.  */
-unsigned int
+unsigned int M4_GNUC_PURE
 quote_age (void)
 {
   /* This accessor is a function, so that the implementation can
@@ -1665,7 +1665,7 @@ quote_age (void)
    reparsing the current token in the context of a quoted string will
    be safe.  This could always return false and behavior would still
    be correct, just slower.  */
-bool
+bool M4_GNUC_PURE
 safe_quotes (void)
 {
   return current_quote_age != 0;
