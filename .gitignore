@@ -52,14 +52,16 @@
 /doc/stamp-vti
 /doc/version.texi
 /gendocs.sh
+/GNUmakefile
 /gnupload
 /install-sh
 /lib/*
 !/lib/Makefile.am
 /link-warning.h
 /m4-*
-/m4/.gitignore
-/m4/gnulib-comp.m4
+/m4/*
+!/m4/gnulib-cache.m4
+/maint.mk
 Makefile.in
 Makefile
 /missing
@@ -69,5 +71,3 @@ Makefile
 /stamp-h.in
 /tests/*
 !/tests/Makefile.am
-/GNUmakefile
-/maint.mk
