@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# bootstrap (GNU M4) version 2012-07-21
+# bootstrap (GNU M4) version 2012-09-21
 # Written by Gary V. Vaughan  <gary@gnu.org>
 
 # Copyright (C) 2004-2012 Free Software Foundation, Inc.
@@ -212,26 +212,6 @@ func_update ()
 ## ---------------- ##
 ## Version control. ##
 ## ---------------- ##
-
-# gnulib-tool updates m4/.{git,cvs}ignore and lib/.{git,cvs}ignore, and
-# keeping generated files under version control does not make sense.
-# Since lib is entirely ignored, we only need to prepopulate the m4 ignore
-# files with generated files not tracked by gnulib-tool.
-if test -f $config_macro_dir/.gitignore ; then
-  :
-else
-  func_echo "creating initial $config_macro_dir/.cvsignore"
-  cat > $config_macro_dir/.cvsignore <<\EOF
-# files created by gnulib, but that gnulib doesn't track
-*~
-.cvsignore
-.gitignore
-gnulib-comp.m4
-# gnulib-tool edits below here
-EOF
-  func_echo "creating initial $config_macro_dir/.gitignore"
-  cp $config_macro_dir/.cvsignore $config_macro_dir/.gitignore
-fi
 
 # See if we can use gnulib's git-merge-changelog merge driver.
 if test -d .git && (git --version) >/dev/null 2>/dev/null ; then

@@ -32,6 +32,7 @@ configure
 configure.lineno
 CVS
 /depcomp
+/doc/.gitignore
 /doc/fdl-1.3.texi
 /doc/gendocs_template
 /doc/gpl-3.0.texi
@@ -52,6 +53,8 @@ gnupload
 /lib/*
 !/lib/Makefile.am
 link-warning.h
+/m4/*
+!/m4/gnulib-cache.m4
 m4-*
 /maint.mk
 Makefile.in
