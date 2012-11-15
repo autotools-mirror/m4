@@ -366,19 +366,42 @@ debugging their @code{m4} scripts than doing real work.  Beware that
 
 @cindex history of @code{m4}
 @cindex GNU M4, history of
-@code{GPM} was an important ancestor of @code{m4}.  See
-C. Strachey: ``A General Purpose Macro generator'', Computer Journal
-8,3 (1965), pp.@: 225 ff.  @code{GPM} is also succinctly described into
-David Gries classic ``Compiler Construction for Digital Computers''.
+Macro languages were invented early in the history of computing.  In the
+1950s Alan Perlis suggested that the macro language be independent of the
+language being processed.  Techniques such as conditional and recursive
+macros, and using macros to define other macros, were described by Doug
+McIlroy of Bell Labs in ``Macro Instruction Extensions of Compiler
+Languages'', @emph{Communications of the ACM} 3, 4 (1960), 214--20,
+@url{http://dx.doi.org/10.1145/367177.367223}.
 
-The classic B. Kernighan and P.J. Plauger: ``Software Tools'',
-Addison-Wesley, Inc.@: (1976) describes and implements a Unix
+An important precursor of @code{m4} was GPM; see C. Strachey,
+@c The title uses lower case and has no space between "macro" and "generator".
+``A general purpose macrogenerator'', @emph{Computer Journal} 8, 3
+(1965), 225--41, @url{http://dx.doi.org/10.1093/comjnl/8.3.225}.  GPM is
+also succinctly described in David Gries's book @emph{Compiler
+Construction for Digital Computers}, Wiley (1971).  Strachey was a
+brilliant programmer: GPM fit into 250 machine instructions!
+
+Inspired by GPM while visiting Strachey's Lab in 1968, McIlroy wrote a
+model preprocessor in that fit into a page of Snobol 3 code, and McIlroy
+and Robert Morris developed a series of further models at Bell Labs.
+Andrew D. Hall followed up with M6, a general purpose macro processor
+used to port the Fortran source code of the Altran computer algebra
+system; see Hall's ``The M6 Macro Processor'', Computing Science
+Technical Report #2, Bell Labs (1972),
+@url{http://cm.bell-labs.com/cm/cs/cstr/2.pdf}.  M6's source code
+consisted of about 600 Fortran statements.  Its name was the first of
+the @code{m4} line.
+
+The Brian Kernighan and P.J. Plauger book @emph{Software Tools},
+Addison-Wesley (1976), describes and implements a Unix
 macro-processor language, which inspired Dennis Ritchie to write
 @code{m3}, a macro processor for the AP-3 minicomputer.
 
 Kernighan and Ritchie then joined forces to develop the original
-@code{m4}, as described in ``The M4 Macro Processor'', Bell
-Laboratories (1977).  It had only 21 builtin macros.
+@code{m4}, described in ``The M4 Macro Processor'', Bell Laboratories
+(1977), @url{http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf}.
+It had only 21 builtin macros.
 
 While @code{GPM} was more @emph{pure}, @code{m4} is meant to deal with
 the true intricacies of real life: macros can be recognized without
