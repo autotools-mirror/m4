@@ -75,6 +75,7 @@ if test "$gl_gcc_warnings" = yes; then
     [M4_cv_gcc_pragma_push_works=no])
     CFLAGS=$save_CFLAGS])
 
+  # This, $nw, is the list of warnings we disable.
   nw=
   nw="$nw -Waggregate-return"       # K&R is anachronistic
   nw="$nw -Wtraditional-conversion" # K&R is anachronistic
@@ -87,7 +88,27 @@ if test "$gl_gcc_warnings" = yes; then
   nw="$nw -Wsign-conversion"        # Too many warnings for now
   nw="$nw -Wcast-qual"              # Too many warnings for now
   nw="$nw -Wswitch-enum"            # Too many warnings for now
-  # This, $nw, is the list of warnings we disable.
+  # gcc 4.4.6 complains enum-compare is C++ only; gcc 4.7.0 implies it in -Wall
+  nw="$nw -Wenum-compare"
+
+  # Gnulib uses '#pragma GCC diagnostic push' to silence some
+  # warnings, but older gcc doesn't support this.
+  AC_CACHE_CHECK([whether pragma GCC diagnostic push works],
+    [M4_cv_gcc_pragma_push_works], [
+    save_CFLAGS=$CFLAGS
+    CFLAGS='-Wunknown-pragmas -Werror'
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic pop
+    ]])],
+    [M4_cv_gcc_pragma_push_works=yes],
+    [M4_cv_gcc_pragma_push_works=no])
+    CFLAGS=$save_CFLAGS])
+  if test $M4_cv_gcc_pragma_push_works = no; then
+    nw="$nw -Wmissing-prototypes"
+    nw="$nw -Wmissing-declarations"
+    nw="$nw -Wunreachable-code"
+  fi
 
   gl_MANYWARN_ALL_GCC([ws])
   gl_MANYWARN_COMPLEMENT([ws], [$ws], [$nw])

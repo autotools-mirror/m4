@@ -1,3 +1,10 @@
+2012-11-19  Eric Blake  <eblake@redhat.com>
+
+	build: avoid problematic gcc 4.4 warnings
+	* configure.ac (nw): Disable gcc warnings that cause build
+	failures under RHEL 6.3.
+	* gnulib: Update to latest.
+
 2012-11-14  Paul Eggert  <eggert@cs.ucla.edu>
 
 	doc: improve prehistory discussion
