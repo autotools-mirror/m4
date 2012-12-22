@@ -23,6 +23,7 @@ AUTOMAKE_OPTIONS = nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/lib -I../lib
 AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
 bin_PROGRAMS = m4
-m4_SOURCES = m4.h m4.c builtin.c debug.c eval.c format.c freeze.c input.c \
+noinst_HEADERS = m4.h
+m4_SOURCES = m4.c builtin.c debug.c eval.c format.c freeze.c input.c \
 macro.c output.c path.c symtab.c
 m4_LDADD = ../lib/libm4.a $(LIBM4_LIBDEPS) $(LIBCSTACK) $(LIBTHREAD)

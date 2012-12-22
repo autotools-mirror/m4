@@ -1,5 +1,12 @@
 2012-12-22  Eric Blake  <eblake@redhat.com>
 
+	maint: enable tight_scope syntax check
+	* src/Makefile.am (m4_SOURCES): Move m4.h...
+	(noinst_HEADERS): ...into separate listing for syntax check.
+	* src/m4.h: Add 'extern' to function declarations.
+	(expansion_level): Declare extern variable here...
+	* src/debug.c: ...not here.
+
 	maint: move syntax check exemptions into cfg.mk
 	* .x-sc_prohibit_tab_based_indentation: Delete file.
 	* .x-update-copyright: Likewise.

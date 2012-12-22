@@ -30,8 +30,6 @@ FILE *debug = NULL;
 /* Obstack for trace messages.  */
 static struct obstack trace;
 
-extern int expansion_level;
-
 static void debug_set_file (FILE *);
 
 /*----------------------------------.
