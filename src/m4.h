@@ -166,9 +166,10 @@ typedef struct call_info call_info;
 
 extern int retcode;
 
-void m4_error (int, int, const call_info *, const char *, ...)
+extern void m4_error (int, int, const call_info *, const char *, ...)
   M4_GNUC_PRINTF (4, 5);
-void m4_warn (int, const call_info *, const char *, ...) M4_GNUC_PRINTF (3, 4);
+extern void m4_warn (int, const call_info *, const char *, ...)
+  M4_GNUC_PRINTF (3, 4);
 
 
 /* File: debug.c  --- debugging and tracing function.  */
@@ -207,15 +208,15 @@ extern FILE *debug;
 /* default flags -- equiv: adeq */
 #define DEBUG_TRACE_DEFAULT 0x407
 
-void debug_init (void);
-int debug_decode (const char *, size_t);
-void debug_flush_files (void);
-bool debug_set_output (const call_info *, const char *);
-void debug_message (const char *, ...) M4_GNUC_PRINTF (1, 2);
+extern void debug_init (void);
+extern int debug_decode (const char *, size_t);
+extern void debug_flush_files (void);
+extern bool debug_set_output (const call_info *, const char *);
+extern void debug_message (const char *, ...) M4_GNUC_PRINTF (1, 2);
 
-void trace_prepre (const call_info *);
-unsigned int trace_pre (macro_arguments *);
-void trace_post (unsigned int, const call_info *);
+extern void trace_prepre (const call_info *);
+extern unsigned int trace_pre (macro_arguments *);
+extern void trace_post (unsigned int, const call_info *);
 
 
 /* File: input.c  --- lexical definitions.  */
@@ -354,25 +355,25 @@ struct token_data
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
 
-void input_init (void);
-token_type peek_token (void);
-token_type next_token (token_data *, int *, struct obstack *, bool,
-                       const call_info *);
-void skip_line (const call_info *);
+extern void input_init (void);
+extern token_type peek_token (void);
+extern token_type next_token (token_data *, int *, struct obstack *, bool,
+                              const call_info *);
+extern void skip_line (const call_info *);
 
 /* push back input */
-void make_text_link (struct obstack *, token_chain **, token_chain **);
-void push_file (FILE *, const char *, bool);
-void append_macro (struct obstack *, builtin_func *, token_chain **,
-                   token_chain **);
-void push_macro (struct obstack *, builtin_func *);
-struct obstack *push_string_init (const char *, int);
-bool push_token (token_data *, int, bool);
-void push_string_finish (void);
-struct obstack *push_wrapup_init (const call_info *, token_chain ***);
-void push_wrapup_finish (void);
-bool pop_wrapup (void);
-void input_print (struct obstack *);
+extern void make_text_link (struct obstack *, token_chain **, token_chain **);
+extern void push_file (FILE *, const char *, bool);
+extern void append_macro (struct obstack *, builtin_func *, token_chain **,
+                          token_chain **);
+extern void push_macro (struct obstack *, builtin_func *);
+extern struct obstack *push_string_init (const char *, int);
+extern bool push_token (token_data *, int, bool);
+extern void push_string_finish (void);
+extern struct obstack *push_wrapup_init (const call_info *, token_chain ***);
+extern void push_wrapup_finish (void);
+extern bool pop_wrapup (void);
+extern void input_print (struct obstack *);
 
 /* current input file, and line */
 extern const char *current_file;
@@ -387,29 +388,30 @@ extern string_pair curr_quote;
 #define DEF_BCOMM "#"
 #define DEF_ECOMM "\n"
 
-void set_quotes (const char *, size_t, const char *, size_t);
-void set_comment (const char *, size_t, const char *, size_t);
+extern void set_quotes (const char *, size_t, const char *, size_t);
+extern void set_comment (const char *, size_t, const char *, size_t);
 #ifdef ENABLE_CHANGEWORD
-void set_word_regexp (const call_info *, const char *, size_t);
+extern void set_word_regexp (const call_info *, const char *, size_t);
 #endif
-unsigned int quote_age (void);
-bool safe_quotes (void);
-const string_pair *quote_cache (struct obstack *, unsigned int,
-                                const string_pair *);
+extern unsigned int quote_age (void);
+extern bool safe_quotes (void);
+extern const string_pair *quote_cache (struct obstack *, unsigned int,
+                                       const string_pair *);
 
 /* File: output.c --- output functions.  */
 extern int current_diversion;
 extern int output_current_line;
 
-void output_init (void);
-void output_exit (void);
-void output_text (const char *, int);
-void divert_text (struct obstack *, const char *, int, int);
-bool shipout_string_trunc (struct obstack *, const char *, size_t, size_t *);
-void make_diversion (int);
-void insert_diversion (int);
-void insert_file (FILE *);
-void freeze_diversions (FILE *);
+extern void output_init (void);
+extern void output_exit (void);
+extern void output_text (const char *, int);
+extern void divert_text (struct obstack *, const char *, int, int);
+extern bool shipout_string_trunc (struct obstack *, const char *, size_t,
+                                  size_t *);
+extern void make_diversion (int);
+extern void insert_diversion (int);
+extern void insert_file (FILE *);
+extern void freeze_diversions (FILE *);
 
 /* File symtab.c  --- symbol table definitions.  */
 
@@ -456,40 +458,40 @@ typedef void hack_symbol (symbol *, void *);
 
 #define HASHMAX 509             /* default, overridden by -Hsize */
 
-void free_symbol (symbol *);
-void symtab_init (size_t);
-void symtab_free (void);
-symbol *lookup_symbol (const char *, size_t, symbol_lookup);
-void hack_all_symbols (hack_symbol *, void *);
+extern void free_symbol (symbol *);
+extern void symtab_init (size_t);
+extern void symtab_free (void);
+extern symbol *lookup_symbol (const char *, size_t, symbol_lookup);
+extern void hack_all_symbols (hack_symbol *, void *);
 
 /* File: macro.c  --- macro expansion.  */
 
 extern int expansion_level;
 
-void expand_input (void);
-void call_macro (symbol *, macro_arguments *, struct obstack *);
-size_t adjust_refcount (int, bool);
+extern void expand_input (void);
+extern void call_macro (symbol *, macro_arguments *, struct obstack *);
+extern size_t adjust_refcount (int, bool);
 
-bool arg_adjust_refcount (macro_arguments *, bool);
-unsigned int arg_argc (macro_arguments *);
-const call_info *arg_info (macro_arguments *);
-token_data_type arg_type (macro_arguments *, unsigned int);
-const char *arg_text (macro_arguments *, unsigned int, bool);
-bool arg_equal (macro_arguments *, unsigned int, unsigned int);
-bool arg_empty (macro_arguments *, unsigned int);
-size_t arg_len (macro_arguments *, unsigned int, bool);
-builtin_func *arg_func (macro_arguments *, unsigned int);
-struct obstack *arg_scratch (void);
-bool arg_print (struct obstack *, macro_arguments *, unsigned int,
-                const string_pair *, bool, token_chain **, const char *,
-                size_t *, bool);
-macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
-                                bool, bool);
-void push_arg (struct obstack *, macro_arguments *, unsigned int);
-void push_arg_quote (struct obstack *, macro_arguments *, unsigned int,
-                     const string_pair *);
-void push_args (struct obstack *, macro_arguments *, bool, bool);
-void wrap_args (macro_arguments *);
+extern bool arg_adjust_refcount (macro_arguments *, bool);
+extern unsigned int arg_argc (macro_arguments *);
+extern const call_info *arg_info (macro_arguments *);
+extern token_data_type arg_type (macro_arguments *, unsigned int);
+extern const char *arg_text (macro_arguments *, unsigned int, bool);
+extern bool arg_equal (macro_arguments *, unsigned int, unsigned int);
+extern bool arg_empty (macro_arguments *, unsigned int);
+extern size_t arg_len (macro_arguments *, unsigned int, bool);
+extern builtin_func *arg_func (macro_arguments *, unsigned int);
+extern struct obstack *arg_scratch (void);
+extern bool arg_print (struct obstack *, macro_arguments *, unsigned int,
+                       const string_pair *, bool, token_chain **, const char *,
+                       size_t *, bool);
+extern macro_arguments *make_argv_ref (macro_arguments *, const char *, size_t,
+                                       bool, bool);
+extern void push_arg (struct obstack *, macro_arguments *, unsigned int);
+extern void push_arg_quote (struct obstack *, macro_arguments *, unsigned int,
+                            const string_pair *);
+extern void push_args (struct obstack *, macro_arguments *, bool, bool);
+extern void wrap_args (macro_arguments *);
 
 /* Grab the text at argv index I.  Assumes macro_argument *argv is in
    scope, and aborts if the argument is not text.  */
@@ -528,42 +530,45 @@ struct re_registers;
    syntax (new in 2.0).  */
 #define DEFAULT_MACRO_SEQUENCE "\\$\\({[^}]*}\\|[0-9][0-9]+\\)"
 
-void builtin_init (void);
-bool bad_argc (const call_info *, int, unsigned int, unsigned int);
-void define_builtin (const char *, size_t, const builtin *, symbol_lookup);
-void set_macro_sequence (const char *);
-void free_regex (void);
-void define_user_macro (const char *, size_t, const char *, size_t,
-                        symbol_lookup);
-void undivert_all (void);
-void expand_user_macro (struct obstack *, symbol *, int, macro_arguments *);
-void m4_placeholder (struct obstack *, int, macro_arguments *);
-void init_pattern_buffer (struct re_pattern_buffer *, struct re_registers *);
+extern void builtin_init (void);
+extern bool bad_argc (const call_info *, int, unsigned int, unsigned int);
+extern void define_builtin (const char *, size_t, const builtin *,
+                            symbol_lookup);
+extern void set_macro_sequence (const char *);
+extern void free_regex (void);
+extern void define_user_macro (const char *, size_t, const char *, size_t,
+                               symbol_lookup);
+extern void undivert_all (void);
+extern void expand_user_macro (struct obstack *, symbol *, int,
+                               macro_arguments *);
+extern void m4_placeholder (struct obstack *, int, macro_arguments *);
+extern void init_pattern_buffer (struct re_pattern_buffer *,
+                                 struct re_registers *);
 
-const builtin *find_builtin_by_addr (builtin_func *);
-const builtin *find_builtin_by_name (const char *);
-void func_print (struct obstack *, const builtin *, bool, token_chain **,
-                 const string_pair *);
+extern const builtin *find_builtin_by_addr (builtin_func *);
+extern const builtin *find_builtin_by_name (const char *);
+extern void func_print (struct obstack *, const builtin *, bool, token_chain **,
+                        const string_pair *);
 
 /* File: path.c  --- path search for include files.  */
 
-void include_init (void);
-void include_env_init (void);
-void add_include_directory (const char *);
-FILE *m4_path_search (const char *, char **);
+extern void include_init (void);
+extern void include_env_init (void);
+extern void add_include_directory (const char *);
+extern FILE *m4_path_search (const char *, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-bool evaluate (const call_info *, const char *, size_t, int32_t *);
+extern bool evaluate (const call_info *, const char *, size_t, int32_t *);
 
 /* File: format.c  --- printf like formatting.  */
 
-void expand_format (struct obstack *, int, macro_arguments *);
+extern void expand_format (struct obstack *, int, macro_arguments *);
 
 /* File: freeze.c --- frozen state files.  */
 
-void produce_frozen_state (const char *);
-void reload_frozen_state (const char *);
+extern void produce_frozen_state (const char *);
+extern void reload_frozen_state (const char *);
 
 /* Debugging the memory allocator.  */
 
