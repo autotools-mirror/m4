@@ -1,5 +1,12 @@
 2012-12-22  Eric Blake  <eblake@redhat.com>
 
+	maint: move syntax check exemptions into cfg.mk
+	* .x-sc_prohibit_tab_based_indentation: Delete file.
+	* .x-update-copyright: Likewise.
+	* Makefile.am (syntax_check_exceptions): Delete rule.
+	* cfg.mk (exclude_file_name_regexp): Move exemptions here.
+	(local-checks-to-skip): Re-enable copyright check.
+
 	build: update to latest gnulib
 	* gnulib: Update to latest.
 
