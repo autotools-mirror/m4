@@ -42,3 +42,13 @@ sc_prohibit_tab_based_indentation:
  @re='^ *    '                                               \
  msg='TAB in indentation; use only spaces'                   \
    $(_prohibit_regexp)
+
+# List all syntax-check exemptions:
+exclude_file_name_regexp--sc_cast_of_argument_to_free = ^m4/m4private.h$
+exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \
+  (^(GNU)?Makefile(\.am)?|\.mk|^HACKING|^ChangeLog.*)$$
+exclude_file_name_regexp--sc_require_config_h = \
+  ^modules/(evalparse|format)\.c$$
+exclude_file_name_regexp--sc_require_config_h_first = \
+  ^modules/(evalparse|format)\.c$$
+exclude_file_name_regexp--update_copyright = ^ltdl/m4/gnulib-cache.m4$$
