@@ -1,3 +1,8 @@
+2012-12-22  Eric Blake  <eblake@redhat.com>
+
+	build: update to latest gnulib
+	* gnulib: Update to latest.
+
 2012-11-19  Eric Blake  <eblake@redhat.com>
 
 	build: avoid problematic gcc 4.4 warnings
