@@ -1,6 +1,10 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release ?.? (????-??-??) [?]
+* Noteworthy changes in release 1.4.17 (2013-01-??) [stable]
+
+** Fix compilation with newer glibc headers.
+
+** A number of portability improvements inherited from gnulib.
 
 
 * Noteworthy changes in release 1.4.16 (2011-03-01) [stable]

@@ -1,3 +1,10 @@
+2013-01-01  Eric Blake  <eblake@redhat.com>
+
+	maint: update to latest gnulib
+	* gnulib: Update to latest, for rational range regex, build fixes,
+	copyright update.
+	* NEWS: Document this.
+
 2012-12-22  Eric Blake  <eblake@redhat.com>
 
 	maint: enable tight_scope syntax check
