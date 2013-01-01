@@ -1,5 +1,5 @@
 # Configure template for GNU M4.           -*-Autoconf-*-
-# Copyright (C) 1991, 1993-1994, 2004-2012 Free Software Foundation,
+# Copyright (C) 1991, 1993-1994, 2004-2013 Free Software Foundation,
 # Inc.
 #
 # This file is part of GNU M4.
