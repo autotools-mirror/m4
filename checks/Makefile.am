@@ -24,9 +24,9 @@ EXTRA_DIST = get-them check-them stamp-checks stackovf.test $(DOC_CHECKS)
 
 all-local: $(srcdir)/stamp-checks
 
-$(srcdir)/stamp-checks: $(srcdir)/get-them $(top_srcdir)/doc/m4.texinfo
+$(srcdir)/stamp-checks: $(srcdir)/get-them $(top_srcdir)/doc/m4.texi
 	rm -f $(DOC_CHECKS)
-	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texinfo
+	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texi
 	echo stamp >$@
 
 MAINTAINERCLEANFILES = $(DOC_CHECKS) $(srcdir)/stamp-checks

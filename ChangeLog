@@ -1,3 +1,12 @@
+2013-01-02  Eric Blake  <eblake@redhat.com>
+
+	maint: automake recommends *.texi now
+	* doc/m4.texinfo: Move...
+	* doc/m4.texi: ...here, for the eventual automake 1.14.
+	* HACKING: Reflect the rename.
+	* doc/Makefile.am (info_TEXINFOS): Likewise.
+	* checks/Makefile.am ($(srcdir)/stamp-checks): Likewise.
+
 2013-01-01  Eric Blake  <eblake@redhat.com>
 
 	maint: bump copyright year

@@ -118,7 +118,7 @@ and is not part of a release distribution.
   linkers you can.
 
 * For branch-1.4, the testsuite is generated from the documentation.
-  All instances of @example in doc/m4.texinfo that are not preceeded by
+  All instances of @example in doc/m4.texi that are not preceeded by
   "@comment ignore" are turned into tests in the checks directory.
 
 
