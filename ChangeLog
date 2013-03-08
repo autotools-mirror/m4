@@ -1,5 +1,11 @@
 2013-03-08  Gary V. Vaughan  <gary@gnu.org>
 
+	bootstrap: require newer texinfo release.
+	* bootstrap.conf (buildreq): Bump required makeinfo binary
+	release number to 5.0 to support --build-dir option.
+
+2013-03-08  Gary V. Vaughan  <gary@gnu.org>
+
 	bootstrap: remove reintroduced CVS cruft.
 	* bootstrap.conf (m4_ignore_gnulib_ignore): Remove.
 	The code this was factored from was removed between making the
