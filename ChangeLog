@@ -1,5 +1,11 @@
 2013-03-08  Gary V. Vaughan  <gary@gnu.org>
 
+	bootstrap: remove reintroduced CVS cruft.
+	* bootstrap.conf (m4_ignore_gnulib_ignore): Remove.
+	The code this was factored from was removed between making the
+	bootstrap branch, and merging, so this function is actually
+	obsolete.
+
 	maint: automake 1.11.5 and earlier generate insecure dist
 	rules.
 	* configure.ac (AM_INIT_AUTOMAKE): Require 1.11.5 or newer.
