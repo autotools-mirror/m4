@@ -4,6 +4,9 @@ GNU M4 NEWS - User visible changes.
 
 ** Fix compilation with newer glibc headers.
 
+** Fix a failure with diverting large amounts of text on mingw (does
+   not affect platforms that can rename an open file).
+
 ** A number of portability improvements inherited from gnulib.
 
 

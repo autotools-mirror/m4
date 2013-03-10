@@ -1,3 +1,9 @@
+2013-03-11  Eric Blake  <eblake@redhat.com>
+
+	build: fix large diversions on mingw
+	* gl/lib/clean-temp.c.diff: New file.
+	* NEWS: Mention the fix.
+
 2013-03-08  Gary V. Vaughan  <gary@gnu.org>
 
 	bootstrap: remove reintroduced CVS cruft.
