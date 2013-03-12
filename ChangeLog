@@ -1,3 +1,10 @@
+2013-03-15  Eric Blake  <eblake@redhat.com>
+
+	build: avoid test failure on HPUX
+	* doc/m4.texi (Command line files): Skip tests on systems where it
+	is impossible to start with stdin/out closed.
+	Reported by Gary V. Vaughan.
+
 2013-03-12  Eric Blake  <eblake@redhat.com>
 
 	maint: update to latest gnulib

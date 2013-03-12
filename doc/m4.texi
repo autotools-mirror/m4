@@ -993,6 +993,9 @@ options.
 ifdef(`__unix__', ,
       `errprint(` skipping: syscmd does not have unix semantics
 ')m4exit(`77')')dnl
+syscmd(`echo | cat >&- 2>/dev/null')ifelse(sysval, `0',
+       `errprint(` skipping: system does not allow closing stdout
+')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo | ']__program__[' >&-])dnl
 @error{}m4: write error: Bad file descriptor
@@ -1003,6 +1006,9 @@ sysval
 @example
 ifdef(`__unix__', ,
       `errprint(` skipping: syscmd does not have unix semantics
+')m4exit(`77')')dnl
+syscmd(`echo | cat >&- 2>/dev/null')ifelse(sysval, `0',
+       `errprint(` skipping: system does not allow closing stdout
 ')m4exit(`77')')dnl
 changequote(`[', `]')dnl
 syscmd([echo 'esyscmd(echo hi >&2 && echo err"print(bye
