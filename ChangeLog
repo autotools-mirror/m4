@@ -1,3 +1,8 @@
+2013-04-18  Eric Blake  <eblake@redhat.com>
+
+	maint: update to latest gnulib
+	* gnulib: Update to latest, for regex fixes.
+
 2013-03-15  Eric Blake  <eblake@redhat.com>
 
 	build: avoid test failure on HPUX
