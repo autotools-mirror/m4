@@ -333,7 +333,7 @@ popularity of GNU Autoconf, which requires GNU
 @code{m4} for @emph{generating} @file{configure} scripts, is an incentive
 for many to install it, while these people will not themselves
 program in @code{m4}.  GNU @code{m4} is mostly compatible with the
-System V, Release 3 version, except for some minor differences.
+System V, Release 4 version, except for some minor differences.
 @xref{Compatibility}, for more details.
 
 Some people find @code{m4} to be fairly addictive.  They first use
@@ -7352,7 +7352,7 @@ once.
 @cindex compatibility
 This chapter describes the many of the differences between this
 implementation of @code{m4}, and of other implementations found under
-UNIX, such as System V Release 3, Solaris, and BSD flavors.
+UNIX, such as System V Release 4, Solaris, and BSD flavors.
 In particular, it lists the known differences and extensions to
 POSIX.  However, the list is not necessarily comprehensive.
 
