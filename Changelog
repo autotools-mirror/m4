@@ -1,5 +1,12 @@
 2013-09-15  Gary V. Vaughan  <gary@gnu.org>
 
+	doc: use .texi extension consistently.
+	* doc/m4.texinfo: Rename from this...
+	* doc/m4.texi: ...to this.
+	* Makefile.am (m4_texinfo): Rename from this...
+	(m4_texi): ...to this. Adjust all callers.
+	* doc/Makeflie.am (m4_TEXINFOS): Adjust.
+
 	bootstrap: set copyright_holder explicitly.
 	* bootstrap.conf (copyright_holder): Explicitly set to the FSF.
 

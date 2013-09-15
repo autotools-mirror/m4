@@ -21,7 +21,7 @@ MAINTAINERCLEANFILES =
 EXTRA_DIST =
 config_aux_dir = build-aux
 
-info_TEXINFOS	= m4.texinfo
+info_TEXINFOS	= m4.texi
 m4_TEXINFOS	= regexprops-generic.texi fdl-1.3.texi gpl-3.0.texi
 dist_man_MANS	= $(srcdir)/m4.1
 EXTRA_DIST	+= gendocs_template

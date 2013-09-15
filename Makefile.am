@@ -364,10 +364,10 @@ EXTRA_DIST     += $(TESTSUITE) $(TESTSUITE_AT) $(OTHER_FILES) \
 
 # Using variables so that this snippet is not too wide and can
 # be used as is in Texinfo @example/@end example.
-m4_texinfo  = $(srcdir)/doc/m4.texinfo
+m4_texi     = $(srcdir)/doc/m4.texi
 generate    = $(AWK) -f $(srcdir)/tests/generate.awk
-$(srcdir)/tests/generated.at: tests/generate.awk $(m4_texinfo)
-	$(generate) $(m4_texinfo) >$@t
+$(srcdir)/tests/generated.at: tests/generate.awk $(m4_texi)
+	$(generate) $(m4_texi) >$@t
 	mv $@t $@
 
 AUTOM4TE = $(SHELL) $(srcdir)/$(config_aux_dir)/missing --run autom4te
