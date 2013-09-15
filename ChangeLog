@@ -1,5 +1,10 @@
 2013-09-15  Gary V. Vaughan  <gary@gnu.org>
 
+	configury: specify subdir-objects for future automake releases.
+	Latest automake warns about future incompatibility if
+	subdir-objects is not specified by AM_INIT_AUTOMAKE.
+	* configure.ac (AM_INIT_AUTOMAKE): Add subdir-objects.
+
 	bootstrap: require newer texinfo release.
 	* bootstrap.conf (buildreq): Bump required makeinfo binary
 	release number to 4.13 to support --bulid-dir option.

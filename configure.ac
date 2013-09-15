@@ -23,7 +23,7 @@ AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
 AC_CONFIG_AUX_DIR([build-aux])
 
 AM_INIT_AUTOMAKE([1.11.6 dist-bzip2 dist-xz color-tests parallel-tests
-silent-rules gnu])
+silent-rules subdir-objects gnu])
 
 m4_pattern_forbid([^M4_[A-Z]])
 
