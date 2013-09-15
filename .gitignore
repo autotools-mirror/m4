@@ -27,6 +27,7 @@ ABOUT-NLS
 /aclocal.m4t
 autom4te.cache
 /build-aux
+/ChangeLog
 /config.cache
 /config.h
 /config-h.in

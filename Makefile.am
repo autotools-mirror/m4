@@ -28,6 +28,11 @@ SUBDIRS		= po gnu . doc tests/gnu
 ACLOCAL_AMFLAGS = -I ltdl/m4
 AUTOMAKE_OPTIONS = nostdinc
 
+gitlog_to_changelog	= $(srcdir)/$(config_aux_dir)/gitlog-to-changelog
+git_log_fix		= $(srcdir)/$(config_aux_dir)/git-log-fix
+changelog		= $(srcdir)/ChangeLog
+changelog_old		= $(srcdir)/ChangeLog.old
+
 # Prime the variables that will be augmented by libtool.
 # FIXME - the -export-symbols-regex ".*" is a hack to work around the
 # fact that on cygwin, the convenience library libltdl exports symbols,
@@ -63,13 +68,24 @@ AM_CPPFLAGS    += -Ignu -I$(srcdir)/gnu \
 		  -Im4 -I$(srcdir)/m4
 EXTRA_DIST     += bootstrap cfg.mk maint.mk .version .prev-version \
 		  $(config_macro_dir)/gnulib-cache.m4 \
-		  $(syntax_check_exceptions)
+		  $(syntax_check_exceptions) $(gitlog_to_changelog)
 BUILT_SOURCES  += .version
 .version:
 	echo $(VERSION) > $@-t && mv $@-t $@
 dist-hook: dist-tarball-version
 dist-tarball-version:
 	echo $(VERSION) > $(distdir)/.tarball-version
+
+dist-hook: ChangeLog
+changelog_start_date = 2011-01-01
+$(changelog): FORCE
+	$(AM_V_GEN)if test -d '$(srcdir)/.git'; then	\
+	  $(gitlog_to_changelog)			\
+	    --since=$(changelog_start_date) > '$@T';	\
+	  rm -f '$@'; mv '$@T' '$@';			\
+	  cat '$(changelog_old)' >> '$@';		\
+	fi
+
 MAINTAINERCLEANFILES = \
 		  ABOUT-NLS INSTALL Makefile.in aclocal.m4 \
 		  config-h.in configure stamp-h.in \

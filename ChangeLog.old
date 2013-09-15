@@ -1,37 +1,3 @@
-2013-09-15  Gary V. Vaughan  <gary@gnu.org>
-
-	doc: use .texi extension consistently.
-	* doc/m4.texinfo: Rename from this...
-	* doc/m4.texi: ...to this.
-	* Makefile.am (m4_texinfo): Rename from this...
-	(m4_texi): ...to this. Adjust all callers.
-	* doc/Makeflie.am (m4_TEXINFOS): Adjust.
-
-	bootstrap: set copyright_holder explicitly.
-	* bootstrap.conf (copyright_holder): Explicitly set to the FSF.
-
-	configury: don't check in generated files.
-	* COPYING: Install explicitly to avoid confusion over M4
-	license.
-	* INSTALL, build-aux/compile, bulid-aux/config.guess,
-	build-aux/config.sub, build-aux/depcomp, build-aux/install-sh,
-	build-aux/mdate-sh, build-aux/missing, build-aux/texinfo.tex:
-	Remove.
-
-	configury: don't install modules to pkglibexecdir.
-	Modern Automake (correctly) oerrors out when trying to install
-	modules to pkglibexecdir; we should be using pkglibdir here.
-	* Makefile.am (pkglibexec_LTLIBRARIES): Rename from this...
-	(pkglib_LTLIBRARIES): ...to this.
-
-	bootstrap: sync with upstream.
-	* bootstrap.conf: New file.
-	* gl/build-aux/bootstrap.in, gl/build-aux/extract-trace,
-	gl/build-aux/funclib.sh, gl/build-aux/options-parser: Update
-	from upstream to pick up recent improvements.
-	* bootstrap: Regenerate.
-	* ltdl/m3/gnulib-cache.m4: Regenerate.
-
 2010-03-02  Giuseppe Scrivano  <gscrivano@gnu.org>  (tiny change)
 
 	Support bootstrap --gnulib-srcdir=DIR.
