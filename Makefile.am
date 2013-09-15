@@ -149,7 +149,7 @@ module_libadd	= m4/libm4.la
 
 pkgmodinclude_HEADERS = modules/m4.h
 
-pkglibexec_LTLIBRARIES = \
+pkglib_LTLIBRARIES = \
 		  modules/gnu.la \
 		  modules/load.la \
 		  modules/m4.la \
@@ -172,14 +172,14 @@ modules_traditional_la_LDFLAGS	= $(module_ldflags)
 modules_traditional_la_LIBADD	= $(module_libadd)
 
 if USE_GMP
-pkglibexec_LTLIBRARIES	       += modules/mpeval.la
+pkglib_LTLIBRARIES	       += modules/mpeval.la
 EXTRA_modules_mpeval_la_SOURCES	= modules/evalparse.c
 modules_mpeval_la_LDFLAGS	= $(module_ldflags)
 modules_mpeval_la_LIBADD	= $(module_libadd) $(LIBADD_GMP)
 endif
 
 ## Disabled for now.  It is too fragile to be useful.
-## pkglibexec_LTLIBRARIES         += modules/perl.la
+## pkglib_LTLIBRARIES         += modules/perl.la
 ## modules_perl_la_CPPFLAGS	= `$(PERL) -MExtUtils::Embed -e ccopts`
 ## modules_perl_la_LDFLAGS		= \
 ##		  $(module_ldflags) `$(PERL) -MExtUtils::Embed -e ldopts`
