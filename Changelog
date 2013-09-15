@@ -1,5 +1,8 @@
 2013-09-15  Gary V. Vaughan  <gary@gnu.org>
 
+	bootstrap: set copyright_holder explicitly.
+	* bootstrap.conf (copyright_holder): Explicitly set to the FSF.
+
 	configury: don't check in generated files.
 	* COPYING: Install explicitly to avoid confusion over M4
 	license.
