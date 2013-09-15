@@ -239,9 +239,9 @@ hej:	`def 4.'
 hej:	`def 3.'
 hej:	`def 2.'
 hej:	`def 1.'
-m4:pushpop.m4:18: warning: dumpdef: undefined macro `hej'
-m4:pushpop.m4:20: warning: dumpdef: undefined macro `mac2'
-m4:pushpop.m4:21: warning: popdef: undefined macro `mac2'
+m4:pushpop.m4:18: warning: dumpdef: undefined macro 'hej'
+m4:pushpop.m4:20: warning: dumpdef: undefined macro 'mac2'
+m4:pushpop.m4:21: warning: popdef: undefined macro 'mac2'
 ]])
 
 AT_CLEANUP

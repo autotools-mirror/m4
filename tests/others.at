@@ -145,14 +145,14 @@ AT_DATA([in3.m4],
 AT_CHECK_M4([in1.m4/], [1], [], [stderr])
 dnl mingw fails with EINVAL rather than the expected ENOTDIR
 AT_CHECK([$SED 's/Invalid argument/Not a directory/' stderr], [0],
-[[m4: cannot open `in1.m4/': Not a directory
+[[m4: cannot open 'in1.m4/': Not a directory
 ]])
 
 AT_CHECK_M4([in1.m4], [1], [[
 ]], [stderr])
 dnl mingw fails with EINVAL rather than the expected ENOTDIR
 AT_CHECK([$SED 's/Invalid argument/Not a directory/' stderr], [0],
-[[m4:in1.m4:1: include: cannot open `in2.m4/': Not a directory
+[[m4:in1.m4:1: include: cannot open 'in2.m4/': Not a directory
 ]])
 
 AT_CHECK_M4([in2.m4], [0], [[
@@ -163,7 +163,7 @@ AT_CHECK_M4([in3.m4], [1], [[
 ]], [stderr])
 dnl mingw fails with EACCES rather than the expected EISDIR
 AT_CHECK([$SED 's/Permission denied/Is a directory/' stderr], [0],
-[[m4:in3.m4:1: include: cannot open `.': Is a directory
+[[m4:in3.m4:1: include: cannot open '.': Is a directory
 ]])
 
 AT_CLEANUP
@@ -437,7 +437,7 @@ AT_CHECK_M4(["$abs_srcdir/null.m4"], [1],
 [[# This file tests m4 behavior on NUL bytes.
 ]], [stderr])
 AT_CHECK([sed "s|$abs_srcdir/||" stderr], [0],
-[[m4:null.m4:5: warning: m4exit: non-numeric argument `2\0002'
+[[m4:null.m4:5: warning: m4exit: non-numeric argument '2\0002'
 ]])
 
 AT_CLEANUP
@@ -630,13 +630,13 @@ AT_CHECK_M4([in.m4], [0], [ignore], [ignore], [-])
 
 dnl error when stdin must be read
 AT_CHECK_M4([], [1], [],
-[[m4:stdin:1: error reading `stdin'
+[[m4:stdin:1: error reading 'stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 
 dnl error when stdin must be read
 AT_CHECK_M4([-], [1], [],
-[[m4:stdin:1: error reading `stdin'
+[[m4:stdin:1: error reading 'stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 
@@ -644,8 +644,8 @@ dnl error once per command-line attempt to read stdin
 AT_DATA([in.m4], [[hello world
 ]])
 AT_CHECK_M4([- in.m4 -], [1], [[hello world
-]], [[m4:stdin:1: error reading `stdin'
-m4:stdin:1: error reading `stdin'
+]], [[m4:stdin:1: error reading 'stdin'
+m4:stdin:1: error reading 'stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 
@@ -670,7 +670,7 @@ AT_DATA([in2.m4], [[divert(`-1')undivert
 divert`'world
 ]])
 AT_CHECK_M4([in.m4 - in2.m4], [1], [[hello world
-]], [[m4:stdin:1: error reading `stdin'
+]], [[m4:stdin:1: error reading 'stdin'
 m4: error closing file: Bad file descriptor
 ]], [-])
 

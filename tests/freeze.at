@@ -61,7 +61,7 @@ AT_SETUP([freezing failure])
 AT_KEYWORDS([frozen])
 
 AT_CHECK_M4([-F /none/such], [1], [],
-[[m4: cannot open `/none/such': No such file or directory
+[[m4: cannot open '/none/such': No such file or directory
 ]])
 
 if test -w /dev/full && test -c /dev/full ; then
@@ -170,7 +170,7 @@ define 1
 my_define(bar, 4) 3
 bar${1}
 ]],
-[[m4:input.m4:5: warning: popdef: undefined macro `my_define'
+[[m4:input.m4:5: warning: popdef: undefined macro 'my_define'
 ]])
 
 dnl Test rejection of v2 features in a v1 frozen file
@@ -414,7 +414,7 @@ AT_CHECK([cat out1 stdout], [0], [expout])
 dnl Check that unexpected embedded NULs are recognized.
 printf '# bogus frozen file\nV2\nR4\ngnu\0\n' > bogus.m4f
 AT_CHECK_M4([-R bogus.m4f], [1], [],
-[[m4:bogus.m4f:4: bad syntax-spec `gnu\0'
+[[m4:bogus.m4f:4: bad syntax-spec 'gnu\0'
 ]])
 
 dnl Reject escape sequences that expand to unexpected NUL
@@ -426,7 +426,7 @@ len
 len\0
 ]])
 AT_CHECK_M4([-R bogus.m4f], [1], [],
-[[m4:bogus.m4f:5: ill-formed frozen file, invalid builtin `len\0' encountered
+[[m4:bogus.m4f:5: ill-formed frozen file, invalid builtin 'len\0' encountered
 ]])
 
 AT_CLEANUP
@@ -528,10 +528,10 @@ AT_CHECK_M4([-R frozen.m4f input.m4], 0,
 
 a
 ]],
-[[m4:input.m4:4: warning: defn: a: builtin `b' requested by frozen file not found
-m4:input.m4:6: warning: a: builtin `b' requested by frozen file not found
-m4:input.m4:8: warning: a: builtin `b' requested by frozen file not found
-m4:input.m4:10: warning: builtin: undefined builtin `b'
+[[m4:input.m4:4: warning: defn: a: builtin 'b' requested by frozen file not found
+m4:input.m4:6: warning: a: builtin 'b' requested by frozen file not found
+m4:input.m4:8: warning: a: builtin 'b' requested by frozen file not found
+m4:input.m4:10: warning: builtin: undefined builtin 'b'
 a:	<<b>>
 c:	`'
 ]], [], [ ])

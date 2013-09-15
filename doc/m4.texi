@@ -661,7 +661,7 @@ a warning.
 @example
 $ @kbd{m4}
 defn(`oops')
-@error{}m4:stdin:1: warning: defn: undefined macro `oops'
+@error{}m4:stdin:1: warning: defn: undefined macro 'oops'
 @result{}
 ^D
 @end example
@@ -691,7 +691,7 @@ $ @kbd{echo $?}
 @example
 $ @kbd{m4 -E -d}
 defn(`oops')
-@error{}m4:stdin:1: warning: defn: undefined macro `oops'
+@error{}m4:stdin:1: warning: defn: undefined macro 'oops'
 @result{}
 ^D
 @end example
@@ -2257,7 +2257,7 @@ m4}).
 @example
 $ @kbd{m4}
 undefine(`a')
-@error{}m4:stdin:1: warning: undefine: undefined macro `a'
+@error{}m4:stdin:1: warning: undefine: undefined macro 'a'
 @result{}
 debugmode(`-d')
 @result{}
@@ -2460,7 +2460,7 @@ builtin token does not occur in isolation.  A future version of
 @example
 $ @kbd{m4 -d}
 defn(`foo')
-@error{}m4:stdin:1: warning: defn: undefined macro `foo'
+@error{}m4:stdin:1: warning: defn: undefined macro 'foo'
 @result{}
 debugmode(`-d')
 @result{}
@@ -2610,7 +2610,7 @@ define(`a', `1')
 popdef
 @result{}popdef
 popdef(`a', `a')
-@error{}m4:stdin:3: warning: popdef: undefined macro `a'
+@error{}m4:stdin:3: warning: popdef: undefined macro 'a'
 @result{}
 debugmode(`-d')
 @result{}
@@ -2785,7 +2785,7 @@ f(define(`f', `2'))
 indir(`f', define(`f', `3'))
 @result{}3
 indir(`f', undefine(`f'))
-@error{}m4:stdin:4: warning: indir: undefined macro `f'
+@error{}m4:stdin:4: warning: indir: undefined macro 'f'
 @result{}
 debugmode(`-d')
 @result{}
@@ -2896,10 +2896,10 @@ $ @kbd{m4 -P}
 m4_builtin(`divnum')
 @result{}0
 m4_builtin(`m4_divnum')
-@error{}m4:stdin:2: warning: m4_builtin: undefined builtin `m4_divnum'
+@error{}m4:stdin:2: warning: m4_builtin: undefined builtin 'm4_divnum'
 @result{}
 m4_indir(`divnum')
-@error{}m4:stdin:3: warning: m4_indir: undefined macro `divnum'
+@error{}m4:stdin:3: warning: m4_indir: undefined macro 'divnum'
 @result{}
 m4_indir(`m4_divnum')
 @result{}0
@@ -2918,17 +2918,17 @@ as though empty strings had been passed as the required arguments.
 builtin
 @result{}builtin
 builtin()
-@error{}m4:stdin:2: warning: builtin: undefined builtin `'
+@error{}m4:stdin:2: warning: builtin: undefined builtin ''
 @result{}
 builtin(`builtin')
 @error{}m4:stdin:3: warning: builtin: too few arguments: 0 < 1
 @result{}
 builtin(`builtin',)
-@error{}m4:stdin:4: warning: builtin: undefined builtin `'
+@error{}m4:stdin:4: warning: builtin: undefined builtin ''
 @result{}
 builtin(`builtin', ``'
 ')
-@error{}m4:stdin:5: warning: builtin: undefined builtin ``\'\n'
+@error{}m4:stdin:5: warning: builtin: undefined builtin '`\'\n'
 @result{}
 indir(`index')
 @error{}m4:stdin:7: warning: index: too few arguments: 0 < 2
@@ -2988,7 +2988,7 @@ traceoff
 changequote(`[', `]')
 @result{}
 defn1([foo])
-@error{}m4:stdin:11: warning: builtin: undefined builtin ``defn\''
+@error{}m4:stdin:11: warning: builtin: undefined builtin '`defn\''
 @result{}
 defn2([foo])
 @result{}bar
@@ -2999,7 +2999,7 @@ defn1([foo])
 changequote
 @result{}
 defn1(`foo')
-@error{}m4:stdin:16: warning: builtin: undefined builtin `[defn]'
+@error{}m4:stdin:16: warning: builtin: undefined builtin '[defn]'
 @result{}
 @end example
 
@@ -4120,7 +4120,7 @@ f(popdef(`f')dumpdef(`f'))
 @error{}f:@tabchar{}``$0'1'
 @result{}f2
 f(popdef(`f')dumpdef(`f'))
-@error{}m4:stdin:3: warning: dumpdef: undefined macro `f'
+@error{}m4:stdin:3: warning: dumpdef: undefined macro 'f'
 @result{}f1
 debugmode(`-d')
 @result{}
@@ -4244,17 +4244,17 @@ traceon(`foo')
 foo
 @result{}foo
 defn(`foo')
-@error{}m4:stdin:4: warning: defn: undefined macro `foo'
+@error{}m4:stdin:4: warning: defn: undefined macro 'foo'
 @result{}
 undefine(`foo')
-@error{}m4:stdin:5: warning: undefine: undefined macro `foo'
+@error{}m4:stdin:5: warning: undefine: undefined macro 'foo'
 @result{}
 pushdef(`foo')
 @result{}
 popdef(`foo')
 @result{}
 popdef(`foo')
-@error{}m4:stdin:8: warning: popdef: undefined macro `foo'
+@error{}m4:stdin:8: warning: popdef: undefined macro 'foo'
 @result{}
 define(`foo', `bar')
 @result{}
@@ -4266,7 +4266,7 @@ undefine(`foo')
 ifdef(`foo', `yes', `no')
 @result{}no
 indir(`foo')
-@error{}m4:stdin:13: warning: indir: undefined macro `foo'
+@error{}m4:stdin:13: warning: indir: undefined macro 'foo'
 @result{}
 define(`foo', `blah')
 @result{}
@@ -4619,13 +4619,13 @@ to macro tracing.
 @comment options: -dip
 @example
 $ @kbd{m4 -dip -I examples}
-@error{}m4debug: input read from `stdin'
+@error{}m4debug: input read from 'stdin'
 define(`foo', `m4wrap(`wrapped text
 ')dnl')
 @result{}
 include(`incl.m4')dnl
-@error{}m4debug: path search for `incl.m4' found `examples/incl.m4'
-@error{}m4debug: input read from `examples/incl.m4'
+@error{}m4debug: path search for 'incl.m4' found 'examples/incl.m4'
+@error{}m4debug: input read from 'examples/incl.m4'
 @result{}Include file start
 @result{}Include file end
 @error{}m4debug: input reverted to stdin, line 3
@@ -4676,7 +4676,7 @@ Also, the special tokens for builtin functions are not truncated.
 @example
 $ @kbd{m4 -d -l 6 -t echo -t defn}
 debuglen(`oops')
-@error{}m4:stdin:1: warning: debuglen: non-numeric argument `oops'
+@error{}m4:stdin:1: warning: debuglen: non-numeric argument 'oops'
 @result{}
 define(`echo', `$@@')
 @result{}
@@ -5364,7 +5364,7 @@ changeresyntax(`GNU-m4')
 changeresyntax(`Gnu_M4')
 @result{}
 changeresyntax(`unknown')
-@error{}m4:stdin:4: warning: changeresyntax: bad syntax-spec: `unknown'
+@error{}m4:stdin:4: warning: changeresyntax: bad syntax-spec: 'unknown'
 @result{}
 @end example
 
@@ -6010,10 +6010,10 @@ parameters.
 @comment status: 1
 @example
 include(`n')
-@error{}m4:stdin:1: include: cannot open `n': No such file or directory
+@error{}m4:stdin:1: include: cannot open 'n': No such file or directory
 @result{}
 include()
-@error{}m4:stdin:2: include: cannot open `': No such file or directory
+@error{}m4:stdin:2: include: cannot open '': No such file or directory
 @result{}
 sinclude(`n')
 @result{}
@@ -7547,14 +7547,14 @@ Likewise, escape sequences are not yet recognized.
 
 @example
 format(`%p', `0')
-@error{}m4:stdin:1: warning: format: unrecognized specifier in `%p'
+@error{}m4:stdin:1: warning: format: unrecognized specifier in '%p'
 @result{}p
 format(`%*d', `')
 @error{}m4:stdin:2: warning: format: empty string treated as 0
 @error{}m4:stdin:2: warning: format: too few arguments: 2 < 3
 @result{}0
 format(`%.1f', `2a')
-@error{}m4:stdin:3: warning: format: non-numeric argument `2a'
+@error{}m4:stdin:3: warning: format: non-numeric argument '2a'
 @result{}2.0
 @end example
 
@@ -7710,23 +7710,23 @@ eval(`(1 | 1) ^ 1')
 eval(`+ + - ~ ! ~ 0')
 @result{}1
 eval(`++0')
-@error{}m4:stdin:8: warning: eval: invalid operator: `++0'
+@error{}m4:stdin:8: warning: eval: invalid operator: '++0'
 @result{}
 eval(`1 = 1')
-@error{}m4:stdin:9: warning: eval: invalid operator: `1 = 1'
+@error{}m4:stdin:9: warning: eval: invalid operator: '1 = 1'
 @result{}
 eval(`0 |= 1')
-@error{}m4:stdin:10: warning: eval: invalid operator: `0 |= 1'
+@error{}m4:stdin:10: warning: eval: invalid operator: '0 |= 1'
 @result{}
 eval(`2 || 1 / 0')
 @result{}1
 eval(`0 || 1 / 0')
-@error{}m4:stdin:12: warning: eval: divide by zero: `0 || 1 / 0'
+@error{}m4:stdin:12: warning: eval: divide by zero: '0 || 1 / 0'
 @result{}
 eval(`0 && 1 % 0')
 @result{}0
 eval(`2 && 1 % 0')
-@error{}m4:stdin:14: warning: eval: modulo by zero: `2 && 1 % 0'
+@error{}m4:stdin:14: warning: eval: modulo by zero: '2 && 1 % 0'
 @result{}
 @end example
 
@@ -7754,9 +7754,9 @@ eval(`2 ** 0')
 @result{}1
 eval(`0 ** 0')
 @result{}
-@error{}m4:stdin:5: warning: eval: divide by zero: `0 ** 0'
+@error{}m4:stdin:5: warning: eval: divide by zero: '0 ** 0'
 eval(`4 ** -2')
-@error{}m4:stdin:6: warning: eval: negative exponent: `4 ** -2'
+@error{}m4:stdin:6: warning: eval: negative exponent: '4 ** -2'
 @result{}
 eval(`2 || 4 ** -2')
 @result{}1
@@ -7819,7 +7819,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: warning: eval: bad expression: `foo / 6'
+@error{}m4:stdin:11: warning: eval: bad expression: 'foo / 6'
 @result{}
 eval(foo / 6)
 @result{}111
@@ -8780,7 +8780,7 @@ twoline
 @result{}1
 @result{}2
 syncoutput(`blah')
-@error{}m4:stdin:18: warning: syncoutput: unknown directive `blah'
+@error{}m4:stdin:18: warning: syncoutput: unknown directive 'blah'
 @result{}
 @end example
 
@@ -9522,7 +9522,7 @@ forloop(`', `1', `2', ` odd iterator name')
 forloop(`i', `5 + 5', `0xc', ` 0x`'eval(i, `16')')
 @result{} 0xa 0xb 0xc
 forloop(`i', `a', `b', `non-numeric bounds')
-@error{}m4:stdin:6: warning: eval: bad input: `(a) <= (b)'
+@error{}m4:stdin:6: warning: eval: bad input: '(a) <= (b)'
 @result{}
 @end example
 

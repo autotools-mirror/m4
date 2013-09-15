@@ -77,7 +77,7 @@ AT_CHECK_M4([--arglength=10], [0], [],
 
 AT_CHECK_M4([--arglength=x], [1], [],
 [[m4: warning: `--arglength' is deprecated, use `--debuglen' instead
-m4: invalid --arglength argument `x'
+m4: invalid --arglength argument 'x'
 ]])
 
 dnl --word-regexp from 1.4.x is no longer supported.  Can't test for its
@@ -99,7 +99,7 @@ dnl Check that all files are processed even after missing file
 AT_DATA([in], [[hello world
 ]])
 AT_CHECK_M4([oops in], [1], [[hello world
-]], [[m4: cannot open `oops': No such file or directory
+]], [[m4: cannot open 'oops': No such file or directory
 ]])
 
 dnl Check that '-' means stdin, even if ./- exists.
@@ -294,7 +294,7 @@ AT_CHECK([test -f trace3], [1])
 dnl check that trace file failure causes an error, but allows processing
 AT_CHECK_M4([--debugfile=no_such_dir/trace -tfoo -Dfoo=bar in], [1],
 [[bar
-]], [[m4: cannot set debug file `no_such_dir/trace': No such file or directory
+]], [[m4: cannot set debug file 'no_such_dir/trace': No such file or directory
 m4trace: -1- foo -> `bar'
 ]])
 
@@ -345,15 +345,15 @@ echo(`long string')
 ]])
 
 AT_CHECK_M4([--debuglen=-1 in], [1], [],
-[[m4: invalid --debuglen argument `-1'
+[[m4: invalid --debuglen argument '-1'
 ]])
 
 AT_CHECK_M4([--debuglen oops in], [1], [],
-[[m4: invalid --debuglen argument `oops'
+[[m4: invalid --debuglen argument 'oops'
 ]])
 
 AT_CHECK_M4([-l 10oops in], [1], [],
-[[m4: invalid suffix in -l argument `10oops'
+[[m4: invalid suffix in -l argument '10oops'
 ]])
 
 dnl MiB is the suffix to implict 1, resulting in 1048576
@@ -363,10 +363,10 @@ AT_CHECK_M4([-lMiB in], [0], [[long string
 
 dnl this assumes size_t is no bigger than 64 bits
 AT_CHECK_M4([-l 123456789012345678901234567890 in], [1], [],
-[[m4: -l argument `123456789012345678901234567890' too large
+[[m4: -l argument '123456789012345678901234567890' too large
 ]])
 AT_CHECK_M4([--debugl 123456789012345678901234567890 in], [1], [],
-[[m4: --debuglen argument `123456789012345678901234567890' too large
+[[m4: --debuglen argument '123456789012345678901234567890' too large
 ]])
 
 dnl per POSIX guidelines, this is a decimal number 10, not octal 8
@@ -431,11 +431,11 @@ m4debug: module gnu: opening file
 m4debug: module gnu: opened
 m4debug: module gnu: builtins loaded
 m4debug: module gnu: macros loaded
-m4debug: path search for `in' found `in'
-m4debug: input read from `in'
+m4debug: path search for 'in' found 'in'
+m4debug: input read from 'in'
 m4trace:in:1: -1- id 1: include ... = <include>{m4}
-m4debug:in:1: path search for `nested' found `nested'
-m4debug:in:1: input read from `nested'
+m4debug:in:1: path search for 'nested' found 'nested'
+m4debug:in:1: input read from 'nested'
 m4trace:in:1: -1- id 1: include(`nested') -> <file: nested>
 m4trace:nested:1: -1- id 2: m4wrap ... = <m4wrap>{m4}
 m4trace:nested:1: -1- id 2: m4wrap(`divnum
@@ -626,15 +626,15 @@ echo(echo(echo(echo(echo(echo(echo(echo(echo(`nested string')))))))))
 ]])
 
 AT_CHECK_M4([--nesting-limit=-1 in], [1], [],
-[[m4: invalid --nesting-limit argument `-1'
+[[m4: invalid --nesting-limit argument '-1'
 ]])
 
 AT_CHECK_M4([--nesting-limit oops in], [1], [],
-[[m4: invalid --nesting-limit argument `oops'
+[[m4: invalid --nesting-limit argument 'oops'
 ]])
 
 AT_CHECK_M4([-L 10oops in], [1], [],
-[[m4: invalid suffix in -L argument `10oops'
+[[m4: invalid suffix in -L argument '10oops'
 ]])
 
 dnl MiB is the suffix to implict 1, resulting in 1048576
@@ -644,10 +644,10 @@ nested string
 
 dnl this assumes size_t is no bigger than 64 bits
 AT_CHECK_M4([-L 123456789012345678901234567890 in], [1], [],
-[[m4: -L argument `123456789012345678901234567890' too large
+[[m4: -L argument '123456789012345678901234567890' too large
 ]])
 AT_CHECK_M4([--nest 123456789012345678901234567890 in], [1], [],
-[[m4: --nesting-limit argument `123456789012345678901234567890' too large
+[[m4: --nesting-limit argument '123456789012345678901234567890' too large
 ]])
 
 AT_CHECK_M4([-L 5 in], [1], [[nested string
@@ -705,7 +705,7 @@ AT_CHECK_M4([-I post -B pre in], [1],
 [[in pre/foo
 in ./bar
 in post/blah
-]], [[m4:in:3: include: cannot open `bad': No such file or directory
+]], [[m4:in:3: include: cannot open 'bad': No such file or directory
 ]])
 
 AT_CLEANUP
@@ -723,7 +723,7 @@ AT_DATA([[in]], [[regexp(`(', `(')
 ]])
 
 AT_CHECK_M4([--regexp-syntax=unknown in], [1], [],
-[[m4: bad syntax-spec: `unknown'
+[[m4: bad syntax-spec: 'unknown'
 ]])
 
 AT_CHECK_M4([--regexp-syntax= in], [0], [[0
@@ -821,7 +821,7 @@ hi
 dnl test parse error
 AT_CHECK_M4([--syncoutput=huh in], [0],
 [[hi
-]], [[m4: warning: --syncoutput: unknown directive `huh'
+]], [[m4: warning: --syncoutput: unknown directive 'huh'
 ]])
 
 AT_CLEANUP

@@ -133,7 +133,7 @@ Dumpdef: .
 [[Test module loaded.
 test:	<test>
 Test module unloaded.
-m4:input.m4:6: warning: dumpdef: undefined macro `test'
+m4:input.m4:6: warning: dumpdef: undefined macro 'test'
 ]])
 
 AT_CLEANUP
