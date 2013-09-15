@@ -1,3 +1,11 @@
+2013-09-15  Gary V. Vaughan  <gary@gnu.org>
+
+	bootstrap: sync with upstream.
+	* gl/build-aux/bootstrap.in, gl/build-aux/extract-trace,
+	gl/build-aux/funclib.sh, gl/build-aux/options-parser: Update
+	from upstream to pick up recent improvements.
+	* bootstrap: Regenerate.
+
 2013-08-17  Michael Witten  <mfwitten@gmail.com>  (tiny change)
 
 	Clean up documentation
