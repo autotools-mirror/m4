@@ -1,5 +1,9 @@
 2013-09-15  Gary V. Vaughan  <gary@gnu.org>
 
+	bootstrap: require newer texinfo release.
+	* bootstrap.conf (buildreq): Bump required makeinfo binary
+	release number to 4.13 to support --bulid-dir option.
+
 	bootstrap: don't double-specify --no-changelog to gnulib-tool.
 	* bootstrap.conf (gnulib_tool_option_extras): Rename from
 	this...
