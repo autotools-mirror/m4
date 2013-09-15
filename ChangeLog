@@ -1,5 +1,11 @@
 2013-09-15  Gary V. Vaughan  <gary@gnu.org>
 
+	bootstrap: don't double-specify --no-changelog to gnulib-tool.
+	* bootstrap.conf (gnulib_tool_option_extras): Rename from
+	this...
+	(gnulib_tool_options): ...this, and append options rather than
+	overwrite.
+
 	bootstrap: sync with upstream.
 	* gl/build-aux/bootstrap.in, gl/build-aux/extract-trace,
 	gl/build-aux/funclib.sh, gl/build-aux/options-parser: Update
