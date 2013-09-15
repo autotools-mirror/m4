@@ -26,9 +26,7 @@ ABOUT-NLS
 /aclocal.m4
 /aclocal.m4t
 autom4te.cache
-/build-aux/.gitignore
-/build-aux/config.rpath
-/build-aux/ltmain.sh
+/build-aux
 /config.cache
 /config.h
 /config-h.in
@@ -48,6 +46,7 @@ CVS
 /doc/version.texi
 /gnu
 /GNUmakefile
+/INSTALL
 /intl
 libtool
 /ltdl/argz.c

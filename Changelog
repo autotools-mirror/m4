@@ -1,5 +1,13 @@
 2013-09-15  Gary V. Vaughan  <gary@gnu.org>
 
+	configury: don't check in generated files.
+	* COPYING: Install explicitly to avoid confusion over M4
+	license.
+	* INSTALL, build-aux/compile, bulid-aux/config.guess,
+	build-aux/config.sub, build-aux/depcomp, build-aux/install-sh,
+	build-aux/mdate-sh, build-aux/missing, build-aux/texinfo.tex:
+	Remove.
+
 	configury: don't install modules to pkglibexecdir.
 	Modern Automake (correctly) oerrors out when trying to install
 	modules to pkglibexecdir; we should be using pkglibdir here.

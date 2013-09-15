@@ -1,22 +1,3 @@
-## Makevars - customizations for creating I18N files.
-##
-## Copyright (C) 2002, 2006, 2007, 2010 Free Software Foundation, Inc.
-##
-## This file is part of GNU M4.
-##
-## GNU M4 is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
-##
-## GNU M4 is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-##
 # Makefile variables for PO directory in any package using GNU gettext.
 
 # Usually the message domain is the same as the package name.
@@ -27,20 +8,10 @@ subdir = po
 top_builddir = ..
 
 # These options get passed to xgettext.
-XGETTEXT_OPTIONS = \
-  --from-code=UTF-8 \
-  --keyword=_ --flag=_:1:pass-c-format \
-  --keyword=N_ --flag=N_:1:pass-c-format \
-  --keyword=proper_name:1,'"This is a proper name. See the gettext manual, section Names."' \
-  --keyword=proper_name_utf8:1,'"This is a proper name. See the gettext manual, section Names."' \
-  --flag=error:3:c-format --flag=error_at_line:5:c-format \
-  --flag=verror:3:c-format --flag=verror_at_line:5:c-format \
-  --flag=asprintf:2:c-format --flag=vasprintf:2:c-format \
-  --flag=asnprintf:3:c-format --flag=vasnprintf:3:c-format \
-  --flag=xprintf:1:c-format --flag=xvprintf:1:c-format \
-  --flag=xfprintf:2:c-format --flag=xvfprintf:2:c-format \
-  --flag=m4_error:4:c-format --flag=m4_error_at_line:6:c-format \
-  --flag=m4_debug_message:3:c-format
+XGETTEXT_OPTIONS = --keyword=_ --keyword=N_ \
+--flag=_:1:pass-c-format \
+--flag=N_:1:pass-c-format \
+$${end_of_xgettext_options+}
 
 # This is the copyright holder that gets inserted into the header of the
 # $(DOMAIN).pot file.  Set this to the copyright holder of the surrounding
@@ -70,10 +41,4 @@ MSGID_BUGS_ADDRESS = bug-m4@gnu.org
 
 # This is the list of locale categories, beyond LC_MESSAGES, for which the
 # message catalogs shall be used.  It is usually empty.
-EXTRA_LOCALE_CATEGORIES =
-
-# This tells whether the $(DOMAIN).pot file contains messages with an 'msgctxt'
-# context.  Possible values are "yes" and "no".  Set this to yes if the
-# package uses functions taking also a message context, like pgettext(), or
-# if in $(XGETTEXT_OPTIONS) you define keywords with a context argument.
-USE_MSGCTXT = no
+EXTRA_LOCALE_CATEGORIES = 
