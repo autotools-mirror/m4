@@ -2547,7 +2547,7 @@ func_reconfigure ()
         func_ensure_changelog
     else
       $require_gnulib_cache
-      if sed -n '/^gl_MODULES(\[/,/^])$/p' $gnulib_cache |
+      if sed -n '/^gl_MODULES(\[/,/^])$/p' $gnulib_cache 2>/dev/null |
          func_grep_q gitlog-to-changelog
       then
         func_ensure_changelog
