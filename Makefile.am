@@ -438,3 +438,5 @@ DISTCLEANFILES += tests/atconfig tests/atlocal tests/m4
 MAINTAINERCLEANFILES += $(srcdir)/tests/generated.at '$(TESTSUITE)'
 
 clean-local: clean-local-tests
+
+FORCE:
