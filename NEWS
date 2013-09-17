@@ -323,25 +323,32 @@ promoted to 2.0.
 
 ** A number of portability improvements inherited from gnulib.
 
-* Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
-  Released by Eric Blake, based on git version 1.4.10a
+* Noteworthy changes in release 1.4.17 (2013-09-17) [stable]
 
-Note that M4 1.4.10b was released prior to 1.4.11, and includes all the
-features of 1.4.11 except for C99 parsing in the `format' builtin.  It also
-contains the following beta features that were deemed worth deferring until
-1.6:
+** Fix compilation with newer glibc headers.
 
-** Further enhance the `index' builtin to often achieve sublinear results.
+** Fix a failure with diverting large amounts of text on mingw (does
+   not affect platforms that can rename an open file).
 
-** Enhance the `regexp' and `patsubst' builtins to cache frequently used
-   regular expressions, which speeds up typical Autoconf usage.
+** A number of portability improvements inherited from gnulib.
 
-** Enhance the `format' builtin to warn for more suspicious usages, such as
-   missing arguments or problems parsing according to the format string.
 
-** Enhance the `ifelse' and `shift' builtins so that tail-recursive
-   algorithms based on `$@' operate in linear, rather than quadratic, time
-   and memory.
+* Noteworthy changes in release 1.4.16 (2011-03-01) [stable]
+
+** Fix regressions in the `index' builtin.  On glibc platforms, this
+   avoids false positives from a strstr bug in glibc 2.9 through 2.12;
+   on many other platforms, it fixes two separate regressions, a false
+   positive introduced in 1.4.11 and a false negative in 1.4.15.
+
+** A number of portability improvements inherited from gnulib.
+
+
+* Noteworthy changes in release 1.4.15 (2010-08-31) [stable]
+
+** Fix regression introduced in 1.4.9b where the `format' builtin could
+   crash on an invalid format string.
+
+** Fix compilation against newer glibc, and on AIX 7.1BETA.
 
 ** A number of portability improvements inherited from gnulib.
 
@@ -450,6 +457,28 @@ contains the following beta features that were deemed worth deferring until
 ** Enhance the `index' builtin to guarantee linear behavior, in spite of
    the surprisingly large number of systems with a brain-dead quadratic
    strstr(3).
+
+** A number of portability improvements inherited from gnulib.
+
+* Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
+  Released by Eric Blake, based on git version 1.4.10a
+
+Note that M4 1.4.10b was released prior to 1.4.11, and includes all the
+features of 1.4.11 except for C99 parsing in the `format' builtin.  It also
+contains the following beta features that were deemed worth deferring until
+1.6:
+
+** Further enhance the `index' builtin to often achieve sublinear results.
+
+** Enhance the `regexp' and `patsubst' builtins to cache frequently used
+   regular expressions, which speeds up typical Autoconf usage.
+
+** Enhance the `format' builtin to warn for more suspicious usages, such as
+   missing arguments or problems parsing according to the format string.
+
+** Enhance the `ifelse' and `shift' builtins so that tail-recursive
+   algorithms based on `$@' operate in linear, rather than quadratic, time
+   and memory.
 
 ** A number of portability improvements inherited from gnulib.
 
