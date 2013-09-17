@@ -338,6 +338,11 @@ format (m4 *context, m4_obstack *obs, int argc, m4_macro_args *argv)
           m4_warn (context, 0, me, _("unrecognized specifier in %s"),
                    quotearg_style_mem (locale_quoting_style, f, M4ARGLEN (1)));
           valid_format = false;
+          if (f_len > 0)
+            {
+              fmt++;
+              f_len--;
+            }
           continue;
         }
       fmt++;

@@ -7512,7 +7512,7 @@ Likewise, escape sequences are not yet recognized.
 @example
 format(`%p', `0')
 @error{}m4:stdin:1: warning: format: unrecognized specifier in '%p'
-@result{}p
+@result{}
 format(`%*d', `')
 @error{}m4:stdin:2: warning: format: empty string treated as 0
 @error{}m4:stdin:2: warning: format: too few arguments: 2 < 3
@@ -7527,10 +7527,10 @@ format(`%.1f', `2a')
 @comment Unfortunately, 8-bit bytes are hard to check for; but the
 @comment exit status is enough to sniff the crash in broken versions.
 
-@comment xerr: ignore
 @example
 format(`%'format(`%c', `128'))
 @result{}
+@error{}ignore
 @end example
 @end ignore
 

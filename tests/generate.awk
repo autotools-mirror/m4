@@ -170,6 +170,9 @@ function new_test(input, status, output, error, options, xfail, examples) {
   output = normalize(output);
   error = normalize(error);
 
+  if (error == "ignore\n")
+    error = "ignore";
+
   if (options ~ / (import|load|modtest|mpeval|perl|shadow|stdlib|time)/)
     printf ("AT_CHECK_DYNAMIC_MODULE\n");
   if (options ~ / mpeval/)
