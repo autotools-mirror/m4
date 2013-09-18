@@ -66,6 +66,7 @@ gl_MODULES([
   intprops
   inttypes
   maintainer-makefile
+  manywarnings
   memchr2
   memcmp2
   memmem

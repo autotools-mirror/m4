@@ -99,6 +99,52 @@ if test "x$with_included_ltdl" != "xyes"; then
   CFLAGS="$save_CFLAGS"
 fi
 
+AC_ARG_ENABLE([gcc-warnings],
+  [AS_HELP_STRING([--enable-gcc-warnings],
+                  [turn on lots of GCC warnings (for developers)])],
+  [case $enableval in
+     yes|no) ;;
+     *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
+   esac
+   gl_gcc_warnings=$enableval],
+  [gl_gcc_warnings=no]
+)
+
+if test "$gl_gcc_warnings" = yes; then
+  gl_WARN_ADD([-Werror], [WERROR_CFLAGS])
+  AC_SUBST([WERROR_CFLAGS])
+
+  nw=
+  nw="$nw -Waggregate-return"       # C90 is anachronistic
+  nw="$nw -Wlong-long"              # C90 is anachronistic
+  nw="$nw -Wundef"                  # Warns on '#if GNULIB_FOO' etc in gnulib
+  nw="$nw -Wtraditional"            # Warns on #elif which we use often
+  nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
+  nw="$nw -Wpadded"                 # Our structs are not packed
+  nw="$nw -Wredundant-decls"        # Gnulib has multiple decls
+  nw="$nw -Wformat-nonliteral"      # Needed in builtin.c
+  nw="$nw -Wunreachable-code"       # Needed in output.c
+  nw="$nw -Wconversion"             # Too many warnings for now
+  nw="$nw -Wsign-conversion"        # Too many warnings for now
+  nw="$nw -Wtraditional-conversion" # Too many warnings for now
+  nw="$nw -Wcast-qual"              # Too many warnings for now
+  nw="$nw -Wswitch-enum"            # Too many warnings for now
+  # This, $nw, is the list of warnings we disable.
+
+  gl_MANYWARN_ALL_GCC([ws])
+  gl_MANYWARN_COMPLEMENT([ws], [$ws], [$nw])
+  for w in $ws; do
+    gl_WARN_ADD([$w])
+  done
+
+  gl_WARN_ADD([-fdiagnostics-show-option])
+  gl_WARN_ADD([-funit-at-a-time])
+
+  AC_SUBST([WARN_CFLAGS])
+
+  AC_DEFINE([_FORTIFY_SOURCE], [2],
+    [enable compile-time and run-time bounds-checking, and some warnings])
+fi
 
 # Use gcc's -pipe option if available: for faster compilation.
 case "$CFLAGS" in

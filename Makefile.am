@@ -40,6 +40,7 @@ changelog_old		= $(srcdir)/ChangeLog.old
 # Revisit this if libtool on cygwin improves.
 # See http://lists.gnu.org/archive/html/libtool-patches/2007-02/msg00062.html
 AM_CPPFLAGS	=
+AM_CFLAGS	= $(WARN_CFLAGS) $(WERROR_CFLAGS)
 AM_LDFLAGS	= -export-dynamic -export-symbols-regex ".*"
 EXTRA_DIST	=
 BUILT_SOURCES	=
