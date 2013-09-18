@@ -1,13 +1,5 @@
 This directory contains all bundled modules for GNU m4.
 
-Note that as of this writing, an unreleased version of libtool from the
-CVS trunk is required to be able to compile the example modules, since they
-in turn depend on the uninstalled libm4.la library.  I think that third
-party modules will not have this requirement since they will be linking
-against the installed library.  In any case, once libtool-2.0 is
-released this will become a non-issue.  The bottom line is that you
-shouldn't libtoolize this distribution unless you know what you are doing!
-
 Dynamic modules are only available if the host operating system provides
 one (or more!) of libltdl's required APIs.
 
@@ -15,15 +7,14 @@ Implementation details are in ../m4/module.c
 
 A module is a compiled shared object, i.e., modules are written in C and
 then compiled.  The compiled file can then be loaded into a running m4
-process by calling m4 with the `-m' or `--load-module' options on the
-command line, or by calling the builtin "load" (itself implemented by the
-module `load').  This will give GNU m4 potential access to any system
-feature with a C interface.
+process by calling m4 with the module name listed on the command line,
+or by calling the builtin "include". This gives GNU m4 potential access
+to any system feature with a C interface.
 
-Modules are searched for in M4MODPATH, if set, else in a module directory
-defined at configure time, default $prefix/libexec/m4.  Extra directories
+Modules are searched for in M4PATH, if set, else in a module directory
+defined at configure time, $prefix/lib/m4/ by default.  Extra directories
 can also be added to the search patch by specifying them on the command
-line with the `-M' or `--module-directory' options.
+line with the `-I' or `-B' options.
 
 A module extends GNU m4 by defining new builtins, It can define builtins
 with the same names as existing builtins, which will shadow the existing
@@ -59,7 +50,7 @@ If a module defines the symbol "m4_init_module", it is supposed to be a
 function with a prototype of "void m4_init_module (struct obstack *obs)",
 and it will be called as soon as the module is loaded.  Any non-finished
 object left on the obstack will be the expansion of the call of the
-builtin "load".  The obstack pointer might be NULL (in the future).
+builtin "include".  The obstack pointer might be NULL (in the future).
 
 If a module defines the symbol "m4_finish_module", it is supposed to be
 a function with a prototype of "void m4_finish_module (void)", and it
@@ -80,15 +71,11 @@ strategies are illustrated by shadow.c and shadow.m4.
 
 To try the demos, compile with `make' and run them with the commands as:
 
-   M4MODPATH=`pwd` ../src/m4 time.m4
-
-or
-
-  ../src/m4 -M `pwd` shadow.m4
+    tests/m4 examples/time.m4
 
 or in the case of time2.m4
 
-  ../src/m4 -M `pwd` -m time time2.m4
+    tests/m4 -I tests time -I examples time2.m4
 
 ========================================================================
 
