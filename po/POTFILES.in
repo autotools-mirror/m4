@@ -23,7 +23,6 @@ modules/gnu.c
 modules/load.c
 modules/m4.c
 modules/mpeval.c
-modules/perl.c
 modules/traditional.c
 src/freeze.c
 src/getopt.c

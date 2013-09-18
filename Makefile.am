@@ -187,21 +187,6 @@ modules_mpeval_la_LDFLAGS	= $(module_ldflags)
 modules_mpeval_la_LIBADD	= $(module_libadd) $(LIBADD_GMP)
 endif
 
-## Disabled for now.  It is too fragile to be useful.
-## pkglib_LTLIBRARIES         += modules/perl.la
-## modules_perl_la_CPPFLAGS	= `$(PERL) -MExtUtils::Embed -e ccopts`
-## modules_perl_la_LDFLAGS		= \
-##		  $(module_ldflags) `$(PERL) -MExtUtils::Embed -e ldopts`
-## modules_perl_la_LIBADD		= $(module_libadd)
-## BUILT_SOURCES			= perlxsi.c
-## DISTCLEANFILES		       += $(BUILT_SOURCES)
-##
-## perlxsi.c:
-##	$(PERL) -MExtUtils::Embed -e xsinit -- -o perlxsi.c
-
-## but we should still distribute it, because it is listed in POTFILES.in:
-EXTRA_DIST += modules/perl.c
-
 module_check	= -rpath /dev/null
 check_LTLIBRARIES = \
 		  tests/import.la \
