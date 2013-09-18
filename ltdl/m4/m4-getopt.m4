@@ -2,7 +2,7 @@
 # m4-getopt.m4 -- Use the installed version of getopt.h if available.
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
-# Copyright (C) 2005, 2006, 2007, 2009, 2010 Free Software Foundation,
+# Copyright (C) 2005-2007, 2009-2010, 2013 Free Software Foundation,
 # Inc.
 #
 # This file is part of GNU M4.
