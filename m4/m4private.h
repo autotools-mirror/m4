@@ -621,6 +621,7 @@ extern void m4__include_init (m4 *);
 
 /* Avoid negative logic when comparing two strings.  */
 #define STREQ(a, b) (strcmp (a, b) == 0)
+#define STRNEQ(a, b) (strcmp (a, b) != 0)
 
 
 #if DEBUG

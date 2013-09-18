@@ -290,7 +290,7 @@ produce_frozen_state (m4 *context, const char *name)
 
   /* Dump quote delimiters.  */
   pair = m4_get_syntax_quotes (M4SYNTAX);
-  if (strcmp (pair->str1, DEF_LQUOTE) || strcmp (pair->str2, DEF_RQUOTE))
+  if (STRNEQ (pair->str1, DEF_LQUOTE) || STRNEQ (pair->str2, DEF_RQUOTE))
     {
       xfprintf (file, "Q%zu,%zu\n", pair->len1, pair->len2);
       produce_mem_dump (file, pair->str1, pair->len1);
@@ -301,7 +301,7 @@ produce_frozen_state (m4 *context, const char *name)
 
   /* Dump comment delimiters.  */
   pair = m4_get_syntax_comments (M4SYNTAX);
-  if (strcmp (pair->str1, DEF_BCOMM) || strcmp (pair->str2, DEF_ECOMM))
+  if (STRNEQ (pair->str1, DEF_BCOMM) || STRNEQ (pair->str2, DEF_ECOMM))
     {
       xfprintf (file, "C%zu,%zu\n", pair->len1, pair->len2);
       produce_mem_dump (file, pair->str1, pair->len1);

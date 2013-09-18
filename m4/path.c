@@ -296,7 +296,7 @@ m4_load_filename (m4 *context, const m4_call_info *caller,
 
   if (!m4_get_posixly_correct_opt (context)
       && suffix
-      && (!strcmp (suffix, LT_MODULE_EXT) || !strcmp (suffix, ".la")))
+      && (STREQ (suffix, LT_MODULE_EXT) || STREQ (suffix, ".la")))
     {
       m4_module_load (context, filepath, obs);
     }
