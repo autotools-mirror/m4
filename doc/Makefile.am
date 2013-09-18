@@ -41,4 +41,3 @@ TAGS_DEPENDENCIES = $(TAGS_FILES)
 ETAGS_ARGS	= --language=none --regex='/@node \([^,]*\)/\1/' $(TAGS_FILES)
 
 MAINTAINERCLEANFILES += $(dist_man_MANS)
-

@@ -27,4 +27,3 @@ include(`setup.m4')
 \undivert(1)
 
 \defn([_ideas])
-

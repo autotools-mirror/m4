@@ -25,8 +25,6 @@
 
 #include "m4private.h"
 
-#include "intprops.h"
-
 /* Define this to 1 see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_INPUT 1 */
 #ifndef DEBUG_MACRO

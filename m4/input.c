@@ -1247,7 +1247,7 @@ pop_input (m4 *context, bool cleanup)
   return true;
 }
 
-/* To switch input over to the wrapup stack, main () calls pop_wrapup.
+/* To switch input over to the wrapup stack, main calls pop_wrapup.
    Since wrapup text can install new wrapup text, pop_wrapup ()
    returns true if there is more wrapped text to parse.  */
 bool

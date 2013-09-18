@@ -254,7 +254,7 @@ m4_fopen (m4 *context, const char *file, const char *mode)
     {
       struct stat st;
       int fd;
-     
+
       fp = fopen (file, mode);
       fd = fileno (fp);
 

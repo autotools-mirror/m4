@@ -277,14 +277,14 @@ sigsegv_handler (int signo)
 /* Arrange to trap a stack-overflow and call a specified handler.  The
    call is on a dedicated signal stack.
 
-   argv and envp are as passed to main().
+   argv and envp are as passed to main.
 
    If a stack overflow is not detected, then the SIGSEGV is re-raised
    with action set to SIG_DFL, causing an abort and coredump in the usual
    way.
 
    Detection of a stack overflow depends on the trap address being near
-   the stack limit address.  The stack limit can not be directly
+   the stack limit address.  The stack limit cannot be directly
    determined in a portable way, but we make an estimate based on the
    address of the argv and environment vectors, their contents, and the
    maximum stack size obtained using getrlimit.  */

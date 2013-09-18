@@ -1041,7 +1041,7 @@ m4_insert_diversion (m4 *context, int divnum)
     }
 }
 
-/* Get back all diversions.  This is done just before exiting from main (),
+/* Get back all diversions.  This is done just before exiting from main,
    and from m4_undivert (), if called without arguments.  */
 void
 m4_undivert_all (m4 *context)

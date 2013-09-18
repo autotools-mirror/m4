@@ -28,14 +28,15 @@ update-copyright-env = \
 # sc_po_check assumes a directory layout that we don't quite provide
 local-checks-to-skip = sc_cast_of_x_alloc_return_value \
 	sc_proper_name_utf8_requires_ICONV \
-	sc_po_check
+	sc_po_check \
+	sc_bindtextdomain
 
 # PRAGMA_SYSTEM_HEADER includes #, which does not work through a
 # Makefile variable, so we exempt it.
 _makefile_at_at_check_exceptions = ' && !/PRAGMA_SYSTEM_HEADER/'
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = 63ea02337d29e0ce5574ec04d87df4f9
+old_NEWS_hash = bbccada98ce08092a9f24b508c399051
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
@@ -45,10 +46,14 @@ sc_prohibit_tab_based_indentation:
 
 # List all syntax-check exemptions:
 exclude_file_name_regexp--sc_cast_of_argument_to_free = ^m4/m4private.h$
+exclude_file_name_regexp--sc_prohibit_always_true_header_tests = \
+  ^Makefile.am$$
+exclude_file_name_regexp--sc_prohibit_strncpy = ^m4/path.c$$
 exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \
   (^(GNU)?Makefile(\.am)?|\.mk|^HACKING|^ChangeLog.*)$$
 exclude_file_name_regexp--sc_require_config_h = \
   ^modules/(evalparse|format)\.c$$
 exclude_file_name_regexp--sc_require_config_h_first = \
   ^modules/(evalparse|format)\.c$$
-exclude_file_name_regexp--update_copyright = ^ltdl/m4/gnulib-cache.m4$$
+exclude_file_name_regexp--update_copyright = \
+  ^(doc/m4\.texi|ltdl/m4/gnulib-cache.m4)$$
