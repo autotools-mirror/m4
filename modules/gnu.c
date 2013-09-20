@@ -417,7 +417,7 @@ M4BUILTIN_HANDLER (builtin)
           name = M4ARG (2);
           len = M4ARGLEN (2);
           if (len == strlen (name))
-            value = m4_builtin_find_by_name (NULL, name);
+            value = m4_builtin_find_by_name (context, NULL, name);
           if (value)
             {
               m4_push_builtin (context, obs, value);
@@ -435,7 +435,7 @@ M4BUILTIN_HANDLER (builtin)
       name = M4ARG (1);
       len = M4ARGLEN (1);
       if (len == strlen (name))
-        value = m4_builtin_find_by_name (NULL, name);
+        value = m4_builtin_find_by_name (context, NULL, name);
       if (value == NULL)
         {
           if (m4_is_debug_bit (context, M4_DEBUG_TRACE_DEREF))
@@ -1007,7 +1007,7 @@ M4BUILTIN_HANDLER (m4modules)
 {
   /* The expansion of this builtin is a comma separated list of
      loaded modules.  */
-  m4_module *module = m4_module_next (NULL);
+  m4_module *module = m4_module_next (context, NULL);
 
   if (module)
     do
@@ -1015,7 +1015,7 @@ M4BUILTIN_HANDLER (m4modules)
         m4_shipout_string (context, obs, m4_get_module_name (module), SIZE_MAX,
                            true);
 
-        if ((module = m4_module_next (module)))
+        if ((module = m4_module_next (context, module)))
           obstack_1grow (obs, ',');
       }
     while (module);

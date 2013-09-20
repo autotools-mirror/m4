@@ -33,7 +33,7 @@
 static  void  produce_mem_dump          (FILE *, const char *, size_t);
 static  void  produce_resyntax_dump     (m4 *, FILE *);
 static  void  produce_syntax_dump       (FILE *, m4_syntax_table *, char);
-static  void  produce_module_dump       (FILE *, m4_module *);
+static  void  produce_module_dump       (m4 *, FILE *, m4_module *);
 static  void  produce_symbol_dump       (m4 *, FILE *, m4_symbol_table *);
 static  void *dump_symbol_CB            (m4_symbol_table *, const char *,
                                          size_t, m4_symbol *, void *);
@@ -148,17 +148,17 @@ produce_debugmode_state (FILE *file, int flags)
 }
 
 /* The modules must be dumped in the order in which they will be
-   reloaded from the frozen file.  libltdl stores handles in a push
+   reloaded from the frozen file.  We store handles in a push
    down stack, so we need to dump them in the reverse order to that.  */
 static void
-produce_module_dump (FILE *file, m4_module *module)
+produce_module_dump (m4 *context, FILE *file, m4_module *module)
 {
   const char *name = m4_get_module_name (module);
   size_t len = strlen (name);
 
-  module = m4_module_next (module);
+  module = m4_module_next (context, module);
   if (module)
-    produce_module_dump (file, module);
+    produce_module_dump (context, file, module);
 
   xfprintf (file, "M%zu\n", len);
   produce_mem_dump (file, name, len);
@@ -322,7 +322,7 @@ produce_frozen_state (m4 *context, const char *name)
   produce_debugmode_state (file, m4_get_debug_level_opt (context));
 
   /* Dump all loaded modules.  */
-  produce_module_dump (file, m4_module_next (NULL));
+  produce_module_dump (context, file, m4_module_next (context, NULL));
 
   /* Dump all symbols.  */
   produce_symbol_dump (context, file, M4SYMTAB);
@@ -713,7 +713,7 @@ ill-formed frozen file, invalid module %s encountered"),
                                                 string[2], number[2]));
                 module = m4__module_find (string[2]);
               }
-            token = m4_builtin_find_by_name (module, string[1]);
+            token = m4_builtin_find_by_name (context, module, string[1]);
 
             if (token == NULL)
               {

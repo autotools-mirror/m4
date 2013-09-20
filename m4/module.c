@@ -246,26 +246,11 @@ m4__module_interface (lt_dlhandle handle, const char *id_string)
 }
 
 
-/* Return successive loaded modules that pass the interface test registered
-   with the interface id.  */
+/* Return successive loaded modules. */
 m4_module *
-m4_module_next (m4_module *module)
+m4_module_next (m4 *context, m4_module *module)
 {
-  lt_dlhandle handle = module ? module->handle : NULL;
-  assert (iface_id);
-
-  /* Resident modules still show up in the lt_dlhandle_iterate loop
-     after they have been unloaded from m4.  */
-  do
-    {
-      handle = lt_dlhandle_iterate (iface_id, handle);
-      if (!handle)
-        return NULL;
-      module = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
-    }
-  while (!module);
-  assert (module->handle == handle);
-  return module;
+  return module ? module->next : context->modules;
 }
 
 /* Return the first loaded module that passes the registered interface test
@@ -414,6 +399,9 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
           module = (m4_module *) xzalloc (sizeof *module);
           module->name   = xstrdup (name);
           module->handle = handle;
+	  module->next   = context->modules;
+
+	  context->modules = module;
 
           /* clear out any stale errors, since we have to use
              lt_dlerror to distinguish between success and

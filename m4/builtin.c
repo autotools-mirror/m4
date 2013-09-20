@@ -39,9 +39,9 @@ compare_builtin_name_CB (const void *name, const void *b)
    symbol value, suitable for use in the symbol table or for an
    argument to m4_push_builtin.  */
 m4_symbol_value * M4_GNUC_PURE
-m4_builtin_find_by_name (m4_module *module, const char *name)
+m4_builtin_find_by_name (m4 *context, m4_module *module, const char *name)
 {
-  m4_module *cur = module ? module : m4_module_next (NULL);
+  m4_module *cur = module ? module : m4_module_next (context, NULL);
   m4__builtin *bp;
 
   do
@@ -55,7 +55,7 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
           return token;
         }
     }
-  while (!module && (cur = m4_module_next (cur)));
+  while (!module && (cur = m4_module_next (context, cur)));
 
   return NULL;
 }
@@ -65,9 +65,9 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
    malloc'd symbol value, suitable for use in the symbol table or for
    an argument to m4_push_builtin.  */
 m4_symbol_value * M4_GNUC_PURE
-m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
+m4_builtin_find_by_func (m4 *context, m4_module *module, m4_builtin_func *func)
 {
-  m4_module *cur = module ? module : m4_module_next (NULL);
+  m4_module *cur = module ? module : m4_module_next (context, NULL);
   size_t i;
 
   do
@@ -81,7 +81,7 @@ m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
             return token;
           }
     }
-  while (!module && (cur = m4_module_next (cur)));
+  while (!module && (cur = m4_module_next (context, cur)));
 
   return 0;
 }
