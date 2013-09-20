@@ -79,13 +79,8 @@ static lt_dlinterface_id iface_id = NULL;
 const char *
 m4_get_module_name (const m4_module *module)
 {
-  const lt_dlinfo *info;
-
-  assert (module && module->handle);
-
-  info = lt_dlgetinfo (module->handle);
-
-  return info ? info->name : NULL;
+  assert (module);
+  return module->name;
 }
 
 void *
@@ -212,7 +207,7 @@ install_macro_table (m4 *context, m4_module *module)
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
                         _("module %s: macros loaded"),
-		        m4_get_module_name (module));
+                        m4_get_module_name (module));
     }
 }
 
@@ -229,7 +224,7 @@ m4_module_load (m4 *context, const char *name, m4_obstack *obs)
         {
           install_builtin_table (context, module);
           install_macro_table (context, module);
-	}
+        }
     }
 
   return module;
@@ -417,6 +412,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
           const char *err;
 
           module = (m4_module *) xzalloc (sizeof *module);
+          module->name   = xstrdup (name);
           module->handle = handle;
 
           /* clear out any stale errors, since we have to use

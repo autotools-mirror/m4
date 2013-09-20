@@ -178,6 +178,7 @@ extern void m4__builtin_print (m4_obstack *, const m4__builtin *, bool,
 /* Representation of a loaded m4 module.  */
 struct m4_module
 {
+  const char *name;             /* Name of the module.  */
   lt_dlhandle handle;           /* All ltdl module information.  */
   m4__builtin *builtins;        /* Sorted array of builtins.  */
   m4_macro *macros;		/* Unsorted array of macros.  */
