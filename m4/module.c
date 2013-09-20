@@ -39,10 +39,17 @@
  * libdld or lt_dlpreload from libtool if shared libraries are not
  * available on the host machine.
  *
- * An M4 module will usually define an external symbol called
- * `m4_builtin_table'.  This symbol points to a table of `m4_builtin'.
- * The table is saved as libltdl caller data and each definition therein
- * is added to the symbol table.
+ * An M4 module will usually define an external symbol named after the
+ * basename of the loadable module:
+ *
+ *   void
+ *   mymod_LTX_m4_init_module (m4 *context, m4_module *module,
+ *                             m4_obstack *obs)
+ *
+ * The function is only called the first time the module is included
+ * and generally uses either `m4_install_builtins' or
+ * `m4_install_macros' (or both!) to register whatever builtins and
+ * macros are provided by the module.
  *
  * To load a module, call m4_module_load(), which searches for the
  * module in directories from M4PATH. The search path is initialized
@@ -50,20 +57,10 @@
  * time default where the modules shipped with M4 itself are installed.
  * `m4_module_load' returns NULL on failure, or else an opaque module
  * handle for the newly mapped vm segment containing the module code.
- * If the module is not already loaded, m4_module_load() retrieves its
- * value for the symbol `m4_builtin_table', which is installed using
- * set_module_builtin_table().
- *
- * In addition to builtin functions, you can also define static macro
- * expansions in the `m4_macro_table' symbol.  If you define this symbol
- * in your modules, it should be an array of `m4_macro's, mapping macro
- * names to the expansion text.  Any macros defined in `m4_macro_table'
- * are installed into the M4 symbol table with set_module_macro_table().
- *
- * Each time a module is loaded, the module function prototyped as
- * "M4INIT_HANDLER (<module name>)" is called, if defined.  Any value
- * stored in OBS by this function becomes the expansion of the macro
- * which called it.
+ * If the module is not already loaded, m4_module_load() the builtins
+ * and macros registered by `mymod_LTX_m4_init_module' are installed
+ * into the symbol table using `install_builtin_table' and `install_
+ * macro_table' respectively.
  **/
 
 #define MODULE_SELF_NAME        "!myself!"
@@ -73,8 +70,9 @@ static const char*  module_dlerror (void);
 static void         install_builtin_table (m4*, m4_module *);
 static void         install_macro_table   (m4*, m4_module *);
 
-static int          m4__module_interface        (lt_dlhandle handle,
-                                                 const char *id_string);
+static int          compare_builtin_CB    (const void *a, const void *b);
+static int          m4__module_interface  (lt_dlhandle handle,
+                                           const char *id_string);
 
 static lt_dlinterface_id iface_id = NULL;
 
@@ -117,6 +115,36 @@ m4_module_import (m4 *context, const char *module_name,
   return symbol_address;
 }
 
+void
+m4_install_builtins (m4 *context, m4_module *module, const m4_builtin *bp)
+{
+  assert (context);
+  assert (module);
+  assert (bp);
+
+  const m4_builtin *tmp;
+  m4__builtin *builtin;
+  for (tmp = bp; tmp->name; tmp++)
+    module->builtins_len++;
+  module->builtins = (m4__builtin *) xnmalloc (module->builtins_len,
+                                               sizeof *module->builtins);
+  for (builtin = module->builtins; bp->name != NULL; bp++, builtin++)
+    {
+      /* Sanity check that builtins meet the required interface. */
+      assert (bp->min_args <= bp->max_args);
+      assert (bp->min_args > 0 ||
+              (bp->flags & (M4_BUILTIN_BLIND|M4_BUILTIN_SIDE_EFFECT)) == 0);
+      assert (bp->max_args ||
+              (bp->flags & M4_BUILTIN_FLATTEN_ARGS) == 0);
+      assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
+      memcpy (&builtin->builtin, bp, sizeof *bp);
+      builtin->builtin.name = xstrdup (bp->name);
+      builtin->module = module;
+    }
+  qsort (module->builtins, module->builtins_len,
+         sizeof *module->builtins, compare_builtin_CB);
+}
+
 static void
 install_builtin_table (m4 *context, m4_module *module)
 {
@@ -144,6 +172,16 @@ install_builtin_table (m4 *context, m4_module *module)
                       m4_get_module_name (module));
 }
 
+void
+m4_install_macros (m4 *context, m4_module *module, const m4_macro *mp)
+{
+  assert (context);
+  assert (module);
+  assert (mp);
+
+  module->macros = (m4_macro *) mp;
+}
+
 static void
 install_macro_table (m4 *context, m4_module *module)
 {
@@ -152,7 +190,7 @@ install_macro_table (m4 *context, m4_module *module)
   assert (context);
   assert (module);
 
-  mp = (const m4_macro *) lt_dlsym (module->handle, MACRO_SYMBOL);
+  mp = module->macros;
 
   if (mp)
     {
@@ -174,7 +212,7 @@ install_macro_table (m4 *context, m4_module *module)
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
                         _("module %s: macros loaded"),
-                        m4_get_module_name (module));
+		        m4_get_module_name (module));
     }
 }
 
@@ -209,9 +247,7 @@ m4__module_interface (lt_dlhandle handle, const char *id_string)
     return 0;
 
   /* A valid m4 module must provide at least one of these symbols.  */
-  return !(lt_dlsym (handle, INIT_SYMBOL)
-           || lt_dlsym (handle, BUILTIN_SYMBOL)
-           || lt_dlsym (handle, MACRO_SYMBOL));
+  return !(lt_dlsym (handle, INIT_SYMBOL));
 }
 
 
@@ -379,45 +415,9 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
         {
           void *old;
           const char *err;
-          const m4_builtin *bp;
 
           module = (m4_module *) xzalloc (sizeof *module);
           module->handle = handle;
-
-          /* TODO - change module interface to return function pointer
-             that supplies both table and length of table, rather than
-             returning data pointer that must have a sentinel
-             entry?  */
-          bp = (m4_builtin *) lt_dlsym (module->handle, BUILTIN_SYMBOL);
-          if (bp)
-            {
-              const m4_builtin *tmp;
-              m4__builtin *builtin;
-              for (tmp = bp; tmp->name; tmp++)
-                module->builtins_len++;
-              module->builtins =
-                (m4__builtin *) xnmalloc (module->builtins_len,
-                                          sizeof *module->builtins);
-              for (builtin = module->builtins; bp->name != NULL;
-                   bp++, builtin++)
-                {
-                  /* Sanity check that builtins meet the required
-                     interface.  */
-                  assert (bp->min_args <= bp->max_args);
-                  assert (bp->min_args > 0
-                          || (bp->flags & (M4_BUILTIN_BLIND
-                                           | M4_BUILTIN_SIDE_EFFECT)) == 0);
-                  assert (bp->max_args
-                          || (bp->flags & M4_BUILTIN_FLATTEN_ARGS) == 0);
-                  assert ((bp->flags & ~M4_BUILTIN_FLAGS_MASK) == 0);
-
-                  memcpy (&builtin->builtin, bp, sizeof *bp);
-                  builtin->builtin.name = xstrdup (bp->name);
-                  builtin->module = module;
-                }
-            }
-          qsort (module->builtins, module->builtins_len,
-                 sizeof *module->builtins, compare_builtin_CB);
 
           /* clear out any stale errors, since we have to use
              lt_dlerror to distinguish between success and
@@ -429,23 +429,22 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
           if (err)
             m4_error (context, EXIT_FAILURE, 0, NULL,
                       _("unable to load module `%s': %s"), name, err);
-        }
 
-      /* Find and run any initializing function in the opened module,
-         each time the module is opened.  */
-      init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
-      if (init_func)
-        {
-          init_func (context, module, obs);
+          /* Find and run any initializing function in the opened module,
+             the first time the module is opened.  */
+          init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
+          if (init_func)
+            {
+              init_func (context, module, obs);
 
-          m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-                            _("module %s: init hook called"), name);
-        }
-      else if (!lt_dlsym (handle, BUILTIN_SYMBOL)
-               && !lt_dlsym (handle, MACRO_SYMBOL))
-        {
-          m4_error (context, EXIT_FAILURE, 0, NULL,
-                    _("module `%s' has no entry points"), name);
+              m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+                                _("module %s: init hook called"), name);
+            }
+          else
+            {
+              m4_error (context, EXIT_FAILURE, 0, NULL,
+                        _("module `%s' has no entry point"), name);
+            }
         }
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,

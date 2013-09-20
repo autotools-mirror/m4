@@ -28,11 +28,8 @@
 #  include "m4private.h"
 #endif
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_macro_table          traditional_LTX_m4_macro_table
-
 /* A table for mapping m4 symbol names to simple expansion text. */
-const m4_macro m4_macro_table[] =
+static const m4_macro m4_macro_table[] =
 {
   /* name               text    min     max */
 #if UNIX
@@ -47,3 +44,8 @@ const m4_macro m4_macro_table[] =
   { "__traditional__",  "",     0,      0 },
   { NULL,               NULL,   0,      0 },
 };
+
+M4INIT_HANDLER (traditional)
+{
+  m4_install_macros (context, module, m4_macro_table);
+}

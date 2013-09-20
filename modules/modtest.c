@@ -29,9 +29,6 @@
 #endif
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table        modtest_LTX_m4_builtin_table
-#define m4_macro_table          modtest_LTX_m4_macro_table
-
 #define export_test             modtest_LTX_export_test
 
 extern bool export_test (const char *foo);
@@ -44,7 +41,7 @@ extern bool export_test (const char *foo);
   builtin_functions
 #undef BUILTIN
 
-const m4_builtin m4_builtin_table[] =
+static const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -55,7 +52,7 @@ const m4_builtin m4_builtin_table[] =
   { NULL, NULL, 0, 0, 0 },
 };
 
-const m4_macro m4_macro_table[] =
+static const m4_macro m4_macro_table[] =
 {
   /* name               text            min     max */
   { "__test__",         "`modtest'",    0,      0 },
@@ -72,6 +69,9 @@ const m4_macro m4_macro_table[] =
 M4INIT_HANDLER (modtest)
 {
   const char *s = "Test module loaded.\n";
+
+  m4_install_builtins (context, module, m4_builtin_table);
+  m4_install_macros   (context, module, m4_macro_table);
 
   /* Don't depend on OBS so that the traces are the same when used
      directly, or via a frozen file.  */

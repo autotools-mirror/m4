@@ -36,12 +36,9 @@
 #  include "m4private.h"
 #endif
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table        stdlib_LTX_m4_builtin_table
-
 /*         function     macros  blind   side    minargs maxargs */
 #define builtin_functions                                       \
-  BUILTIN (getcwd,      false,  false,  false,  0,      0  )    \
+    BUILTIN (getcwd,    false,  false,  false,  0,      0  )    \
     BUILTIN (getenv,    false,  true,   false,  1,      1  )    \
     BUILTIN (getlogin,  false,  false,  false,  0,      0  )    \
     BUILTIN (getpid,    false,  false,  false,  0,      0  )    \
@@ -61,7 +58,7 @@
   builtin_functions
 #undef BUILTIN
 
-const m4_builtin m4_builtin_table[] =
+static const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -71,6 +68,13 @@ const m4_builtin m4_builtin_table[] =
 
   { NULL, NULL, 0, 0, 0 },
 };
+
+
+M4INIT_HANDLER (stdlib)
+{
+  m4_install_builtins (context, module, m4_builtin_table);
+}
+
 
 /**
  * getcwd()

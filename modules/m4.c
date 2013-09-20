@@ -39,8 +39,6 @@
 #include <modules/m4.h>
 
 /* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table        m4_LTX_m4_builtin_table
-
 #define m4_set_sysval           m4_LTX_m4_set_sysval
 #define m4_sysval_flush         m4_LTX_m4_sysval_flush
 #define m4_dump_symbols         m4_LTX_m4_dump_symbols
@@ -125,6 +123,12 @@ const m4_builtin m4_builtin_table[] =
 
   { NULL, NULL, 0, 0, 0 },
 };
+
+
+M4INIT_HANDLER (m4)
+{
+  m4_install_builtins (context, module, m4_builtin_table);
+}
 
 
 

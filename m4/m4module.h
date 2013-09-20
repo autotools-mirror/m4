@@ -237,6 +237,9 @@ extern m4_module *  m4_module_load     (m4 *, const char *, m4_obstack *);
 extern void *       m4_module_import   (m4 *, const char *, const char *,
                                         m4_obstack *);
 
+extern void         m4_install_builtins (m4*, m4_module *, const m4_builtin*);
+extern void         m4_install_macros   (m4*, m4_module *, const m4_macro*);
+
 extern const char * m4_get_module_name (const m4_module *);
 extern m4_module *  m4_module_next     (m4_module *);
 

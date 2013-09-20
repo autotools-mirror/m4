@@ -423,9 +423,11 @@ dnl Test all flags.
 AT_CHECK_M4([-dV in], [0], [[3
 0
 ]], [[m4debug: module m4: opening file
+m4debug: module m4: init hook called
 m4debug: module m4: opened
 m4debug: module m4: builtins loaded
 m4debug: module gnu: opening file
+m4debug: module gnu: init hook called
 m4debug: module gnu: opened
 m4debug: module gnu: builtins loaded
 m4debug: module gnu: macros loaded

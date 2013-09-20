@@ -41,7 +41,7 @@
   builtin_functions
 #undef BUILTIN
 
-const m4_builtin m4_builtin_table[] =
+static const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -51,6 +51,12 @@ const m4_builtin m4_builtin_table[] =
 
   { NULL, NULL, 0, 0, 0 },
 };
+
+
+M4INIT_HANDLER (import)
+{
+  m4_install_builtins (context, module, m4_builtin_table);
+}
 
 
 

@@ -32,11 +32,6 @@
 #include "spawn-pipe.h"
 #include "wait-process.h"
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table        gnu_LTX_m4_builtin_table
-#define m4_macro_table          gnu_LTX_m4_macro_table
-
-
 /* Maintain each of the builtins implemented in this modules along
    with their details in a single table for easy maintenance.
 
@@ -70,7 +65,7 @@
 
 
 /* Generate a table for mapping m4 symbol names to handler functions. */
-const m4_builtin m4_builtin_table[] =
+static const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -83,7 +78,7 @@ const m4_builtin m4_builtin_table[] =
 
 
 /* A table for mapping m4 symbol names to simple expansion text. */
-const m4_macro m4_macro_table[] =
+static const m4_macro m4_macro_table[] =
 {
   /* name               text    min     max */
 #if UNIX
@@ -100,6 +95,13 @@ const m4_macro m4_macro_table[] =
 
   { NULL,               NULL,   0,      0 },
 };
+
+
+M4INIT_HANDLER (gnu)
+{
+  m4_install_builtins (context, module, m4_builtin_table);
+  m4_install_macros   (context, module, m4_macro_table);
+}
 
 
 

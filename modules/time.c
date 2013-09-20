@@ -34,9 +34,6 @@
 #  include "m4private.h"
 #endif
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table        time_LTX_m4_builtin_table
-
 /*         function     macros  blind   side    minargs maxargs */
 #define builtin_functions                                       \
   BUILTIN (currenttime, false,  false,  false,  0,      0  )    \
@@ -61,7 +58,7 @@
 # endif
 #undef BUILTIN
 
-const m4_builtin m4_builtin_table[] =
+static const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -77,6 +74,14 @@ const m4_builtin m4_builtin_table[] =
 
   { NULL, NULL, 0, 0, 0 },
 };
+
+
+M4INIT_HANDLER (time)
+{
+  m4_install_builtins (context, module, m4_builtin_table);
+}
+
+
 
 /**
  * currenttime()

@@ -28,10 +28,6 @@
 #  include "m4private.h"
 #endif
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table        shadow_LTX_m4_builtin_table
-#define m4_macro_table          shadow_LTX_m4_macro_table
-
 /*         function     macros  blind   side    minargs maxargs */
 #define builtin_functions                       \
   BUILTIN (shadow,      false,  false,  false,  0,      -1 )    \
@@ -42,7 +38,7 @@
   builtin_functions
 #undef BUILTIN
 
-const m4_builtin m4_builtin_table[] =
+static const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -53,7 +49,7 @@ const m4_builtin m4_builtin_table[] =
   { NULL, NULL, 0, 0, 0 },
 };
 
-const m4_macro m4_macro_table[] =
+static const m4_macro m4_macro_table[] =
 {
   /* name               text            min     max */
   { "__test__",         "`shadow'",     0,      0 },
@@ -64,16 +60,13 @@ const m4_macro m4_macro_table[] =
 
 M4INIT_HANDLER (shadow)
 {
-  static bool loaded = false;
-
   const char *s = "Shadow module loaded.";
 
-  /* Only display the message on first load.  */
-  if (obs && !loaded)
-    {
-      loaded = true;
+  if (obs)
       obstack_grow (obs, s, strlen (s));
-    }
+
+  m4_install_builtins (context, module, m4_builtin_table);
+  m4_install_macros   (context, module, m4_macro_table);
 }
 
 
