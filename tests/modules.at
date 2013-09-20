@@ -51,14 +51,14 @@ test3
 
 # First generate the `expout' ouput by running over the sources before
 # freezing.
-AT_CHECK_M4([-I "$abs_builddir" load frozen.m4 unfrozen.m4],
+AT_CHECK_M4([-I "$abs_builddir" frozen.m4 unfrozen.m4],
             [0], [stdout], [stderr])
 
 mv stdout expout
 mv stderr experr
 
 # Now freeze the first source file.
-AT_CHECK_M4([-I "$abs_builddir" load -F frozen.m4f frozen.m4],
+AT_CHECK_M4([-I "$abs_builddir" -F frozen.m4f frozen.m4],
             [0], [], [ignore])
 
 # Now rerun the original sequence, but using the frozen file.
@@ -66,33 +66,6 @@ AT_CHECK_M4([-I "$abs_builddir" -R frozen.m4f unfrozen.m4],
             [0], [expout], [experr])
 
 AT_CLEANUP([frozen.m4f])
-
-
-## ------------------ ##
-## module test macros ##
-## ------------------ ##
-
-AT_SETUP([module test macros])
-AT_CHECK_DYNAMIC_MODULE
-AT_CHECK_GMP
-
-AT_DATA([in], [[include(`mpeval')
--__load__-__mpeval__-
-unload(`mpeval')
--__load__-__mpeval__-
-unload(`load')
--__load__-__mpeval__-
-]])
-
-AT_CHECK_M4([load in], [0], [[
----
-
---__mpeval__-
-
--__load__-__mpeval__-
-]])
-
-AT_CLEANUP
 
 
 ## ---------------------------- ##
@@ -108,10 +81,9 @@ m4_define([AT_CHECK_M4_MODTEST],
 AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([input.m4],
-[[include(`modtest')
-test
+[[test
 Dumpdef: dumpdef(`test').
-unload(`modtest')
+include(`modtest')
 test
 Dumpdef: dumpdef(`test').
 ]])
@@ -122,18 +94,16 @@ dnl carry over to the next AT_SETUP.
 m4_ifval([$2], [$2
 export m4_substr([$2], [0], m4_index([$2], [=]))])
 
-AT_CHECK_M4([load $3 input.m4], [0],
-[[
-Test module called.
+AT_CHECK_M4([$3 input.m4], [0],
+[[test
 Dumpdef: .
 
-test
+Test module called.
 Dumpdef: .
 ]],
-[[Test module loaded.
+[[m4:input.m4:2: warning: dumpdef: undefined macro 'test'
+Test module loaded.
 test:	<test>
-Test module unloaded.
-m4:input.m4:6: warning: dumpdef: undefined macro 'test'
 ]])
 
 AT_CLEANUP
@@ -196,26 +166,6 @@ dumpdef(`test')
 dumpdef(`shadow')
 test
 shadow
-
-# Unloading Modtest will unshadow the test definition in Shadow
-unload(`modtest')
-dumpdef(`test')
-dumpdef(`shadow')
-test
-shadow
-
-# Unloading Shadow once has no effect (we loaded it twice)
-unload(`shadow')
-dumpdef(`test')
-dumpdef(`shadow')
-test
-shadow
-
-# Unloading Shadow again will revert to copying `test' and the local
-# `shadow' macro.
-unload(`shadow')
-test
-shadow
 ]])
 
 AT_DATA([[expout]],
@@ -252,26 +202,6 @@ Shadow::shadow called.
 
 Test module called.
 Shadow::shadow called.
-
-# Unloading Modtest will unshadow the test definition in Shadow
-
-
-
-Shadow::test called.
-Shadow::shadow called.
-
-# Unloading Shadow once has no effect (we loaded it twice)
-
-
-
-Shadow::test called.
-Shadow::shadow called.
-
-# Unloading Shadow again will revert to copying `test' and the local
-# `shadow' macro.
-
-local::test
-local::shadow
 ]])
 
 AT_DATA([[experr]],
@@ -282,83 +212,10 @@ test:	<test>
 shadow:	<shadow>
 test:	<test>
 shadow:	<shadow>
-Test module unloaded.
-test:	<test>
-shadow:	<shadow>
-test:	<test>
-shadow:	<shadow>
 ]])
 
-AT_CHECK_M4([-I "$abs_builddir" load input.m4], [0],
+AT_CHECK_M4([-I "$abs_builddir" input.m4], [0],
             [expout], [experr])
-
-AT_CLEANUP
-
-
-
-## ------ ##
-## unload ##
-## ------ ##
-
-AT_SETUP([modules: unload])
-AT_CHECK_DYNAMIC_MODULE
-
-AT_DATA([[input.m4]],
-[[test
-__test__
-include(`modtest')
-test
-__test__
-include(`shadow')
-test
-__test__
-unload(`modtest')
-test
-__test__
-include(`modtest')
-test
-__test__
-unload(`modtest')
-test
-__test__
-unload(`shadow')
-test
-__test__
-]])
-
-AT_DATA([[expout]],
-[[test
-__test__
-
-Test module called.
-modtest
-Shadow module loaded.
-Shadow::test called.
-shadow
-
-Shadow::test called.
-shadow
-
-Test module called.
-modtest
-
-Shadow::test called.
-shadow
-
-test
-__test__
-]])
-
-AT_DATA([[experr]],
-[[Test module loaded.
-Test module unloaded.
-Test module loaded.
-Test module unloaded.
-]])
-
-
-AT_CHECK_M4([-I "$abs_builddir" load input.m4],
-            [0], [expout], [experr])
 
 AT_CLEANUP
 
@@ -382,7 +239,6 @@ AT_DATA([[input.m4]],
 [[import
 include(`import')
 import
-unload(`modtest')
 import
 symbol_fail
 module_fail
@@ -392,7 +248,6 @@ AT_DATA([[expout]],
 [[import
 
 import::import called.
-
 import::import called.
 import::symbol_fail called.
 ]])
@@ -401,17 +256,15 @@ AT_DATA([[experr]],
 [[Test module loaded.
 
 TRUE
-Test module unloaded.
-Test module loaded.
 
 TRUE
-m4:input.m4:6: cannot load symbol `no_such' from module `modtest'
-m4:input.m4:7: cannot open module `no_such'
+m4:input.m4:5: cannot load symbol `no_such' from module `modtest'
+m4:input.m4:6: cannot open module `no_such'
 ]])
 
 ls "$abs_builddir"
 
-AT_CHECK_M4([-I "$abs_builddir" load input.m4],
+AT_CHECK_M4([-I "$abs_builddir" input.m4],
             [1], [expout], [experr])
 
 AT_CLEANUP
@@ -454,7 +307,6 @@ m4:input.m4:2: warning: __test__: extra arguments ignored: 1 > 0
 m4:input.m4:3: warning: __test__: extra arguments ignored: 2 > 0
 m4:input.m4:4: warning: onearg: too few arguments: 0 < 1
 m4:input.m4:6: warning: onearg: extra arguments ignored: 2 > 1
-Test module unloaded.
 ]])
 
 AT_CLEANUP
@@ -474,8 +326,6 @@ AT_DATA([[input.m4]],
 [[test
 include(`shadow')
 test
-unload(`shadow')
-test
 include(`shadow')
 test
 ]])
@@ -485,8 +335,6 @@ AT_DATA([[expout]],
 Shadow module loaded.
 Shadow::test called.
 
-test
-Shadow module loaded.
 Shadow::test called.
 ]])
 
@@ -496,74 +344,7 @@ m4trace: -1- test -> `Shadow::`test' called.'
 ]])
 
 
-AT_CHECK_M4([-I "$abs_builddir" load -t test input.m4],
+AT_CHECK_M4([-I "$abs_builddir" -t test input.m4],
             [0], [expout], [experr])
-
-AT_CLEANUP
-
-
-## ----------------- ##
-## unload gnu module ##
-## ----------------- ##
-
-AT_SETUP([unload gnu module])
-AT_CHECK_DYNAMIC_MODULE
-
-dnl Ensure that the gnu module does not leak memory.  I don't know how
-dnl to portably artificially limit the heap to cause an out-of-memory
-dnl condition in the case of a leak, but examining the run of this test
-dnl in a debugger can show whether it is leaking.
-AT_DATA([input.m4], [[divert(-1)
-define(`forloop',
-  `pushdef(`$1', `$2')_forloop(`$1', `$2', `$3', `$4')popdef(`$1')')
-define(`_forloop',
-  `$4`'ifelse($1, `$3', `',
-    `define(`$1', incr($1))_forloop(`$1', `$2', `$3', `$4')')')
-forloop(`i', `1', `5000', `unload(`gnu')include(`gnu')regexp(`123', `\(4\)?2')')
-]])
-
-AT_CHECK_M4([load input.m4], [0])
-
-AT_CLEANUP
-
-
-## ------------------ ##
-## unload load module ##
-## ------------------ ##
-
-AT_SETUP([unload load module])
-AT_CHECK_DYNAMIC_MODULE
-
-dnl Ensure that the load module can be unloaded and reloaded (obviously,
-dnl it can't reload itself; the reload occurs on the command line).  Since
-dnl the module must be resident (after all, the `unload' builtin had better
-dnl not unmap the memory for the code it is currently executing), make sure
-dnl that resident modules are handled gracefully.
-AT_DATA([in1.m4], [[__load__ 1
-unload(`load') 2
-__load__ 3
-]])
-
-AT_DATA([in2.m4], [[__load__ 4
-include(`load') 5
-__load__ 6
-unload(`load') 7
-__load__ 8
-unload(`load') 9
-__load__ 10
-]])
-
-AT_CHECK_M4([load in1.m4 load in2.m4], [0],
-[[ 1
- 2
-__load__ 3
- 4
- 5
- 6
- 7
- 8
- 9
-__load__ 10
-]])
 
 AT_CLEANUP

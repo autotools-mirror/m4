@@ -80,19 +80,6 @@ M4INIT_HANDLER (modtest)
 
 
 /**
- * modtest()
- **/
-M4FINISH_HANDLER (modtest)
-{
-  const char *s = "Test module unloaded.\n";
-
-  /* Don't depend on OBS so that the traces are the same when used
-     directly, or via a frozen file.  */
-  fputs (s, stderr);
-}
-
-
-/**
  * test()
  **/
 M4BUILTIN_HANDLER (test)

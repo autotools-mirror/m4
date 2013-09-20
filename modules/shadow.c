@@ -64,12 +64,16 @@ const m4_macro m4_macro_table[] =
 
 M4INIT_HANDLER (shadow)
 {
+  static bool loaded = false;
+
   const char *s = "Shadow module loaded.";
-  int refcount = m4_module_refcount (module);
 
   /* Only display the message on first load.  */
-  if (obs && refcount == 1)
-    obstack_grow (obs, s, strlen (s));
+  if (obs && !loaded)
+    {
+      loaded = true;
+      obstack_grow (obs, s, strlen (s));
+    }
 }
 
 

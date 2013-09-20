@@ -63,25 +63,12 @@
  * Each time a module is loaded, the module function prototyped as
  * "M4INIT_HANDLER (<module name>)" is called, if defined.  Any value
  * stored in OBS by this function becomes the expansion of the macro
- * which called it.  Before M4 exits, all modules are unloaded and the
- * function prototyped as "M4FINISH_HANDLER (<module name>)" is called,
- * if defined.  It is safe to load the same module several times: the
- * init and finish functions will also be called multiple times in this
- * case.
- *
- * To unload a module, use m4_module_unload(). which uses
- * m4__symtab_remove_module_references() to remove the builtins defined by
- * the unloaded module from the symbol table.  If the module has been
- * loaded several times with calls to m4_module_load, then the module will
- * not be unloaded until the same number of calls to m4_module_unload()
- * have been made (nor will the symbol table be purged).
+ * which called it.
  **/
 
 #define MODULE_SELF_NAME        "!myself!"
 
 static const char*  module_dlerror (void);
-static int          module_remove  (m4 *context, m4_module *module,
-                                    m4_obstack *obs);
 
 static void         install_builtin_table (m4*, m4_module *);
 static void         install_macro_table   (m4*, m4_module *);
@@ -196,54 +183,19 @@ m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 {
   m4_module *module = m4__module_open (context, name, obs);
 
-  if (module && module->refcount == 1)
+  if (module)
     {
-      install_builtin_table (context, module);
-      install_macro_table (context, module);
+      const lt_dlinfo *info = lt_dlgetinfo (module->handle);
+
+      if (info->ref_count == 1)
+        {
+          install_builtin_table (context, module);
+          install_macro_table (context, module);
+	}
     }
 
   return module;
 }
-
-/* Make the module MODULE resident.  Return NULL on success, or a
-   pre-translated error string on failure.  */
-const char *
-m4_module_makeresident (m4_module *module)
-{
-  assert (module);
-  return lt_dlmakeresident (module->handle) ? module_dlerror () : NULL;
-}
-
-/* Unload a module.  */
-void
-m4_module_unload (m4 *context, const char *name, m4_obstack *obs)
-{
-  m4_module *   module  = NULL;
-  int           errors  = 0;
-
-  assert (context);
-
-  if (name)
-    module = m4__module_find (name);
-
-  if (!module)
-    {
-      const char *error_msg = _("module not loaded");
-
-      lt_dlseterror (lt_dladderror (error_msg));
-      ++errors;
-    }
-  else
-    errors = module_remove (context, module, obs);
-
-  if (errors)
-    {
-      m4_error (context, EXIT_FAILURE, 0, NULL,
-                _("cannot unload module `%s': %s"),
-                name ? name : MODULE_SELF_NAME, module_dlerror ());
-    }
-}
-
 
 
 static int
@@ -258,7 +210,6 @@ m4__module_interface (lt_dlhandle handle, const char *id_string)
 
   /* A valid m4 module must provide at least one of these symbols.  */
   return !(lt_dlsym (handle, INIT_SYMBOL)
-           || lt_dlsym (handle, FINISH_SYMBOL)
            || lt_dlsym (handle, BUILTIN_SYMBOL)
            || lt_dlsym (handle, MACRO_SYMBOL));
 }
@@ -267,7 +218,7 @@ m4__module_interface (lt_dlhandle handle, const char *id_string)
 /* Return successive loaded modules that pass the interface test registered
    with the interface id.  */
 m4_module *
-m4__module_next (m4_module *module)
+m4_module_next (m4_module *module)
 {
   lt_dlhandle handle = module ? module->handle : NULL;
   assert (iface_id);
@@ -482,7 +433,6 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 
       /* Find and run any initializing function in the opened module,
          each time the module is opened.  */
-      module->refcount++;
       init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
       if (init_func)
         {
@@ -491,8 +441,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
           m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
                             _("module %s: init hook called"), name);
         }
-      else if (!lt_dlsym (handle, FINISH_SYMBOL)
-               && !lt_dlsym (handle, BUILTIN_SYMBOL)
+      else if (!lt_dlsym (handle, BUILTIN_SYMBOL)
                && !lt_dlsym (handle, MACRO_SYMBOL))
         {
           m4_error (context, EXIT_FAILURE, 0, NULL,
@@ -512,39 +461,6 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
   return module;
 }
 
-void
-m4__module_exit (m4 *context)
-{
-  m4_module *   module  = m4__module_next (NULL);
-  int           errors  = 0;
-
-  while (module && !errors)
-    {
-      m4_module *pending = module;
-
-      /* If we are about to unload the final reference, move on to the
-         next module before we unload the current one.  */
-      if (pending->refcount <= 1)
-        module = m4__module_next (module);
-
-      errors = module_remove (context, pending, NULL);
-    }
-
-  assert (iface_id);            /* need to have called m4__module_init */
-  lt_dlinterface_free (iface_id);
-  iface_id = NULL;
-
-  if (!errors)
-    errors = lt_dlexit ();
-
-  if (errors)
-    {
-      m4_error (context, EXIT_FAILURE, 0, NULL,
-                _("cannot unload all modules: %s"), module_dlerror ());
-    }
-}
-
-
 
 /* FIXME - libtool doesn't expose lt_dlerror strings for translation.  */
 static const char *
@@ -556,127 +472,4 @@ module_dlerror (void)
     dlerror = _("unknown error");
 
   return dlerror;
-}
-
-/* Close one reference to the module MODULE, and output to OBS any
-   information from the finish hook of the module.  If no references
-   to MODULE remain, also remove all symbols and other memory
-   associated with the module.  */
-static int
-module_remove (m4 *context, m4_module *module, m4_obstack *obs)
-{
-  const lt_dlinfo *             info;
-  int                           errors = 0;
-  const char *                  name;
-  lt_dlhandle                   handle;
-  bool                          last_reference = false;
-  bool                          resident = false;
-  m4_module_finish_func *       finish_func;
-
-  assert (module && module->handle);
-
-  /* Be careful when closing myself.  */
-  handle = module->handle;
-  name = m4_get_module_name (module);
-  name = xstrdup (name ? name : MODULE_SELF_NAME);
-
-  info = lt_dlgetinfo (handle);
-  resident = info->is_resident;
-
-  /* Only do the actual close when the number of calls to close this
-     module is equal to the number of times it was opened. */
-#ifdef DEBUG_MODULES
-  if (info->ref_count > 1)
-    {
-      xfprintf (stderr, "module %s: now has %d libtool references.",
-                name, info->ref_count - 1);
-    }
-#endif /* DEBUG_MODULES */
-
-  if (module->refcount-- == 1)
-    {
-      /* Remove the table references only when ref_count is *exactly*
-         equal to 1.  If module_close is called again on a
-         resident module after the references have already been
-         removed, we needn't try to remove them again!  */
-      m4__symtab_remove_module_references (M4SYMTAB, module);
-
-      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-                        _("module %s: symbols unloaded"), name);
-      last_reference = true;
-    }
-
-  finish_func = (m4_module_finish_func *) lt_dlsym (handle, FINISH_SYMBOL);
-  if (finish_func)
-    {
-      finish_func (context, module, obs);
-
-      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-                        _("module %s: finish hook called"), name);
-    }
-
-  if (last_reference && resident)
-    {
-      /* Special case when closing last reference to resident module -
-         we need to remove the association of the m4_module wrapper
-         with the dlhandle, because we are about to free the wrapper,
-         but the module will still show up in lt_dlhandle_iterate.
-         Still call lt_dlclose to reduce the ref count, but ignore the
-         failure about not closing a resident module.  */
-      void *old = lt_dlcaller_set_data (iface_id, handle, NULL);
-      if (!old)
-        m4_error (context, EXIT_FAILURE, 0, NULL,
-                  _("unable to close module `%s': %s"), name,
-                  module_dlerror());
-      assert (old == module);
-      lt_dlclose (handle);
-      m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-                        _("module %s: resident module not closed"), name);
-    }
-  else
-    {
-      errors = lt_dlclose (handle);
-      /* Ignore the error expected if the module was resident.  */
-      if (resident)
-        errors = 0;
-      if (!errors)
-        {
-          m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-                            _("module %s: closed"), name);
-        }
-    }
-
-  if (errors)
-    m4_error (context, EXIT_FAILURE, 0, NULL,
-              _("cannot close module `%s': %s"), name, module_dlerror ());
-  if (last_reference)
-    {
-      size_t i;
-      for (i = 0; i < module->builtins_len; i++)
-        DELETE (module->builtins[i].builtin.name);
-      free (module->builtins);
-      free (module);
-    }
-
-  DELETE (name);
-
-  return errors;
-}
-
-
-/* Below here are the accessor functions behind fast macros.  Declare
-   them last, so the rest of the file can use the macros.  */
-
-/* Return the current refcount, or times that module MODULE has been
-   opened.  */
-#undef m4_module_refcount
-int
-m4_module_refcount (const m4_module *module)
-{
-  const lt_dlinfo *info;
-  assert (module);
-  info = lt_dlgetinfo (module->handle);
-  assert (info);
-  assert (module->refcount <= info->ref_count);
-  return module->refcount;
 }

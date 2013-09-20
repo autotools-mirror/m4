@@ -160,7 +160,6 @@ pkgmodinclude_HEADERS = modules/m4.h
 
 pkglib_LTLIBRARIES = \
 		  modules/gnu.la \
-		  modules/load.la \
 		  modules/m4.la \
 		  modules/traditional.la
 
@@ -168,9 +167,6 @@ EXTRA_modules_gnu_la_SOURCES	= modules/format.c
 modules_gnu_la_LDFLAGS		= $(module_ldflags)
 modules_gnu_la_LIBADD		= $(module_libadd)
 EXTRA_DIST		       += $(EXTRA_modules_gnu_la_SOURCES)
-
-modules_load_la_LDFLAGS		= $(module_ldflags)
-modules_load_la_LIBADD		= $(module_libadd)
 
 EXTRA_modules_m4_la_SOURCES	= modules/evalparse.c
 modules_m4_la_LDFLAGS		= $(module_ldflags)

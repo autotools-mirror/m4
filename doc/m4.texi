@@ -235,8 +235,6 @@ Diverting and undiverting output
 Extending M4 with dynamic runtime modules
 
 * M4modules::                   Listing loaded modules
-* Unload::                      Removing loaded modules
-* Refcount::                    Tracking module references
 * Standard Modules::            Standard bundled modules
 
 Macros for text handling
@@ -6669,8 +6667,8 @@ extensions by configuring the distribution with @kbd{./configure
 --with-modules=m4}.  For a binary built with that option to understand
 code that uses GNU extensions, you must then run @kbd{m4 gnu}.
 It is also possible to build a @emph{fatter} binary with additional
-modules preloaded: adding, say, the @code{load} module usingr
- @kbd{./configure --with-modules="m4 gnu load"}.
+modules preloaded: adding, say, the @code{load} module using
+@kbd{./configure --with-modules="m4 gnu load"}.
 
 GNU M4 now has a facility for defining additional builtins without
 recompiling the sources.  In actual fact, all of the builtins provided
@@ -6686,15 +6684,13 @@ two modes of startup.
 
 @menu
 * M4modules::                   Listing loaded modules
-* Unload::                      Removing loaded modules
-* Refcount::                    Tracking module references
 * Standard Modules::            Standard bundled modules
 @end menu
 
 @node M4modules
 @section Listing loaded modules
 
-@deffn {Builtin (load)} m4modules
+@deffn {Builtin (gnu)} m4modules
 Expands to a quoted ordered list of currently loaded modules,
 with the most recently loaded module at the front of the list.  Loading
 a module multiple times will not affect the order of this list, the
@@ -6704,78 +6700,10 @@ position depends on when the module was @emph{first} loaded.
 For example, if GNU @code{m4} is started with the
 @option{load} module, @code{m4modules} will yield the following:
 
-@comment options: load -
 @example
-$ @kbd{m4 load -}
+$ @kbd{m4}
 m4modules
-@result{}load,gnu,m4
-@end example
-
-@node Unload
-@section Removing loaded modules
-
-@deffn {Builtin (load)} unload (@var{module-name})
-Any loaded modules that can be listed by the @code{m4modules} macro can be
-removed by naming them as the @var{module-name} parameter of the
-@code{unload} macro.  Unloading a module consists of removing all of the
-macros it provides from the internal table of visible macros, and
-running the module's finalization method (if any).
-
-The macro @code{unload} is recognized only with parameters.
-@end deffn
-
-@comment options: mpeval load -
-@example
-$ @kbd{m4 mpeval load -}
-m4modules
-@result{}load,mpeval,gnu,m4
-unload(`mpeval')
-@result{}
-m4modules
-@result{}load,gnu,m4
-@end example
-
-@node Refcount
-@section Tracking module references
-
-@deffn {Builtin (load)} refcount (@var{module-name})
-This macro expands to an integer representing the number of times
-@var{module-name} has been loaded but not yet unloaded.  No warning is
-issued, even if @var{module-name} does not represent a valid module.
-
-The macro @code{refcount} is recognized only with parameters.
-@end deffn
-
-This example demonstrates tracking the reference count of the gnu
-module.
-
-@comment options: load -
-@example
-$ @kbd{m4 load -}
-m4modules
-@result{}load,gnu,m4
-refcount(`gnu')
-@result{}1
-m4modules
-@result{}load,gnu,m4
-include(`gnu')
-@result{}
-refcount(`gnu')
-@result{}2
-unload(`gnu')
-@result{}
-m4modules
-@result{}load,gnu,m4
-refcount(`gnu')
-@result{}1
-unload(`gnu')
-@result{}
-m4modules
-@result{}load,m4
-refcount(`gnu')
-@result{}0
-refcount(`NoSuchModule')
-@result{}0
+@result{}gnu,m4
 @end example
 
 @node Standard Modules

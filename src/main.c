@@ -744,7 +744,6 @@ main (int argc, char *const *argv, char *const *envp)
      Strictly, we don't need to do this, but it makes leak detection
      a whole lot easier!  */
 
-  m4__module_exit (context);
   m4_output_exit ();
   m4_input_exit ();
 

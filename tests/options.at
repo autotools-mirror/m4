@@ -423,7 +423,6 @@ dnl Test all flags.
 AT_CHECK_M4([-dV in], [0], [[3
 0
 ]], [[m4debug: module m4: opening file
-m4debug: module m4: init hook called
 m4debug: module m4: opened
 m4debug: module m4: builtins loaded
 m4debug: module gnu: opening file
@@ -451,11 +450,6 @@ m4debug: input from m4wrap recursion level 1
 m4trace:nested:1: -1- id 6: divnum ... = <divnum>{m4}
 m4trace:nested:1: -1- id 6: divnum -> `0'
 m4debug: input from m4wrap exhausted
-m4debug: module gnu: symbols unloaded
-m4debug: module gnu: finish hook called
-m4debug: module gnu: closed
-m4debug: module m4: symbols unloaded
-m4debug: module m4: resident module not closed
 ]])
 
 dnl Test addition and subtraction of flags.

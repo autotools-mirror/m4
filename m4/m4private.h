@@ -176,13 +176,11 @@ extern void m4__builtin_print (m4_obstack *, const m4__builtin *, bool,
 #define BUILTIN_SYMBOL          "m4_builtin_table"
 #define MACRO_SYMBOL            "m4_macro_table"
 #define INIT_SYMBOL             "m4_init_module"
-#define FINISH_SYMBOL           "m4_finish_module"
 
 /* Representation of a loaded m4 module.  */
 struct m4_module
 {
   lt_dlhandle handle;           /* All ltdl module information.  */
-  int refcount;                 /* Count of loads not matched by unload.  */
   m4__builtin *builtins;        /* Sorted array of builtins.  */
   size_t builtins_len;          /* Number of builtins.  */
 };
@@ -190,15 +188,7 @@ struct m4_module
 extern void         m4__module_init (m4 *context);
 extern m4_module *  m4__module_open (m4 *context, const char *name,
                                      m4_obstack *obs);
-extern void         m4__module_exit (m4 *context);
-extern m4_module *  m4__module_next (m4_module *);
 extern m4_module *  m4__module_find (const char *name);
-
-/* Fast macro versions of symbol table accessor functions, that also
-   have an identically named function exported in m4module.h.  */
-#ifdef NDEBUG
-# define m4_module_refcount(M)  ((M)->refcount)
-#endif
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */

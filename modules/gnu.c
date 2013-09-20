@@ -58,6 +58,7 @@
   BUILTIN (patsubst,    false,  true,   true,   2,      4  )    \
   BUILTIN (regexp,      false,  true,   true,   2,      4  )    \
   BUILTIN (renamesyms,  false,  true,   false,  2,      3  )    \
+  BUILTIN (m4modules,   false,  false,  false,  0,      0  )    \
   BUILTIN (m4symbols,   true,   false,  false,  0,      -1 )    \
   BUILTIN (syncoutput,  false,  true,   false,  1,      1  )    \
 
@@ -349,25 +350,6 @@ regexp_substitute (m4 *context, m4_obstack *obs, const m4_call_info *caller,
     }
 
   return subst;
-}
-
-
-/* Reclaim memory used by this module.  */
-M4FINISH_HANDLER(gnu)
-{
-  int i;
-  for (i = 0; i < REGEX_CACHE_SIZE; i++)
-    if (regex_cache[i].str)
-      {
-        free (regex_cache[i].str);
-        regfree (regex_cache[i].pat);
-        free (regex_cache[i].pat);
-        free (regex_cache[i].regs.start);
-        free (regex_cache[i].regs.end);
-      }
-  /* If this module was preloaded, then we need to explicitly reset
-     the memory in case it gets reloaded.  */
-  memset (&regex_cache, 0, sizeof regex_cache);
 }
 
 
@@ -1013,6 +995,28 @@ M4BUILTIN_HANDLER (renamesyms)
     }
   else
     assert (!"Unable to import from m4 module");
+}
+
+
+/**
+ * m4modules()
+ **/
+M4BUILTIN_HANDLER (m4modules)
+{
+  /* The expansion of this builtin is a comma separated list of
+     loaded modules.  */
+  m4_module *module = m4_module_next (NULL);
+
+  if (module)
+    do
+      {
+        m4_shipout_string (context, obs, m4_get_module_name (module), SIZE_MAX,
+                           true);
+
+        if ((module = m4_module_next (module)))
+          obstack_1grow (obs, ',');
+      }
+    while (module);
 }
 
 

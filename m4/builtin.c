@@ -41,7 +41,7 @@ compare_builtin_name_CB (const void *name, const void *b)
 m4_symbol_value * M4_GNUC_PURE
 m4_builtin_find_by_name (m4_module *module, const char *name)
 {
-  m4_module *cur = module ? module : m4__module_next (NULL);
+  m4_module *cur = module ? module : m4_module_next (NULL);
   m4__builtin *bp;
 
   do
@@ -55,7 +55,7 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
           return token;
         }
     }
-  while (!module && (cur = m4__module_next (cur)));
+  while (!module && (cur = m4_module_next (cur)));
 
   return NULL;
 }
@@ -67,7 +67,7 @@ m4_builtin_find_by_name (m4_module *module, const char *name)
 m4_symbol_value * M4_GNUC_PURE
 m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
 {
-  m4_module *cur = module ? module : m4__module_next (NULL);
+  m4_module *cur = module ? module : m4_module_next (NULL);
   size_t i;
 
   do
@@ -81,7 +81,7 @@ m4_builtin_find_by_func (m4_module *module, m4_builtin_func *func)
             return token;
           }
     }
-  while (!module && (cur = m4__module_next (cur)));
+  while (!module && (cur = m4_module_next (cur)));
 
   return 0;
 }

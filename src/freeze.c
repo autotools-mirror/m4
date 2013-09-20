@@ -156,7 +156,7 @@ produce_module_dump (FILE *file, m4_module *module)
   const char *name = m4_get_module_name (module);
   size_t len = strlen (name);
 
-  module = m4__module_next (module);
+  module = m4_module_next (module);
   if (module)
     produce_module_dump (file, module);
 
@@ -322,7 +322,7 @@ produce_frozen_state (m4 *context, const char *name)
   produce_debugmode_state (file, m4_get_debug_level_opt (context));
 
   /* Dump all loaded modules.  */
-  produce_module_dump (file, m4__module_next (NULL));
+  produce_module_dump (file, m4_module_next (NULL));
 
   /* Dump all symbols.  */
   produce_symbol_dump (context, file, M4SYMTAB);

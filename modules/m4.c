@@ -128,19 +128,6 @@ const m4_builtin m4_builtin_table[] =
 
 
 
-/* This module cannot be safely unloaded from memory, incase the unload
-   is triggered by m4exit, and the module is removed while m4exit is in
-   progress.  */
-M4INIT_HANDLER (m4)
-{
-  const char *err = m4_module_makeresident (module);
-  if (err)
-    m4_error (context, 0, 0, NULL, _("cannot make module `%s' resident: %s"),
-              m4_get_module_name (module), err);
-}
-
-
-
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
 
@@ -839,9 +826,6 @@ M4BUILTIN_HANDLER (m4exit)
   /* Ensure that atexit handlers see correct nonzero status.  */
   if (exit_code != EXIT_SUCCESS)
     m4_set_exit_failure (exit_code);
-
-  /* Ensure any module exit callbacks are executed.  */
-  m4__module_exit (context);
 
   /* Change debug stream back to stderr, to force flushing debug
      stream and detect any errors.  */

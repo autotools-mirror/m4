@@ -122,17 +122,6 @@ struct m4_string_pair
   void name ## _LTX_m4_init_module                                      \
     (m4 *context, m4_module *module, m4_obstack *obs)
 
-/* Declare a prototype, then begin the implementation of the function
-   "<NAME>_LTX_m4_init_module", which will automatically be registered
-   as the cleanup function for module NAME.  Note that NAME is
-   intentionally used literally, rather than subjected to macro
-   expansion.  */
-#define M4FINISH_HANDLER(name)                                          \
-  void name ## _LTX_m4_finish_module                                    \
-    (m4 *, m4_module *, m4_obstack *);                                  \
-  void name ## _LTX_m4_finish_module                                    \
-    (m4 *context, m4_module *module, m4_obstack *obs)
-
 /* Declare a variable S of type "<S>_func" to be a pointer to the
    function named S imported from the module M, or NULL if the import
    fails.  Note that M and S are intentionally used literally rather
@@ -243,17 +232,13 @@ m4_context_opt_bit_table
 /* --- MODULE MANAGEMENT --- */
 
 typedef void m4_module_init_func   (m4 *, m4_module *, m4_obstack *);
-typedef void m4_module_finish_func (m4 *, m4_module *, m4_obstack *);
 
 extern m4_module *  m4_module_load     (m4 *, const char *, m4_obstack *);
-extern const char * m4_module_makeresident (m4_module *);
-extern int          m4_module_refcount (const m4_module *);
-extern void         m4_module_unload   (m4 *, const char *, m4_obstack *);
 extern void *       m4_module_import   (m4 *, const char *, const char *,
                                         m4_obstack *);
 
 extern const char * m4_get_module_name (const m4_module *);
-extern void         m4__module_exit    (m4 *);
+extern m4_module *  m4_module_next     (m4_module *);
 
 
 
