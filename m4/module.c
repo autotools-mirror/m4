@@ -214,13 +214,13 @@ install_macro_table (m4 *context, m4_module *module)
 m4_module *
 m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 {
-  m4_module *module = m4__module_open (context, name, obs);
-
-  if (module)
+  m4_module *module = m4__module_find (context, name);
+  
+  if (!module)
     {
-      const lt_dlinfo *info = lt_dlgetinfo (module->handle);
+      module = m4__module_open (context, name, obs);
 
-      if (info->ref_count == 1)
+      if (module)
         {
           install_builtin_table (context, module);
           install_macro_table (context, module);
