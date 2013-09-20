@@ -87,7 +87,7 @@ void *
 m4_module_import (m4 *context, const char *module_name,
                   const char *symbol_name, m4_obstack *obs)
 {
-  m4_module *   module          = m4__module_find (module_name);
+  m4_module *   module          = m4__module_find (context, module_name);
   void *        symbol_address  = NULL;
 
   /* Try to load the module if it is not yet available (errors are
@@ -256,19 +256,10 @@ m4_module_next (m4 *context, m4_module *module)
 /* Return the first loaded module that passes the registered interface test
    and is called NAME.  */
 m4_module *
-m4__module_find (const char *name)
+m4__module_find (m4 *context, const char *name)
 {
-  lt_dlhandle handle;
-  m4_module *module;
-  assert (iface_id);
-
-  handle = lt_dlhandle_fetch (iface_id, name);
-  if (!handle)
-    return NULL;
-  module = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
-  if (module)
-    assert (module->handle == handle);
-  return module;
+  m4_module **pmodule = (m4_module **) m4_hash_lookup (context->namemap, name);
+  return pmodule ? *pmodule : NULL;
 }
 
 
@@ -402,6 +393,7 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 	  module->next   = context->modules;
 
 	  context->modules = module;
+	  m4_hash_insert (context->namemap, xstrdup (name), module);
 
           /* clear out any stale errors, since we have to use
              lt_dlerror to distinguish between success and

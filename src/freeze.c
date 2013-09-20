@@ -711,7 +711,7 @@ ill-formed frozen file, invalid builtin %s encountered"),
 ill-formed frozen file, invalid module %s encountered"),
                             quotearg_style_mem (locale_quoting_style,
                                                 string[2], number[2]));
-                module = m4__module_find (string[2]);
+                module = m4__module_find (context, string[2]);
               }
             token = m4_builtin_find_by_name (context, module, string[1]);
 
@@ -966,7 +966,7 @@ ill-formed frozen file, version 2 directive `%c' encountered"), 'T');
 ill-formed frozen file, invalid module %s encountered"),
                             quotearg_style_mem (locale_quoting_style,
                                                 string[2], number[2]));
-                module = m4__module_find (string[2]);
+                module = m4__module_find (context, string[2]);
               }
 
             m4_set_symbol_value_text (token, xmemdup0 (string[1], number[1]),

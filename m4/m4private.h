@@ -60,6 +60,7 @@ struct m4 {
   m4_symbol_table *     symtab;
   m4_syntax_table *     syntax;
   m4_module *           modules;
+  m4_hash *             namemap;
 
   const char *          current_file;   /* Current input file.  */
   int                   current_line;   /* Current input line.  */
@@ -190,7 +191,7 @@ struct m4_module
 extern void         m4__module_init (m4 *context);
 extern m4_module *  m4__module_open (m4 *context, const char *name,
                                      m4_obstack *obs);
-extern m4_module *  m4__module_find (const char *name);
+extern m4_module *  m4__module_find (m4 *context, const char *name);
 
 
 /* --- SYMBOL TABLE MANAGEMENT --- */

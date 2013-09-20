@@ -20,9 +20,21 @@
 
 #include <config.h>
 
+#include "bitrotate.h"
 #include "m4private.h"
 
 #define DEFAULT_NESTING_LIMIT	1024
+#define DEFAULT_NAMEMAP_SIZE    61
+
+static size_t
+hashfn (const void *ptr)
+{
+  const char *s = (const char *) ptr;
+  size_t val = DEFAULT_NAMEMAP_SIZE;
+  while (*s)
+    val = rotl_sz (val, 7) + to_uchar (*s++);
+  return val;
+}
 
 
 m4 *
@@ -32,6 +44,9 @@ m4_create (void)
 
   context->symtab = m4_symtab_create (0);
   context->syntax = m4_syntax_create ();
+
+  context->namemap =
+    m4_hash_new (DEFAULT_NAMEMAP_SIZE, hashfn, (m4_hash_cmp_func *) strcmp);
 
   context->debug_file	 = stderr;
   obstack_init (&context->trace_messages);
