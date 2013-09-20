@@ -30,6 +30,7 @@
 
 #include "m4private.h"
 
+#include "configmake.h"
 #include "dirname.h"
 #include "filenamecat.h"
 
@@ -338,6 +339,9 @@ m4__include_init (m4 *context)
     assert (info);
     if (info->list_end == NULL)
       search_path_add (info, "", false);
+
+    /* Non-core modules installation directory. */
+    search_path_add (info, PKGLIBDIR, false);
   }
 
 #ifdef DEBUG_INCL

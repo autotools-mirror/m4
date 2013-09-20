@@ -173,7 +173,6 @@ extern void m4__builtin_print (m4_obstack *, const m4__builtin *, bool,
 
 /* --- MODULE MANAGEMENT --- */
 
-#define USER_MODULE_PATH_ENV    "M4MODPATH"
 #define BUILTIN_SYMBOL          "m4_builtin_table"
 #define MACRO_SYMBOL            "m4_macro_table"
 #define INIT_SYMBOL             "m4_init_module"

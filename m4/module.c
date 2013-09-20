@@ -20,7 +20,6 @@
 
 #include <config.h>
 
-#include "configmake.h"
 #include "m4private.h"
 #include "xvasprintf.h"
 
@@ -45,16 +44,15 @@
  * The table is saved as libltdl caller data and each definition therein
  * is added to the symbol table.
  *
- * To load a module, call m4_module_load(), which uses the libltdl
- * API to find the module in the module search path.  The search
- * path is initialized from the environment variable M4MODPATH, followed
- * by the configuration time default where the modules shipped with M4
- * itself are installed.  Libltdl reads the libtool .la file to
- * get the real library name (which can be system dependent), returning
- * NULL on failure or else a libtool module handle for the newly mapped
- * vm segment containing the module code.  If the module is not already
- * loaded, m4_module_load() retrieves its value for the symbol
- * `m4_builtin_table', which is installed using set_module_builtin_table().
+ * To load a module, call m4_module_load(), which searches for the
+ * module in directories from M4PATH. The search path is initialized
+ * from the environment variable M4PATH, followed by the configuration
+ * time default where the modules shipped with M4 itself are installed.
+ * `m4_module_load' returns NULL on failure, or else an opaque module
+ * handle for the newly mapped vm segment containing the module code.
+ * If the module is not already loaded, m4_module_load() retrieves its
+ * value for the symbol `m4_builtin_table', which is installed using
+ * set_module_builtin_table().
  *
  * In addition to builtin functions, you can also define static macro
  * expansions in the `m4_macro_table' symbol.  If you define this symbol
@@ -344,19 +342,6 @@ m4__module_init (m4 *context)
              lt_dlerror() anyway.  */
           ++errors;
         }
-    }
-
-  if (!errors)
-    errors = lt_dlsetsearchpath (PKGLIBEXECDIR);
-
-  /* If the user set M4MODPATH, then use that as the start of the module
-     search path.  */
-  if (!errors)
-    {
-      char *path = getenv (USER_MODULE_PATH_ENV);
-
-      if (path)
-        errors = lt_dlinsertsearchdir (lt_dlgetsearchpath (), path);
     }
 
   /* Couldn't initialize the module system; diagnose and exit.  */
