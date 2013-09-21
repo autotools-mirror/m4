@@ -22,7 +22,6 @@
 #define M4PRIVATE_H 1
 
 #include <m4/m4module.h>
-#include <ltdl.h>
 
 #include "cloexec.h"
 #include "quotearg.h"
@@ -175,20 +174,17 @@ extern void m4__builtin_print (m4_obstack *, const m4__builtin *, bool,
 
 /* --- MODULE MANAGEMENT --- */
 
-#define INIT_SYMBOL             "m4_init_module"
-
 /* Representation of a loaded m4 module.  */
 struct m4_module
 {
   const char *name;             /* Name of the module.  */
-  lt_dlhandle handle;           /* All ltdl module information.  */
+  void *handle;                 /* System module handle.  */
   m4__builtin *builtins;        /* Sorted array of builtins.  */
   m4_macro *macros;		/* Unsorted array of macros.  */
   size_t builtins_len;          /* Number of builtins.  */
   m4_module *next;
 };
 
-extern void         m4__module_init (m4 *context);
 extern m4_module *  m4__module_open (m4 *context, const char *name,
                                      m4_obstack *obs);
 extern m4_module *  m4__module_find (m4 *context, const char *name);

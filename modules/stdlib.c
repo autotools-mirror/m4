@@ -70,7 +70,8 @@ static const m4_builtin m4_builtin_table[] =
 };
 
 
-M4INIT_HANDLER (stdlib)
+void
+include_stdlib (m4 *context, m4_module *module, m4_obstack *obs)
 {
   m4_install_builtins (context, module, m4_builtin_table);
 }

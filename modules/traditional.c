@@ -45,7 +45,8 @@ static const m4_macro m4_macro_table[] =
   { NULL,               NULL,   0,      0 },
 };
 
-M4INIT_HANDLER (traditional)
+void
+include_traditional (m4 *context, m4_module *module, m4_obstack *obs)
 {
   m4_install_macros (context, module, m4_macro_table);
 }

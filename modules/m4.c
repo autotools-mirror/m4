@@ -38,13 +38,6 @@
 
 #include <modules/m4.h>
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_set_sysval           m4_LTX_m4_set_sysval
-#define m4_sysval_flush         m4_LTX_m4_sysval_flush
-#define m4_dump_symbols         m4_LTX_m4_dump_symbols
-#define m4_expand_ranges        m4_LTX_m4_expand_ranges
-#define m4_make_temp            m4_LTX_m4_make_temp
-
 extern void m4_set_sysval    (int);
 extern void m4_sysval_flush  (m4 *, bool);
 extern void m4_dump_symbols  (m4 *, m4_dump_symbol_data *, size_t,
@@ -113,7 +106,7 @@ static void     numb_obstack    (m4_obstack *obs, number value,
 
 
 /* Generate a table for mapping m4 symbol names to handler functions. */
-const m4_builtin m4_builtin_table[] =
+static const m4_builtin m4_builtin_table[] =
 {
 #define BUILTIN(handler, macros, blind, side, min, max)                 \
   M4BUILTIN_ENTRY (handler, #handler, macros, blind, side, min, max)
@@ -125,7 +118,8 @@ const m4_builtin m4_builtin_table[] =
 };
 
 
-M4INIT_HANDLER (m4)
+void
+include_m4 (m4 *context, m4_module *module, m4_obstack *obs)
 {
   m4_install_builtins (context, module, m4_builtin_table);
 }

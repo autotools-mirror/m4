@@ -47,7 +47,7 @@ dnl the m4_ namespace provided by m4sugar, so we prefer M4_ as our
 dnl package-specific prefix.
 m4_pattern_forbid([^M4_[A-Z]])
 
-AC_DEFUN([M4_DEFAULT_PRELOAD], [m4 traditional gnu])
+AC_DEFUN([M4_DEFAULT_PRELOAD], [])
 M4_default_preload="M4_DEFAULT_PRELOAD"
 
 
@@ -82,22 +82,7 @@ M4_CHECK_DEBUGGING
 ## Libtool initialization. ##
 ## ----------------------- ##
 LT_PREREQ([2.2])
-LT_CONFIG_LTDL_DIR([ltdl])
 LT_INIT([shared dlopen win32-dll])
-LTDL_INIT([nonrecursive])
-
-# The lt_dlhandle_iterate symbol was added with libtool-2.2
-if test "x$with_included_ltdl" != "xyes"; then
-  save_CFLAGS="$CFLAGS"
-  save_LDFLAGS="$LDFLAGS"
-  CFLAGS="$CFLAGS $LTDLINCL"
-  LDFLAGS="$LDFLAGS $LIBLTDL"
-  AC_CHECK_LIB([ltdl], [lt_dlhandle_iterate],
-             [],
-     [AC_MSG_ERROR([installed libltdl is too old])])
-  LDFLAGS="$save_LDFLAGS"
-  CFLAGS="$save_CFLAGS"
-fi
 
 AC_ARG_ENABLE([gcc-warnings],
   [AS_HELP_STRING([--enable-gcc-warnings],

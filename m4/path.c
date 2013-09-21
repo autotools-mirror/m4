@@ -41,8 +41,7 @@ static const char *FILE_SUFFIXES[] = {
   "",
   ".m4f",
   ".m4",
-  ".la",
-  LT_MODULE_EXT,
+  ".so",
   NULL
 };
 
@@ -297,7 +296,7 @@ m4_load_filename (m4 *context, const m4_call_info *caller,
 
   if (!m4_get_posixly_correct_opt (context)
       && suffix
-      && (STREQ (suffix, LT_MODULE_EXT) || STREQ (suffix, ".la")))
+      && STREQ (suffix, ".so"))
     {
       m4_module_load (context, filename, obs);
     }

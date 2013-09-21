@@ -331,11 +331,7 @@ main (int argc, char *const *argv, char *const *envp)
   textdomain (PACKAGE);
 #endif
 
-  LTDL_SET_PRELOADED_SYMBOLS ();
-
   context = m4_create ();
-
-  m4__module_init (context);
 
 #ifdef USE_STACKOVF
   setup_stackovf_trap (argv, envp, stackovf_handler);

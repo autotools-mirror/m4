@@ -122,7 +122,8 @@ static const m4_macro m4_macro_table[] =
 };
 
 
-M4INIT_HANDLER (mpeval)
+void
+include_mpeval (m4 *context, m4_module *module, m4_obstack *obs)
 {
   m4_install_builtins (context, module, m4_builtin_table);
   m4_install_macros   (context, module, m4_macro_table);

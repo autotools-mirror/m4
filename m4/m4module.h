@@ -111,17 +111,6 @@ struct m4_string_pair
   static void CONC (builtin_, name)                                     \
     (m4 *context, m4_obstack *obs, size_t argc, m4_macro_args *argv)
 
-/* Declare a prototype, then begin the implementation of the function
-   "<NAME>_LTX_m4_init_module", which will automatically be registered
-   as the initialization function for module NAME.  Note that NAME is
-   intentionally used literally, rather than subjected to macro
-   expansion.  */
-#define M4INIT_HANDLER(name)                                            \
-  void name ## _LTX_m4_init_module                                      \
-    (m4 *, m4_module *, m4_obstack *);                                  \
-  void name ## _LTX_m4_init_module                                      \
-    (m4 *context, m4_module *module, m4_obstack *obs)
-
 /* Declare a variable S of type "<S>_func" to be a pointer to the
    function named S imported from the module M, or NULL if the import
    fails.  Note that M and S are intentionally used literally rather

@@ -28,9 +28,6 @@
 #  include "m4private.h"
 #endif
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define export_test             modtest_LTX_export_test
-
 extern bool export_test (const char *foo);
 
 /*         function     macros  blind   side    minargs maxargs */
@@ -66,7 +63,8 @@ static const m4_macro m4_macro_table[] =
 /**
  * modtest()
  **/
-M4INIT_HANDLER (modtest)
+void
+include_modtest (m4 *context, m4_module *module, m4_obstack *obs)
 {
   const char *s = "Test module loaded.\n";
 

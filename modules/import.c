@@ -28,9 +28,6 @@
 #  include "m4private.h"
 #endif
 
-/* Rename exported symbols for dlpreload()ing.  */
-#define m4_builtin_table        import_LTX_m4_builtin_table
-
 /*         function     macros  blind   side    minargs maxargs */
 #define builtin_functions                                       \
   BUILTIN (import,      false,  false,  false,  0,      1)      \
@@ -53,7 +50,8 @@ static const m4_builtin m4_builtin_table[] =
 };
 
 
-M4INIT_HANDLER (import)
+void
+include_import (m4 *context, m4_module *module, m4_obstack *obs)
 {
   m4_install_builtins (context, module, m4_builtin_table);
 }

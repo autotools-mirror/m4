@@ -58,7 +58,8 @@ static const m4_macro m4_macro_table[] =
 
 
 
-M4INIT_HANDLER (shadow)
+void
+include_shadow (m4 *context, m4_module *module, m4_obstack *obs)
 {
   const char *s = "Shadow module loaded.";
 

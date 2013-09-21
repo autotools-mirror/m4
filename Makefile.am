@@ -39,7 +39,7 @@ changelog_old		= $(srcdir)/ChangeLog.old
 # which effectively disables the auto-exporting of all other symbols.
 # Revisit this if libtool on cygwin improves.
 # See http://lists.gnu.org/archive/html/libtool-patches/2007-02/msg00062.html
-AM_CPPFLAGS	=
+AM_CPPFLAGS	= -I$(srcdir) -I.
 AM_CFLAGS	= $(WARN_CFLAGS) $(WERROR_CFLAGS)
 AM_LDFLAGS	= -export-dynamic -export-symbols-regex ".*"
 EXTRA_DIST	=
@@ -52,9 +52,6 @@ include_HEADERS	=
 noinst_LTLIBRARIES=
 lib_LTLIBRARIES	=
 EXTRA_LTLIBRARIES=
-
-# Include Libtool's rules.
-include ltdl/Makefile.inc
 
 # Additional configuration.  Version management comes from suggestions
 # given in build-aux/git-version-gen.

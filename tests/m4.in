@@ -34,7 +34,13 @@ else
   case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
 fi
 
+M4PATH="\
+@abs_top_builddir@/modules/.libs:\
+@abs_top_builddir@/tests/.libs:\
+${M4PATH+$M4PATH:}\
+:"
+export M4PATH
+
 exec "@abs_top_builddir@/src/m4" \
-      --include="@abs_top_builddir@/modules" \
       ${1+"$@"}
 exit 1

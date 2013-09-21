@@ -20,6 +20,8 @@
 
 #include <config.h>
 
+#include <dlfcn.h>
+
 #include "m4private.h"
 #include "xvasprintf.h"
 
@@ -71,10 +73,6 @@ static void         install_builtin_table (m4*, m4_module *);
 static void         install_macro_table   (m4*, m4_module *);
 
 static int          compare_builtin_CB    (const void *a, const void *b);
-static int          m4__module_interface  (lt_dlhandle handle,
-                                           const char *id_string);
-
-static lt_dlinterface_id iface_id = NULL;
 
 const char *
 m4_get_module_name (const m4_module *module)
@@ -99,7 +97,7 @@ m4_module_import (m4 *context, const char *module_name,
 
   if (module)
     {
-      symbol_address = lt_dlsym (module->handle, symbol_name);
+      symbol_address = dlsym (module->handle, symbol_name);
 
       if (!symbol_address)
         m4_error (context, 0, 0, NULL,
@@ -230,21 +228,6 @@ m4_module_load (m4 *context, const char *name, m4_obstack *obs)
   return module;
 }
 
-
-static int
-m4__module_interface (lt_dlhandle handle, const char *id_string)
-{
-  /* Shortcut.  If we've already associated our wrapper with this
-     handle, then we've validated the handle in the past, and don't
-     need to waste any time on additional lt_dlsym calls.  */
-  m4_module *module = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
-  if (module)
-    return 0;
-
-  /* A valid m4 module must provide at least one of these symbols.  */
-  return !(lt_dlsym (handle, INIT_SYMBOL));
-}
-
 
 /* Return successive loaded modules. */
 m4_module *
@@ -260,56 +243,6 @@ m4__module_find (m4 *context, const char *name)
 {
   m4_module **pmodule = (m4_module **) m4_hash_lookup (context->namemap, name);
   return pmodule ? *pmodule : NULL;
-}
-
-
-/* Initialization.  Currently the module search path in path.c is
-   initialized from M4MODPATH.  Only absolute path names are accepted to
-   prevent the path search of the dlopen library from finding wrong
-   files. */
-void
-m4__module_init (m4 *context)
-{
-  int errors = 0;
-
-  /* Do this only once!  If we already have an iface_id, then the
-     module system has already been initialized.  */
-  if (iface_id)
-    {
-      m4_error (context, 0, 0, NULL,
-                _("multiple module loader initializations"));
-      return;
-    }
-
-  errors      = lt_dlinit ();
-
-  /* Register with libltdl for a key to store client data against
-     ltdl module handles.  */
-  if (!errors)
-    {
-      iface_id = lt_dlinterface_register ("m4 libm4", m4__module_interface);
-
-      if (!iface_id)
-        {
-          const char *error_msg = _("libltdl client registration failed");
-
-          lt_dlseterror (lt_dladderror (error_msg));
-
-          /* No need to check error statuses from the calls above -- If
-             either fails for some reason, a diagnostic will be set for
-             lt_dlerror() anyway.  */
-          ++errors;
-        }
-    }
-
-  /* Couldn't initialize the module system; diagnose and exit.  */
-  if (errors)
-    m4_error (context, EXIT_FAILURE, 0, NULL,
-              _("failed to initialize module loader: %s"), module_dlerror ());
-
-#ifdef DEBUG_MODULES
-  fputs ("Module loader initialized.\n", stderr);
-#endif /* DEBUG_MODULES */
 }
 
 
@@ -332,95 +265,53 @@ compare_builtin_CB (const void *a, const void *b)
 m4_module *
 m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 {
-  static const char *	suffixes[]	= { "", ".la", LT_MODULE_EXT, NULL };
-  char *		filepath	= NULL;
-  lt_dlhandle		handle		= NULL;
-  lt_dladvise		advise		= NULL;
+  static const char *	suffixes[]	= { "", ".so", NULL };
   m4_module *		module		= NULL;
-  m4_module_init_func *	init_func	= NULL;
 
   assert (context);
-  assert (iface_id);            /* need to have called m4__module_init */
 
-  /* Try opening as a preloaded module initially incase path searching
-     has been disabled by POSIXLY_CORRECT... */
-  if (!lt_dladvise_init (&advise) && !lt_dladvise_preload (&advise))
-    handle = lt_dlopenadvise (name, advise);
-  lt_dladvise_destroy (&advise);
+  char *filepath = m4_path_search (context, name, suffixes);
+  void *handle   = NULL;
 
-  /* ...otherwise resort to a path search anyway.  */
-  if (!handle)
+  if (filepath)
     {
-      filepath = m4_path_search (context, name, suffixes);
-      if (filepath)
-        {
-          handle = lt_dlopenext (filepath);
-          free (filepath);
-        }
+      handle = dlopen (filepath, RTLD_NOW|RTLD_GLOBAL);
+      free (filepath);
     }
 
   if (handle)
     {
-      const lt_dlinfo *info = lt_dlgetinfo (handle);
-
-      /* If we have a handle, there must be handle info.  */
-      assert (info);
-
-#ifdef DEBUG_MODULES
-      if (info->ref_count > 1)
-        {
-          xfprintf (stderr, "module %s: now has %d libtool references.",
-                    name, info->ref_count);
-        }
-#endif /* DEBUG_MODULES */
-
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
                         _("module %s: opening file %s"),
                         name ? name : MODULE_SELF_NAME,
-                        quotearg_style (locale_quoting_style, info->filename));
+                        quotearg_style (locale_quoting_style, name));
 
-      /* Provide the m4_module corresponding to the lt_dlhandle, if
-         not yet created.  */
-      module = (m4_module *) lt_dlcaller_get_data (iface_id, handle);
-      if (!module)
+      module = (m4_module *) xzalloc (sizeof *module);
+      module->name   = xstrdup (name);
+      module->handle = handle;
+      module->next   = context->modules;
+
+      context->modules = module;
+      m4_hash_insert (context->namemap, xstrdup (name), module);
+
+      /* Find and run any initializing function in the opened module,
+         the first time the module is opened.  */
+      char *entry_point = xasprintf ("include_%s", name);
+      m4_module_init_func *init_func =
+          (m4_module_init_func *) dlsym (handle, entry_point);
+      free (entry_point);
+
+      if (init_func)
         {
-          void *old;
-          const char *err;
+          init_func (context, module, obs);
 
-          module = (m4_module *) xzalloc (sizeof *module);
-          module->name   = xstrdup (name);
-          module->handle = handle;
-	  module->next   = context->modules;
-
-	  context->modules = module;
-	  m4_hash_insert (context->namemap, xstrdup (name), module);
-
-          /* clear out any stale errors, since we have to use
-             lt_dlerror to distinguish between success and
-             failure.  */
-          lt_dlerror ();
-          old = lt_dlcaller_set_data (iface_id, handle, module);
-          assert (!old);
-          err = lt_dlerror ();
-          if (err)
-            m4_error (context, EXIT_FAILURE, 0, NULL,
-                      _("unable to load module `%s': %s"), name, err);
-
-          /* Find and run any initializing function in the opened module,
-             the first time the module is opened.  */
-          init_func = (m4_module_init_func *) lt_dlsym (handle, INIT_SYMBOL);
-          if (init_func)
-            {
-              init_func (context, module, obs);
-
-              m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
-                                _("module %s: init hook called"), name);
-            }
-          else
-            {
-              m4_error (context, EXIT_FAILURE, 0, NULL,
-                        _("module `%s' has no entry point"), name);
-            }
+          m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
+                            _("module %s: init hook called"), name);
+        }
+      else
+        {
+          m4_error (context, EXIT_FAILURE, 0, NULL,
+                    _("module `%s' has no entry point"), name);
         }
 
       m4_debug_message (context, M4_DEBUG_TRACE_MODULE,
@@ -428,23 +319,13 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
     }
   else
     {
+      const char *err = dlerror ();
+      if (!err) err = _("unknown error");
+
       /* Couldn't open the module; diagnose and exit. */
       m4_error (context, EXIT_FAILURE, 0, NULL,
-                _("cannot open module `%s': %s"), name, module_dlerror ());
+                _("cannot open module `%s': %s"), name, err);
     }
 
   return module;
-}
-
-
-/* FIXME - libtool doesn't expose lt_dlerror strings for translation.  */
-static const char *
-module_dlerror (void)
-{
-  const char *dlerror = lt_dlerror ();
-
-  if (!dlerror)
-    dlerror = _("unknown error");
-
-  return dlerror;
 }
