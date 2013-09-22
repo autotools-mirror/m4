@@ -20,8 +20,8 @@ ahead and start with `./configure'.  If you are trying to build `m4'
 from git, more information can be found in the version-control-only
 file HACKING.
 
-In the subdirectories `tests' and `examples' you will find various m4
-files, ranging from trivial test files to rather advanced macros.  If
+In the subdirectories `tests' and `doc/examples' you will find various
+m4 files, ranging from trivial test files to rather advanced macros.  If
 you intend to use m4 seriously, you might find useful material down
 there.
 

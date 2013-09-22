@@ -71,11 +71,11 @@ strategies are illustrated by shadow.c and shadow.m4.
 
 To try the demos, compile with `make' and run them with the commands as:
 
-    tests/m4 examples/time.m4
+    tests/m4 doc/examples/time.m4
 
 or in the case of time2.m4
 
-    tests/m4 -I tests time -I examples time2.m4
+    tests/m4 -I tests time -I doc/examples time2.m4
 
 ========================================================================
 
