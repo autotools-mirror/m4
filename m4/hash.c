@@ -80,7 +80,7 @@ struct m4_hash_iterator
 #define ITERATOR_NEXT(i)        ((i)->next)
 #define ITERATOR_NEXT_BUCKET(i) ((i)->next_bucket)
 
-#define ITERATOR_NEXT_NEXT(i)   NODE_NEXT (ITERATOR_PLACE (i))
+/*#define ITERATOR_NEXT_NEXT(i)   NODE_NEXT (ITERATOR_PLACE (i))*/
 
 /* Helper macros. */
 #define BUCKET_NTH(hash, n)     (HASH_BUCKETS (hash)[n])
@@ -368,7 +368,7 @@ node_lookup (m4_hash *hash, const void *key)
 
 /* How many entries are currently contained by HASH.  Safe to call
    even during an interation.  */
-size_t
+size_t M4_GNUC_PURE
 m4_get_hash_length (m4_hash *hash)
 {
   assert (hash);
@@ -424,7 +424,7 @@ maybe_grow (m4_hash *hash)
 
   nodes_per_bucket = (float) HASH_LENGTH (hash) / (float) HASH_SIZE (hash);
 
-  if (nodes_per_bucket > M4_HASH_MAXIMUM_DENSITY)
+  if (nodes_per_bucket > (float) M4_HASH_MAXIMUM_DENSITY)
     {
       size_t original_size = HASH_SIZE (hash);
       hash_node **original_buckets = HASH_BUCKETS (hash);
@@ -587,7 +587,7 @@ m4_free_hash_iterator (const m4_hash *hash, m4_hash_iterator *place)
 }
 
 /* Return the key being visited by the iterator PLACE.  */
-const void *
+const void * M4_GNUC_PURE
 m4_get_hash_iterator_key (m4_hash_iterator *place)
 {
   assert (place);
@@ -596,7 +596,7 @@ m4_get_hash_iterator_key (m4_hash_iterator *place)
 }
 
 /* Return the value being visited by the iterator PLACE.  */
-void *
+void * M4_GNUC_PURE
 m4_get_hash_iterator_value (m4_hash_iterator *place)
 {
   assert (place);
@@ -642,7 +642,7 @@ m4_hash_apply (m4_hash *hash, m4_hash_apply_func *func, void *userdata)
 
 /* Return a hash value for a string, similar to gnulib's hash module,
    but with length factored in.  */
-size_t
+size_t M4_GNUC_PURE
 m4_hash_string_hash (const void *ptr)
 {
   const m4_string *key = (const m4_string *) ptr;
@@ -657,7 +657,7 @@ m4_hash_string_hash (const void *ptr)
 
 /* Comparison function for hash keys -- used by the underlying
    hash table ADT when searching for a key match during name lookup.  */
-int
+int M4_GNUC_PURE
 m4_hash_string_cmp (const void *key, const void *try)
 {
   const m4_string *a = (const m4_string *) key;
