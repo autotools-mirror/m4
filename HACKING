@@ -247,9 +247,9 @@ and is not part of a release distribution.
   appropriate.  This will run various additional checks and create diff
   files from the previous version.
 
-* Run './build-aux/gnupload --to [dest].gnu.org:m4 [files]' to create
-  detached gpg signature and clear signed directive files, and upload
-  the combination to the correct location.  For an alpha release,
+* Run './build-aux/gnupload --to [dest].gnu.org:m4 --symlink-regex [files]'
+  to create detached gpg signature and clear signed directive files, and
+  upload the combination to the correct location.  For an alpha release,
   gnupload will place files in alpha.gnu.org, in /incoming/alpha; for a
   full release, gnupload will place files in ftp.gnu.org, in
   /incoming/ftp.  Verify that the files uploaded successfully before
@@ -257,7 +257,7 @@ and is not part of a release distribution.
 
 * Send announcement to m4-discuss@gnu.org, m4-announce@gnu.org, and
   autotools-announce@gnu.org.  If not an alpha send to info-gnu@gnu.org
-  as well.  Use /tmp/announce-m4-<version>, created during the above
+  as well.  Use ~/announce-m4-<version>, created during the above
   `make <target>' run, as a starting point.  Contact a list
   administrator for m4-announce in advance to ensure your post will make
   it through (the list is normally set to silently discard all posts,
