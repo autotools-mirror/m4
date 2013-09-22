@@ -21,11 +21,11 @@
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
 config_aux_dir	= build-aux
-config_macro_dir= ltdl/m4
+config_macro_dir= $(config_aux_dir)/m4
 
 SUBDIRS		= po gnu . doc tests/gnu
 
-ACLOCAL_AMFLAGS = -I ltdl/m4
+ACLOCAL_AMFLAGS = -I build-aux/m4
 AUTOMAKE_OPTIONS = nostdinc
 
 gitlog_to_changelog	= $(srcdir)/$(config_aux_dir)/gitlog-to-changelog
