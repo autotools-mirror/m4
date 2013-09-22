@@ -52,6 +52,7 @@ MAINTAINERCLEANFILES =
 include_HEADERS	=
 noinst_LTLIBRARIES=
 lib_LTLIBRARIES	=
+check_LTLIBRARIES =
 EXTRA_LTLIBRARIES=
 
 # Additional configuration.  Version management comes from suggestions
@@ -152,23 +153,19 @@ module_libadd	= m4/libm4.la
 
 noinst_HEADERS	= modules/m4.h
 
-pkglib_LTLIBRARIES = \
-		  modules/gnu.la \
-		  modules/m4.la \
-		  modules/traditional.la
+pkglib_LTLIBRARIES =
 
+pkglib_LTLIBRARIES	       += modules/gnu.la
 EXTRA_modules_gnu_la_SOURCES	= modules/format.c
 modules_gnu_la_LDFLAGS		= $(module_ldflags)
 modules_gnu_la_LIBADD		= $(module_libadd)
 EXTRA_DIST		       += $(EXTRA_modules_gnu_la_SOURCES)
 
+pkglib_LTLIBRARIES	       += modules/m4.la
 EXTRA_modules_m4_la_SOURCES	= modules/evalparse.c
 modules_m4_la_LDFLAGS		= $(module_ldflags)
 modules_m4_la_LIBADD		= $(module_libadd)
 EXTRA_DIST		       += $(EXTRA_modules_m4_la_SOURCES)
-
-modules_traditional_la_LDFLAGS	= $(module_ldflags)
-modules_traditional_la_LIBADD	= $(module_libadd)
 
 if USE_GMP
 pkglib_LTLIBRARIES	       += modules/mpeval.la
@@ -177,33 +174,17 @@ modules_mpeval_la_LDFLAGS	= $(module_ldflags)
 modules_mpeval_la_LIBADD	= $(module_libadd) $(LIBADD_GMP)
 endif
 
-module_check	= -rpath /dev/null
-check_LTLIBRARIES = \
-		  tests/import.la \
-		  tests/modtest.la \
-		  tests/shadow.la \
-		  tests/stdlib.la \
-		  tests/time.la
+pkglib_LTLIBRARIES	       += modules/stdlib.la
+modules_stdlib_la_LDFLAGS	= $(module_ldflags)
+modules_stdlib_la_LIBADD	= $(module_libadd)
 
-tests_import_la_LDFLAGS		= $(module_ldflags) $(module_check)
-tests_import_la_LIBADD		= $(module_libadd)
-tests_import_la_SOURCES		= modules/import.c
+pkglib_LTLIBRARIES	       += modules/time.la
+modules_time_la_LDFLAGS		= $(module_ldflags)
+modules_time_la_LIBADD		= $(module_libadd)
 
-tests_modtest_la_LDFLAGS	= $(module_ldflags) $(module_check)
-tests_modtest_la_LIBADD		= $(module_libadd)
-tests_modtest_la_SOURCES	= modules/modtest.c
-
-tests_shadow_la_LDFLAGS		= $(module_ldflags) $(module_check)
-tests_shadow_la_LIBADD		= $(module_libadd)
-tests_shadow_la_SOURCES		= modules/shadow.c
-
-tests_stdlib_la_LDFLAGS		= $(module_ldflags) $(module_check)
-tests_stdlib_la_LIBADD		= $(module_libadd)
-tests_stdlib_la_SOURCES		= modules/stdlib.c
-
-tests_time_la_LDFLAGS		= $(module_ldflags) $(module_check)
-tests_time_la_LIBADD		= $(module_libadd)
-tests_time_la_SOURCES		= modules/time.c
+pkglib_LTLIBRARIES	       += modules/traditional.la
+modules_traditional_la_LDFLAGS	= $(module_ldflags)
+modules_traditional_la_LIBADD	= $(module_libadd)
 
 
 ## ----- ##
@@ -244,6 +225,7 @@ EXTRA_DIST     += m4/system_.h
 ## -------------- ##
 ## Documentation. ##
 ## -------------- ##
+
 info_TEXINFOS	= doc/m4.texi
 m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl-1.3.texi doc/gpl-3.0.texi
 dist_man_MANS	= $(srcdir)/doc/m4.1
@@ -370,9 +352,24 @@ EXTRA_DIST     += $(TESTSUITE) $(TESTSUITE_AT) $(OTHER_FILES) \
 		  tests/generate.awk \
 		  $(srcdir)/tests/package.m4
 
+module_check	= -rpath /dev/null
+
+check_LTLIBRARIES	       += tests/import.la
+tests_import_la_LDFLAGS		= $(module_ldflags) $(module_check)
+tests_import_la_LIBADD		= $(module_libadd)
+
+check_LTLIBRARIES	       += tests/modtest.la
+tests_modtest_la_LDFLAGS	= $(module_ldflags) $(module_check)
+tests_modtest_la_LIBADD		= $(module_libadd)
+
+check_LTLIBRARIES	       += tests/shadow.la
+tests_shadow_la_LDFLAGS		= $(module_ldflags) $(module_check)
+tests_shadow_la_LIBADD		= $(module_libadd)
+
 # Using variables so that this snippet is not too wide and can
 # be used as is in Texinfo @example/@end example.
 m4_texi     = $(srcdir)/doc/m4.texi
+
 generate    = $(AWK) -f $(srcdir)/tests/generate.awk
 $(srcdir)/tests/generated.at: tests/generate.awk $(m4_texi)
 	$(generate) $(m4_texi) >$@t
