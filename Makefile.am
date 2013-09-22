@@ -147,14 +147,10 @@ MOSTLYCLEANFILES += src/getopt.h src/getopt.h-t
 ## Modules. ##
 ## -------- ##
 
-pkgmodincludedir= $(pkgincludedir)/modules
-
-ETAGS_ARGS	= --regex='/M4BUILTIN_HANDLER[ \t]*)\([^)]*\)/\1/'
-
 module_ldflags	= -module $(AM_LDFLAGS)
 module_libadd	= m4/libm4.la
 
-pkgmodinclude_HEADERS = modules/m4.h
+noinst_HEADERS	= modules/m4.h
 
 pkglib_LTLIBRARIES = \
 		  modules/gnu.la \
@@ -217,8 +213,7 @@ tests_time_la_SOURCES		= modules/time.c
 lib_LTLIBRARIES	+= m4/libm4.la
 
 nobase_include_HEADERS = \
-		  m4/m4module.h
-nobase_pkginclude_HEADERS = \
+		  m4/m4module.h \
 		  m4/hash.h \
 		  m4/system.h
 m4_libm4_la_SOURCES	= \
@@ -266,7 +261,7 @@ $(srcdir)/doc/m4.1: .version $(srcdir)/src/main.c
 
 TAGS_FILES	= $(infos_TEXINFOS)
 TAGS_DEPENDENCIES = $(TAGS_FILES)
-ETAGS_ARGS	+= --language=none --regex='/@node \([^,]*\)/\1/' $(TAGS_FILES)
+ETAGS_ARGS	= --language=none --regex='/@node \([^,]*\)/\1/' $(TAGS_FILES)
 
 MAINTAINERCLEANFILES += $(dist_man_MANS)
 
