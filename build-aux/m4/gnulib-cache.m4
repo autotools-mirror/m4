@@ -27,7 +27,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --local-dir=build-aux/gl --lib=libgnu --source-base=gnu --m4-base=build-aux/m4 --doc-base=doc --tests-base=tests/gnu --aux-dir=build-aux --with-tests --with-c++-tests --no-conditional-dependencies --libtool --macro-prefix=M4 assert autobuild avltree-oset binary-io bitrotate clean-temp cloexec close-stream closein config-h configmake dirname error execute fclose fdl-1.3 fflush filenamecat flexmember fopen fopen-safer freadptr freadseek fseeko gendocs gettext git-version-gen gitlog-to-changelog gnumakefile gnupload gpl-3.0 intprops inttypes maintainer-makefile manywarnings memchr2 memcmp2 memmem mkstemp obstack obstack-printf-posix progname propername quote regex regexprops-generic rename setenv sigpipe snprintf-posix spawn-pipe sprintf-posix stdbool stdlib-safer strnlen strtod tempname unlocked-io unsetenv update-copyright vasnprintf-posix verify verror wait-process xalloc xalloc-die xmemdup0 xoset xprintf-posix xstrndup xvasprintf-posix
+#   gnulib-tool --import --dir=. --local-dir=build-aux/gl --lib=libgnu --source-base=m4/gnu --m4-base=build-aux/m4 --doc-base=doc --tests-base=tests/gnu --aux-dir=build-aux --with-tests --with-c++-tests --no-conditional-dependencies --libtool --macro-prefix=M4 assert autobuild avltree-oset binary-io bitrotate clean-temp cloexec close-stream closein config-h configmake dirname error execute fclose fdl-1.3 fflush filenamecat flexmember fopen fopen-safer freadptr freadseek fseeko gendocs gettext git-version-gen gitlog-to-changelog gnumakefile gnupload gpl-3.0 intprops inttypes maintainer-makefile manywarnings memchr2 memcmp2 memmem mkstemp obstack obstack-printf-posix progname propername quote regex regexprops-generic rename setenv sigpipe snprintf-posix spawn-pipe sprintf-posix stdbool stdlib-safer strnlen strtod tempname unlocked-io unsetenv update-copyright vasnprintf-posix verify verror wait-process xalloc xalloc-die xmemdup0 xoset xprintf-posix xstrndup xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([build-aux/gl])
@@ -106,7 +106,7 @@ gl_MODULES([
 ])
 gl_WITH_CXX_TESTS
 gl_AVOID([])
-gl_SOURCE_BASE([gnu])
+gl_SOURCE_BASE([m4/gnu])
 gl_M4_BASE([build-aux/m4])
 gl_PO_BASE([])
 gl_DOC_BASE([doc])

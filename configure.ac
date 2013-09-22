@@ -32,9 +32,9 @@ AC_INIT([GNU M4], m4_defn([M4_VERSION]), [bug-m4@gnu.org])
 AC_CONFIG_SRCDIR([src/m4.h])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([build-aux/m4])
-AC_CONFIG_LIBOBJ_DIR([gnu])
+AC_CONFIG_LIBOBJ_DIR([m4/gnu])
 AC_CONFIG_TESTDIR([tests])
-AC_CONFIG_HEADERS([gnu/config.h:gnu/config.hin])
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([tests/m4], [chmod +x tests/m4])
 
 
@@ -280,8 +280,8 @@ M4_SYSCMD
 ## -------- ##
 AC_CONFIG_FILES([
 Makefile
-gnu/Makefile
 doc/Makefile
+m4/gnu/Makefile
 m4/system.h:m4/system_.h
 tests/atlocal
 tests/gnu/Makefile

@@ -23,7 +23,7 @@
 config_aux_dir	= build-aux
 config_macro_dir= $(config_aux_dir)/m4
 
-SUBDIRS		= po gnu . doc tests/gnu
+SUBDIRS		= po m4/gnu . doc tests/gnu
 
 ACLOCAL_AMFLAGS = -I build-aux/m4
 AUTOMAKE_OPTIONS = nostdinc
@@ -55,7 +55,7 @@ EXTRA_LTLIBRARIES=
 
 # Additional configuration.  Version management comes from suggestions
 # given in build-aux/git-version-gen.
-AM_CPPFLAGS    += -Ignu -I$(srcdir)/gnu \
+AM_CPPFLAGS    += -Im4/gnu -I$(srcdir)/m4/gnu \
 		  -Im4 -I$(srcdir)/m4
 EXTRA_DIST     += bootstrap cfg.mk maint.mk .version .prev-version \
 		  $(config_macro_dir)/gnulib-cache.m4 $(gitlog_to_changelog)
@@ -235,9 +235,9 @@ m4_libm4_la_SOURCES	= \
 		  m4/symtab.c \
 		  m4/syntax.c \
 		  m4/utility.c
-m4_libm4_la_LIBADD = gnu/libgnu.la \
+m4_libm4_la_LIBADD = m4/gnu/libgnu.la \
 		  $(LIBLTDL) $(LTLIBINTL) $(LIBADD_DL)
-m4_libm4_la_DEPENDENCIES = $(LTDLDEPS) gnu/libgnu.la
+m4_libm4_la_DEPENDENCIES = $(LTDLDEPS) m4/gnu/libgnu.la
 
 # This file needs to be regenerated at configure time.
 dist-hook:
