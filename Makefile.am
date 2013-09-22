@@ -23,7 +23,7 @@
 config_aux_dir	= build-aux
 config_macro_dir= $(config_aux_dir)/m4
 
-SUBDIRS		= po m4/gnu . doc tests/gnu
+SUBDIRS		= po m4/gnu . tests/gnu
 
 ACLOCAL_AMFLAGS = -I build-aux/m4
 AUTOMAKE_OPTIONS = nostdinc
@@ -47,6 +47,7 @@ BUILT_SOURCES	=
 CLEANFILES	=
 DISTCLEANFILES	=
 MOSTLYCLEANFILES=
+MAINTAINERCLEANFILES =
 
 include_HEADERS	=
 noinst_LTLIBRARIES=
@@ -76,7 +77,7 @@ $(changelog): FORCE
 	  cat '$(changelog_old)' >> '$@';		\
 	fi
 
-MAINTAINERCLEANFILES = \
+MAINTAINERCLEANFILES += \
 		  ABOUT-NLS INSTALL Makefile.in aclocal.m4 \
 		  config-h.in configure stamp-h.in \
 		  po/cat-id-tbl.c po/m4.pot po/stamp-cat-id
@@ -244,6 +245,30 @@ dist-hook:
 	rm -f $(distdir)/m4/system.h
 EXTRA_DIST     += m4/system_.h
 
+
+## -------------- ##
+## Documentation. ##
+## -------------- ##
+info_TEXINFOS	= doc/m4.texi
+m4_TEXINFOS	= doc/regexprops-generic.texi doc/fdl-1.3.texi doc/gpl-3.0.texi
+dist_man_MANS	= $(srcdir)/doc/m4.1
+EXTRA_DIST	+= doc/gendocs_template
+MAINTAINERCLEANFILES += doc/gendocs_template
+HELP2MAN	= $(SHELL) $(top_srcdir)/$(config_aux_dir)/missing --run help2man
+
+# Build the man page once in the srcdir, rather than in every VPATH build
+# dir, to match how automake builds info pages.  This is safe for 'make
+# distcheck' since it is distributed pre-built.
+$(srcdir)/doc/m4.1: .version $(srcdir)/src/main.c
+	@echo "Updating the \`man' page \`$@'"; \
+	$(HELP2MAN) --name="macro processor" --source=FSF \
+	  --info-page=m4 --output=$@ src/m4$(EXEEXT)
+
+TAGS_FILES	= $(infos_TEXINFOS)
+TAGS_DEPENDENCIES = $(TAGS_FILES)
+ETAGS_ARGS	+= --language=none --regex='/@node \([^,]*\)/\1/' $(TAGS_FILES)
+
+MAINTAINERCLEANFILES += $(dist_man_MANS)
 
 ## --------- ##
 ## Examples. ##
