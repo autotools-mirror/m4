@@ -143,7 +143,7 @@ contains the following beta features that were deemed worth deferring until
 ** A number of portability improvements inherited from gnulib.
 
 
-* Noteworthy changes in release 1.4.17 (2013-01-??) [stable]
+* Noteworthy changes in release 1.4.17 (2013-09-22) [stable]
 
 ** Fix compilation with newer glibc headers.
 
