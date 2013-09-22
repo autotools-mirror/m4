@@ -290,24 +290,20 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   as appropriate.  This will run various additional checks and create
   diff files from the previous version.
 
-* Run './build-aux/gnupload --to [dest].gnu.org:m4 [files]' to create
-  detached gpg signature and clear signed directive files, and upload
-  the combination to the correct location.  For an alpha release,
+* Run './build-aux/gnupload --to [dest].gnu.org:m4 --symlink-regex [files]'
+  to create detached gpg signature and clear signed directive files, and
+  upload the combination to the correct location.  For an alpha release,
   gnupload will place files in alpha.gnu.org, in /incoming/alpha; for a
   full release, gnupload will place files in ftp.gnu.org, in
   /incoming/ftp.
 
 * Send announcement to m4-discuss@gnu.org, m4-announce@gnu.org, and
   autotools-announce@gnu.org.  If not an alpha send to info-gnu@gnu.org
-  as well.  Use /tmp/announce-m4-<version>, created during the above
+  as well.  Use ~/announce-m4-<version>, created during the above
   `make <target>' run, as a starting point.  Contact a list
   administrator for m4-announce in advance to ensure your post will make
   it through (the list is normally set to silently discard all posts,
   even from subscribers).
-
-* Update version number in configure.ac to next alpha number.
-  See http://www.gnu.org/software/libtool/contribute.html for details of
-  the numbering scheme.
 
 * Update NEWS, README, and ChangeLog to start the intra-release changes,
   and run `git commit'.  Then run `git push origin refs/tags/v<version>'
@@ -315,6 +311,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * For non-alpha releases, update the webpages.  Replace manual.html with
   the new one (generate with `make web-manual').
+
+* Make a News entry on savannah
 
 * Update the Free Software Directory.  Checkout the CVS sources:
     cvs -d :pserver:anonymous@cvs.sv.gnu.org:/sources/directory \
