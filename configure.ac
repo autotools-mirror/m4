@@ -207,7 +207,8 @@ AC_SUBST([PREOPEN_DEPENDENCIES])
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
-AM_GNU_GETTEXT([external], [need-formatstring-macros])
+AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_NEED([need-formatstring-macros])
 AM_GNU_GETTEXT_VERSION([0.16])
 M4_GNU_GETTEXT
 
