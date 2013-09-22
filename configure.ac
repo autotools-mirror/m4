@@ -228,13 +228,6 @@ M4_REGEX
 M4_RENAME
 
 
-## ------------------------ ##
-## Other external programs. ##
-## ------------------------ ##
-AC_PATH_PROG([PERL], [perl])
-
-
-
 ## --------------------------- ##
 ## C compiler characteristics. ##
 ## --------------------------- ##
