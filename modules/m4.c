@@ -769,7 +769,7 @@ M4BUILTIN_HANDLER (maketemp)
       if (len - i < pid_len)
         obstack_grow (obs, pid + pid_len - (len - i), len - i);
       else
-        obstack_printf (obs, "%.*d%s", len - i - pid_len, 0, pid);
+        obstack_printf (obs, "%.*d%s", (int) (len - i - pid_len), 0, pid);
     }
   else
     m4_make_temp (context, obs, me, M4ARG (1), M4ARGLEN (1), false);
