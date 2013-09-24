@@ -50,10 +50,10 @@ AC_ARG_ENABLE([gcc-warnings],
      *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
    esac
    gl_gcc_warnings=$enableval],
-  [if test -d "$srcdir"/.git; then
-     gl_gcc_warnings=yes
-   else
+  [if test -f "$srcdir"/.tarball-version; then
      gl_gcc_warnings=no
+   else
+     gl_gcc_warnings=yes
    fi]
 )
 
@@ -121,9 +121,6 @@ if test "$gl_gcc_warnings" = yes; then
   if test $M4_cv_gcc_pragma_push_works = no; then
     gl_WARN_ADD([-Wno-format-nonliteral])
   fi
-
-  gl_WARN_ADD([-fdiagnostics-show-option])
-  gl_WARN_ADD([-funit-at-a-time])
 
   AC_SUBST([WARN_CFLAGS])
 
