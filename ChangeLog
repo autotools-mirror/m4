@@ -1,3 +1,9 @@
+2014-01-01  Eric Blake  <eblake@redhat.com>
+
+	maint: bump copyright year
+	* all files: Version control now has a commit in 2014.
+	* gnulib: Update to latest.
+
 2013-11-08  Eric Blake  <eblake@redhat.com>
 
 	build: fix regression for DragonFly BSD
@@ -5558,7 +5564,7 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	coding: utf-8
 	End:
 
-	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2013 Free
+	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2014 Free
 	Software Foundation, Inc.
 
 	Copying and distribution of this file, with or without
