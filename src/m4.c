@@ -356,7 +356,9 @@ static const struct option long_options[] =
   {"trace", required_argument, NULL, 't'},
   {"traditional", no_argument, NULL, 'G'},
   {"undefine", required_argument, NULL, 'U'},
+#ifdef ENABLE_CHANGEWORD
   {"word-regexp", required_argument, NULL, 'W'},
+#endif
 
   {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
   {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
