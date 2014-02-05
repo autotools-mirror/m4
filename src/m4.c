@@ -307,7 +307,9 @@ static const struct option long_options[] =
   {"trace", required_argument, NULL, 't'},
   {"traditional", no_argument, NULL, 'G'},
   {"undefine", required_argument, NULL, 'U'},
+#ifdef ENABLE_CHANGEWORD
   {"word-regexp", required_argument, NULL, 'W'},
+#endif
 
   {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},

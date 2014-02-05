@@ -1,3 +1,9 @@
+2014-02-05  Vitezslav Crhonek  <vcrhonek@redhat.com>  (tiny change)
+
+	main: diagnose unsupported --word-regexp
+	* src/m4.c (long_options): Don't allow long option if short option
+	is rejected.
+
 2014-01-01  Eric Blake  <eblake@redhat.com>
 
 	maint: bump copyright year
