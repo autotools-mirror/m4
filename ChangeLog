@@ -1,3 +1,10 @@
+2014-05-13  Eric Blake  <eblake@redhat.com>
+
+	doc: fix line-wrapped macro definitions
+	* doc/m4.texi: Drop bogus @c.
+	Reported by Marijn Schouten, fix by Patrice Dumas copied from
+	autoconf code base.
+
 2014-02-05  Vitezslav Crhonek  <vcrhonek@redhat.com>  (tiny change)
 
 	main: diagnose unsupported --word-regexp

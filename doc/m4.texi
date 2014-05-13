@@ -23,7 +23,7 @@
 @c The ARG is an optional argument.  To be used for macro arguments in
 @c their documentation (@defmac).
 @macro ovar{varname}
-@r{[}@var{\varname\}@r{]}@c
+@r{[}@var{\varname\}@r{]}
 @end macro
 
 @c @dvar{ARG, DEFAULT}
@@ -31,7 +31,7 @@
 @c The ARG is an optional argument, defaulting to DEFAULT.  To be used
 @c for macro arguments in their documentation (@defmac).
 @macro dvar{varname, default}
-@r{[}@var{\varname\} = @samp{\default\}@r{]}@c
+@r{[}@var{\varname\} = @samp{\default\}@r{]}
 @end macro
 
 @comment %**end of header
