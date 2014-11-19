@@ -63,6 +63,7 @@ EXTRA_LTLIBRARIES=
 # given in build-aux/git-version-gen.
 AM_CPPFLAGS    += -Im4/gnu -I$(srcdir)/m4/gnu \
 		  -Im4 -I$(srcdir)/m4
+AM_LDFLAGS     += $(OS2_LDFLAGS)
 EXTRA_DIST     += bootstrap cfg.mk maint.mk .version .prev-version \
 		  $(config_macro_dir)/gnulib-cache.m4 $(gitlog_to_changelog)
 BUILT_SOURCES  += .version

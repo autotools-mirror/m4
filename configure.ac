@@ -164,6 +164,7 @@ case "$CFLAGS" in
               ;;
 esac
 
+
 ## ------------------------------- ##
 ## Preloaded module configuration. ##
 ## ------------------------------- ##
@@ -213,7 +214,6 @@ AM_GNU_GETTEXT_VERSION([0.16])
 M4_GNU_GETTEXT
 
 
-
 ## --------------- ##
 ## Gnulib support. ##
 ## --------------- ##
@@ -235,6 +235,8 @@ M4_RENAME
 AC_TYPE_SIZE_T
 AC_CHECK_SIZEOF([long long int])
 
+AS_CASE([$host], [*-*-os2*], [OS2_LDFLAGS=-Zargs-resp])
+AC_SUBST([OS2_LDFLAGS])
 
 
 ## ------------------------- ##
@@ -248,7 +250,6 @@ else
   INCLUDE_STDBOOL_H='#include <gnu/stdbool.h>'
 fi
 AC_SUBST([INCLUDE_STDBOOL_H])
-
 
 
 ## --------------------------------- ##
