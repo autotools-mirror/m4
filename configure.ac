@@ -191,7 +191,7 @@ if test "$with_syscmd_shell" = no ; then
   with_syscmd_shell=/bin/sh
   if test "$cross_compiling" != yes ; then
 dnl Give mingw a default that is more likely to be available.
-    AS_IF([AS_EXECUTABLE_P([/bin/sh])], [],
+    AS_IF([AS_EXECUTABLE_P([/bin/sh$EXEEXT])], [],
       [if (cmd /c) 2>/dev/null; then with_syscmd_shell=cmd; fi])
 dnl Too bad _AS_PATH_WALK is not public.
     M4_save_IFS=$IFS; IFS=$PATH_SEPARATOR
