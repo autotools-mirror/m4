@@ -22,6 +22,7 @@
 AUTOMAKE_OPTIONS = nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/lib -I../lib
 AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
+AM_LDFLAGS = $(OS2_LDFLAGS)
 bin_PROGRAMS = m4
 noinst_HEADERS = m4.h
 m4_SOURCES = m4.c builtin.c debug.c eval.c format.c freeze.c input.c \
