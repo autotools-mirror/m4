@@ -217,6 +217,9 @@ M4_WITH_DMALLOC
 
 AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
 
+AS_CASE([$host], [*-*-os2*], [OS2_LDFLAGS="-Zargs-resp"])
+AC_SUBST([OS2_LDFLAGS])
+
 AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  lib/Makefile
