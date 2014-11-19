@@ -3,17 +3,9 @@
 # Bootstrap an Autotooled package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
 
-# Copyright (C) 2010-2013 Free Software Foundation, Inc.
+# Copyright (C) 2010-2014 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-
-# Source required external libraries:
-. `echo "$0" |${SED-sed} 's|[^/]*$||'`"funclib.sh"
-. `echo "$0" |${SED-sed} 's|[^/]*$||'`"options-parser"
-. `echo "$0" |${SED-sed} 's|[^/]*$||'`"extract-trace"
-
-# Set a version string for *this* script.
-scriptversion=2013-09-15.06; # UTC
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -100,13 +92,9 @@ scriptversion=2013-09-15.06; # UTC
 : ${CMP="cmp"}
 : ${CONFIG_SHELL="/bin/sh"}
 : ${DIFF="diff"}
-: ${EGREP="grep -E"}
-: ${FGREP="grep -F"}
 : ${GIT="git"}
-: ${GREP="grep"}
 : ${LN_S="ln -s"}
 : ${RM="rm"}
-: ${SED="sed"}
 
 export ACLOCAL
 export AUTOCONF
@@ -235,6 +223,19 @@ vc_ignore=
 
 
 ## ------------------- ##
+## External Libraries. ##
+## ------------------- ##
+
+# Source required external libraries:
+. `echo "$0" |${SED-sed} 's|[^/]*$||'`"funclib.sh"
+. `echo "$0" |${SED-sed} 's|[^/]*$||'`"options-parser"
+. `echo "$0" |${SED-sed} 's|[^/]*$||'`"extract-trace"
+
+# Set a version string for *this* script.
+scriptversion=2014-11-04.13; # UTC
+
+
+## ------------------- ##
 ## Hookable functions. ##
 ## ------------------- ##
 
@@ -315,6 +316,10 @@ func_prep ()
 
     $require_gnulib_merge_changelog
 
+    # Report the results of SED and GREP searches from funclib.sh.
+    func_verbose "GREP='$GREP'"
+    func_verbose "SED='$SED'"
+
     # fetch update files from the translation project
     func_update_translations
 
@@ -351,13 +356,21 @@ func_reconfigure ()
 {
     $debug_cmd
 
+    $require_automake_options
+
+    # Automake (without 'foreign' option) requires that README exists.
+    case " $automake_options " in
+      " foreign ") ;;
+      *) func_ensure_README ;;
+    esac
+
     # Ensure ChangeLog presence.
     if test -n "$gnulib_modules"; then
       func_ifcontains "$gnulib_modules" gitlog-to-changelog \
         func_ensure_changelog
     else
       $require_gnulib_cache
-      if sed -n '/^gl_MODULES(\[/,/^])$/p' $gnulib_cache 2>/dev/null |
+      if $SED -n '/^gl_MODULES(\[/,/^])$/p' $gnulib_cache 2>/dev/null |
          func_grep_q gitlog-to-changelog
       then
         func_ensure_changelog
@@ -365,7 +378,7 @@ func_reconfigure ()
     fi
 
     # Released 'autopoint' has the tendency to install macros that have
-    # been obsoleted in current 'gnulib., so run this before 'gnulib-tool'.
+    # been obsoleted in current 'gnulib', so run this before 'gnulib-tool'.
     func_autopoint
 
     # Autoreconf runs 'aclocal' before 'libtoolize', which causes spurious
@@ -677,12 +690,44 @@ EOT
 }
 
 
-# func_autoreconf
-# ---------------
+# func_ensure_README
+# ------------------
+# Without AM_INIT_AUTOMAKE([foreign]), automake will not run to
+# completion with no README file, even though README.md or README.txt
+# is often preferable.
+func_ensure_README ()
+{
+    $debug_cmd
+
+    test -f README || {
+      _G_README=
+      for _G_readme in README.txt README.md README.rst; do
+        test -f "$_G_readme" && break
+      done
+
+      test -f "$_G_readme" && $LN_S $_G_readme README
+      func_verbose "$LN_S $_G_readme README"
+    }
+
+    return 0
+}
+
+
+# func_autoreconf [SUBDIR]
+# ------------------------
 # Being careful not to re-run 'autopoint' or 'libtoolize', and not to
 # try to run 'autopoint', 'libtoolize' or 'autoheader' on packages that
 # don't use them, defer to 'autoreconf' for execution of the remaining
 # autotools to bootstrap this package.
+#
+# Projects with multiple trees to reconfigure can hook another call to
+# this function onto func_reconfigure:
+#
+#    my_autoreconf_foo ()
+#    {
+#        func_autoreconf foo
+#    }
+#    func_add_hook func_reconfigure my_autoreconf_foo
 func_autoreconf ()
 {
     $debug_cmd
@@ -699,7 +744,7 @@ func_autoreconf ()
     $opt_copy || func_append _G_autoreconf_options " --symlink"
     $opt_force && func_append _G_autoreconf_options " --force"
     $opt_verbose && func_append _G_autoreconf_options " --verbose"
-    func_show_eval "$AUTORECONF$_G_autoreconf_options --install" 'exit $?'
+    func_show_eval "$AUTORECONF$_G_autoreconf_options --install${1+ $1}" 'exit $?'
 
     AUTOPOINT=$save_AUTOPOINT
     LIBTOOLIZE=$save_LIBTOOLIZE
@@ -774,7 +819,7 @@ func_clean_unused_macros ()
 
       # We use 'ls|grep' instead of 'ls *.m4' to avoid exceeding
       # command line length limits in some shells.
-      for file in `cd "$macro_dir" && ls -1 |grep '\.m4$'`; do
+      for file in `cd "$macro_dir" && ls -1 |$GREP '\.m4$'`; do
 
 	# Remove a macro file when aclocal.m4 does not m4_include it...
         func_grep_q 'm4_include([[]'$macro_dir/$file'])' $aclocal_m4s \
@@ -924,6 +969,21 @@ func_require_autoheader ()
 }
 
 
+# require_automake_options
+# ------------------------
+# Extract options from AM_AUTOMAKE_INIT.
+require_automake_options=func_require_automake_options
+func_require_automake_options ()
+{
+    $debug_cmd
+
+    func_extract_trace AM_INIT_AUTOMAKE
+    automake_options=$func_extract_trace_result
+
+    require_automake_options=:
+}
+
+
 # require_autopoint
 # -----------------
 # Skip autopoint if it's not needed.
@@ -978,17 +1038,19 @@ Please add bootstrap to your gnulib_modules list in
 'bootstrap.conf', so that I can tell you when there are
 updates available."
     else
+      rm -f bootstrap.new
       $build_aux/inline-source $build_aux/bootstrap.in > bootstrap.new
 
       if func_cmp_s "$progpath" bootstrap.new; then
         rm -f bootstrap.new
 	func_verbose "bootstrap script up to date"
       else
+        chmod 555 bootstrap.new
         func_warning upgrade "\
 An updated bootstrap script has been generated for you in
 'bootstrap.new'.  After you've verified that you want
 the changes, you can update with:
-    cat bootstrap.new > $progname
+    mv -f bootstrap.new $progname
     ./$progname
 
 Or you can disable this check permanently by adding the
@@ -1092,7 +1154,7 @@ for tool in autoconf libtoolize autopoint; do
             '$tool' $_G_version http://www.gnu.org/s/'$b'
 "
         func_verbose \
-            "auto-adding '\'$tool'-'$_G_version\'' to build requirements"
+            "auto-adding '\'$tool'-$_G_version'\'' to build requirements"
       }
     }
 
@@ -1117,7 +1179,7 @@ func_require_buildreq_automake ()
 
       # ...and AM_INIT_AUTOMAKE is declared...
       test -n "$func_extract_trace_result" && {
-        automake_version=`$bs_echo "$func_extract_trace_result" \
+        automake_version=`$ECHO "$func_extract_trace_result" \
            |$SED -e 's|[^0-9]*||' -e 's| .*$||'`
         test -n "$automake_version" || automake_version=-
 
@@ -1153,7 +1215,7 @@ func_require_buildreq_patch ()
       # The ugly find invocation is necessary to exit with non-zero
       # status for old find binaries that don't support -exec fully.
       if test ! -d "$local_gl_dir" \
-          || find "$local_gl_dir" -name *.diff -exec false {} \; ; then :
+          || find "$local_gl_dir" -name "*.diff" -exec false {} \; ; then :
       else
           func_append buildreq 'patch - http://www.gnu.org/s/patch
 '
@@ -1305,8 +1367,8 @@ func_require_git ()
     $opt_skip_git && GIT=true
 
     test true = "$GIT" || {
-      if test -f .gitignore && ($GIT --version) >/dev/null 2>&1; then :; else
-      GIT=true
+      if test -d .git/.; then
+        ($GIT --version) >/dev/null 2>&1 || GIT=true
       fi
     }
 
@@ -1523,8 +1585,8 @@ func_require_gnulib_submodule ()
       fi
 
       # Make sure we've checked out the correct revision of gnulib.
-      func_show_eval "$GIT submodule init" \
-          && func_show_eval "$GIT submodule update" \
+      func_show_eval "$GIT submodule init -- $gnulib_path" \
+          && func_show_eval "$GIT submodule update -- $gnulib_path" \
           ||  func_fatal_error "Unable to update gnulib submodule."
     fi
 
@@ -1628,6 +1690,9 @@ func_require_libtoolize ()
       func_find_tool LIBTOOLIZE libtoolize glibtoolize
     }
 
+    test -n "$LIBTOOLIZE" || func_fatal_error "\
+Please install GNU Libtool, or 'export LIBTOOLIZE=/path/to/libtoolize'."
+
     func_verbose "export LIBTOOLIZE='$LIBTOOLIZE'"
 
     # Make sure the search result is visible to subshells
@@ -1718,7 +1783,6 @@ func_require_macro_dir ()
 # require_makefile_am
 # -------------------
 # Ensure there is a 'Makefile.am' in the current directory.
-# names an existing file.
 require_makefile_am=func_require_makefile_am
 func_require_makefile_am ()
 {
@@ -1866,6 +1930,9 @@ func_require_patch ()
       func_find_tool PATCH gpatch patch
     }
 
+    test -n "$PATCH" || func_fatal_error "\
+Please install GNU Patch, or 'export PATCH=/path/to/gnu/patch'."
+
     func_verbose "export PATCH='$PATCH'"
 
     # Make sure the search result is visible to subshells
@@ -1923,9 +1990,9 @@ func_require_vc_ignore_files ()
 }
 
 
-## ------------------##
+## ----------------- ##
 ## Helper functions. ##
-## ------------------##
+## ----------------- ##
 
 # This section contains the helper functions used by the rest of 'bootstrap'.
 
@@ -1998,27 +2065,30 @@ func_grep_q ()
 # func_ifcontains LIST MEMBER YES-CMD [NO-CMD]
 # --------------------------------------------
 # If whitespace-separated LIST contains MEMBER then execute YES-CMD,
-# otherwise if NO-CMD was give, execute that.
+# otherwise if NO-CMD was given, execute that.
 func_ifcontains ()
 {
     $debug_cmd
 
-    # The embedded echo is to squash whitespace before globbing.
-    _G_wslist=`$bs_echo " "$1" "`
+    _G_wslist=$1
     _G_member=$2
     _G_yes_cmd=$3
     _G_no_cmd=${4-":"}
 
-    case $_G_wslist in
-      *" $_G_member "*)
-        eval "$_G_yes_cmd"
-	_G_status=$?
-	;;
-      *)
-	eval "$_G_no_cmd"
-	_G_status=$?
-	;;
-    esac
+    _G_found=false
+    for _G_item in $_G_wslist; do
+      test "x$_G_item" = "x$_G_member" && {
+        _G_found=:
+	break
+      }
+    done
+    if $_G_found; then
+      eval "$_G_yes_cmd"
+      _G_status=$?
+    else
+      eval "$_G_no_cmd"
+      _G_status=$?
+    fi
 
     test 0 -eq "$_G_status" || exit $_G_status
 }
@@ -2032,7 +2102,7 @@ func_strpad ()
     $debug_cmd
 
     _G_width=`expr "$2" - 1`
-    func_strpad_result=`$bs_echo "$1" |$SED '
+    func_strpad_result=`$ECHO "$1" |$SED '
         :a
         s|^.\{0,'"$_G_width"'\}$|&'"$3"'|
         ta
@@ -2049,7 +2119,7 @@ func_strrpad ()
     $debug_cmd
 
     _G_width=`expr "$2" - 1`
-    func_strrpad_result=`$bs_echo "$1" |$SED '
+    func_strrpad_result=`$ECHO "$1" |$SED '
         :a
         s|^.\{0,'"$_G_width"'\}$|'"$3"'&|
         ta
@@ -2134,7 +2204,7 @@ func_strtable ()
 
     # Strip off the indent, and make a divider with '-' chars, then
     # reindent.
-    _G_divider=`$bs_echo "$func_strrow_result" \
+    _G_divider=`$ECHO "$func_strrow_result" \
         |$SED 's|[^ ]|-|g
             :a
             s|- |--|g
@@ -2261,7 +2331,7 @@ func_gitignore_entries ()
 {
     $debug_cmd
 
-    sed -e '/^#/d' -e '/^$/d' "$@"
+    $SED -e '/^#/d' -e '/^$/d' "$@"
 }
 
 
@@ -2291,58 +2361,11 @@ func_insert_if_absent ()
           || func_verbose "inserting '$str' into '$file'"
 
       linesold=`func_gitignore_entries "$file" |wc -l`
-      linesnew=`{ $bs_echo "$str"; cat "$file"; } \
+      linesnew=`{ $ECHO "$str"; cat "$file"; } \
                 |func_gitignore_entries |sort -u |wc -l`
       test "$linesold" -eq "$linesnew" \
-        || { sed "1i\\$nl$str$nl" "$file" >"$file"T && mv "$file"T "$file"; } \
+        || { $SED "1i\\$nl$str$nl" "$file" >"$file"T && mv "$file"T "$file"; } \
         || func_permissions_error "$file"
-    done
-}
-
-
-# func_sort_ver VER1 VER2
-# -----------------------
-# 'sort -V' is not generally available.
-# Note this deviates from the version comparison in automake
-# in that it treats 1.5 < 1.5.0, and treats 1.4.4a < 1.4-p3a
-# but this should suffice as we won't be specifying old
-# version formats or redundant trailing .0 in bootstrap.conf.
-# If we did want full compatibility then we should probably
-# use m4_version_compare from autoconf.
-func_sort_ver ()
-{
-    $debug_cmd
-
-    ver1=$1
-    ver2=$2
-
-    # Split on '.' and compare each component.
-    i=1
-    while :; do
-      p1=`echo "$ver1" |cut -d. -f$i`
-      p2=`echo "$ver2" |cut -d. -f$i`
-      if test ! "$p1"; then
-        echo "$1 $2"
-        break
-      elif test ! "$p2"; then
-        echo "$2 $1"
-        break
-      elif test ! "$p1" = "$p2"; then
-        if test "$p1" -gt "$p2" 2>/dev/null; then # numeric comparison
-          echo "$2 $1"
-        elif test "$p2" -gt "$p1" 2>/dev/null; then # numeric comparison
-          echo "$1 $2"
-        else # numeric, then lexicographic comparison
-          lp=`printf "$p1\n$p2\n" |sort -n |tail -n1`
-          if test "$lp" = "$p2"; then
-            echo "$1 $2"
-          else
-            echo "$2 $1"
-          fi
-        fi
-        break
-      fi
-      i=`expr $i + 1`
     done
 }
 
@@ -2359,7 +2382,7 @@ func_get_version ()
 
     # Rather than uncomment the sed script in-situ, strip the comments
     # programatically before passing the result to $SED for evaluation.
-    sed_get_version=`$bs_echo '# extract version within line
+    sed_get_version=`$ECHO '# extract version within line
           s|.*[v ]\{1,\}\([0-9]\{1,\}\.[.a-z0-9-]*\).*|\1|
           t done
 
@@ -2401,7 +2424,7 @@ func_check_tool ()
       ;;
     *)
       save_IFS=$IFS
-      IFS=:
+      IFS=${PATH_SEPARATOR-:}
       for _G_check_tool_path in $PATH; do
         IFS=$save_IFS
 	if test -x "$_G_check_tool_path/$1"; then
@@ -2457,9 +2480,6 @@ delimited list of triples; 'program min-version url'."
       else
         _G_instver=`func_get_version $_G_app`
 
-        test -z "$_G_instver" \
-            || func_verbose "found '$_G_app' version $_G_instver."
-
         # Fail if --version didn't work.
         if test -z "$_G_instver"; then
           func_error "Prerequisite '$_G_app' not found. Please install it, or
@@ -2468,13 +2488,29 @@ delimited list of triples; 'program min-version url'."
 
         # Fail if a newer version than what we have is required.
         else
-          _G_newer=`func_sort_ver $_G_reqver $_G_instver |cut -d' ' -f2`
-          test "$_G_newer" != "$_G_instver" && {
-            func_error "\
+          func_verbose "found '$_G_app' version $_G_instver."
+
+	  case $_G_reqver in
+            =*)
+              # If $buildreq version starts with '=', version must
+	      # match the installed program exactly.
+	      test "x$_G_reqver" = "x=$_G_instver" || {
+	        func_error "\
+  '$_G_app' version == $_G_instver is too old
+  'exactly $_G_app-$_G_reqver is required"
+                func_check_versions_result=false
+              }
+	      ;;
+	    *)
+              # Otherwise, anything that is not older is a match.
+              func_lt_ver "$_G_reqver" "$_G_instver" || {
+                func_error "\
   '$_G_app' version == $_G_instver is too old
   '$_G_app' version >= $_G_reqver is required"
             func_check_versions_result=false
-          }
+              }
+	      ;;
+	  esac
         fi
       fi
     done
@@ -2533,6 +2569,9 @@ func_update_po_files ()
 
     # Find sha1sum, named gsha1sum on MacPorts, and shasum on MacOS 10.6+.
     func_find_tool SHA1SUM sha1sum gsha1sum shasum sha1
+
+    test -n "$SHA1SUM" || func_fatal_error "\
+Please install GNU Coreutils, or 'export SHA1SUM=/path/to/sha1sum'."
 
     _G_langs=`cd $_G_ref_po_dir && echo *.po|$SED 's|\.po||g'`
     test '*' = "$_G_langs" && _G_langs=x
@@ -2724,7 +2763,7 @@ exit ${exit_status-$EXIT_SUCCESS}
 # Local variables:
 # mode: shell-script
 # sh-indentation: 2
-# eval: (add-hook 'write-file-hooks 'time-stamp)
-# time-stamp-pattern: "20/scriptversion=%:y-%02m-%02d.%02H; # UTC"
+# eval: (add-hook 'before-save-hook 'time-stamp)
+# time-stamp-pattern: "500/scriptversion=%:y-%02m-%02d.%02H; # UTC"
 # time-stamp-time-zone: "UTC"
 # End:
