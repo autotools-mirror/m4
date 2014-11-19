@@ -1019,7 +1019,13 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
       sysval = 127;
       return;
     }
+#if OS2
+  /* On OS/2 kLIBC, fdopen() creates a stream in a mode of a file descriptor.
+     So include "t" to open a stream in a text mode explicitly on OS/2. */
+  pin = fdopen (fd, "rt");
+#else
   pin = fdopen (fd, "r");
+#endif
   if (pin == NULL)
     {
       M4ERROR ((warning_status, errno, "cannot run command `%s'", cmd));
