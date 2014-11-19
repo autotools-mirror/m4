@@ -12,7 +12,7 @@
 . `echo "$0" |${SED-sed} 's|[^/]*$||'`"options-parser"
 
 # Set a version string for *this* script.
-scriptversion=2012-10-11.10; # UTC
+scriptversion=2014-01-03.01; # UTC
 
 
 # This program is free software: you can redistribute it and/or modify
@@ -124,16 +124,26 @@ func_include ()
     test -n "$_G_scriptdir" || _G_scriptdir="./"
 
     $AWK '
+        BEGIN { magic = '${_RECURSE_MAGIC-0}'; }
+
+        /^#!/ && magic == 0 {
+            print $0;
+            print "## DO NOT EDIT - This file generated from '$1'";
+            print "##               by '$progname' v'$scriptversion'";
+            magic++;
+            next;
+        }
+
         /^\. ['\''"].*['\''"]$/ {
             file = substr ($2, 2, length ($2) -2);
-	    system (sprintf ("'$progpath' %s", file));
+	    system (sprintf ("env _RECURSE_MAGIC=%d '$progpath' %s", magic, file));
             next;
         }
 
         /^\. `echo [^`]*`['\''"][^'\''"]*['\''"]$/ {
             tail = substr ($0, match ($0, /`['\''"]/));
 	    file = substr (tail, 3, length (tail) -3);
-	    system (sprintf ("'$progpath' '"$_G_scriptdir"'%s", file));
+	    system (sprintf ("env _RECURSE_MAGIC=%d '$progpath' '"$_G_scriptdir"'%s", magic, file));
             next;
         }
 
@@ -148,7 +158,7 @@ exit 0
 # Local variables:
 # mode: shell-script
 # sh-indentation: 2
-# eval: (add-hook 'write-file-hooks 'time-stamp)
-# time-stamp-pattern: "10/scriptversion=%:y-%02m-%02d.%02H; # UTC"
+# eval: (add-hook 'before-save-hook 'time-stamp)
+# time-stamp-pattern: "20/scriptversion=%:y-%02m-%02d.%02H; # UTC"
 # time-stamp-time-zone: "UTC"
 # End:

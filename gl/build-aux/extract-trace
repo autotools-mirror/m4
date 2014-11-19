@@ -12,7 +12,7 @@ test -z "$progpath" && . `echo "$0" |${SED-sed} 's|[^/]*$||'`/funclib.sh
 test extract-trace = "$progname" && . `echo "$0" |${SED-sed} 's|[^/]*$||'`/options-parser
 
 # Set a version string.
-scriptversion=2013-08-22.10; # UTC
+scriptversion=2014-01-04.01; # UTC
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,9 +44,9 @@ scriptversion=2013-08-22.10; # UTC
 
 
 
-## ------------------##
+## ----------------- ##
 ## Helper functions. ##
-## ------------------##
+## ----------------- ##
 
 # This section contains the helper functions used by the rest of
 # 'extract-trace'.
@@ -68,7 +68,7 @@ func_autoconf_configure ()
 
     # If we were passed a genuine file, make sure it calls AC_INIT.
     test -f "$1" \
-      && _G_ac_init=`$SED "$_G_sed_no_comment" "$1" |grep AC_INIT`
+      && _G_ac_init=`$SED "$_G_sed_no_comment" "$1" |$GREP AC_INIT`
 
     # Otherwise it is not a genuine Autoconf input file.
     test -n "$_G_ac_init"
@@ -242,8 +242,8 @@ func_extract_trace ()
     $require_configure_ac
     $require_gnu_m4
 
-    _G_m4_traces=`$bs_echo "--trace=$1" |$SED 's%,% --trace=%g'`
-    _G_re_macros=`$bs_echo "($1)" |$SED 's%,%|%g'`
+    _G_m4_traces=`$ECHO "--trace=$1" |$SED 's%,% --trace=%g'`
+    _G_re_macros=`$ECHO "($1)" |$SED 's%,%|%g'`
     _G_macros="$1"; shift
     test $# -gt 0 || {
       set dummy $configure_ac
@@ -345,7 +345,7 @@ func_extract_trace ()
 
     # Save the command pipeline results for further use by callers of
     # this function.
-    func_extract_trace_result=`$bs_echo "$_G_mini" \
+    func_extract_trace_result=`$ECHO "$_G_mini" \
       |$M4 -daq --prefix $_G_m4_traces - "$@" 2>&1 1>/dev/null \
       |$SED -n -e "$_G_transform"`
 }
@@ -361,7 +361,7 @@ func_extract_trace_first ()
     $debug_cmd
 
     func_extract_trace ${1+"$@"}
-    func_extract_trace_first_result=`$bs_echo "$func_extract_trace_result" \
+    func_extract_trace_first_result=`$ECHO "$func_extract_trace_result" \
       |$SED -e 's|:.*$||g' -e 1q`
 }
 
@@ -397,7 +397,7 @@ on a separate line.'
 
     # Display results.
     test -n "$func_extract_trace_result" \
-        && $bs_echo "$func_extract_trace_result"
+        && $ECHO "$func_extract_trace_result"
 
     # The End.
     exit $EXIT_SUCCESS
@@ -414,7 +414,7 @@ test extract-trace = "$progname" && func_main "$@"
 # Local variables:
 # mode: shell-script
 # sh-indentation: 2
-# eval: (add-hook 'write-file-hooks 'time-stamp)
-# time-stamp-pattern: "10/scriptversion=%:y-%02m-%02d.%02H; # UTC"
+# eval: (add-hook 'before-save-hook 'time-stamp)
+# time-stamp-pattern: "20/scriptversion=%:y-%02m-%02d.%02H; # UTC"
 # time-stamp-time-zone: "UTC"
 # End:
