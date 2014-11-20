@@ -30,8 +30,12 @@ AUTOMAKE_OPTIONS = nostdinc
 
 gitlog_to_changelog	= $(srcdir)/$(config_aux_dir)/gitlog-to-changelog
 git_log_fix		= $(srcdir)/$(config_aux_dir)/git-log-fix
-changelog		= $(srcdir)/ChangeLog
+thanks_gen		= $(srcdir)/$(config_aux_dir)/thanks-gen
+
+changelog		= $(distdir)/ChangeLog
 changelog_old		= $(srcdir)/ChangeLog.old
+thanks			= $(distdir)/THANKS
+no_thanks		= $(srcdir)/NO-THANKS
 
 # Prime the variables that will be augmented by libtool.
 # FIXME - the -export-symbols-regex ".*" is a hack to work around the
@@ -68,7 +72,7 @@ dist-hook: dist-tarball-version
 dist-tarball-version:
 	echo $(VERSION) > $(distdir)/.tarball-version
 
-dist-hook: ChangeLog
+dist-hook: $(changelog)
 changelog_start_date = 2011-01-01
 $(changelog): FORCE
 	$(AM_V_GEN)if test -d '$(srcdir)/.git'; then	\
@@ -76,6 +80,34 @@ $(changelog): FORCE
 	    --since=$(changelog_start_date) > '$@T';	\
 	  rm -f '$@'; mv '$@T' '$@';			\
 	  cat '$(changelog_old)' >> '$@';		\
+	fi
+
+# Sort in traditional ASCII order, regardless of the current locale;
+# otherwise we may get into trouble with distinct strings that the
+# current locale considers to be equal.
+ASSORT = LC_ALL=C sort
+
+# Extract all lines up to the first one starting with "##".
+prologue = perl -ne '/^\#\#/ and exit; print' $(no_thanks)
+
+# Generate THANKS using git log entries as far as possible, fixing
+# up ommisions and errors from NO-THANKS configuration.
+$(thanks): FORCE
+	$(AM_V_GEN)if test -d '$(srcdir)/.git'; then \
+	  { \
+	    $(prologue); echo; \
+	    { perl -ne '/^$$/.../^$$/ and print' $(no_thanks) \
+	      | grep -v '^$$' | perl -pe 's/  +/\0/'; \
+	      {  sed -e '1,/\#\# /d' -e '/^\#\# /d' \
+		    -e 's|[	][	 ]*|	|' < $(no_thanks) \
+		  | tr '\t' '\0'; \
+		git log --pretty=format:'%aN%x00%aE'; \
+	      } | $(ASSORT) -u; \
+	    } | $(thanks_gen) \
+	      | LC_ALL=en_US.UTF-8 sort -f; \
+	    echo; \
+	    printf ';; %s\n' 'Local Variables:' 'coding: utf-8' End:; \
+	  } > '$@'; \
 	fi
 
 MAINTAINERCLEANFILES += \
