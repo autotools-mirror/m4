@@ -67,7 +67,20 @@
 
 #define MODULE_SELF_NAME        "!myself!"
 
-static const char*  module_dlerror (void);
+#if NEED_USCORE
+static void *
+uscore_sym (void *handle, const char *symbol)
+{
+  char *symname = xasprintf ("_%s", symbol);
+  void *address = dlsym (handle, symname);
+  free (symname);
+  return address;
+}
+
+#define dlsym uscore_sym
+#endif
+
+static const char * module_dlerror (void);
 
 static void         install_builtin_table (m4*, m4_module *);
 static void         install_macro_table   (m4*, m4_module *);

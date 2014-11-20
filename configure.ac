@@ -204,6 +204,8 @@ AC_MSG_RESULT([$use_modules])
 AC_SUBST([DLPREOPEN])
 AC_SUBST([PREOPEN_DEPENDENCIES])
 
+LT_FUNC_DLSYM_USCORE
+
 
 ## ---------------- ##
 ## Gettext support. ##
