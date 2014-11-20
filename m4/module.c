@@ -265,7 +265,7 @@ compare_builtin_CB (const void *a, const void *b)
 m4_module *
 m4__module_open (m4 *context, const char *name, m4_obstack *obs)
 {
-  static const char *	suffixes[]	= { "", ".so", NULL };
+  static const char *	suffixes[]	= { "", ".so", ".dll", NULL };
   m4_module *		module		= NULL;
 
   assert (context);
