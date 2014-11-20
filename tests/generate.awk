@@ -1,6 +1,6 @@
 # Extract all examples from the manual source.            -*- AWK -*-
 
-# Copyright (C) 1992, 2000-2001, 2006-2010, 2013 Free Software
+# Copyright (C) 1992, 2000-2001, 2006-2010, 2013-2014 Free Software
 # Foundation, Inc.
 #
 # This file is part of GNU M4.

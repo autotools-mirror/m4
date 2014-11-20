@@ -1,7 +1,7 @@
 # -*- shell-script -*-
 # @configure_input@
 # Configurable variable values for M4 test suite.
-# Copyright (C) 2000-2001, 2006, 2008, 2010, 2013 Free Software
+# Copyright (C) 2000-2001, 2006, 2008, 2010, 2013-2014 Free Software
 # Foundation, Inc.
 
 # This file is part of GNU M4.

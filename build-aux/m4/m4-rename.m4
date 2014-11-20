@@ -2,7 +2,7 @@
 # m4-rename.m4 -- Test the abilities of rename.
 # Written by Eric Blake <ebb9@byu.net>
 #
-# Copyright (C) 2008, 2010, 2013 Free Software Foundation, Inc.
+# Copyright (C) 2008, 2010, 2013-2014 Free Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #
