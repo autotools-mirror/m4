@@ -30,6 +30,7 @@ build-aux/
 !build-aux/gl/
 !build-aux/gnulib/
 !build-aux/m4/
+!build-aux/thanks-gen
 /ChangeLog
 /config.cache
 /config.h
