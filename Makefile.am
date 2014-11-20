@@ -45,7 +45,7 @@ no_thanks		= $(srcdir)/NO-THANKS
 # See http://lists.gnu.org/archive/html/libtool-patches/2007-02/msg00062.html
 AM_CPPFLAGS	= -I$(srcdir) -I.
 AM_CFLAGS	= $(WARN_CFLAGS) $(WERROR_CFLAGS)
-AM_LDFLAGS	= -export-dynamic -export-symbols-regex ".*"
+AM_LDFLAGS	= -no-undefined -export-dynamic -export-symbols-regex ".*"
 EXTRA_DIST	=
 BUILT_SOURCES	=
 CLEANFILES	=
