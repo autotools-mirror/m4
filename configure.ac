@@ -204,7 +204,14 @@ AC_MSG_RESULT([$use_modules])
 AC_SUBST([DLPREOPEN])
 AC_SUBST([PREOPEN_DEPENDENCIES])
 
+
+## ------------------------------- ##
+## Dynamic Loader Characteristics. ##
+## ------------------------------- ##
+
 LT_FUNC_DLSYM_USCORE
+AC_DEFINE_UNQUOTED([PATH_SEPARATOR], ['$PATH_SEPARATOR'],
+		   [Define this to system search path delimiter])
 
 
 ## ---------------- ##

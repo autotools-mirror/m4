@@ -101,7 +101,7 @@ search_path_env_init (m4__search_path_info *info, char *path, bool isabs)
 
   do
     {
-      path_end = strchr (path, ':');
+      path_end = strchr (path, PATH_SEPARATOR);
       if (path_end)
         *path_end = '\0';
       if (!isabs || *path == '/')
