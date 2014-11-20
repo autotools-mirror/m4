@@ -273,6 +273,10 @@ m4__module_open (m4 *context, const char *name, m4_obstack *obs)
   char *filepath = m4_path_search (context, name, suffixes);
   void *handle   = NULL;
 
+  /* Use system module search path if m4_path_search fails. */
+  if (!filepath)
+    filepath = xstrdup (name);
+
   if (filepath)
     {
       handle = dlopen (filepath, RTLD_NOW|RTLD_GLOBAL);
