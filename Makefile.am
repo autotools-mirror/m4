@@ -180,7 +180,7 @@ MOSTLYCLEANFILES += src/getopt.h src/getopt.h-t
 ## Modules. ##
 ## -------- ##
 
-module_ldflags	= -module $(AM_LDFLAGS)
+module_ldflags	= -avoid-version -module $(AM_LDFLAGS)
 module_libadd	= m4/libm4.la
 
 noinst_HEADERS	= modules/m4.h
