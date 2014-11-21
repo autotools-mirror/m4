@@ -209,6 +209,7 @@ AC_SUBST([PREOPEN_DEPENDENCIES])
 ## Dynamic Loader Characteristics. ##
 ## ------------------------------- ##
 
+LT_LIB_DLLOAD
 LT_FUNC_DLSYM_USCORE
 AC_DEFINE_UNQUOTED([PATH_SEPARATOR], ['$PATH_SEPARATOR'],
 		   [Define this to system search path delimiter])
