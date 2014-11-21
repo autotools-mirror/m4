@@ -34,6 +34,10 @@
 #include "dirname.h"
 #include "filenamecat.h"
 
+#if OS2 /* Any others? */
+#  define TRUNCATE_FILENAME 1
+#endif
+
 /* Define this to see runtime debug info.  Implied by DEBUG.  */
 /*#define DEBUG_INCL */
 
@@ -127,6 +131,43 @@ include_env_init (m4 *context)
 }
 
 
+#if TRUNCATE_FILENAME
+/* Destructively modify PATH to contain no more than 8 non-`.'
+   characters, optionally followed by a `.' and a filenname extension
+   of 3 characters or fewer. */
+static char *
+path_truncate (char *path)
+{
+  char *p, *beg = path;			/* following final '/' */
+  for (p = path; *p != '\0'; ++p)
+    {
+      if (ISSLASH (*p))
+        beg = 1+ p;
+    }
+
+  char *end = strchr (beg, '.');	/* first period */
+  char *ext = strrchr (beg, '.');	/* last period */
+
+  size_t len = (size_t) (end - beg);	/* length of filename element */
+  if (len > 8)
+    end = beg + 8;
+
+  if (ext == NULL)
+    {
+      *end = '\0';
+    }
+  else if (ext != end)
+    {
+      stpncpy (end, ext, 4);
+    }
+
+  return path;
+}
+#else
+#  define path_truncate(path) (path)
+#endif
+
+
 
 /* Functions for normal input path search */
 
@@ -186,7 +227,7 @@ m4_path_search (m4 *context, const char *filename, const char **suffixes)
       size_t mem = strlen (filename);
 
       /* Try appending each of the suffixes we were given.  */
-      filepath = strncpy (xmalloc (mem + max_suffix_len +1), filename, mem);
+      filepath = path_truncate (strncpy (xmalloc (mem + max_suffix_len +1), filename, mem));
       for (i = 0; suffixes && suffixes[i]; ++i)
         {
           strcpy (filepath + mem, suffixes[i]);
@@ -227,7 +268,7 @@ m4_path_search (m4 *context, const char *filename, const char **suffixes)
 	/* Capture errno only when searching `.'.  */
 	e = errno;
 
-      filepath = strncpy (xmalloc (mem + max_suffix_len +1), pathname, mem);
+      filepath = path_truncate (strncpy (xmalloc (mem + max_suffix_len +1), pathname, mem));
       free (pathname);
 
       for (i = 0; suffixes && suffixes[i]; ++i)
