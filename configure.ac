@@ -291,6 +291,7 @@ M4_SYSCMD
 ## -------- ##
 AC_CONFIG_FILES([
 Makefile
+doc/Makefile
 m4/gnu/Makefile
 m4/system.h:m4/system_.h
 tests/atlocal
