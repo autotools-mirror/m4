@@ -182,6 +182,12 @@ esac
 LT_LIB_DLLOAD
 LT_SYS_SYMBOL_USCORE
 
+save_module=$module; module=yes
+mfour_shrext=`eval printf '%s' \"$shrext_cmds\"`
+module=$save_module
+AC_DEFINE_UNQUOTED([SYS_SHREXT], ["$mfour_shrext"],
+	[Define this to the system shared module file extension])
+
 if test yes = "$sys_symbol_underscore"; then
   AC_MSG_CHECKING([whether dlsym requires underscore prefixed symbols])
   AC_CACHE_VAL([mfour_cv_sys_dlsym_uscore], [dnl
@@ -196,10 +202,6 @@ int fnord () __attribute__((visibility("default")));
 #endif
 int fnord () { return 42; }]
 _M4_EOF
-    save_module=$module; module=yes
-    mfour_shrext=`eval printf '%s' \"$shrext_cmds\"`
-    module=$save_module
-
     libobjs=conftest_loadme.$ac_objext; lib=conftest_loadme$mfour_shrext
     save_module_cmds=$module_cmds; module_cmds=`eval echo $module_cmds`
     test -n "$module_cmds" || module_cmds=`eval echo $archive_cmds`
