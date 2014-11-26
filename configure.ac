@@ -182,11 +182,8 @@ esac
 LT_LIB_DLLOAD
 LT_SYS_SYMBOL_USCORE
 
-save_module=$module; module=yes
-mfour_shrext=`eval printf '%s' \"$shrext_cmds\"`
-module=$save_module
-AC_DEFINE_UNQUOTED([SYS_SHREXT], ["$mfour_shrext"],
-	[Define this to the system shared module file extension])
+LT_SYS_MODULE_EXT
+libm4_shlibext=$libltdl_cv_shlibext
 
 if test yes = "$sys_symbol_underscore"; then
   AC_MSG_CHECKING([whether dlsym requires underscore prefixed symbols])
@@ -202,12 +199,12 @@ int fnord () __attribute__((visibility("default")));
 #endif
 int fnord () { return 42; }]
 _M4_EOF
-    libobjs=conftest_loadme.$ac_objext; lib=conftest_loadme$mfour_shrext
+    libobjs=conftest_loadme.$ac_objext; lib=conftest_loadme$libm4_shlibext
     save_module_cmds=$module_cmds; module_cmds=`eval echo $module_cmds`
     test -n "$module_cmds" || module_cmds=`eval echo $archive_cmds`
     $CC $pic_flag -c conftest_loadme.$ac_ext
     eval "wl=\"$lt_prog_compiler_wl\"; major=; versuffix=; verstring=; deplibs=; \
-	  rpath=/not-exists/conftest_loadme$mfour_shrext; $module_cmds"
+	  rpath=/not-exists/conftest_loadme$libm4_shlibext; $module_cmds"
     module_cmds=$save_module_cmds
 
     # Try to fetch fnord with dlsym().
@@ -234,7 +231,7 @@ _M4_EOF
 #  endif
 #endif
 int main () {
-  void *handle = dlopen ("`pwd`/$objdir/conftest_loadme$mfour_shrext", RTLD_GLOBAL|RTLD_NOW);
+  void *handle = dlopen ("`pwd`/$objdir/conftest_loadme$libm4_shlibext", RTLD_GLOBAL|RTLD_NOW);
   int status = $mfour_dlunknown;
   if (handle) {
     if (dlsym (handle, "fnord"))
