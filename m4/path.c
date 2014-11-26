@@ -337,7 +337,7 @@ m4_load_filename (m4 *context, const m4_call_info *caller,
 
   if (!m4_get_posixly_correct_opt (context)
       && suffix
-      && STREQ (suffix, ".so"))
+      && STREQ (suffix, LT_MODULE_EXT))
     {
       m4_module_load (context, filename, obs);
     }
