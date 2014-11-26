@@ -45,7 +45,7 @@ static const char *FILE_SUFFIXES[] = {
   "",
   ".m4f",
   ".m4",
-  SYS_SHREXT,
+  LT_MODULE_EXT,
   NULL
 };
 
