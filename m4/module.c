@@ -67,7 +67,7 @@
 
 #define MODULE_SELF_NAME        "!myself!"
 
-#if NEED_USCORE
+#if DLSYM_USCORE
 static void *
 uscore_sym (void *handle, const char *symbol)
 {

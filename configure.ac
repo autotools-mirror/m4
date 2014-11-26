@@ -78,6 +78,16 @@ AM_PROG_CC_C_O
 M4_CHECK_DEBUGGING
 
 
+## --------------------------- ##
+## C compiler characteristics. ##
+## --------------------------- ##
+AC_TYPE_SIZE_T
+AC_CHECK_SIZEOF([long long int])
+
+AS_CASE([$host], [*-*-os2*], [OS2_LDFLAGS=-Zargs-resp])
+AC_SUBST([OS2_LDFLAGS])
+
+
 ## ----------------------- ##
 ## Libtool initialization. ##
 ## ----------------------- ##
@@ -166,6 +176,103 @@ esac
 
 
 ## ------------------------------- ##
+## Dynamic Loader Characteristics. ##
+## ------------------------------- ##
+
+LT_LIB_DLLOAD
+LT_SYS_SYMBOL_USCORE
+
+if test yes = "$sys_symbol_underscore"; then
+  AC_MSG_CHECKING([whether dlsym requires underscore prefixed symbols])
+  AC_CACHE_VAL([mfour_cv_sys_dlsym_uscore], [dnl
+    # Use Libtool to make a loadable module
+    cat >conftest_loadme.$ac_ext <<_M4_EOF
+[#line $LINENO "configure"
+#include "confdefs.h"
+/* When -fvisibility=hidden is used, assume the code has been annotated
+   correspondingly for the symbols needed.  */
+#if defined __GNUC__ && (((__GNUC__ == 3) && (__GNUC_MINOR__ >= 3)) || (__GNUC__ > 3))
+int fnord () __attribute__((visibility("default")));
+#endif
+int fnord () { return 42; }]
+_M4_EOF
+    save_module=$module; module=yes
+    mfour_shrext=`eval printf '%s' \"$shrext_cmds\"`
+    module=$save_module
+
+    libobjs=conftest_loadme.$ac_objext; lib=conftest_loadme$mfour_shrext
+    save_module_cmds=$module_cmds; module_cmds=`eval echo $module_cmds`
+    test -n "$module_cmds" || module_cmds=`eval echo $archive_cmds`
+    $CC $pic_flag -c conftest_loadme.$ac_ext
+    eval "wl=\"$lt_prog_compiler_wl\"; major=; versuffix=; verstring=; deplibs=; \
+	  rpath=/not-exists/conftest_loadme$mfour_shrext; $module_cmds"
+    module_cmds=$save_module_cmds
+
+    # Try to fetch fnord with dlsym().
+    mfour_dlunknown=0; mfour_dlnouscore=1; mfour_dluscore=2
+    cat >conftest.$ac_ext <<_M4_EOF
+[#line $LINENO "configure"
+#include "confdefs.h"
+#if HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+#include <stdio.h>
+#ifndef RTLD_GLOBAL
+#  ifdef DL_GLOBAL
+#    define RTLD_GLOBAL DL_GLOBAL
+#  else
+#    define RTLD_GLOBAL 0
+#  endif
+#endif
+#ifndef RTLD_NOW
+#  ifdef DL_NOW
+#    define RTLD_NOW DL_NOW
+#  else
+#    define RTLD_NOW 0
+#  endif
+#endif
+int main () {
+  void *handle = dlopen ("`pwd`/$objdir/conftest_loadme$mfour_shrext", RTLD_GLOBAL|RTLD_NOW);
+  int status = $mfour_dlunknown;
+  if (handle) {
+    if (dlsym (handle, "fnord"))
+      status = $mfour_dlnouscore;
+    else {
+      if (dlsym (handle, "_fnord"))
+        status = $mfour_dluscore;
+      else
+	puts (dlerror ());
+    }
+    dlclose (handle);
+  } else
+    puts (dlerror ());
+  return status;
+}]
+_M4_EOF
+    if AC_TRY_EVAL(ac_link) && test -s "conftest$ac_exeext" 2>/dev/null; then
+      (./conftest; exit; ) >&AS_MESSAGE_LOG_FD 2>/dev/null
+      mfour_status=$?
+      case x$mfour_status in
+        x$mfour_dlnouscore) mfour_cv_sys_dlsym_uscore=no ;;
+	x$mfour_dluscore) mfour_cv_sys_dlsym_uscore=yes ;;
+	x*) mfour_cv_sys_dlsym_uscore=unknown ;;
+      esac
+    fi
+    rm -rf conftest*
+  ])
+  sys_dlsym_uscore=$mfour_cv_sys_dlsym_uscore
+  AC_MSG_RESULT($sys_dlsym_uscore)
+  if test yes = "$sys_dlsym_uscore"; then
+    AC_DEFINE([DLSYM_USCORE], [1],
+      [Define if dlsym() requires a leading underscore in symbol names.])
+  fi
+fi
+
+AC_DEFINE_UNQUOTED([PATH_SEPARATOR], ['$PATH_SEPARATOR'],
+		   [Define this to system search path delimiter])
+
+
+## ------------------------------- ##
 ## Preloaded module configuration. ##
 ## ------------------------------- ##
 AS_IF([test "x$enable_shared" != xno],
@@ -205,16 +312,6 @@ AC_SUBST([DLPREOPEN])
 AC_SUBST([PREOPEN_DEPENDENCIES])
 
 
-## ------------------------------- ##
-## Dynamic Loader Characteristics. ##
-## ------------------------------- ##
-
-LT_LIB_DLLOAD
-LT_FUNC_DLSYM_USCORE
-AC_DEFINE_UNQUOTED([PATH_SEPARATOR], ['$PATH_SEPARATOR'],
-		   [Define this to system search path delimiter])
-
-
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##
@@ -237,16 +334,6 @@ M4_GETOPT
 M4_OBSTACK
 M4_REGEX
 M4_RENAME
-
-
-## --------------------------- ##
-## C compiler characteristics. ##
-## --------------------------- ##
-AC_TYPE_SIZE_T
-AC_CHECK_SIZEOF([long long int])
-
-AS_CASE([$host], [*-*-os2*], [OS2_LDFLAGS=-Zargs-resp])
-AC_SUBST([OS2_LDFLAGS])
 
 
 ## ------------------------- ##
