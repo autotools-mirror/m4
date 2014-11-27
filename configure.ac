@@ -183,13 +183,14 @@ LT_LIB_DLLOAD
 LT_SYS_SYMBOL_USCORE
 
 LT_SYS_MODULE_EXT
-libm4_shlibext=$libltdl_cv_shlibext
 
 if test yes = "$sys_symbol_underscore"; then
+  libm4_shlibext=$libltdl_cv_shlibext
+
   AC_MSG_CHECKING([whether dlsym requires underscore prefixed symbols])
-  AC_CACHE_VAL([mfour_cv_sys_dlsym_uscore], [dnl
-    # Use Libtool to make a loadable module
-    cat >conftest_loadme.$ac_ext <<_M4_EOF
+  AC_CACHE_VAL([libm4_cv_sys_dlsym_uscore], [dnl
+    libname=conftmod # stay within 8.3 filename limits!
+    cat >$libname.$ac_ext <<_M4_EOF
 [#line $LINENO "configure"
 #include "confdefs.h"
 /* When -fvisibility=hidden is used, assume the code has been annotated
@@ -199,16 +200,30 @@ int fnord () __attribute__((visibility("default")));
 #endif
 int fnord () { return 42; }]
 _M4_EOF
-    libobjs=conftest_loadme.$ac_objext; lib=conftest_loadme$libm4_shlibext
-    save_module_cmds=$module_cmds; module_cmds=`eval echo $module_cmds`
-    test -n "$module_cmds" || module_cmds=`eval echo $archive_cmds`
-    $CC $pic_flag -c conftest_loadme.$ac_ext
-    eval "wl=\"$lt_prog_compiler_wl\"; major=; versuffix=; verstring=; deplibs=; \
-	  rpath=/not-exists/conftest_loadme$libm4_shlibext; $module_cmds"
-    module_cmds=$save_module_cmds
+
+    # fn_module_cmds module_cmds
+    # Execute tilde-delimited MODULE_CMDS with environment primed for
+    # ${module_cmds} or ${archive_cmds} type content.
+    fn_module_cmds ()
+    {( # subshell avoids polluting parent global environment
+        module_cmds_save_ifs=$IFS; IFS='~'
+        for cmd in $1; do
+          IFS=$module_cmds_save_ifs
+          libobjs=$libname.$ac_objext; lib=$libname$libm4_shlibext
+          rpath=/not-exists; soname=$libname$libm4_shlibext; output_objdir=.
+          major=; versuffix=; verstring=; deplibs=
+          ECHO=echo; wl=$lt_prog_compiler_wl; allow_undefined_flag=
+          eval $cmd
+        done
+        IFS=$module_cmds_save_ifs
+    )}
+
+    # Compile a loadable module using libtool macro expansion results.
+    $CC $pic_flag -c $libname.$ac_ext
+    fn_module_cmds "${module_cmds:-$archive_cmds}"
 
     # Try to fetch fnord with dlsym().
-    mfour_dlunknown=0; mfour_dlnouscore=1; mfour_dluscore=2
+    libm4_dlunknown=0; libm4_dlnouscore=1; libm4_dluscore=2
     cat >conftest.$ac_ext <<_M4_EOF
 [#line $LINENO "configure"
 #include "confdefs.h"
@@ -231,14 +246,14 @@ _M4_EOF
 #  endif
 #endif
 int main () {
-  void *handle = dlopen ("`pwd`/$objdir/conftest_loadme$libm4_shlibext", RTLD_GLOBAL|RTLD_NOW);
-  int status = $mfour_dlunknown;
+  void *handle = dlopen ("`pwd`/$libname$libm4_shlibext", RTLD_GLOBAL|RTLD_NOW);
+  int status = $libm4_dlunknown;
   if (handle) {
     if (dlsym (handle, "fnord"))
-      status = $mfour_dlnouscore;
+      status = $libm4_dlnouscore;
     else {
       if (dlsym (handle, "_fnord"))
-        status = $mfour_dluscore;
+        status = $libm4_dluscore;
       else
 	puts (dlerror ());
     }
@@ -250,16 +265,16 @@ int main () {
 _M4_EOF
     if AC_TRY_EVAL(ac_link) && test -s "conftest$ac_exeext" 2>/dev/null; then
       (./conftest; exit; ) >&AS_MESSAGE_LOG_FD 2>/dev/null
-      mfour_status=$?
-      case x$mfour_status in
-        x$mfour_dlnouscore) mfour_cv_sys_dlsym_uscore=no ;;
-	x$mfour_dluscore) mfour_cv_sys_dlsym_uscore=yes ;;
-	x*) mfour_cv_sys_dlsym_uscore=unknown ;;
+      libm4_status=$?
+      case x$libm4_status in
+        x$libm4_dlnouscore) libm4_cv_sys_dlsym_uscore=no ;;
+	x$libm4_dluscore) libm4_cv_sys_dlsym_uscore=yes ;;
+	x*) libm4_cv_sys_dlsym_uscore=unknown ;;
       esac
     fi
-    rm -rf conftest*
+    rm -rf conftest* $libname*
   ])
-  sys_dlsym_uscore=$mfour_cv_sys_dlsym_uscore
+  sys_dlsym_uscore=$libm4_cv_sys_dlsym_uscore
   AC_MSG_RESULT($sys_dlsym_uscore)
   if test yes = "$sys_dlsym_uscore"; then
     AC_DEFINE([DLSYM_USCORE], [1],
