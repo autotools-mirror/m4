@@ -173,8 +173,6 @@ function new_test(input, status, output, error, options, xfail, examples) {
   if (error == "ignore\n")
     error = "ignore";
 
-  if (options ~ / (import|load|modtest|mpeval|perl|shadow|stdlib|time)/)
-    printf ("AT_CHECK_DYNAMIC_MODULE\n");
   if (options ~ / mpeval/)
     printf ("AT_CHECK_GMP\n");
   if (xfail == 1)

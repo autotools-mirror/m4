@@ -271,46 +271,6 @@ AC_DEFINE_UNQUOTED([PATH_SEPARATOR], ['$PATH_SEPARATOR'],
 		   [Define this to system search path delimiter])
 
 
-## ------------------------------- ##
-## Preloaded module configuration. ##
-## ------------------------------- ##
-AS_IF([test "x$enable_shared" != xno],
-      [DYNAMIC_MODULES=yes], [DYNAMIC_MODULES=no])
-AC_SUBST([DYNAMIC_MODULES], [$DYNAMIC_MODULES])
-
-AC_MSG_CHECKING([for modules to preload])
-  DLPREOPEN=
-
-  AC_ARG_WITH([modules],
-    [AS_HELP_STRING([--with-modules=MODULES],
-                    [preload MODULES @<:@default: ]M4_DEFAULT_PRELOAD[@:>@])],
-    [use_modules="$withval"],
-    [use_modules="$M4_default_preload"])
-
-  PREOPEN_DEPENDENCIES=
-  DLPREOPEN="-dlpreopen force"
-  if test -z "$use_modules"; then
-    use_modules=none
-  else
-    if test "$use_modules" != yes; then
-      for module in $use_modules; do
-        case $module in
-          no|none) break ;;
-          m4|traditional|gnu|load|mpeval) dir=modules ;;
-          import|modtest|shadow|stdlib|time) dir=tests ;;
-          *) AC_MSG_ERROR([Unrecognized module `$module' in --with-modules])
-            ;;
-        esac
-        DLPREOPEN="$DLPREOPEN -dlpreopen $dir/$module.la"
-        PREOPEN_DEPENDENCIES="$PREOPEN_DEPENDENCIES $dir/$module.la"
-      done
-    fi
-  fi
-AC_MSG_RESULT([$use_modules])
-AC_SUBST([DLPREOPEN])
-AC_SUBST([PREOPEN_DEPENDENCIES])
-
-
 ## ---------------- ##
 ## Gettext support. ##
 ## ---------------- ##

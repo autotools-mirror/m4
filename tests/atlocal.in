@@ -21,7 +21,6 @@
 
 # Some tests cannot be performed with all the configurations.
 USE_GMP=@USE_GMP@
-DYNAMIC_MODULES=@DYNAMIC_MODULES@
 
 # Prefer tools learned during configure.
 SED='@SED@'

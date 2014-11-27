@@ -27,7 +27,6 @@ AT_BANNER([Module support.])
 
 AT_SETUP([Freezing modules])
 AT_KEYWORDS([frozen])
-AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[frozen.m4]],
 [[divert(1)dnl
@@ -78,7 +77,6 @@ AT_CLEANUP([frozen.m4f])
 # or M4-OPTIONS set to pick up test modules.
 m4_define([AT_CHECK_M4_MODTEST],
 [AT_SETUP([$1])
-AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([input.m4],
 [[test
@@ -130,7 +128,6 @@ AT_CHECK_M4_MODTEST([M4PATH: relative path],
 ## ------ ##
 
 AT_SETUP([modules: shadow])
-AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[# no modules loaded yet
@@ -233,7 +230,6 @@ AT_CLEANUP
 # from the first command:
 
 AT_SETUP([modules: importing])
-AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[import
@@ -278,7 +274,6 @@ AT_CLEANUP
 # Support text macros with requested numbers of parameters.
 
 AT_SETUP([modules: text])
-AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([input.m4],
 [[__test__
@@ -320,7 +315,6 @@ AT_CLEANUP
 # memory and then redefined by a subsequent load.
 
 AT_SETUP([modules: trace])
-AT_CHECK_DYNAMIC_MODULE
 
 AT_DATA([[input.m4]],
 [[test

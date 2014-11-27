@@ -806,7 +806,6 @@ AT_CLEANUP
 ## ------ ##
 
 AT_SETUP([mpeval])
-AT_CHECK_DYNAMIC_MODULE
 AT_CHECK_GMP
 
 AT_DATA([[in]],

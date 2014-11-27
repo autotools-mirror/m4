@@ -6587,16 +6587,11 @@ could be added only by writing more code in the M4 language, or at the
 extreme by hacking the sources and recompiling the whole thing to make
 a custom M4 installation.
 
-Starting with release 2.0, M4 uses Libtool's @code{libltdl} facilities
-(@pxref{Using libltdl, , libltdl, libtool, The GNU Libtool Manual})
-to move all of M4's builtins out to pluggable modules.  Unless compile
-time options are set to change the default build, the installed M4 2.0
-binary is virtually identical to 1.4.x, supporting the same builtins.
-However, additional modules can be loaded into the running M4 interpreter
-as it is started up at the command line, or during normal expansion of
-macros.  This facilitates runtime extension of the M4 builtin macro
-list using compiled C code linked against a new shared library,
-typically named @file{libm4.so}.
+Starting with release 2.0, M4 supports and is composed of loadable modules.
+Additional modules can be loaded into the running M4 interpreter as it is
+started up at the command line, or during normal expansion of macros.  This
+facilitates runtime extension of the M4 builtin macro list using compiled C
+code linked against a new shared library, typically named @file{libm4.so}.
 
 For example, you might want to add a @code{setenv} builtin to M4, to
 use before invoking @code{esyscmd}.  We might write a @file{setenv.c}
@@ -6655,27 +6650,11 @@ setenv(`PATH', `/sbin:/bin:/usr/sbin:/usr/bin')
 @result{}
 @end example
 
-Also, at build time, you can choose which modules to build into
-the core (so that they will be available without dynamic loading).
-SUSv3 M4 functionality is contained in the module @samp{m4}, GNU
-extensions in the module @samp{gnu}, additional module builtins in the
-module @samp{load} and so on.
-
-We hinted earlier that the @code{m4} and @code{gnu} modules are
-preloaded into the installed M4 binary, but it is possible to install
-a @emph{thinner} binary; for example, omitting the GNU
-extensions by configuring the distribution with @kbd{./configure
---with-modules=m4}.  For a binary built with that option to understand
-code that uses GNU extensions, you must then run @kbd{m4 gnu}.
-It is also possible to build a @emph{fatter} binary with additional
-modules preloaded: adding, say, the @code{load} module using
-@kbd{./configure --with-modules="m4 gnu load"}.
-
-GNU M4 now has a facility for defining additional builtins without
-recompiling the sources.  In actual fact, all of the builtins provided
-by GNU M4 are loaded from such modules.  All of the builtin
-descriptions in this manual are annotated with the module from which
-they are loaded -- mostly from the module @samp{m4}.
+Also, at run time, you can choose which core modules to load. SUSv3 M4
+functionality is contained in the module @samp{m4}, GNU extensions in the
+module @samp{gnu}, and so on. All of the builtin descriptions in this manual
+are annotated with the module from which they are loaded -- mostly from the
+module @samp{m4}.
 
 When you start GNU M4, the modules @samp{m4} and @samp{gnu} are
 loaded by default.  If you supply the @option{-G} option at startup, the
@@ -6698,8 +6677,8 @@ a module multiple times will not affect the order of this list, the
 position depends on when the module was @emph{first} loaded.
 @end deffn
 
-For example, if GNU @code{m4} is started with the
-@option{load} module, @code{m4modules} will yield the following:
+For example, after GNU @code{m4} is started with no additional modules,
+@code{m4modules} will yield the following:
 
 @example
 $ @kbd{m4}
@@ -6749,16 +6728,6 @@ not specified by POSIX, and is loaded instead of the
 @deffn {Macro (traditional)} __traditional__
 Expands to the empty string, as an indication that the
 @samp{traditional} module is loaded.
-@end deffn
-
-@item load
-This module supplies the builtins for advanced use of modules from within a
-GNU @code{m4} program.  @xref{Modules}, for more details.  The
-module also defines the following macro:
-
-@deffn {Macro (load)} __load__
-Expands to the empty string, as an indication that the @samp{load}
-module is loaded.
 @end deffn
 
 @item mpeval
