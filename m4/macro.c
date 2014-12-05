@@ -864,7 +864,7 @@ trace_flush (m4 *context, unsigned int start)
       fwrite (&str[start], 1, len - start, file);
       fputc ('\n', file);
     }
-  obstack_blank (&context->trace_messages, start - len);
+  obstack_blank_fast (&context->trace_messages, start - len);
 }
 
 /* Do pre-argument-collection tracing for the macro described in INFO.

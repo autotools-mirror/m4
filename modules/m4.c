@@ -732,7 +732,7 @@ m4_make_temp (m4 *context, m4_obstack *obs, const m4_call_info *caller,
       if (!dir)
         close (fd);
       /* Remove NUL, then finish quote.  */
-      obstack_blank (obs, -1);
+      obstack_blank_fast (obs, -1);
       obstack_grow (obs, quotes->str2, quotes->len2);
     }
 }
