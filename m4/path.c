@@ -162,8 +162,6 @@ path_truncate (char *path)
 
   return path;
 }
-#else
-#  define path_truncate(path) (path)
 #endif
 
 
@@ -226,7 +224,11 @@ m4_path_search (m4 *context, const char *filename, const char **suffixes)
       size_t mem = strlen (filename);
 
       /* Try appending each of the suffixes we were given.  */
-      filepath = path_truncate (strncpy (xmalloc (mem + max_suffix_len +1), filename, mem));
+      filepath = strncpy (xmalloc (mem + max_suffix_len +1), filename, mem +1);
+#if FILE_TRUNCATE
+      filepath = path_truncate (filepath);
+      mem = strlen (filepath); /* recalculate length after truncation */
+#endif
       for (i = 0; suffixes && suffixes[i]; ++i)
         {
           strcpy (filepath + mem, suffixes[i]);
@@ -267,9 +269,13 @@ m4_path_search (m4 *context, const char *filename, const char **suffixes)
 	/* Capture errno only when searching `.'.  */
 	e = errno;
 
-      filepath = path_truncate (strncpy (xmalloc (mem + max_suffix_len +1), pathname, mem));
+      filepath = strncpy (xmalloc (mem + max_suffix_len +1), pathname, mem +1);
       free (pathname);
-
+#if FILE_TRUNCATE
+      filepath = path_truncate (filepath);
+      mem = strlen (filepath); /* recalculate length after truncation */
+#endif
+ 
       for (i = 0; suffixes && suffixes[i]; ++i)
         {
           strcpy (filepath + mem, suffixes[i]);
