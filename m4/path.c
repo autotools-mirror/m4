@@ -225,7 +225,7 @@ m4_path_search (m4 *context, const char *filename, const char **suffixes)
 
       /* Try appending each of the suffixes we were given.  */
       filepath = strncpy (xmalloc (mem + max_suffix_len +1), filename, mem +1);
-#if FILE_TRUNCATE
+#if TRUNCATE_FILENAME
       filepath = path_truncate (filepath);
       mem = strlen (filepath); /* recalculate length after truncation */
 #endif
@@ -271,7 +271,7 @@ m4_path_search (m4 *context, const char *filename, const char **suffixes)
 
       filepath = strncpy (xmalloc (mem + max_suffix_len +1), pathname, mem +1);
       free (pathname);
-#if FILE_TRUNCATE
+#if TRUNCATE_FILENAME
       filepath = path_truncate (filepath);
       mem = strlen (filepath); /* recalculate length after truncation */
 #endif
