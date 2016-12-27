@@ -1426,7 +1426,7 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
     {
       close (fd);
       /* Remove NUL, then finish quote.  */
-      obstack_blank (obs, -1);
+      obstack_blank_fast (obs, -1);
       obstack_grow (obs, rquote.string, rquote.length);
     }
 }

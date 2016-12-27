@@ -1,3 +1,11 @@
+2016-12-29  Eric Blake  <eblake@redhat.com>
+
+	build: update to latest gnulib
+	* gnulib: Update to latest.
+	* m4/gnulib-cache.m4: Regenerate.
+	* src/macro.c (expand_macro): Deal with obstack API change.
+	* src/builtin.c (mkstemp_helper): Likewise.
+
 2014-05-13  Eric Blake  <eblake@redhat.com>
 
 	doc: fix line-wrapped macro definitions
@@ -5577,7 +5585,7 @@ Mon Jan 22 21:08:52 1990  Rene' Seindal (seindal at diku.dk)
 	coding: utf-8
 	End:
 
-	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2014 Free
+	Copyright (C) 1990-1994, 2000-2001, 2003, 2005-2014, 2016 Free
 	Software Foundation, Inc.
 
 	Copying and distribution of this file, with or without
