@@ -1,5 +1,8 @@
 2016-12-29  Eric Blake  <eblake@redhat.com>
 
+	maint: bump copyright year
+	* all files: Version control now has a commit in 2016.
+
 	build: update to latest gnulib
 	* gnulib: Update to latest.
 	* m4/gnulib-cache.m4: Regenerate.
