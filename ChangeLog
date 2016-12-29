@@ -1,5 +1,8 @@
 2016-12-29  Eric Blake  <eblake@redhat.com>
 
+	build: update to latest gnulib
+	* gnulib: Update to latest, to fix failure in getopt tests.
+
 	maint: regenerate bootstrap
 	* bootstrap: Regenerate.
 
