@@ -57,7 +57,7 @@ M4_default_preload="M4_DEFAULT_PRELOAD"
 AM_INIT_AUTOMAKE([1.11.6 subdir-objects dist-bzip2 dist-xz
 color-tests parallel-tests silent-rules]
 m4_if(m4_index(m4_defn([M4_VERSION]), [-]), [-1], [gnits], [gnu]))
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+AM_SILENT_RULES([yes]) # make --enable-silent-rules the default.
 
 
 ## ------------------ ##
