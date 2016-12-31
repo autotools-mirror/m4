@@ -248,9 +248,6 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 
 * Make sure you have wget installed.
 
-* Make sure you have a copy of the previous release tarball in the build
-  directory.
-
 * Make sure you have GNU make installed.
 
 * Make sure you have an up-to-date version of help2man installed.
@@ -287,8 +284,7 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   `git tag -d v<version>' and start again from the `git commit' step.
 
 * Run `make <target>', with target set to `stable', `alpha', or `beta'
-  as appropriate.  This will run various additional checks and create
-  diff files from the previous version.
+  as appropriate.  This will run various additional checks.
 
 * Run './build-aux/gnupload --to [dest].gnu.org:m4 --symlink-regex [files]'
   to create detached gpg signature and clear signed directive files, and

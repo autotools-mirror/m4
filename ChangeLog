@@ -1,3 +1,8 @@
+2016-12-31  Eric Blake  <eblake@redhat.com>
+
+	maint: release no longer creates a diff file
+	* HACKING: Drop outdated steps.
+
 2016-12-30  Eric Blake  <eblake@redhat.com>
 
 	doc: drop obsolete @setcontentsaftertitlepage
