@@ -2,7 +2,11 @@ GNU M4 NEWS - User visible changes.
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Diagnose --word-regexp as unsupported if it was not configured.
+
 ** Preliminary support for OS/2.
+
+** A number of portability improvements inherited from gnulib.
 
 
 * Noteworthy changes in release 1.4.17 (2013-09-22) [stable]
