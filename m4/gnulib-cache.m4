@@ -59,6 +59,7 @@
 #  closein \
 #  config-h \
 #  dirname \
+#  do-release-commit-and-tag \
 #  error \
 #  execute \
 #  fclose \
@@ -135,6 +136,7 @@ gl_MODULES([
   closein
   config-h
   dirname
+  do-release-commit-and-tag
   error
   execute
   fclose
