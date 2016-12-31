@@ -323,6 +323,15 @@ promoted to 2.0.
 
 ** A number of portability improvements inherited from gnulib.
 
+* Noteworthy changes in release 1.4.18 (2016-12-31) [stable]
+
+** Diagnose --word-regexp as unsupported if it was not configured.
+
+** Preliminary support for OS/2.
+
+** A number of portability improvements inherited from gnulib.
+
+
 * Noteworthy changes in release 1.4.17 (2013-09-17) [stable]
 
 ** Fix compilation with newer glibc headers.

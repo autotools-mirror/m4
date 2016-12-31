@@ -40,7 +40,7 @@ local-checks-to-skip = sc_cast_of_x_alloc_return_value \
 _makefile_at_at_check_exceptions = ' && !/PRAGMA_SYSTEM_HEADER/'
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = bbccada98ce08092a9f24b508c399051
+old_NEWS_hash = 761ae30101b24be4aea2f564e9ceee75
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
