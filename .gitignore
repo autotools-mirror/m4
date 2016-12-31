@@ -19,6 +19,7 @@ autom4te.cache
 !/build-aux/install-sh
 !/build-aux/mdate-sh
 !/build-aux/texinfo.tex
+/ChangeLog
 /checks/[0-9][0-9][0-9].*
 /checks/stamp-checks
 config.cache

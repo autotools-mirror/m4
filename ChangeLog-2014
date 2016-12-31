@@ -1,34 +1,3 @@
-2016-12-31  Eric Blake  <eblake@redhat.com>
-
-	maint: make silent builds the default
-	* configure.ac (AM_SILENT_RULES): Add, to match what most projects
-	are doing these days.
-
-	maint: release no longer creates a diff file
-	* HACKING: Drop outdated steps.
-
-2016-12-30  Eric Blake  <eblake@redhat.com>
-
-	doc: drop obsolete @setcontentsaftertitlepage
-	* doc/m4.texi: Satisfy newer texinfo.
-
-2016-12-29  Eric Blake  <eblake@redhat.com>
-
-	build: update to latest gnulib
-	* gnulib: Update to latest, to fix failure in getopt tests.
-
-	maint: regenerate bootstrap
-	* bootstrap: Regenerate.
-
-	maint: bump copyright year
-	* all files: Version control now has a commit in 2016.
-
-	build: update to latest gnulib
-	* gnulib: Update to latest.
-	* m4/gnulib-cache.m4: Regenerate.
-	* src/macro.c (expand_macro): Deal with obstack API change.
-	* src/builtin.c (mkstemp_helper): Likewise.
-
 2014-05-13  Eric Blake  <eblake@redhat.com>
 
 	doc: fix line-wrapped macro definitions

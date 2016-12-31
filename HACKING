@@ -125,70 +125,24 @@ and is not part of a release distribution.
 5. Editing 'ChangeLog'
 ======================
 
+* The ChangeLog is generated from git commit comments.  Each commit log
+  should start with a one-line summary, a blank line, and then a
+  ChangeLog-style entry for all affected files.  However, it's fine --
+  even recommended -- to write a few lines of prose describing the
+  change, when the summary and ChangeLog entries don't give enough of
+  the big picture.  Omit the leading TABs that you're used to seeing in
+  a "real" ChangeLog file, but keep the maximum line length at 72 or
+  smaller, so that the generated ChangeLog lines, each with its leading
+  TAB, will not exceed 80 columns.  As for the ChangeLog-style content,
+  please follow these guidelines:
+
+    http://www.gnu.org/software/guile/changelogs/guile-changelogs_3.html
+
 * When in doubt, check that emacs can syntax-color properly in
   change-log-mode.  And preferably use emacs 'C-x 4 a'
   (add-change-log-entry-other-window) to open ChangeLog with an
-  appropriate new template.
-
-* If this change is by a different author, or on a different date to the
-  last entry start a new entry at the top of the file with the format
-  (note two spaces between each field):
-
-yyyy-mm-dd  Name of Author  <email@address>
-
-*  If more than one person collaborated on the change, additional
-   authors can be listed on subsequent lines, thus:
-
-yyyy-mm-dd  Name of Main Author  <email@address>,
-            Name of Contributor  <another@email.address>
-
-* Where a change author did not supply a copyright assignment, but the
-  changes they submitted were sufficiently trivial to commit in any case
-  (see the GCS for guidelines on this), then flag this against their
-  name in the header, thus:
-
-yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
-
-* Preferably the next part should be a description of the overall
-  purpose of the change, separated from the header by a blank line,
-  indented by 1 tab, and filled at column 72.  The last character of the
-  description should be a colon, :.
-
-* Changes to each file come next.  Each new file starts on a new line,
-  indented by 1 tab and starting with an asterisk and a space.  Multiple
-  files can be listed here relative to $top_srcdir, and comma separated.
-  Names of functions (or sections as appropriate) to which the change
-  applies should be named inside parentheses and comma separated.  If
-  this goes beyond column 72, then parens should be closed and re-opened
-  on the next line:
-
-	* file, another/file, test/testcases/foo.test (func_foo)
-	(func_bar, func_baz): Description of changes.
-
-* If the change does not apply to particular functions (or sections),
-  the section list can be omitted:
-
-	* file, another/file, test/testcases/foo.test: General changes.
-
-* If the changes are particular to certain architectures, they should be
-  listed after the functions in square brackets:
-
-	* file, another/file (func_foo) [linux, solaris]: Description of
-	changes.
-
-* Subsequent changes in other files that are related to the same overall
-  enhancement or bugfix should be listed concurrently, without blank
-  lines.  Always start a fresh line for a new file:
-
-	* file, another/file (func_foo) [linux, solaris]: Description of
-	changes.
-	* doc/foo.texi (Invoking Foo): Document.
-	* NEWS: Updated.
-
-* If the change is in response to a problem reported by someone other
-  than the author, then credit them at the end of the description with:
-
-	Reported by Reporter Name <email@address>.
+  appropriate new template, which you can then paste into your git
+  commit editing session.
 
 * See the GNU Coding Standards document for more details on ChangeLog
   formatting.
@@ -196,8 +150,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
 6. Formatting
 =============
 
-* Use space-only indentation in nearly all files (Makefile and
-  ChangeLogs being the exception).
+* Use space-only indentation in nearly all files (Makefile inputs being
+  the exception).
 
   If you use Emacs and your m4 working directory name matches,
   this code in your ~/.emacs enables the right mode:
@@ -259,8 +213,8 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
     git submodule foreach git pull origin master
     git commit -m 'Update gnulib submodule to latest.' gnulib
 
-* Update the version number in NEWS and ChangeLog, and mention in README
-  whether the release is stable.  See
+* Update the version number in NEWS, and mention in README whether the
+  release is stable.  See
   http://www.gnu.org/software/libtool/contribute.html for details of the
   numbering scheme (M4 uses a similar scheme to libtool, although
   intra-release versions carry more information thanks to
@@ -301,9 +255,9 @@ yyyy-mm-dd  Name of Author  <email@address>  (tiny change)
   it through (the list is normally set to silently discard all posts,
   even from subscribers).
 
-* Update NEWS, README, and ChangeLog to start the intra-release changes,
-  and run `git commit'.  Then run `git push origin refs/tags/v<version>'
-  to push the release tag and complete the release.
+* Update NEWS and README to start the intra-release changes, and run
+  `git commit'.  Then run `git push origin refs/tags/v<version>' to push
+  the release tag and complete the release.
 
 * For non-alpha releases, update the webpages.  Replace manual.html with
   the new one (generate with `make web-manual').

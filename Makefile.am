@@ -23,7 +23,7 @@
 SUBDIRS = . examples lib src doc checks tests
 
 EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
-	.prev-version .version m4/gnulib-cache.m4
+	.prev-version .version m4/gnulib-cache.m4 ChangeLog-2014
 DISTCLEANFILES = stamp-h
 ## maintainer-clean should remove as much as possible that ./bootstrap can
 ## recreate.  In the m4 directory, keep only gnulib-cache.m4.
@@ -38,11 +38,33 @@ ACLOCAL_AMFLAGS = -I m4
 DISTCHECK_CONFIGURE_FLAGS = --enable-changeword --program-prefix=g \
 	--enable-gcc-warnings --enable-silent-rules --enable-cxx
 
+# Generate the ChangeLog from git history.
+gen_start_date = 2015-01-01
+.PHONY: gen-ChangeLog
+gen-ChangeLog:
+	$(AM_V_GEN)if test -d $(top_srcdir)/.git; then			\
+	  log_fix="$(srcdir)/build-aux/git-log-fix";			\
+	  test -e "$$log_fix"						\
+	    && amend_git_log="--amend=$$log_fix"			\
+	    || amend_git_log=;						\
+	  $(top_srcdir)/build-aux/gitlog-to-changelog $$amend_git_log	\
+	   --since='$(gen_start_date)' > $(distdir)/cl-t		\
+	  && rm -f $(distdir)/ChangeLog					\
+	  && mv $(distdir)/cl-t $(distdir)/ChangeLog;			\
+	fi
+
+# Dummy rule, to pacify automake "gnu" strictness and allow a clean
+# bootstrap.  Creates a dummy ChangeLog (unless one is already present,
+# as might be the case for users of vc-dwim) that will be overridden
+# with a proper one at distribution time.
+$(srcdir)/ChangeLog:
+	@echo dummy > $@
+
 BUILT_SOURCES = $(top_srcdir)/.version
 $(top_srcdir)/.version:
 	echo $(VERSION) > $@-t && mv $@-t $@
 
 # Arrange so that .tarball-version appears only in the distribution
 # tarball, and never in a checked-out repository.
-dist-hook:
-	echo $(VERSION) > $(distdir)/.tarball-version
+dist-hook: gen-ChangeLog
+	$(AM_V_GEN)echo $(VERSION) > $(distdir)/.tarball-version
