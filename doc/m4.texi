@@ -5,9 +5,6 @@
 @include version.texi
 @settitle GNU M4 @value{VERSION} macro processor
 @setchapternewpage odd
-@ifnothtml
-@setcontentsaftertitlepage
-@end ifnothtml
 @finalout
 
 @c @tabchar{}

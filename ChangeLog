@@ -1,3 +1,8 @@
+2016-12-30  Eric Blake  <eblake@redhat.com>
+
+	doc: drop obsolete @setcontentsaftertitlepage
+	* doc/m4.texi: Satisfy newer texinfo.
+
 2016-12-29  Eric Blake  <eblake@redhat.com>
 
 	build: update to latest gnulib
