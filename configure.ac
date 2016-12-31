@@ -24,6 +24,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 
 AM_INIT_AUTOMAKE([1.11.6 dist-bzip2 dist-xz color-tests parallel-tests
 silent-rules subdir-objects gnu])
+AM_SILENT_RULES([yes]) # make --enable-silent-rules the default.
 
 m4_pattern_forbid([^M4_[A-Z]])
 
