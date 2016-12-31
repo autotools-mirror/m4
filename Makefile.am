@@ -65,22 +65,24 @@ AM_CPPFLAGS    += -Im4/gnu -I$(srcdir)/m4/gnu \
 		  -Im4 -I$(srcdir)/m4
 AM_LDFLAGS     += $(OS2_LDFLAGS)
 EXTRA_DIST     += bootstrap cfg.mk maint.mk .version .prev-version \
-		  $(config_macro_dir)/gnulib-cache.m4 $(gitlog_to_changelog)
+		  $(config_macro_dir)/gnulib-cache.m4
 BUILT_SOURCES  += .version
 .version:
-	echo $(VERSION) > $@-t && mv $@-t $@
+	$(AM_V_GEN)echo $(VERSION) > $@-t && mv $@-t $@
 dist-hook: dist-tarball-version
 dist-tarball-version:
-	echo $(VERSION) > $(distdir)/.tarball-version
+	$(AM_V_GEN)echo $(VERSION) > $(distdir)/.tarball-version
 
 dist-hook: $(changelog)
 changelog_start_date = 2011-01-01
 $(changelog): FORCE
-	$(AM_V_GEN)if test -d '$(srcdir)/.git'; then	\
-	  $(gitlog_to_changelog)			\
-	    --since=$(changelog_start_date) > '$@T';	\
-	  rm -f '$@'; mv '$@T' '$@';			\
-	  cat '$(changelog_old)' >> '$@';		\
+	$(AM_V_GEN)if test -d '$(top_srcdir)/.git'; then	\
+          test -e '$(log_fix)'					\
+            && amend_git_log="--amend=$(log_fix)"		\
+            || amend_git_log=;					\
+	  $(gitlog_to_changelog) $$amend_git_log		\
+	    --since=$(changelog_start_date) > '$@T'		\
+	  && rm -f '$@' && mv '$@T' '$@';			\
 	fi
 
 # Sort in traditional ASCII order, regardless of the current locale;
