@@ -200,25 +200,18 @@ and is not part of a release distribution.
   helps, since by default, m4-announce rejects all posts, so you have to
   get an administrator to allow your announcement through.
 
-* Make sure you have wget installed.
-
-* Make sure you have GNU make installed.
-
-* Make sure you have an up-to-date version of help2man installed.
+* Make sure you have appropriate up-to-date tools installed, including:
+  wget
+  GNU make
+  help2man
+  texi2dvi
 
 * Make sure your locale is sane, e.g. by exporting LC_ALL=C.
 
 * Make sure you are happy with the particular gnulib version recorded as
   the gnulib submodule.  If necessary to update to the latest, run:
     git submodule foreach git pull origin master
-    git commit -m 'Update gnulib submodule to latest.' gnulib
-
-* Update the version number in NEWS, and mention in README whether the
-  release is stable.  See
-  http://www.gnu.org/software/libtool/contribute.html for details of the
-  numbering scheme (M4 uses a similar scheme to libtool, although
-  intra-release versions carry more information thanks to
-  git-version-gen).
+    git commit -m 'maint: update gnulib submodule to latest' gnulib
 
 * Run ./bootstrap, perhaps with environment variables set.
 
@@ -228,17 +221,28 @@ and is not part of a release distribution.
   be up-to-date with m4 --help output, but `make dist' intentionally
   does not depend on running a built binary.
 
+* Make sure README properly describes the current release type (stable,
+  alpha, or current).
+
 * Run `git commit' from the source tree if there are any changes from
   the previous steps.
 
-* Run `git tag -s -m <version> -u <gpg_key> v<version>' with the desired
-  version number.  Do not push anything upstream at this point.
+* Run `make release-commit RELEASE="X.Y $type"' (for the correct X.Y and
+  release type), to update the version number in NEWS.  See
+  http://www.gnu.org/software/libtool/contribute.html for details of the
+  numbering scheme (M4 uses a similar scheme to libtool, although
+  intra-release versions carry more information thanks to
+  git-version-gen).  This tags the potential release, but do not push
+  anything upstream at this point.
 
 * Run `make distcheck'.  If there are any problems, fix them, then run
-  `git tag -d v<version>' and start again from the `git commit' step.
+  `git tag -d v<version>; git reset --hard HEAD^' to undo the tag, and
+  start again from the `git commit' step.
 
 * Run `make <target>', with target set to `stable', `alpha', or `beta'
-  as appropriate.  This will run various additional checks.
+  as appropriate.  This will run various additional checks, as well as
+  spell out the preferred gnupload commands to use in the next step, and
+  create a post-release commit that updates NEWS for subsequent edits.
 
 * Run './build-aux/gnupload --to [dest].gnu.org:m4 --symlink-regex [files]'
   to create detached gpg signature and clear signed directive files, and
@@ -255,12 +259,13 @@ and is not part of a release distribution.
   it through (the list is normally set to silently discard all posts,
   even from subscribers).
 
-* Update NEWS and README to start the intra-release changes, and run
-  `git commit'.  Then run `git push origin refs/tags/v<version>' to push
-  the release tag and complete the release.
+* Run `git push origin refs/tags/v<version>' to push the release tag and
+  complete the release.
 
-* For non-alpha releases, update the webpages.  Replace manual.html with
-  the new one (generate with `make web-manual').
+* For non-alpha releases, update the webpages accessible via
+    http://www.gnu.org/software/m4/manual/
+  by running this:
+    build-aux/gnu-web-doc-update --mirror
 
 * Make a News entry on savannah
 
