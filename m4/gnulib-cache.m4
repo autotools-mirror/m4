@@ -135,6 +135,7 @@ gl_MODULES([
   gendocs
   getopt-gnu
   git-version-gen
+  gitlog-to-changelog
   gnu-web-doc-update
   gnumakefile
   gnupload
