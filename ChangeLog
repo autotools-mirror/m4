@@ -1,5 +1,9 @@
 2016-12-31  Eric Blake  <eblake@redhat.com>
 
+	maint: make silent builds the default
+	* configure.ac (AM_SILENT_RULES): Add, to match what most projects
+	are doing these days.
+
 	maint: release no longer creates a diff file
 	* HACKING: Drop outdated steps.
 
