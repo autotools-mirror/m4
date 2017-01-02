@@ -1,5 +1,5 @@
 /* GNU m4 -- A simple macro processor
-   Copyright (C) 2001, 2006-2007, 2010, 2013-2014 Free Software
+   Copyright (C) 2001, 2006-2007, 2010, 2013-2014, 2017 Free Software
    Foundation, Inc.
    Written by Gary V. Vaughan <gary@gnu.org>
 

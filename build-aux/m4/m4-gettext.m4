@@ -2,8 +2,8 @@
 # m4-gettext.m4 -- Use the installed version of GNU gettext if available.
 # Written by Gary V. Vaughan <gary@gnu.org>
 #
-# Copyright (C) 2003-2004, 2006-2007, 2010, 2013-2014 Free Software
-# Foundation, Inc.
+# Copyright (C) 2003-2004, 2006-2007, 2010, 2013-2014, 2017 Free
+# Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #

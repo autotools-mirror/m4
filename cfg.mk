@@ -1,5 +1,6 @@
 # Customize maint.mk.                           -*- makefile -*-
-# Copyright (C) 2003-2011, 2013-2014 Free Software Foundation, Inc.
+# Copyright (C) 2003-2011, 2013-2014, 2017 Free Software Foundation,
+# Inc.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,6 +14,9 @@
 
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# We intentionally hide the submodule in a subdirectory
+gnulib_dir = $(srcdir)/build-aux/gnulib
 
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor

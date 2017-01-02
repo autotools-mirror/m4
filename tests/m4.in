@@ -2,8 +2,8 @@
 # @configure_input@
 # Wrapper around a non installed m4 to make it work as an installed one.
 #
-# Copyright (C) 2001-2002, 2006-2008, 2010, 2013-2014 Free Software
-# Foundation, Inc.
+# Copyright (C) 2001-2002, 2006-2008, 2010, 2013-2014, 2017 Free
+# Software Foundation, Inc.
 #
 # This file is part of GNU M4.
 #

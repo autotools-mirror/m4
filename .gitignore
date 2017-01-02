@@ -70,6 +70,7 @@ Makefile.inc
 /po/POTFILES
 /po/Rules-quot
 /po/stamp-po
+/src/assure*
 /src/getopt*
 /src/m4
 /src/version-etc*

@@ -1,5 +1,5 @@
 ## -*- Autoconf -*-
-## Copyright (C) 2000-2001, 2003, 2006-2008, 2010, 2013-2014 Free
+## Copyright (C) 2000-2001, 2003, 2006-2008, 2010, 2013-2014, 2017 Free
 ## Software Foundation, Inc.
 ##
 ## This file is part of GNU M4.
