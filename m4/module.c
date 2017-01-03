@@ -226,7 +226,7 @@ m4_module *
 m4_module_load (m4 *context, const char *name, m4_obstack *obs)
 {
   m4_module *module = m4__module_find (context, name);
-  
+
   if (!module)
     {
       module = m4__module_open (context, name, obs);

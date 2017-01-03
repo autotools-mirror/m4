@@ -275,7 +275,7 @@ m4_path_search (m4 *context, const char *filename, const char **suffixes)
       filepath = path_truncate (filepath);
       mem = strlen (filepath); /* recalculate length after truncation */
 #endif
- 
+
       for (i = 0; suffixes && suffixes[i]; ++i)
         {
           strcpy (filepath + mem, suffixes[i]);

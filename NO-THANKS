@@ -4,14 +4,14 @@ The particular contributions are described in the version control logs and
 ChangeLog files.  If your name has been left out, if you'd rather not be
 listed, or if you'd prefer a different address be used, please send a
 note to the bug-report mailing list (as seen at end of e.g., m4 --help).
-## 
+##
 ## There is no need to list here any name that appears as an Author in
 ## "git log" output.  Those are automatically added when this template
 ## is used to generate the THANKS file. You will still need to add
 ## contributors who are not a git log Author - e.g. bug reporters.
-## 
+##
 ## Folks already promoted to AUTHORS:
-## 
+##
 !Akim Demaille
 !Alexandre Duret-Lutz
 !Andrew James Bettison
@@ -35,20 +35,20 @@ note to the bug-report mailing list (as seen at end of e.g., m4 --help).
 !Tim Rice
 !William C. Cox
 !Yuji Minejima
-## 
+##
 ## Remove duplicates under alternate names, and add preferred email
 ## addresses from contributors that don't match git log output here:
-## 
+##
 !Andrew Bettison
 !Eric Blake
 !Francois Pinard
 !Noah Misch
 !Rene' Seindal
-## 
+##
 ## Add bug reporters, patch Authors you forgot to attribute at commit
 ## time with 'git commit --author=...' and other non-patch contributers
 ## below:
-## 
+##
 Akiko Matsushita		matusita@sra.co.jp
 Alan Magnuson			awm@osc.edu
 Albert Chin			m4-discuss@mlists.thewrittenword.com
