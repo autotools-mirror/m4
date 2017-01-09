@@ -123,6 +123,7 @@ MAINTAINERCLEANFILES += \
 
 bin_PROGRAMS	= src/m4
 src_m4_SOURCES	= \
+		  src/assure.h \
 		  src/xstrtoul.c \
 		  src/xstrtol-error.c \
 		  src/xstrtol.c \
