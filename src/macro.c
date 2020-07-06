@@ -273,7 +273,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
          does not form a multi-byte quote delimiter, but that is a lot
          of overhead, so we give the conservative answer of false.  */
       result = first || safe_quotes ();
-      /* fallthru */
+      FALLTHROUGH;
     case TOKEN_COMMENT:
       /* Comments can contain unbalanced quote delimiters.  Rather
          than search for one, we return the conservative answer of
@@ -407,7 +407,7 @@ expand_argument (struct obstack *obs, token_data *argp,
                 }
               return t == TOKEN_COMMA;
             }
-          /* fallthru */
+          FALLTHROUGH;
         case TOKEN_OPEN:
         case TOKEN_SIMPLE:
           if (t == TOKEN_OPEN)

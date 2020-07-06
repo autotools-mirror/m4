@@ -305,6 +305,7 @@ reload_frozen_state (const char *name)
         {
         default:
           m4_error (EXIT_FAILURE, 0, NULL, _("ill-formed frozen file"));
+          assume (false);
 
         case 'C':
         case 'D':

@@ -520,7 +520,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
 
       case '\1':
         seen_file = true;
-        /* fall through */
+        FALLTHROUGH;
       case 'D':
       case 'U':
       case 's':
@@ -607,7 +607,7 @@ main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
       case 'e':
         error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
                        "-e", "-i");
-        /* fall through */
+        FALLTHROUGH;
       case 'i':
         interactive = true;
         break;

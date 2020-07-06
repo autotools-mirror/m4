@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "attribute.h"
 #include "binary-io.h"
 #include "clean-temp.h"
 #include "cloexec.h"
@@ -52,6 +53,7 @@
 #include "stdlib--.h"
 #include "unistd--.h"
 #include "vasnprintf.h"
+#include "verify.h"
 #include "xalloc.h"
 #include "xmemdup0.h"
 #include "xprintf.h"

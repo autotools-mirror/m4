@@ -275,7 +275,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
             }
           return sym;
         }
-      /* Fall through.  */
+      FALLTHROUGH;
 
     case SYMBOL_PUSHDEF:
 

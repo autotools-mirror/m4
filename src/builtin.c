@@ -664,7 +664,7 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
     {
     case TOKEN_COMP:
       m4_warn (0, me, _("cannot concatenate builtins"));
-      /* fallthru */
+      FALLTHROUGH;
     case TOKEN_TEXT:
       define_user_macro (ARG (1), ARG_LEN (1), arg_text (argv, 2, true),
                          arg_len (argv, 2, true), mode);
@@ -2141,7 +2141,7 @@ substitute (struct obstack *obs, const call_info *me, const char *victim,
 \\0 will disappear, use \\& instead in replacements"));
               substitute_warned = 1;
             }
-          /* Fall through.  */
+          FALLTHROUGH;
 
         case '&':
           if (regs)
