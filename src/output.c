@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 2004-2014, 2016-2017 Free Software
+   Copyright (C) 1989-1994, 2004-2014, 2016-2017, 2020 Free Software
    Foundation, Inc.
 
    This file is part of GNU M4.
@@ -225,7 +225,7 @@ m4_tmpfile (int divnum)
     }
   name = m4_tmpname (divnum);
   register_temp_file (output_temp_dir, name);
-  file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
+  file = fopen_temp (name, O_BINARY ? "wb+" : "w+", false);
   if (file == NULL)
     {
       unregister_temp_file (output_temp_dir, name);
@@ -267,7 +267,7 @@ m4_tmpopen (int divnum, bool reread)
     }
   name = m4_tmpname (divnum);
   /* We need update mode, to avoid truncation.  */
-  file = fopen_temp (name, O_BINARY ? "rb+" : "r+");
+  file = fopen_temp (name, O_BINARY ? "rb+" : "r+", false);
   if (file == NULL)
     M4ERROR ((EXIT_FAILURE, errno,
               "cannot create temporary file for diversion"));
