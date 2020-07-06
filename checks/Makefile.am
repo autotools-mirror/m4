@@ -1,6 +1,6 @@
 ## Makefile.am - template for generating Makefile via Automake.
 ##
-## Copyright (C) 1992-1994, 2006-2014, 2016-2017 Free Software
+## Copyright (C) 1992-1994, 2006-2014, 2016-2017, 2020 Free Software
 ## Foundation, Inc.
 ##
 ## This file is part of GNU M4.
