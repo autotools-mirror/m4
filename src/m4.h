@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "attribute.h"
 #include "binary-io.h"
 #include "clean-temp.h"
 #include "cloexec.h"
@@ -48,6 +49,7 @@
 #include "stdio--.h"
 #include "stdlib--.h"
 #include "unistd--.h"
+#include "verify.h"
 #include "verror.h"
 #include "xalloc.h"
 #include "xprintf.h"
@@ -106,20 +108,6 @@ typedef bool bool_bitfield;
 #else
 typedef unsigned int bool_bitfield;
 #endif /* ! __GNUC__ */
-
-/* Take advantage of GNU C compiler source level optimization hints,
-   using portable macros.  */
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-# define M4_GNUC_ATTRIBUTE(args)        __attribute__ (args)
-#else
-# define M4_GNUC_ATTRIBUTE(args)
-#endif  /* __GNUC__ */
-
-#define M4_GNUC_UNUSED          M4_GNUC_ATTRIBUTE ((__unused__))
-#define M4_GNUC_PRINTF(fmt, arg)                        \
-  M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
-#define M4_GNUC_NORETURN        M4_GNUC_ATTRIBUTE ((__noreturn__))
-#define M4_GNUC_PURE            M4_GNUC_ATTRIBUTE ((__pure__))
 
 /* File: m4.c  --- global definitions.  */
 
@@ -140,9 +128,15 @@ extern const char *user_word_regexp;    /* -W */
 /* Error handling.  */
 extern int retcode;
 
-extern void m4_error (int, int, const char *, ...) M4_GNUC_PRINTF(3, 4);
-extern void m4_error_at_line (int, int, const char *, int,
-                              const char *, ...) M4_GNUC_PRINTF(5, 6);
+extern void m4_error (int, int, const char *, ...)
+  ATTRIBUTE_FORMAT ((__printf__, 3, 4));
+extern void m4_error_at_line (int, int, const char *, int, const char *, ...)
+  ATTRIBUTE_FORMAT ((__printf__, 5, 6));
+extern _Noreturn void m4_failure (int, const char *, ...)
+  ATTRIBUTE_FORMAT ((__printf__, 2, 3));
+extern _Noreturn void m4_failure_at_line (int, const char *, int,
+                                          const char *, ...)
+  ATTRIBUTE_FORMAT ((__printf__, 4, 5));
 
 #define M4ERROR(Arglist) (m4_error Arglist)
 #define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)

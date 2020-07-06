@@ -174,7 +174,7 @@ static predefined const predefined_tab[] =
 | Find the builtin, which lives on ADDR.  |
 `----------------------------------------*/
 
-const builtin * M4_GNUC_PURE
+const builtin * ATTRIBUTE_PURE
 find_builtin_by_addr (builtin_func *func)
 {
   const builtin *bp;
@@ -192,7 +192,7 @@ find_builtin_by_addr (builtin_func *func)
 | placeholder builtin.                                      |
 `----------------------------------------------------------*/
 
-const builtin * M4_GNUC_PURE
+const builtin * ATTRIBUTE_PURE
 find_builtin_by_name (const char *name)
 {
   const builtin *bp;
@@ -261,11 +261,8 @@ set_macro_sequence (const char *regexp)
 
   msg = re_compile_pattern (regexp, strlen (regexp), &macro_sequence_buf);
   if (msg != NULL)
-    {
-      M4ERROR ((EXIT_FAILURE, 0,
-                "--warn-macro-sequence: bad regular expression `%s': %s",
-                regexp, msg));
-    }
+    m4_failure (0, "--warn-macro-sequence: bad regular expression `%s': %s",
+                regexp, msg);
   re_set_registers (&macro_sequence_buf, &macro_sequence_regs,
                     macro_sequence_regs.num_regs,
                     macro_sequence_regs.start, macro_sequence_regs.end);
@@ -585,13 +582,13 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 }
 
 static void
-m4_define (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_define (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   define_macro (argc, argv, SYMBOL_INSERT);
 }
 
 static void
-m4_undefine (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_undefine (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   int i;
   if (bad_argc (argv[0], argc, 2, -1))
@@ -601,13 +598,13 @@ m4_undefine (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 }
 
 static void
-m4_pushdef (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_pushdef (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   define_macro (argc, argv,  SYMBOL_PUSHDEF);
 }
 
 static void
-m4_popdef (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_popdef (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   int i;
   if (bad_argc (argv[0], argc, 2, -1))
@@ -945,7 +942,7 @@ builtin `%s' requested by frozen file is not supported", arg));
 static int sysval;
 
 static void
-m4_syscmd (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   const char *cmd = ARG (1);
   int status;
@@ -1051,7 +1048,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
       obstack_blank_fast (obs, len);
     }
   if (ferror (pin) || fclose (pin))
-    M4ERROR ((EXIT_FAILURE, errno, "cannot read pipe"));
+    m4_failure (errno, "cannot read pipe");
   errno = 0;
   status = wait_subprocess (child, ARG (0), false, true, true, false,
                             &sig_status);
@@ -1069,8 +1066,8 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_sysval (struct obstack *obs, int argc M4_GNUC_UNUSED,
-           token_data **argv M4_GNUC_UNUSED)
+m4_sysval (struct obstack *obs, int argc MAYBE_UNUSED,
+           token_data **argv MAYBE_UNUSED)
 {
   shipout_int (obs, sysval);
 }
@@ -1184,7 +1181,7 @@ m4_decr (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------*/
 
 static void
-m4_divert (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_divert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   int i = 0;
 
@@ -1217,7 +1214,7 @@ m4_divnum (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------*/
 
 static void
-m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   int i, file;
   FILE *fp;
@@ -1261,7 +1258,7 @@ m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 `-----------------------------------------------------------*/
 
 static void
-m4_dnl (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_dnl (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -1287,7 +1284,7 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------------*/
 
 static void
-m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_changequote (struct obstack *obs MAYBE_UNUSED, int argc,
                 token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 3))
@@ -1304,7 +1301,7 @@ m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
 `-----------------------------------------------------------------*/
 
 static void
-m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_changecom (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 3))
     return;
@@ -1322,7 +1319,7 @@ m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 `---------------------------------------------------------------*/
 
 static void
-m4_changeword (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_changeword (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1371,7 +1368,7 @@ include (int argc, token_data **argv, bool silent)
 `------------------------------------------------*/
 
 static void
-m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_include (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   include (argc, argv, false);
 }
@@ -1381,7 +1378,7 @@ m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 `----------------------------------*/
 
 static void
-m4_sinclude (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_sinclude (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   include (argc, argv, true);
 }
@@ -1535,8 +1532,8 @@ m4___program__ (struct obstack *obs, int argc, token_data **argv)
 | argument, or 0 if no arguments are present.               |
 `----------------------------------------------------------*/
 
-static void M4_GNUC_NORETURN
-m4_m4exit (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+static void
+m4_m4exit (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   int exit_code = EXIT_SUCCESS;
 
@@ -1623,7 +1620,7 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------------*/
 
 static void
-m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_traceoff (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   symbol *s;
   int i;
@@ -1646,7 +1643,7 @@ m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 `------------------------------------------------------------------*/
 
 static void
-m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   int new_debug_level;
   int change_flag;
@@ -1703,7 +1700,7 @@ m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_debugfile (struct obstack *obs M4_GNUC_UNUSED, int argc, token_data **argv)
+m4_debugfile (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 2))
     return;
@@ -1982,8 +1979,7 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
 Warning: \\0 will disappear, use \\& instead in replacements"));
               substitute_warned = 1;
             }
-          /* Fall through.  */
-
+          FALLTHROUGH;
         case '&':
           obstack_grow (obs, victim + regs->start[0],
                         regs->end[0] - regs->start[0]);
@@ -2196,7 +2192,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 void
-m4_placeholder (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_placeholder (struct obstack *obs MAYBE_UNUSED, int argc,
                 token_data **argv)
 {
   M4ERROR ((warning_status, 0, "\

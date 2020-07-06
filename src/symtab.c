@@ -120,7 +120,7 @@ symtab_init (void)
 | Return a hashvalue for a string, from GNU-emacs.  |
 `--------------------------------------------------*/
 
-static size_t M4_GNUC_PURE
+static size_t ATTRIBUTE_PURE
 hash (const char *s)
 {
   register size_t val = 0;
@@ -229,7 +229,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
             }
           return sym;
         }
-      /* Fall through.  */
+      FALLTHROUGH;
 
     case SYMBOL_PUSHDEF:
 
@@ -349,7 +349,7 @@ hack_all_symbols (hack_symbol *func, void *data)
 
 static void symtab_print_list (int i);
 
-static void M4_GNUC_UNUSED
+static void MAYBE_UNUSED
 symtab_debug (void)
 {
   token_data td;

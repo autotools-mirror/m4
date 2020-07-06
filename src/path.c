@@ -192,7 +192,7 @@ m4_path_search (const char *file, char **result)
 
 #ifdef DEBUG_INCL
 
-static void M4_GNUC_UNUSED
+static void MAYBE_UNUSED
 include_dump (void)
 {
   includes *incl;

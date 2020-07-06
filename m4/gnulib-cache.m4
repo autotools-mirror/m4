@@ -44,6 +44,7 @@
 #  --avoid=tls-tests \
 #  announce-gen \
 #  assert \
+#  attribute \
 #  autobuild \
 #  avltree-oset \
 #  binary-io \
@@ -94,6 +95,7 @@
 #  unlocked-io \
 #  update-copyright \
 #  vc-list-files \
+#  verify \
 #  verror \
 #  version-etc \
 #  version-etc-fsf \
@@ -108,6 +110,7 @@ gl_LOCAL_DIR([gl])
 gl_MODULES([
   announce-gen
   assert
+  attribute
   autobuild
   avltree-oset
   binary-io
@@ -158,6 +161,7 @@ gl_MODULES([
   unlocked-io
   update-copyright
   vc-list-files
+  verify
   verror
   version-etc
   version-etc-fsf

@@ -279,8 +279,7 @@ trace_format (const char *fmt, ...)
         {
         case 'S':
           maxlen = max_debug_argument_length;
-          /* fall through */
-
+          FALLTHROUGH;
         case 's':
           s = va_arg (args, const char *);
           break;

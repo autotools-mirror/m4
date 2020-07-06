@@ -872,8 +872,7 @@ next_token (token_data *td, int *line)
       else
         /* current_file changed to "" if we see CHAR_EOF, use the
            previous value we stored earlier.  */
-        M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
-                          "ERROR: end of file in comment"));
+        m4_failure_at_line (0, file, *line, "ERROR: end of file in comment");
 
       type = TOKEN_STRING;
     }
@@ -992,8 +991,8 @@ next_token (token_data *td, int *line)
           if (ch == CHAR_EOF)
             /* current_file changed to "" if we see CHAR_EOF, use
                the previous value we stored earlier.  */
-            M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, *line,
-                              "ERROR: end of file in string"));
+            m4_failure_at_line (0, file, *line,
+                                "ERROR: end of file in string");
 
           if (MATCH (ch, rquote.string, true))
             {
@@ -1145,7 +1144,7 @@ print_token (const char *s, token_type t, token_data *td)
   xfprintf (stderr, "\t\"%s\"\n", TOKEN_DATA_TEXT (td));
 }
 
-static void M4_GNUC_UNUSED
+static void MAYBE_UNUSED
 lex_debug (void)
 {
   token_type t;

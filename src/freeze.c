@@ -58,10 +58,7 @@ produce_frozen_state (const char *name)
 
   file = fopen (name, O_BINARY ? "wb" : "w");
   if (!file)
-    {
-      M4ERROR ((EXIT_FAILURE, errno, "cannot open `%s'", name));
-      return;
-    }
+    m4_failure (errno, "cannot open `%s'", name);
 
   /* Write a recognizable header.  */
 
@@ -154,7 +151,7 @@ INTERNAL ERROR: bad token data type in freeze_one_symbol ()"));
 
   fputs ("# End of frozen state file\n", file);
   if (close_stream (file) != 0)
-    M4ERROR ((EXIT_FAILURE, errno, "unable to create frozen state"));
+    m4_failure (errno, "unable to create frozen state");
 }
 
 /*----------------------------------------------------------------------.
@@ -165,10 +162,9 @@ static void
 issue_expect_message (int expected)
 {
   if (expected == '\n')
-    M4ERROR ((EXIT_FAILURE, 0, "expecting line feed in frozen file"));
+    m4_failure (0, "expecting line feed in frozen file");
   else
-    M4ERROR ((EXIT_FAILURE, 0, "expecting character `%c' in frozen file",
-              expected));
+    m4_failure (0, "expecting character `%c' in frozen file", expected);
 }
 
 /*-------------------------------------------------.
@@ -214,8 +210,7 @@ reload_frozen_state (const char *name)
         }                                                       \
       if (((AllowNeg) ? INT_MIN : INT_MAX) + 0U < n             \
           || isdigit (character))                               \
-        m4_error (EXIT_FAILURE, 0,                              \
-                  _("integer overflow in frozen file"));        \
+        m4_failure (0, _("integer overflow in frozen file"));   \
       (Number) = n;                                             \
     }                                                           \
   while (0)
@@ -257,8 +252,7 @@ reload_frozen_state (const char *name)
         }                                                               \
       if (number[(i)] > 0                                               \
           && !fread (string[(i)], (size_t) number[(i)], 1, file))       \
-        m4_error (EXIT_FAILURE, 0,                                      \
-                  _("premature end of frozen file"));                   \
+        m4_failure (0, _("premature end of frozen file"));              \
       string[(i)][number[(i)]] = '\0';                                  \
       p = string[(i)];                                                  \
       while ((tmp = memchr(p, '\n', number[(i)] - (p - string[(i)]))))  \
@@ -271,7 +265,7 @@ reload_frozen_state (const char *name)
 
   file = m4_path_search (name, NULL);
   if (file == NULL)
-    M4ERROR ((EXIT_FAILURE, errno, "cannot open %s", name));
+    m4_failure (errno, "cannot open %s", name);
   current_file = name;
 
   allocated[0] = 100;
@@ -289,8 +283,7 @@ reload_frozen_state (const char *name)
               "frozen file version %d greater than max supported of 1",
               number[0]));
   else if (number[0] < 1)
-    M4ERROR ((EXIT_FAILURE, 0,
-              "ill-formed frozen file, version directive expected"));
+    m4_failure (0, "ill-formed frozen file, version directive expected");
   VALIDATE ('\n');
 
   GET_DIRECTIVE;
@@ -299,7 +292,7 @@ reload_frozen_state (const char *name)
       switch (character)
         {
         default:
-          M4ERROR ((EXIT_FAILURE, 0, "ill-formed frozen file"));
+          m4_failure (0, "ill-formed frozen file");
 
         case 'C':
         case 'D':
@@ -387,7 +380,7 @@ reload_frozen_state (const char *name)
   free (string[0]);
   free (string[1]);
   if (close_stream (file) != 0)
-    m4_error (EXIT_FAILURE, errno, _("unable to read frozen state"));
+    m4_failure (errno, _("unable to read frozen state"));
   current_file = NULL;
   current_line = 0;
 

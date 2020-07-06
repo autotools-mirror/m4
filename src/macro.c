@@ -177,7 +177,7 @@ expand_argument (struct obstack *obs, token_data *argp)
                 }
               return t == TOKEN_COMMA;
             }
-          /* fallthru */
+          FALLTHROUGH;
         case TOKEN_OPEN:
         case TOKEN_SIMPLE:
           text = TOKEN_DATA_TEXT (&td);
@@ -192,9 +192,8 @@ expand_argument (struct obstack *obs, token_data *argp)
         case TOKEN_EOF:
           /* current_file changed to "" if we see TOKEN_EOF, use the
              previous value we stored earlier.  */
-          M4ERROR_AT_LINE ((EXIT_FAILURE, 0, file, line,
-                            "ERROR: end of file in argument list"));
-          break;
+          m4_failure_at_line (0, file, line,
+                              "ERROR: end of file in argument list");
 
         case TOKEN_WORD:
         case TOKEN_STRING:
@@ -330,9 +329,8 @@ expand_macro (symbol *sym)
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
-    M4ERROR ((EXIT_FAILURE, 0,
-              "recursion limit of %d exceeded, use -L<N> to change it",
-              nesting_limit));
+    m4_failure (0, "recursion limit of %d exceeded, use -L<N> to change it",
+                nesting_limit);
 
   macro_call_id++;
   my_call_id = macro_call_id;
@@ -357,7 +355,7 @@ expand_macro (symbol *sym)
 
   argc = ((obstack_object_size (&argv_stack) - argv_base)
           / sizeof (token_data *));
-  argv = (token_data **) ((char *) obstack_base (&argv_stack) + argv_base);
+  argv = (token_data **) ((uintptr_t) obstack_base (&argv_stack) + argv_base);
 
   loc_close_file = current_file;
   loc_close_line = current_line;

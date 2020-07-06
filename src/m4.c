@@ -36,7 +36,7 @@
 
 #define AUTHORS "Rene' Seindal"
 
-static void usage (int) M4_GNUC_NORETURN;
+static _Noreturn void usage (int);
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
@@ -103,6 +103,16 @@ m4_error (int status, int errnum, const char *format, ...)
   va_end (args);
 }
 
+void
+m4_failure (int errnum, const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  verror_at_line (EXIT_FAILURE, errnum, current_line ? current_file : NULL,
+                  current_line, format, args);
+  assume (false);
+}
+
 /*-------------------------------.
 | Wrapper around error_at_line.  |
 `-------------------------------*/
@@ -117,6 +127,17 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
   if (fatal_warnings && ! retcode)
     retcode = EXIT_FAILURE;
   va_end (args);
+}
+
+void
+m4_failure_at_line (int errnum, const char *file, int line,
+                    const char *format, ...)
+{
+  va_list args;
+  va_start (args, format);
+  verror_at_line (EXIT_FAILURE, errnum, line ? file : NULL,
+                  line, format, args);
+  assume (false);
 }
 
 #ifndef SIGBUS
@@ -141,7 +162,7 @@ static const char * volatile signal_message[NSIG];
    must be aysnc-signal safe, since it is executed as a signal
    handler.  If SIGNO is zero, this represents a stack overflow; in
    that case, we return to allow c_stack_action to handle things.  */
-static void M4_GNUC_PURE
+static void
 fault_handler (int signo)
 {
   if (signo)
@@ -538,7 +559,7 @@ main (int argc, char *const *argv)
 
       case 'e':
         error (0, 0, _("warning: `m4 -e' is deprecated, use `-i' instead"));
-        /* fall through */
+        FALLTHROUGH;
       case 'i':
         interactive = true;
         break;
