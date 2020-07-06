@@ -107,6 +107,7 @@
 #  unlocked-io \
 #  update-copyright \
 #  vasnprintf-posix \
+#  vc-list-files \
 #  verify \
 #  verror \
 #  version-etc \
@@ -184,6 +185,7 @@ gl_MODULES([
   unlocked-io
   update-copyright
   vasnprintf-posix
+  vc-list-files
   verify
   verror
   version-etc

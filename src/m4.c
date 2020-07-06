@@ -30,6 +30,10 @@
 #include "progname.h"
 #include "version-etc.h"
 
+#ifdef DEBUG_STKOVF
+# include "assert.h"
+#endif
+
 #define AUTHORS "Rene' Seindal", "Eric Blake"
 
 /* Enable sync output for /lib/cpp (-s).  */
@@ -84,7 +88,7 @@ typedef struct macro_definition macro_definition;
    location.  If ERRNUM, decode the errno value that caused the error.
    If STATUS, exit immediately with that status.  If WARN, prepend
    'warning: '.  */
-static void M4_GNUC_PRINTF (5, 0)
+static void ATTRIBUTE_FORMAT ((__printf__, 5, 0))
 m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
                    const char *format, va_list args)
 {
@@ -218,7 +222,7 @@ fault_handler (int signo)
 
 
 /* Print a usage message and exit with STATUS.  */
-static void M4_GNUC_NORETURN
+static _Noreturn void
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
@@ -419,7 +423,7 @@ FILE *trace_file;
 #endif /* DEBUG_REGEX */
 
 int
-main (int argc, char *const *argv, char *const *envp M4_GNUC_UNUSED)
+main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
 {
   struct sigaction act;
   macro_definition *head;	/* head of deferred argument list */

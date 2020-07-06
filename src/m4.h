@@ -116,21 +116,7 @@ typedef void builtin_func (struct obstack *, int, macro_arguments *);
 typedef bool bool_bitfield;
 #else
 typedef unsigned int bool_bitfield;
-#endif /* !__GNUC__ */
-
-/* Take advantage of GNU C compiler source level optimization hints,
-   using portable macros.  */
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 6)
-#  define M4_GNUC_ATTRIBUTE(args)       __attribute__ (args)
-#else
-#  define M4_GNUC_ATTRIBUTE(args)
-#endif  /* __GNUC__ */
-
-#define M4_GNUC_UNUSED          M4_GNUC_ATTRIBUTE ((__unused__))
-#define M4_GNUC_PRINTF(fmt, arg)                        \
-  M4_GNUC_ATTRIBUTE ((__format__ (__printf__, fmt, arg)))
-#define M4_GNUC_NORETURN        M4_GNUC_ATTRIBUTE ((__noreturn__))
-#define M4_GNUC_PURE            M4_GNUC_ATTRIBUTE ((__pure__))
+#endif /* ! __GNUC__ */
 
 /* File: m4.c  --- global definitions.  */
 
@@ -167,9 +153,9 @@ typedef struct call_info call_info;
 extern int retcode;
 
 extern void m4_error (int, int, const call_info *, const char *, ...)
-  M4_GNUC_PRINTF (4, 5);
+  ATTRIBUTE_FORMAT ((__printf__, 4, 5));
 extern void m4_warn (int, const call_info *, const char *, ...)
-  M4_GNUC_PRINTF (3, 4);
+  ATTRIBUTE_FORMAT ((__printf__, 3, 4));
 
 
 /* File: debug.c  --- debugging and tracing function.  */
@@ -212,7 +198,8 @@ extern void debug_init (void);
 extern int debug_decode (const char *, size_t);
 extern void debug_flush_files (void);
 extern bool debug_set_output (const call_info *, const char *);
-extern void debug_message (const char *, ...) M4_GNUC_PRINTF (1, 2);
+extern void debug_message (const char *, ...)
+  ATTRIBUTE_FORMAT ((__printf__, 1, 2));
 
 extern void trace_prepre (const call_info *);
 extern unsigned int trace_pre (macro_arguments *);

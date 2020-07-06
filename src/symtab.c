@@ -103,7 +103,7 @@ profile_memcmp (const char *s1, const char *s2, size_t l)
 static Hash_table *symtab;
 
 /* Return a hashvalue for a string S of length LEN.  */
-static size_t M4_GNUC_PURE
+static size_t ATTRIBUTE_PURE
 hash (const char *s, size_t len)
 {
   size_t val = len;
@@ -409,7 +409,7 @@ hack_all_symbols (hack_symbol *func, void *data)
 
 static void symtab_print_list (int i);
 
-static void M4_GNUC_UNUSED
+static void MAYBE_UNUSED
 symtab_debug (void)
 {
   token_data td;

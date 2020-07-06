@@ -172,7 +172,7 @@ static predefined const predefined_tab[] =
 
 
 /* Find the builtin that owns FUNC.  */
-const builtin * M4_GNUC_PURE
+const builtin * ATTRIBUTE_PURE
 find_builtin_by_addr (builtin_func *func)
 {
   const builtin *bp;
@@ -187,7 +187,7 @@ find_builtin_by_addr (builtin_func *func)
 
 /* Find the builtin matching NAME.  On failure, return the placeholder
    builtin.  */
-const builtin * M4_GNUC_PURE
+const builtin * ATTRIBUTE_PURE
 find_builtin_by_name (const char *name)
 {
   const builtin *bp;
@@ -685,13 +685,13 @@ define_macro (int argc, macro_arguments *argv, symbol_lookup mode)
 }
 
 static void
-m4_define (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
+m4_define (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   define_macro (argc, argv, SYMBOL_INSERT);
 }
 
 static void
-m4_undefine (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_undefine (struct obstack *obs MAYBE_UNUSED, int argc,
              macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
@@ -709,14 +709,14 @@ m4_undefine (struct obstack *obs M4_GNUC_UNUSED, int argc,
 }
 
 static void
-m4_pushdef (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_pushdef (struct obstack *obs MAYBE_UNUSED, int argc,
             macro_arguments *argv)
 {
   define_macro (argc, argv, SYMBOL_PUSHDEF);
 }
 
 static void
-m4_popdef (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
+m4_popdef (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   int i;
@@ -1053,7 +1053,7 @@ m4_defn (struct obstack *obs, int argc, macro_arguments *argv)
 static int sysval;
 
 static void
-m4_syscmd (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
+m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   const char *cmd = ARG (1);
@@ -1198,8 +1198,8 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
 }
 
 static void
-m4_sysval (struct obstack *obs, int argc M4_GNUC_UNUSED,
-           macro_arguments *argv M4_GNUC_UNUSED)
+m4_sysval (struct obstack *obs, int argc MAYBE_UNUSED,
+           macro_arguments *argv MAYBE_UNUSED)
 {
   shipout_int (obs, sysval);
 }
@@ -1311,7 +1311,7 @@ m4_decr (struct obstack *obs, int argc, macro_arguments *argv)
 /* Divert further output to the diversion given by ARGV[1].  Out of
    range means discard further output.  */
 static void
-m4_divert (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
+m4_divert (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   int i = 0;
@@ -1337,7 +1337,7 @@ m4_divnum (struct obstack *obs, int argc, macro_arguments *argv)
    of undiverting named files, by passing a non-numeric argument to
    undivert ().  */
 static void
-m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc,
              macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
@@ -1386,7 +1386,7 @@ m4_undivert (struct obstack *obs M4_GNUC_UNUSED, int argc,
 /* Delete all subsequent whitespace from input.  The function
    skip_line () lives in input.c.  */
 static void
-m4_dnl (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
+m4_dnl (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
 
@@ -1407,7 +1407,7 @@ m4_shift (struct obstack *obs, int argc, macro_arguments *argv)
 /* Change the current quotes.  The function set_quotes () lives in
    input.c.  */
 static void
-m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_changequote (struct obstack *obs MAYBE_UNUSED, int argc,
                 macro_arguments *argv)
 {
   bad_argc (arg_info (argv), argc, 0, 2);
@@ -1420,7 +1420,7 @@ m4_changequote (struct obstack *obs M4_GNUC_UNUSED, int argc,
 /* Change the current comment delimiters.  The function set_comment ()
    lives in input.c.  */
 static void
-m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_changecom (struct obstack *obs MAYBE_UNUSED, int argc,
               macro_arguments *argv)
 {
   bad_argc (arg_info (argv), argc, 0, 2);
@@ -1435,7 +1435,7 @@ m4_changecom (struct obstack *obs M4_GNUC_UNUSED, int argc,
 /* Change the regular expression used for breaking the input into
    words.  The function set_word_regexp () lives in input.c.  */
 static void
-m4_changeword (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_changeword (struct obstack *obs MAYBE_UNUSED, int argc,
                macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
@@ -1486,7 +1486,7 @@ include (int argc, macro_arguments *argv, bool silent)
 
 /* Include a file, complaining in case of errors.  */
 static void
-m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_include (struct obstack *obs MAYBE_UNUSED, int argc,
             macro_arguments *argv)
 {
   include (argc, argv, false);
@@ -1494,7 +1494,7 @@ m4_include (struct obstack *obs M4_GNUC_UNUSED, int argc,
 
 /* Include a file, ignoring errors.  */
 static void
-m4_sinclude (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_sinclude (struct obstack *obs MAYBE_UNUSED, int argc,
              macro_arguments *argv)
 {
   include (argc, argv, true);
@@ -1649,8 +1649,8 @@ m4___program__ (struct obstack *obs, int argc, macro_arguments *argv)
 
 /* Exit immediately, with exit status specified by the first argument,
    or 0 if no arguments are present.  */
-static void M4_GNUC_NORETURN
-m4_m4exit (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
+static _Noreturn void
+m4_m4exit (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   int exit_code = EXIT_SUCCESS;
@@ -1680,7 +1680,7 @@ m4_m4exit (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
    allowing for user specified cleanup action.  Extra arguments are
    saved when not in POSIX mode.  */
 static void
-m4_m4wrap (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
+m4_m4wrap (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   if (bad_argc (arg_info (argv), argc, 1, -1))
     return;
@@ -1731,7 +1731,7 @@ m4_traceon (struct obstack *obs, int argc, macro_arguments *argv)
 /* Disable tracing of all specified macros, or all, if none is
    specified.  */
 static void
-m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_traceoff (struct obstack *obs MAYBE_UNUSED, int argc,
              macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
@@ -1758,7 +1758,7 @@ m4_traceoff (struct obstack *obs M4_GNUC_UNUSED, int argc,
    one argument, which is a character string like that given to the -d
    option, or none in which case the debug_level is zeroed.  */
 static void
-m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc,
               macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
@@ -1778,7 +1778,7 @@ m4_debugmode (struct obstack *obs M4_GNUC_UNUSED, int argc,
    argument, the argument is taken as a file name, with no arguments,
    revert to stderr.  */
 static void
-m4_debugfile (struct obstack *obs M4_GNUC_UNUSED, int argc,
+m4_debugfile (struct obstack *obs MAYBE_UNUSED, int argc,
               macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
@@ -2385,7 +2385,7 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 /* Issue a warning that this macro is a placeholder for an unsupported
    builtin that was requested while reloading a frozen file.  */
 void
-m4_placeholder (struct obstack *obs M4_GNUC_UNUSED, int argc M4_GNUC_UNUSED,
+m4_placeholder (struct obstack *obs MAYBE_UNUSED, int argc MAYBE_UNUSED,
                 macro_arguments *argv)
 {
   m4_warn (0, NULL, _("builtin %s requested by frozen file not found"),
