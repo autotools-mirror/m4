@@ -5,6 +5,8 @@
 @include version.texi
 @settitle GNU M4 @value{VERSION} macro processor
 @documentencoding UTF-8
+@set txicodequoteundirected
+@set txicodequotebacktick
 @setchapternewpage odd
 @finalout
 
@@ -4737,11 +4739,7 @@ foo
 @result{}Macro foo.
 @end example
 
-The quotation strings can safely contain eight-bit characters.
-@ignore
-@comment Yuck.  I know of no clean way to render an 8-bit character in
-@comment both info and dvi.  This example uses the `open-guillemot' and
-@comment `close-guillemot' characters of the Latin-1 character set.
+The quotation strings can safely contain non-@sc{ascii} characters.
 
 @example
 define(`a', `b')
@@ -4753,7 +4751,7 @@ changequote(`«', `»')
 «a»
 @result{}a
 @end example
-@end ignore
+
 If no single character is appropriate, @var{start} and @var{end} can be
 of any length.  Other implementations cap the delimiter length to five
 characters, but GNU has no inherent limit.
@@ -5016,11 +5014,7 @@ changecom(`#', `')
 @result{}# comment again
 @end example
 
-The comment strings can safely contain eight-bit characters.
-@ignore
-@comment Yuck.  I know of no clean way to render an 8-bit character in
-@comment both info and dvi.  This example uses the `open-guillemot' and
-@comment `close-guillemot' characters of the Latin-1 character set.
+The comment strings can safely contain non-@sc{ascii} characters.
 
 @example
 define(`a', `b')
@@ -5032,7 +5026,7 @@ changecom(`«', `»')
 «a»
 @result{}«a»
 @end example
-@end ignore
+
 If no single character is appropriate, @var{start} and @var{end} can be
 of any length.  Other implementations cap the delimiter length to five
 characters, but GNU has no inherent limit.
@@ -6664,7 +6658,8 @@ resulting @samp{b} is not further remapped to @samp{g}; the @samp{d} and
 
 @ignore
 @comment No need to fight 8-bit characters, as it is difficult to get
-@comment rendering right in both info and dvi.
+@comment rendering right in both info and dvi, and examples like this
+@comment do not work correctly with UTF-8 anyway since m4 is byte-oriented.
 
 @example
 translit(`«abc~', `~-»')
