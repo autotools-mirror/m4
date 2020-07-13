@@ -26,7 +26,7 @@
 #include <config.h>
 
 #include <assert.h>
-#include <ctype.h>
+#include <c-ctype.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdbool.h>

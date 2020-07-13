@@ -112,7 +112,7 @@ eval_undo (void)
 static eval_token
 eval_lex (int32_t *val)
 {
-  while (eval_text != end_text && isspace (to_uchar (*eval_text)))
+  while (eval_text != end_text && c_isspace (*eval_text))
     eval_text++;
 
   last_text = eval_text;
@@ -120,7 +120,7 @@ eval_lex (int32_t *val)
   if (eval_text == end_text)
     return EOTEXT;
 
-  if (isdigit (to_uchar (*eval_text)))
+  if (c_isdigit (*eval_text))
     {
       int base, digit;
 
@@ -145,7 +145,7 @@ eval_lex (int32_t *val)
             case 'R':
               base = 0;
               eval_text++;
-              while (isdigit (to_uchar (*eval_text)) && base <= 36)
+              while (c_isdigit (*eval_text) && base <= 36)
                 base = 10 * base + *eval_text++ - '0';
               if (base == 0 || base > 36 || *eval_text != ':')
                 return ERROR;
@@ -163,11 +163,11 @@ eval_lex (int32_t *val)
       *val = 0;
       for (; *eval_text; eval_text++)
         {
-          if (isdigit (to_uchar (*eval_text)))
+          if (c_isdigit (*eval_text))
             digit = *eval_text - '0';
-          else if (islower (to_uchar (*eval_text)))
+          else if (c_islower (*eval_text))
             digit = *eval_text - 'a' + 10;
-          else if (isupper (to_uchar (*eval_text)))
+          else if (c_isupper (*eval_text))
             digit = *eval_text - 'A' + 10;
           else
             break;

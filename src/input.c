@@ -1792,7 +1792,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       return TOKEN_ARGV;
     }
 
-  if (default_word_regexp && (isalpha (ch) || ch == '_'))
+  if (default_word_regexp && (c_isalpha (ch) || ch == '_'))
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -1802,7 +1802,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
           if (buffer)
             {
               const char *p = buffer;
-              while (len && (isalnum (to_uchar (*p)) || *p == '_'))
+              while (len && (c_isalnum (*p) || *p == '_'))
                 {
                   p++;
                   len--;
@@ -1818,7 +1818,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
           else
             {
               ch = peek_input (false);
-              if (ch < CHAR_EOF && (isalnum (ch) || ch == '_'))
+              if (ch < CHAR_EOF && (c_isalnum (ch) || ch == '_'))
                 {
                   obstack_1grow (&token_stack, ch);
                   next_char (false, false);
@@ -2110,7 +2110,7 @@ peek_token (void)
     {
       result = TOKEN_COMMENT;
     }
-  else if ((default_word_regexp && (isalpha (ch) || ch == '_'))
+  else if ((default_word_regexp && (c_isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
       || (!default_word_regexp && word_regexp.fastmap[ch])
 #endif /* ENABLE_CHANGEWORD */

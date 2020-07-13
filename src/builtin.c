@@ -562,7 +562,7 @@ numeric_arg (const call_info *name, const char *arg, size_t len, int *valuep)
                    quotearg_style_mem (locale_quoting_style, arg, len));
           return false;
         }
-      if (isspace (to_uchar (*arg)))
+      if (c_isspace (*arg))
         m4_warn (0, name, _("leading whitespace ignored"));
       else if (errno == ERANGE)
         m4_warn (0, name, _("numeric overflow detected"));
@@ -1354,7 +1354,7 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc,
         const char *str = ARG (i);
         size_t len = ARG_LEN (i);
         file = strtol (str, &endp, 10);
-        if (endp - str + 0UL == len && !isspace (to_uchar (*str)))
+        if (endp - str + 0UL == len && !c_isspace (*str))
           insert_diversion (file);
         else if (no_gnu_extensions)
           m4_warn (0, me, _("non-numeric argument %s"),
@@ -2432,7 +2432,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
             }
           else
             {
-              for (i = 0; len && isdigit (to_uchar (*text)); text++, len--)
+              for (i = 0; len && c_isdigit (*text); text++, len--)
                 i = i * 10 + (*text - '0');
             }
           push_arg (obs, argv, i);

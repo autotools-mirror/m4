@@ -47,7 +47,7 @@ arg_int (const call_info *me, const char *str, size_t len)
   if (endp - str - len)
     m4_warn (0, me, _("non-numeric argument %s"),
              quotearg_style_mem (locale_quoting_style, str, len));
-  else if (isspace (to_uchar (*str)))
+  else if (c_isspace (*str))
     m4_warn (0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE || (int) value != value)
     m4_warn (0, me, _("numeric overflow detected"));
@@ -74,7 +74,7 @@ arg_long (const call_info *me, const char *str, size_t len)
   if (endp - str - len)
     m4_warn (0, me, _("non-numeric argument %s"),
              quotearg_style_mem (locale_quoting_style, str, len));
-  else if (isspace (to_uchar (*str)))
+  else if (c_isspace (*str))
     m4_warn (0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE)
     m4_warn (0, me, _("numeric overflow detected"));
@@ -110,7 +110,7 @@ arg_double (const call_info *me, const char *str, size_t len)
   if (endp - str - len)
     m4_warn (0, me, _("non-numeric argument %s"),
              quotearg_style_mem (locale_quoting_style, str, len));
-  else if (isspace (to_uchar (*str)))
+  else if (c_isspace (*str))
     m4_warn (0, me, _("leading whitespace ignored"));
   else if (errno == ERANGE)
     m4_warn (0, me, _("numeric overflow detected"));
@@ -270,7 +270,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
           f_len--;
         }
       else
-        while (isdigit (to_uchar (*fmt)))
+        while (c_isdigit (*fmt))
           {
             width = 10 * width + *fmt - '0';
             fmt++;
@@ -295,7 +295,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
           else
             {
               prec = 0;
-              while (isdigit (to_uchar (*fmt)))
+              while (c_isdigit (*fmt))
                 {
                   prec = 10 * prec + *fmt - '0';
                   fmt++;

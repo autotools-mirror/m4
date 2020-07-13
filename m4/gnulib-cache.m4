@@ -52,6 +52,7 @@
 #  binary-io \
 #  bitrotate \
 #  bootstrap \
+#  c-ctype \
 #  c-stack \
 #  clean-temp \
 #  cloexec \
@@ -130,6 +131,7 @@ gl_MODULES([
   binary-io
   bitrotate
   bootstrap
+  c-ctype
   c-stack
   clean-temp
   cloexec
