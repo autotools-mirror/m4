@@ -203,13 +203,13 @@ reload_frozen_state (const char *name)
   do                                                            \
     {                                                           \
       unsigned int n = 0;                                       \
-      while (isdigit (character) && n <= INT_MAX / 10U)         \
+      while (c_isdigit (character) && n <= INT_MAX / 10U)       \
         {                                                       \
           n = 10 * n + character - '0';                         \
           GET_CHARACTER;                                        \
         }                                                       \
       if (((AllowNeg) ? INT_MIN : INT_MAX) + 0U < n             \
-          || isdigit (character))                               \
+          || c_isdigit (character))                             \
         m4_failure (0, _("integer overflow in frozen file"));   \
       (Number) = n;                                             \
     }                                                           \

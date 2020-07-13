@@ -48,6 +48,7 @@
 #  autobuild \
 #  avltree-oset \
 #  binary-io \
+#  c-ctype \
 #  c-stack \
 #  clean-temp \
 #  cloexec \
@@ -114,6 +115,7 @@ gl_MODULES([
   autobuild
   avltree-oset
   binary-io
+  c-ctype
   c-stack
   clean-temp
   cloexec

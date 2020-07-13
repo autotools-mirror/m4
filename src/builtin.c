@@ -426,7 +426,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
                     TOKEN_DATA_TEXT (macro)));
           return false;
         }
-      if (isspace (to_uchar (*arg)))
+      if (c_isspace (*arg))
         M4ERROR ((warning_status, 0,
                   "leading whitespace ignored in builtin `%s'",
                   TOKEN_DATA_TEXT (macro)));
@@ -1226,7 +1226,7 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
     for (i = 1; i < argc; i++)
       {
         file = strtol (ARG (i), &endp, 10);
-        if (*endp == '\0' && !isspace (to_uchar (*ARG (i))))
+        if (*endp == '\0' && !c_isspace (*ARG (i)))
           insert_diversion (file);
         else if (no_gnu_extensions)
           M4ERROR ((warning_status, 0,
@@ -2233,7 +2233,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
             }
           else
             {
-              for (i = 0; isdigit (to_uchar (*text)); text++)
+              for (i = 0; c_isdigit (*text); text++)
                 i = i*10 + (*text - '0');
             }
           if (i < argc)

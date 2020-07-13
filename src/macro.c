@@ -153,7 +153,7 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
       t = next_token (&td, NULL);
     }
-  while (t == TOKEN_SIMPLE && isspace (to_uchar (*TOKEN_DATA_TEXT (&td))));
+  while (t == TOKEN_SIMPLE && c_isspace (*TOKEN_DATA_TEXT (&td)));
 
   paren_level = 0;
 
