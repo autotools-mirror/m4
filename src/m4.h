@@ -29,6 +29,7 @@
 #include <c-ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <locale.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -80,8 +81,17 @@
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */
 #define EXIT_MISMATCH 63
 
-/* No-op, for future gettext compatibility.  */
-#define _(ARG) ARG
+/* NLS.  */
+
+#include "gettext.h"
+#if ! ENABLE_NLS
+# undef textdomain
+# define textdomain(Domainname) /* empty */
+# undef bindtextdomain
+# define bindtextdomain(Domainname, Dirname) /* empty */
+#endif
+
+#define _(msgid) gettext (msgid)
 
 /* Various declarations.  */
 

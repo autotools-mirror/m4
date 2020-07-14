@@ -20,7 +20,7 @@
 ##
 ## Written by Gary V. Vaughan <gary@gnu.org>
 
-SUBDIRS = . examples lib src doc checks tests
+SUBDIRS = . examples lib src doc checks po tests
 
 EXTRA_DIST = bootstrap c-boxes.el cfg.mk maint.mk \
 	.prev-version .version m4/gnulib-cache.m4 ChangeLog-2014

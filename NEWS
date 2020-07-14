@@ -638,7 +638,7 @@ detected, then sources are unprotoized on the fly before compilation.
 
 * GNU m4 uses newer versions of obstack, regex, getopt, etc.
 
-Version 1.0 - October 1991, by Rene' Seindal
+Version 1.0 - October 1991, by René Seindal
 
 * Uses GNU configure, taken from the gdb distribution.
 
@@ -651,7 +651,7 @@ or superflous arguments to built-in macros.
 
 * Several minor bugs have been fixed.
 
-Version 0.99 - July 1991, by Rene' Seindal
+Version 0.99 - July 1991, by René Seindal
 
 * The builtins `incr' and `decr' are now implemented without use of
 `eval'.
@@ -680,7 +680,7 @@ available.
 
 * Several typos in the manual has been corrected.  More probably persist.
 
-Version 0.75 - November 1990, by Rene' Seindal
+Version 0.75 - November 1990, by René Seindal
 
 * Implemented search path for include files (-I option and M4PATH
 environment variable).
@@ -713,7 +713,7 @@ not used.  With -G, `unix' is still defined.
 
 * Fixed two missing null bytes bugs.
 
-Version 0.50 - January 1990, by Rene' Seindal
+Version 0.50 - January 1990, by René Seindal
 
 * Initial beta release.
 

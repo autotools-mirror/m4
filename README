@@ -5,7 +5,7 @@ to macros).  `m4' also has built-in functions for including files,
 running shell commands, doing arithmetic, etc.  Autoconf needs GNU
 `m4' for generating `configure' scripts, but not for running them.
 
-GNU `m4' was originally written by Rene' Seindal, from Denmark.
+GNU `m4' was originally written by René Seindal, from Denmark.
 This release is considered stable.
 
 If GNU `m4' is meant to serve GNU `autoconf', beware that `m4'
