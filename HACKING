@@ -42,7 +42,7 @@ and is not part of a release distribution.
 
 * Before you can build from git, you need to bootstrap.  This requires:
   - A pre-installed version of GNU M4 1.4 or later, built from a package
-  - Autoconf 2.63 or later
+  - Autoconf 2.64 or later
   - Automake 1.11.1 or later
   - Gettext 0.19.2 or later
   - Help2man 1.29 or later
