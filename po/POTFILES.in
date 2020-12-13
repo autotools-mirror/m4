@@ -25,13 +25,14 @@ lib/error.c
 lib/execute.c
 lib/getopt.c
 lib/obstack.c
+lib/openat-die.c
+lib/os2-spawn.c
 lib/quotearg.c
 lib/siglist.h
 lib/spawn-pipe.c
 lib/strsignal.c
 lib/verror.c
 lib/version-etc.c
-lib/w32spawn.h
 lib/wait-process.c
 lib/xalloc-die.c
 src/builtin.c
