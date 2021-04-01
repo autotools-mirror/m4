@@ -165,6 +165,9 @@ static struct re_registers regs;
 #ifdef DEBUG_INPUT
 static const char *token_type_string (token_type);
 #endif
+
+static void pop_input (void);
+
 
 
 /*-------------------------------------------------------------------.
@@ -250,6 +253,9 @@ push_string_init (void)
       abort ();
     }
 
+  /* Prefer reusing an older block, for tail-call optimization.  */
+  while (isp && isp->type == INPUT_STRING && !isp->u.u_s.string[0])
+    pop_input ();
   next = (input_block *) obstack_alloc (current_input,
                                         sizeof (struct input_block));
   next->type = INPUT_STRING;
