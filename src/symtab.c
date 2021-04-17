@@ -144,7 +144,8 @@ free_symbol (symbol *sym)
     SYMBOL_DELETED (sym) = true;
   else
     {
-      free (SYMBOL_NAME (sym));
+      if (SYMBOL_STACK (sym) == NULL)
+        free (SYMBOL_NAME (sym));
       if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
         free (SYMBOL_TEXT (sym));
       free (sym);
@@ -219,7 +220,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
               SYMBOL_TYPE (sym) = TOKEN_VOID;
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
               sym->hash = h;
-              SYMBOL_NAME (sym) = xstrdup (name);
+              SYMBOL_NAME (sym) = old->name;
+              old->name = xstrdup (name);
               SYMBOL_MACRO_ARGS (sym) = false;
               SYMBOL_BLIND_NO_ARGS (sym) = false;
               SYMBOL_DELETED (sym) = false;
@@ -244,7 +246,6 @@ lookup_symbol (const char *name, symbol_lookup mode)
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
       sym->hash = h;
-      SYMBOL_NAME (sym) = xstrdup (name);
       SYMBOL_MACRO_ARGS (sym) = false;
       SYMBOL_BLIND_NO_ARGS (sym) = false;
       SYMBOL_DELETED (sym) = false;
@@ -260,7 +261,10 @@ lookup_symbol (const char *name, symbol_lookup mode)
           sym->next = SYMBOL_STACK (sym)->next;
           SYMBOL_STACK (sym)->next = NULL;
           SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_STACK (sym));
+          SYMBOL_NAME (sym) = SYMBOL_NAME (SYMBOL_STACK (sym));
         }
+      else
+        SYMBOL_NAME (sym) = xstrdup (name);
       return sym;
 
     case SYMBOL_DELETE:
