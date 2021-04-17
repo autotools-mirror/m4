@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 2006-2014, 2016-2017, 2020 Free Software
+   Copyright (C) 1989-1994, 2006-2014, 2016-2017, 2020-2021 Free Software
    Foundation, Inc.
 
    This file is part of GNU M4.
@@ -36,8 +36,8 @@ reverse_symbol_list (symbol *sym)
   result = NULL;
   while (sym)
     {
-      next = SYMBOL_NEXT (sym);
-      SYMBOL_NEXT (sym) = result;
+      next = SYMBOL_STACK (sym);
+      SYMBOL_STACK (sym) = result;
       result = sym;
       sym = next;
     }
@@ -54,6 +54,7 @@ produce_frozen_state (const char *name)
   FILE *file;
   size_t h;
   symbol *sym;
+  symbol *bucket;
   const builtin *bp;
 
   file = fopen (name, O_BINARY ? "wb" : "w");
@@ -90,56 +91,57 @@ produce_frozen_state (const char *name)
 
   for (h = 0; h < hash_table_size; h++)
     {
-
-      /* Process all entries in one bucket, from the last to the first.
-         This order ensures that, at reload time, pushdef's will be
-         executed with the oldest definitions first.  */
-
-      symtab[h] = reverse_symbol_list (symtab[h]);
-      for (sym = symtab[h]; sym; sym = SYMBOL_NEXT (sym))
+      for (bucket = symtab[h]; bucket; bucket = SYMBOL_NEXT (bucket))
         {
-          switch (SYMBOL_TYPE (sym))
+          /* Process all entries in one stack, from the last to the first.
+             This order ensures that, at reload time, pushdef's will be
+             executed with the oldest definitions first.  */
+
+          bucket = reverse_symbol_list (bucket);
+          for (sym = bucket; sym; sym = SYMBOL_STACK (sym))
             {
-            case TOKEN_TEXT:
-              xfprintf (file, "T%d,%d\n",
-                        (int) strlen (SYMBOL_NAME (sym)),
-                        (int) strlen (SYMBOL_TEXT (sym)));
-              fputs (SYMBOL_NAME (sym), file);
-              fputs (SYMBOL_TEXT (sym), file);
-              fputc ('\n', file);
-              break;
-
-            case TOKEN_FUNC:
-              bp = find_builtin_by_addr (SYMBOL_FUNC (sym));
-              if (bp == NULL)
+              switch (SYMBOL_TYPE (sym))
                 {
-                  M4ERROR ((warning_status, 0, "\
+                case TOKEN_TEXT:
+                  xfprintf (file, "T%d,%d\n",
+                            (int) strlen (SYMBOL_NAME (sym)),
+                            (int) strlen (SYMBOL_TEXT (sym)));
+                  fputs (SYMBOL_NAME (sym), file);
+                  fputs (SYMBOL_TEXT (sym), file);
+                  fputc ('\n', file);
+                  break;
+
+                case TOKEN_FUNC:
+                  bp = find_builtin_by_addr (SYMBOL_FUNC (sym));
+                  if (bp == NULL)
+                    {
+                      M4ERROR ((warning_status, 0, "\
 INTERNAL ERROR: builtin not found in builtin table!"));
-                  abort ();
-                }
-              xfprintf (file, "F%d,%d\n",
-                        (int) strlen (SYMBOL_NAME (sym)),
-                        (int) strlen (bp->name));
-              fputs (SYMBOL_NAME (sym), file);
-              fputs (bp->name, file);
-              fputc ('\n', file);
-              break;
+                      abort ();
+                    }
+                  xfprintf (file, "F%d,%d\n",
+                            (int) strlen (SYMBOL_NAME (sym)),
+                            (int) strlen (bp->name));
+                  fputs (SYMBOL_NAME (sym), file);
+                  fputs (bp->name, file);
+                  fputc ('\n', file);
+                  break;
 
-            case TOKEN_VOID:
-              /* Ignore placeholder tokens that exist due to traceon.  */
-              break;
+                case TOKEN_VOID:
+                  /* Ignore placeholder tokens that exist due to traceon.  */
+                  break;
 
-            default:
-              M4ERROR ((warning_status, 0, "\
+                default:
+                  M4ERROR ((warning_status, 0, "\
 INTERNAL ERROR: bad token data type in freeze_one_symbol ()"));
-              abort ();
-              break;
+                  abort ();
+                  break;
+                }
             }
+
+          /* Reverse the bucket once more, putting it back as it was.  */
+          bucket = reverse_symbol_list (bucket);
         }
-
-      /* Reverse the bucket once more, putting it back as it was.  */
-
-      symtab[h] = reverse_symbol_list (symtab[h]);
     }
 
   /* Let diversions be issued from output.c module, its cleaner to have this

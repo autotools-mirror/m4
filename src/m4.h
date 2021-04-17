@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 2004-2014, 2016-2017, 2020 Free Software
+   Copyright (C) 1989-1994, 2004-2014, 2016-2017, 2020-2021 Free Software
    Foundation, Inc.
 
    This file is part of GNU M4.
@@ -359,7 +359,8 @@ enum symbol_lookup
 /* Symbol table entry.  */
 struct symbol
 {
-  struct symbol *next;
+  struct symbol *stack; /* pushdef stack */
+  struct symbol *next; /* hash bucket chain */
   bool_bitfield traced : 1;
   bool_bitfield shadowed : 1;
   bool_bitfield macro_args : 1;
@@ -371,6 +372,7 @@ struct symbol
   token_data data;
 };
 
+#define SYMBOL_STACK(S)         ((S)->stack)
 #define SYMBOL_NEXT(S)          ((S)->next)
 #define SYMBOL_TRACED(S)        ((S)->traced)
 #define SYMBOL_SHADOWED(S)      ((S)->shadowed)

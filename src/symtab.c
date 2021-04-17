@@ -1,6 +1,6 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 2003, 2006-2014, 2016-2017, 2020 Free
+   Copyright (C) 1989-1994, 2003, 2006-2014, 2016-2017, 2020-2021 Free
    Software Foundation, Inc.
 
    This file is part of GNU M4.
@@ -223,6 +223,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
               SYMBOL_DELETED (sym) = false;
               SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
+              SYMBOL_STACK (sym) = SYMBOL_STACK (old);
+              SYMBOL_STACK (old) = NULL;
               SYMBOL_NEXT (sym) = SYMBOL_NEXT (old);
               SYMBOL_NEXT (old) = NULL;
               (*spp) = sym;
@@ -247,13 +249,17 @@ lookup_symbol (const char *name, symbol_lookup mode)
       SYMBOL_DELETED (sym) = false;
       SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
+      SYMBOL_STACK (sym) = NULL;
       SYMBOL_NEXT (sym) = *spp;
       (*spp) = sym;
 
       if (mode == SYMBOL_PUSHDEF && cmp == 0)
         {
-          SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = true;
-          SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_NEXT (sym));
+          SYMBOL_STACK (sym) = SYMBOL_NEXT (sym);
+          SYMBOL_NEXT (sym) = SYMBOL_NEXT (SYMBOL_STACK (sym));
+          SYMBOL_NEXT (SYMBOL_STACK (sym)) = NULL;
+          SYMBOL_SHADOWED (SYMBOL_STACK (sym)) = true;
+          SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_STACK (sym));
         }
       return sym;
 
@@ -271,22 +277,28 @@ lookup_symbol (const char *name, symbol_lookup mode)
         return NULL;
       {
         bool traced = false;
-        if (SYMBOL_NEXT (sym) != NULL
-            && SYMBOL_SHADOWED (SYMBOL_NEXT (sym))
+        symbol *next = SYMBOL_NEXT (sym);
+        if (SYMBOL_STACK (sym) != NULL
+            && SYMBOL_SHADOWED (SYMBOL_STACK (sym))
             && mode == SYMBOL_POPDEF)
           {
-            SYMBOL_SHADOWED (SYMBOL_NEXT (sym)) = false;
-            SYMBOL_TRACED (SYMBOL_NEXT (sym)) = SYMBOL_TRACED (sym);
+            SYMBOL_SHADOWED (SYMBOL_STACK (sym)) = false;
+            SYMBOL_TRACED (SYMBOL_STACK (sym)) = SYMBOL_TRACED (sym);
+            SYMBOL_NEXT (SYMBOL_STACK (sym)) = next;
+            *spp = SYMBOL_STACK (sym);
           }
         else
-          traced = SYMBOL_TRACED (sym);
+          {
+            traced = SYMBOL_TRACED (sym);
+            *spp = next;
+          }
         do
           {
-            *spp = SYMBOL_NEXT (sym);
+            next = SYMBOL_STACK (sym);
             free_symbol (sym);
-            sym = *spp;
+            sym = next;
           }
-        while (*spp != NULL && SYMBOL_SHADOWED (*spp)
+        while (next != NULL && SYMBOL_SHADOWED (next)
                && mode == SYMBOL_DELETE);
         if (traced)
           {
@@ -300,6 +312,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
             SYMBOL_DELETED (sym) = false;
             SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
+            SYMBOL_STACK (sym) = NULL;
             SYMBOL_NEXT (sym) = *spp;
             (*spp) = sym;
           }
@@ -383,19 +396,22 @@ static void
 symtab_print_list (int i)
 {
   symbol *sym;
+  symbol *bucket;
   size_t h;
 
   xprintf ("Symbol dump #%d:\n", i);
   for (h = 0; h < hash_table_size; h++)
-    for (sym = symtab[h]; sym != NULL; sym = sym->next)
-      xprintf ("\tname %s, bucket %lu, addr %p, next %p, "
-               "flags%s%s%s, pending %d\n",
-               SYMBOL_NAME (sym),
-               (unsigned long int) h, sym, SYMBOL_NEXT (sym),
-               SYMBOL_TRACED (sym) ? " traced" : "",
-               SYMBOL_SHADOWED (sym) ? " shadowed" : "",
-               SYMBOL_DELETED (sym) ? " deleted" : "",
-               SYMBOL_PENDING_EXPANSIONS (sym));
+    for (bucket = symtab[h]; bucket != NULL; bucket = bucket->next)
+      for (sym = bucket; sym; sym = sym->stack)
+        xprintf ("\tname %s, bucket %lu, addr %p, stack %p, next %p, "
+                 "flags%s%s%s, pending %d\n",
+                 SYMBOL_NAME (sym),
+                 (unsigned long int) h, sym, SYMBOL_STACK (sym),
+                 SYMBOL_NEXT (sym),
+                 SYMBOL_TRACED (sym) ? " traced" : "",
+                 SYMBOL_SHADOWED (sym) ? " shadowed" : "",
+                 SYMBOL_DELETED (sym) ? " deleted" : "",
+                 SYMBOL_PENDING_EXPANSIONS (sym));
 }
 
 #endif /* DEBUG_SYM */
