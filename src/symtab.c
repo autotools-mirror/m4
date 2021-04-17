@@ -23,7 +23,7 @@
    symbol table is a simple chained hash table.  Each symbol is described
    by a struct symbol, which is placed in the hash table based upon the
    symbol name.  Symbols that hash to the same entry in the table are
-   kept on a list, sorted by name.  As a special case, to facilitate the
+   kept on a list, sorted by hash.  As a special case, to facilitate the
    "pushdef" and "popdef" builtins, a symbol can be several times in the
    symbol table, one for each definition.  Since the name is the same,
    all the entries for the symbol will be on the same list, and will
@@ -182,7 +182,9 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
   for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
     {
-      cmp = strcmp (SYMBOL_NAME (sym), name);
+      cmp = (h > sym->hash) - (h < sym->hash);
+      if (cmp == 0)
+        cmp = strcmp (SYMBOL_NAME (sym), name);
       if (cmp >= 0)
         break;
     }
@@ -216,6 +218,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
               sym = (symbol *) xmalloc (sizeof (symbol));
               SYMBOL_TYPE (sym) = TOKEN_VOID;
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
+              sym->hash = h;
               SYMBOL_NAME (sym) = xstrdup (name);
               SYMBOL_MACRO_ARGS (sym) = false;
               SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -240,6 +243,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
       sym = (symbol *) xmalloc (sizeof (symbol));
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
+      sym->hash = h;
       SYMBOL_NAME (sym) = xstrdup (name);
       SYMBOL_MACRO_ARGS (sym) = false;
       SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -298,6 +302,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
             sym = (symbol *) xmalloc (sizeof (symbol));
             SYMBOL_TYPE (sym) = TOKEN_VOID;
             SYMBOL_TRACED (sym) = true;
+            sym->hash = h;
             SYMBOL_NAME (sym) = xstrdup (name);
             SYMBOL_MACRO_ARGS (sym) = false;
             SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -395,9 +400,9 @@ symtab_print_list (int i)
   for (h = 0; h < hash_table_size; h++)
     for (bucket = symtab[h]; bucket != NULL; bucket = bucket->next)
       for (sym = bucket; sym; sym = sym->stack)
-        xprintf ("\tname %s, bucket %lu, addr %p, stack %p, next %p, "
-                 "flags%s%s, pending %d\n",
-                 SYMBOL_NAME (sym),
+        xprintf ("\tname %s, hash %lu, bucket %lu, addr %p, stack %p, "
+                 "next %p, flags%s%s, pending %d\n",
+                 SYMBOL_NAME (sym), (unsigned long int) sym->hash,
                  (unsigned long int) h, sym, SYMBOL_STACK (sym),
                  SYMBOL_NEXT (sym),
                  SYMBOL_TRACED (sym) ? " traced" : "",

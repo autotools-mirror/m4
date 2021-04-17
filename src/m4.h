@@ -367,6 +367,7 @@ struct symbol
   bool_bitfield deleted : 1;
   int pending_expansions;
 
+  size_t hash;
   char *name;
   token_data data;
 };
