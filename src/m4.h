@@ -362,7 +362,6 @@ struct symbol
   struct symbol *stack; /* pushdef stack */
   struct symbol *next; /* hash bucket chain */
   bool_bitfield traced : 1;
-  bool_bitfield shadowed : 1;
   bool_bitfield macro_args : 1;
   bool_bitfield blind_no_args : 1;
   bool_bitfield deleted : 1;
@@ -375,7 +374,6 @@ struct symbol
 #define SYMBOL_STACK(S)         ((S)->stack)
 #define SYMBOL_NEXT(S)          ((S)->next)
 #define SYMBOL_TRACED(S)        ((S)->traced)
-#define SYMBOL_SHADOWED(S)      ((S)->shadowed)
 #define SYMBOL_MACRO_ARGS(S)    ((S)->macro_args)
 #define SYMBOL_BLIND_NO_ARGS(S) ((S)->blind_no_args)
 #define SYMBOL_DELETED(S)       ((S)->deleted)

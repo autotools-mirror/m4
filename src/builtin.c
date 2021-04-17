@@ -1,7 +1,7 @@
 /* GNU m4 -- A simple macro processor
 
-   Copyright (C) 1989-1994, 2000, 2004, 2006-2014, 2016-2017, 2020 Free
-   Software Foundation, Inc.
+   Copyright (C) 1989-1994, 2000, 2004, 2006-2014, 2016-2017, 2020-2021
+   Free Software Foundation, Inc.
 
    This file is part of GNU M4.
 
@@ -700,7 +700,7 @@ static void
 dump_symbol (symbol *sym, void *arg)
 {
   struct dump_symbol_data *data = (struct dump_symbol_data *) arg;
-  if (!SYMBOL_SHADOWED (sym) && SYMBOL_TYPE (sym) != TOKEN_VOID)
+  if (SYMBOL_TYPE (sym) != TOKEN_VOID)
     {
       obstack_blank (data->obs, sizeof (symbol *));
       data->base = (symbol **) obstack_base (data->obs);
