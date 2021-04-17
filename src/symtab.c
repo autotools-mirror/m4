@@ -186,7 +186,8 @@ free_symbol (symbol *sym)
     SYMBOL_DELETED (sym) = true;
   else
     {
-      free (SYMBOL_NAME (sym));
+      if (sym->stack == NULL)
+        free (SYMBOL_NAME (sym));
       if (SYMBOL_TYPE (sym) == TOKEN_TEXT)
         free (SYMBOL_TEXT (sym));
       free (sym);
@@ -245,7 +246,8 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
               SYMBOL_TYPE (sym) = TOKEN_VOID;
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
               sym->hash = old->hash;
-              SYMBOL_NAME (sym) = xmemdup0 (name, len);
+              SYMBOL_NAME (sym) = old->name;
+              old->name = xmemdup0 (name, len);
               SYMBOL_NAME_LEN (sym) = len;
               SYMBOL_MACRO_ARGS (sym) = false;
               SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -286,7 +288,6 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
       sym->hash = tmp.hash;
-      SYMBOL_NAME (sym) = xmemdup0 (name, len);
       SYMBOL_NAME_LEN (sym) = len;
       SYMBOL_MACRO_ARGS (sym) = false;
       SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -299,9 +300,11 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
           sym->stack = entry->stack;
           entry->stack = sym;
           SYMBOL_TRACED (sym) = SYMBOL_TRACED (sym->stack);
+          SYMBOL_NAME (sym) = entry->name;
         }
       else
         {
+          SYMBOL_NAME (sym) = xmemdup0 (name, len);
           sym->stack = sym;
           entry = (symbol *) hash_insert (symtab, sym);
           if (entry)
@@ -333,6 +336,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
             SYMBOL_TRACED (sym->stack) = SYMBOL_TRACED (sym);
             entry->stack = sym->stack;
             sym->stack = NULL;
+            sym->name = NULL;
             free_symbol (sym);
           }
         else
@@ -343,6 +347,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
                 symbol *old = sym;
                 sym = sym->stack;
                 old->stack = NULL;
+                old->name = NULL;
                 free_symbol (old);
               }
             sym = (symbol *) hash_remove (symtab, entry);
