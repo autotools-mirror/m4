@@ -93,7 +93,7 @@ profile_strcmp (const char *s1, const char *s2)
 `------------------------------------------------------------------*/
 
 /* Pointer to symbol table.  */
-symbol **symtab;
+static symbol **symtab;
 
 void
 symtab_init (void)
@@ -227,9 +227,9 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
               SYMBOL_STACK (sym) = SYMBOL_STACK (old);
               SYMBOL_STACK (old) = NULL;
-              SYMBOL_NEXT (sym) = SYMBOL_NEXT (old);
-              SYMBOL_NEXT (old) = NULL;
-              (*spp) = sym;
+              sym->next = old->next;
+              old->next = NULL;
+              *spp = sym;
             }
           return sym;
         }
@@ -251,14 +251,14 @@ lookup_symbol (const char *name, symbol_lookup mode)
       SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
       SYMBOL_STACK (sym) = NULL;
-      SYMBOL_NEXT (sym) = *spp;
-      (*spp) = sym;
+      sym->next = *spp;
+      *spp = sym;
 
       if (mode == SYMBOL_PUSHDEF && cmp == 0)
         {
-          SYMBOL_STACK (sym) = SYMBOL_NEXT (sym);
-          SYMBOL_NEXT (sym) = SYMBOL_NEXT (SYMBOL_STACK (sym));
-          SYMBOL_NEXT (SYMBOL_STACK (sym)) = NULL;
+          SYMBOL_STACK (sym) = sym->next;
+          sym->next = SYMBOL_STACK (sym)->next;
+          SYMBOL_STACK (sym)->next = NULL;
           SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_STACK (sym));
         }
       return sym;
@@ -277,18 +277,18 @@ lookup_symbol (const char *name, symbol_lookup mode)
         return NULL;
       {
         bool traced = false;
-        symbol *next = SYMBOL_NEXT (sym);
+        symbol *next;
         if (SYMBOL_STACK (sym) != NULL
             && mode == SYMBOL_POPDEF)
           {
             SYMBOL_TRACED (SYMBOL_STACK (sym)) = SYMBOL_TRACED (sym);
-            SYMBOL_NEXT (SYMBOL_STACK (sym)) = next;
+            SYMBOL_STACK (sym)->next = sym->next;
             *spp = SYMBOL_STACK (sym);
           }
         else
           {
             traced = SYMBOL_TRACED (sym);
-            *spp = next;
+            *spp = sym->next;
           }
         do
           {
@@ -310,8 +310,8 @@ lookup_symbol (const char *name, symbol_lookup mode)
             SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
             SYMBOL_STACK (sym) = NULL;
-            SYMBOL_NEXT (sym) = *spp;
-            (*spp) = sym;
+            sym->next = *spp;
+            *spp = sym;
           }
       }
       return NULL;
@@ -349,7 +349,7 @@ hack_all_symbols (hack_symbol *func, void *data)
          calling func.  */
       for (sym = symtab[h]; sym != NULL; sym = next)
         {
-          next = SYMBOL_NEXT (sym);
+          next = sym->next;
           func (sym, data);
         }
     }
@@ -404,7 +404,7 @@ symtab_print_list (int i)
                  "next %p, flags%s%s, pending %d\n",
                  SYMBOL_NAME (sym), (unsigned long int) sym->hash,
                  (unsigned long int) h, sym, SYMBOL_STACK (sym),
-                 SYMBOL_NEXT (sym),
+                 sym->next,
                  SYMBOL_TRACED (sym) ? " traced" : "",
                  SYMBOL_DELETED (sym) ? " deleted" : "",
                  SYMBOL_PENDING_EXPANSIONS (sym));

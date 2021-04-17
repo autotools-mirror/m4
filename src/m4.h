@@ -373,7 +373,6 @@ struct symbol
 };
 
 #define SYMBOL_STACK(S)         ((S)->stack)
-#define SYMBOL_NEXT(S)          ((S)->next)
 #define SYMBOL_TRACED(S)        ((S)->traced)
 #define SYMBOL_MACRO_ARGS(S)    ((S)->macro_args)
 #define SYMBOL_BLIND_NO_ARGS(S) ((S)->blind_no_args)
@@ -389,8 +388,6 @@ typedef struct symbol symbol;
 typedef void hack_symbol (symbol *, void *);
 
 #define HASHMAX 509             /* default, overridden by -Hsize */
-
-extern symbol **symtab;
 
 extern void free_symbol (symbol *sym);
 extern void symtab_init (void);
