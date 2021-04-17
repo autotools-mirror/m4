@@ -23,13 +23,7 @@
    symbol table is a simple chained hash table.  Each symbol is described
    by a struct symbol, which is placed in the hash table based upon the
    symbol name.  Symbols that hash to the same entry in the table are
-   kept on a list, sorted by name.  As a special case, to facilitate the
-   "pushdef" and "popdef" builtins, a symbol can be several times in the
-   symbol table, one for each definition.  Since the name is the same,
-   all the entries for the symbol will be on the same list, and will
-   also, because the list is sorted, be adjacent.  All the entries for a
-   name are simply ordered on the list by age.  The current definition
-   will then always be the first found.  */
+   kept on a list, sorted by hash.  */
 
 #include "m4.h"
 
@@ -128,7 +122,7 @@ symtab_hasher (const void *entry, size_t buckets)
     }
 #endif /* DEBUG_SYM */
   const symbol *sym = (const symbol *) entry;
-  return hash (SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym)) % buckets;
+  return sym->hash % buckets;
 }
 
 /* Compare two hash table entries for equality.  */
@@ -140,7 +134,8 @@ symtab_comparator (const void *entry_a, const void *entry_b)
 #endif /* DEBUG_SYM */
   const symbol *sym_a = (const symbol *) entry_a;
   const symbol *sym_b = (const symbol *) entry_b;
-  return (SYMBOL_NAME_LEN (sym_a) == SYMBOL_NAME_LEN (sym_b)
+  return (sym_a->hash == sym_b->hash
+          && SYMBOL_NAME_LEN (sym_a) == SYMBOL_NAME_LEN (sym_b)
           && memcmp (SYMBOL_NAME (sym_a), SYMBOL_NAME (sym_b),
                      SYMBOL_NAME_LEN (sym_a)) == 0);
 }
@@ -223,6 +218,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 
   tmp.name = (char *) name;
   tmp.len = len;
+  tmp.hash = hash (name, len);
   entry = (symbol *) hash_lookup (symtab, &tmp);
 
   switch (mode)
@@ -248,6 +244,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
               sym = (symbol *) xmalloc (sizeof *sym);
               SYMBOL_TYPE (sym) = TOKEN_VOID;
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
+              sym->hash = old->hash;
               SYMBOL_NAME (sym) = xmemdup0 (name, len);
               SYMBOL_NAME_LEN (sym) = len;
               SYMBOL_MACRO_ARGS (sym) = false;
@@ -288,6 +285,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
       sym = (symbol *) xmalloc (sizeof *sym);
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
+      sym->hash = tmp.hash;
       SYMBOL_NAME (sym) = xmemdup0 (name, len);
       SYMBOL_NAME_LEN (sym) = len;
       SYMBOL_MACRO_ARGS (sym) = false;
@@ -357,6 +355,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
             sym = (symbol *) xmalloc (sizeof *sym);
             SYMBOL_TYPE (sym) = TOKEN_VOID;
             SYMBOL_TRACED (sym) = true;
+            sym->hash = tmp.hash;
             SYMBOL_NAME (sym) = xmemdup0 (name, len);
             SYMBOL_NAME_LEN (sym) = len;
             SYMBOL_MACRO_ARGS (sym) = false;
@@ -455,9 +454,9 @@ symtab_print_list (int i)
       stack = sym->stack;
       do
         {
-          xprintf ("\tname %s, len %zu, addr %p, "
+          xprintf ("\tname %s, len %zu, hash %zu, addr %p, "
                    "stack %p, flags%s%s, pending %d\n",
-                   SYMBOL_NAME (stack), SYMBOL_NAME_LEN (stack),
+                   SYMBOL_NAME (stack), SYMBOL_NAME_LEN (stack), stack->hash,
                    stack, stack->stack, SYMBOL_TRACED (stack) ? " traced" : "",
                    SYMBOL_DELETED (stack) ? " deleted" : "",
                    SYMBOL_PENDING_EXPANSIONS (stack));

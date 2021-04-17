@@ -431,6 +431,7 @@ struct symbol
   bool_bitfield deleted : 1;
   int pending_expansions;
 
+  size_t hash;
   char *name;
   size_t len;
   token_data data;  /* Type should be only TOKEN_TEXT or TOKEN_FUNC.  */
