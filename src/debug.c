@@ -225,12 +225,9 @@ debug_set_output (const call_info *caller, const char *name)
     debug_set_file (caller, NULL);
   else
     {
-      fp = fopen (name, "a");
+      fp = fopen (name, "ae");
       if (fp == NULL)
         return false;
-
-      if (set_cloexec_flag (fileno (fp), true) != 0)
-        m4_warn (errno, caller, _("cannot protect debug file across forks"));
       debug_set_file (caller, fp);
     }
   return true;

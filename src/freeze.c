@@ -113,7 +113,7 @@ produce_frozen_state (const char *name)
 {
   FILE *file;
 
-  file = fopen (name, O_BINARY ? "wb" : "w");
+  file = fopen (name, O_BINARY ? "wbe" : "we");
   if (!file)
     {
        m4_error (0, errno, NULL, _("cannot open %s"),

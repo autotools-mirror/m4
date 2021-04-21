@@ -42,6 +42,7 @@
 #  --no-conditional-dependencies \
 #  --no-libtool \
 #  --macro-prefix=M4 \
+#  --avoid=getopt-posix-tests \
 #  --avoid=lock-tests \
 #  --avoid=tls-tests \
 #  announce-gen \
@@ -55,7 +56,6 @@
 #  c-ctype \
 #  c-stack \
 #  clean-temp \
-#  cloexec \
 #  close-stream \
 #  closein \
 #  config-h \
@@ -69,7 +69,7 @@
 #  fflush \
 #  filenamecat \
 #  flexmember \
-#  fopen \
+#  fopen-gnu \
 #  fopen-safer \
 #  freadptr \
 #  freadseek \
@@ -138,7 +138,6 @@ gl_MODULES([
   c-ctype
   c-stack
   clean-temp
-  cloexec
   close-stream
   closein
   config-h
@@ -152,7 +151,7 @@ gl_MODULES([
   fflush
   filenamecat
   flexmember
-  fopen
+  fopen-gnu
   fopen-safer
   freadptr
   freadseek
@@ -208,7 +207,7 @@ gl_MODULES([
   xvasprintf-posix
 ])
 gl_WITH_CXX_TESTS
-gl_AVOID([lock-tests tls-tests])
+gl_AVOID([getopt-posix-tests lock-tests tls-tests])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])
 gl_PO_BASE([])

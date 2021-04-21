@@ -1287,7 +1287,12 @@ m4_incr (struct obstack *obs, int argc, macro_arguments *argv)
   if (!numeric_arg (me, ARG (1), ARG_LEN (1), &value))
     return;
 
-  shipout_int (obs, value + 1);
+  /* Minimize undefined C behavior on overflow.  This code assumes
+     that the implementation-defined overflow when casting unsigned to
+     signed is a silent twos-complement wrap-around.  */
+  uint32_t v = value;
+  int32_t w = v + 1;
+  shipout_int (obs, w);
 }
 
 static void
@@ -1302,7 +1307,12 @@ m4_decr (struct obstack *obs, int argc, macro_arguments *argv)
   if (!numeric_arg (me, ARG (1), ARG_LEN (1), &value))
     return;
 
-  shipout_int (obs, value - 1);
+  /* Minimize undefined C behavior on overflow.  This code assumes
+     that the implementation-defined overflow when casting unsigned to
+     signed is a silent twos-complement wrap-around.  */
+  uint32_t v = value;
+  int32_t w = v - 1;
+  shipout_int (obs, w);
 }
 
 /* This section contains the macros "divert", "undivert" and "divnum" for
