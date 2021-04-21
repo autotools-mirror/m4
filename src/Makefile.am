@@ -29,5 +29,7 @@ noinst_HEADERS = m4.h
 m4_SOURCES = m4.c builtin.c debug.c eval.c format.c freeze.c input.c \
 macro.c output.c path.c symtab.c
 m4_LDADD = ../lib/libm4.a $(LIBM4_LIBDEPS) \
-  $(LIBCSTACK) $(LIBICONV) $(LIBINTL) \
-  $(LIB_MBRTOWC) $(LIB_SETLOCALE) $(LIBTHREAD)
+  $(LIB_CLOCK_GETTIME) $(LIB_GETRANDOM) $(LIB_HARD_LOCALE) \
+  $(LIB_MBRTOWC) $(LIB_POSIX_SPAWN) $(LIB_SETLOCALE) $(LIB_SETLOCALE_NULL) \
+  $(LIBCSTACK) $(LIBICONV) $(LIBINTL) $(LIBTHREAD) $(LIBUNISTRING) \
+  @INTL_MACOSX_LIBS@
