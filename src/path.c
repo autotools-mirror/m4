@@ -110,7 +110,7 @@ add_include_directory (const char *dir)
 static FILE *
 m4_fopen (const char *file)
 {
-  FILE *fp = fopen (file, "r");
+  FILE *fp = fopen (file, "re");
   if (fp)
     {
       struct stat st;
@@ -121,9 +121,6 @@ m4_fopen (const char *file)
           errno = EISDIR;
           return NULL;
         }
-      if (set_cloexec_flag (fd, true) != 0)
-        M4ERROR ((warning_status, errno,
-                  "Warning: cannot protect input file across forks"));
     }
   return fp;
 }

@@ -224,15 +224,12 @@ m4_tmpfile (int divnum)
     }
   name = m4_tmpname (divnum);
   register_temp_file (output_temp_dir, name);
-  file = fopen_temp (name, O_BINARY ? "wb+" : "w+", false);
+  file = fopen_temp (name, O_BINARY ? "wb+e" : "w+e", false);
   if (file == NULL)
     {
       unregister_temp_file (output_temp_dir, name);
       m4_failure (errno, "cannot create temporary file for diversion");
     }
-  else if (set_cloexec_flag (fileno (file), true) != 0)
-    M4ERROR ((warning_status, errno,
-              "Warning: cannot protect diversion across forks"));
   return file;
 }
 
@@ -263,11 +260,9 @@ m4_tmpopen (int divnum, bool reread)
     }
   name = m4_tmpname (divnum);
   /* We need update mode, to avoid truncation.  */
-  file = fopen_temp (name, O_BINARY ? "rb+" : "r+", false);
+  file = fopen_temp (name, O_BINARY ? "rb+e" : "r+e", false);
   if (file == NULL)
     m4_failure (errno, "cannot create temporary file for diversion");
-  else if (set_cloexec_flag (fileno (file), true) != 0)
-    m4_error (0, errno, _("cannot protect diversion across forks"));
   /* Update mode starts at the beginning of the stream, but sometimes
      we want the end.  */
   else if (!reread && fseeko (file, 0, SEEK_END) != 0)

@@ -57,7 +57,7 @@ produce_frozen_state (const char *name)
   symbol *bucket;
   const builtin *bp;
 
-  file = fopen (name, O_BINARY ? "wb" : "w");
+  file = fopen (name, O_BINARY ? "wbe" : "we");
   if (!file)
     m4_failure (errno, "cannot open `%s'", name);
 
