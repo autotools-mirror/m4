@@ -844,10 +844,11 @@ System V version.  @xref{Compatibility}, for a list of these.
 
 @item -H @var{num}
 @itemx --hashsize=@var{num}
-Make the internal hash table for symbol lookup be @var{num} entries big.
-For better performance, the number should be prime, but this is not
-checked.  The default is 509 entries.  It should not be necessary to
-increase this value, unless you define an excessive number of macros.
+Make room for @var{num} entries for the initial size of the internal
+hash table for symbol lookup.  For better performance, the number should
+be prime, but this is not checked.  The default is 65537 entries, and it
+is generally not necessary to alter this value, since the hash table
+automatically grows as needed.
 
 @item -L @var{num}
 @itemx --nesting-limit=@var{num}

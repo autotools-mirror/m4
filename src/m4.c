@@ -278,9 +278,9 @@ Preprocessor features:\n\
 Limits control:\n\
   -g, --gnu                    override -G to re-enable GNU extensions\n\
   -G, --traditional            suppress all GNU extensions\n\
-  -H, --hashsize=PRIME         set symbol lookup hash table size [509]\n\
+  -H, --hashsize=PRIME         set symbol lookup hash table size [%d]\n\
   -L, --nesting-limit=NUMBER   change nesting limit, 0 for unlimited [%d]\n\
-"), nesting_limit);
+"), HASHMAX, nesting_limit);
       puts ("");
       fputs (_("\
 Frozen state files:\n\
