@@ -387,7 +387,7 @@ typedef enum symbol_lookup symbol_lookup;
 typedef struct symbol symbol;
 typedef void hack_symbol (symbol *, void *);
 
-#define HASHMAX 509             /* default, overridden by -Hsize */
+#define HASHMAX 65537             /* default, overridden by -Hsize */
 
 extern void free_symbol (symbol *sym);
 extern void symtab_init (void);
