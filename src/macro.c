@@ -952,7 +952,7 @@ arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
 /* Given ARGV, compare text arguments INDEXA and INDEXB for equality.
    Both indices must be non-zero and less than argc.  Return true if
    the arguments contain the same contents; often more efficient than
-   strcmp (arg_text (argv, a, 1), arg_text (argv, b, 1)) == 0.  */
+   STREQ (arg_text (argv, a, 1), arg_text (argv, b, 1)).  */
 bool ATTRIBUTE_PURE
 arg_equal (macro_arguments *argv, unsigned int indexa, unsigned int indexb)
 {
