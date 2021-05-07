@@ -1,3 +1,0 @@
-[submodule "gnulib"]
-        path = build-aux/gnulib
-        url = git://git.sv.gnu.org/gnulib.git
