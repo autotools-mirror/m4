@@ -6,6 +6,13 @@ GNU M4 NEWS - User visible changes.
    modern systems have enough memory to benefit from fewer hash collisions
    by default.
 
+** Introduce the use of gettext, with the immediate benefit of nicer
+   UTF-8 author names.  Over time, more translations of program messages
+   will become available.
+
+** A number of portability improvements inherited from gnulib.
+
+
 * Noteworthy changes in release 1.4.18 (2016-12-31) [stable]
 
 ** Diagnose --word-regexp as unsupported if it was not configured.

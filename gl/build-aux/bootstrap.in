@@ -2,34 +2,27 @@
 
 # Bootstrap an Autotooled package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
+# Inspired by a script written by Paul Eggert.
 
-# Copyright (C) 2010-2014, 2016-2017, 2020-2021 Free Software
-# Foundation, Inc.
-# This is free software; see the source for copying conditions.  There is NO
-# warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# This is free software.  There is NO warranty; not even for
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# Copyright (C) 2010-2019 Bootstrap Authors
+#
+# This file is dual licensed under the terms of the MIT license
+# <https://opensource.org/license/MIT>, and GPL version 2 or later
+# <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
+# these licenses when using or redistributing this software or any of
+# the files within it.  See the URLs above, or the file `LICENSE`
+# included in the Bootstrap distribution for the full license texts.
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# You should place a copy of this script under version control in the
+# top-level directory of your project.  The intent is that all
+# customization can be done with a `bootstrap.conf` file also maintained
+# in your version control.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# Originally written by Paul Eggert.  The canonical version of this
-# script is maintained as build-aux/bootstrap in gnulib, however, to
-# be useful to your project, you should place a copy of it under
-# version control in the top-level directory of your project.  The
-# intent is that all customization can be done with a bootstrap.conf
-# file also maintained in your version control; gnulib comes with a
-# template build-aux/bootstrap.conf to get you started.
-
-# Please report bugs or propose patches to bug-gnulib@gnu.org.
+# Please report bugs or propose patches to:
+# <https://github.com/gnulib-modules/bootstrap/issues>
 
 
 ## ------ ##
@@ -137,7 +130,7 @@ package_bugreport=
 doc_base=
 gnulib_mk=
 gnulib_name=
-local_gl_dir=
+local_gl_path=
 source_base=
 tests_base=
 
@@ -164,6 +157,9 @@ gnulib_non_module_files="
 # these values are ignored.
 gnulib_path=
 gnulib_url=
+
+# Date from which to clone github, to avoid a full clone.
+gnulib_clone_since=
 
 # Additional gnulib-tool options to use.
 gnulib_tool_options="
@@ -233,7 +229,7 @@ vc_ignore=
 . `echo "$0" |${SED-sed} 's|[^/]*$||'`"extract-trace"
 
 # Set a version string for *this* script.
-scriptversion=2014-11-04.13; # UTC
+scriptversion=2019-03-22.11; # UTC
 
 
 ## ------------------- ##
@@ -261,8 +257,8 @@ func_bootstrap ()
 
     # Save the current positional parameters to prevent them being
     # corrupted by calls to 'set' in 'func_init'.
-    func_quote_for_eval ${1+"$@"}
-    _G_saved_positional_parameters=$func_quote_for_eval_result
+    func_quote eval ${1+"$@"}
+    _G_saved_positional_parameters=$func_quote_result
 
     # Initialisation.
     func_init
@@ -359,10 +355,13 @@ func_reconfigure ()
 
     $require_automake_options
 
-    # Automake (without 'foreign' option) requires that README exists.
+    # Automake (without 'foreign' option) requires that NEWS & README exist.
     case " $automake_options " in
       " foreign ") ;;
-      *) func_ensure_README ;;
+      *)
+        func_ensure_NEWS
+        func_ensure_README
+        ;;
     esac
 
     # Ensure ChangeLog presence.
@@ -419,6 +418,8 @@ func_gnulib_tool ()
     $require_libtoolize
 
     test true = "$gnulib_tool" || {
+      $require_gnulib_git_submodules
+
       # bootstrap.conf written for gnulib bootstrap expects
       # gnulib_tool_option_extras to which --no-changelog is appended,
       # but libtool bootstrap expects you to append to gnulib_tool_options
@@ -540,6 +541,7 @@ func_gettext_configuration ()
              '"$_G_xgettext_options"' \\\
              $${end_of_xgettext_options+}
         }
+        s/ *$//
       ' po/Makevars.template >po/Makevars || exit 1
     }
 
@@ -594,7 +596,7 @@ func_libtoolize ()
 # -----------------------------------
 # Copy SRC, a path relative to the gnulib sub-tree, to DEST, a path
 # relative to the top-level source directory using gnulib-tool so that
-# any patches or replacements in $local_gl_dir are applied.
+# any patches or replacements in $local_gl_path are applied.
 func_gnulib_tool_copy_file ()
 {
     $debug_cmd
@@ -686,6 +688,29 @@ EOT
     test -f ChangeLog~ \
       && func_append _G_message ' (backup in ChangeLog~)'
     func_verbose "$_G_message"
+
+    return 0
+}
+
+
+# func_ensure_NEWS
+# ----------------
+# Without AM_INIT_AUTOMAKE([foreign]), automake will not run to
+# completion with no NEWS file, even though NEWS.md or NEWS.txt
+# is often preferable.
+func_ensure_NEWS ()
+{
+    $debug_cmd
+
+    test -f NEWS || {
+      _G_NEWS=
+      for _G_news in NEWS.txt NEWS.md NEWS.rst; do
+        test -f "$_G_news" && break
+      done
+
+      test -f "$_G_news" && $LN_S $_G_news NEWS
+      func_verbose "$LN_S $_G_news NEWS"
+    }
 
     return 0
 }
@@ -894,6 +919,26 @@ func_update_dotversion ()
 # used in preference to deriving the default. Call them using their
 # associated 'require_*' variable to ensure that they are executed, at
 # most, once.
+
+
+# require_gnulib_git_submodules
+# -----------------------------
+# Initialize all git modules from $gnulib_git_submodules before we
+# run 'gnulib-tool'.
+require_gnulib_git_submodules=func_require_gnulib_git_submodules
+func_require_gnulib_git_submodules ()
+{
+    test -n "$gnulib_git_submodules" && {
+      for _G_submodule in $gnulib_git_submodules
+      do
+        func_show_eval "git submodule init -- $_G_submodule" \
+            && func_show_eval "git submodule update -- $_G_submodule" \
+            || func_fatal_error "Unable to init git module '$_G_submodule'."
+      done
+    }
+
+    require_gnulib_git_submodules=:
+}
 
 
 # require_checkout_only_file
@@ -1199,13 +1244,13 @@ func_require_buildreq_automake ()
 # require_buildreq_patch
 # ----------------------
 # Automatically add a patch build-requirement if there are diff files
-# in $local_gl_dir.
+# in $local_gl_path.
 require_buildreq_patch=func_require_buildreq_patch
 func_require_buildreq_patch ()
 {
     $debug_cmd
 
-    $require_local_gl_dir
+    $require_local_gl_path
 
     # This ensures PATCH is set appropriately by the time
     # func_check_versions enforces $buildreq.
@@ -1213,14 +1258,19 @@ func_require_buildreq_patch ()
 
     # If patch is not already listed in $buildreq...
     printf '%s\n' "$buildreq" |func_grep_q '^[	 ]*patch' || {
-      # The ugly find invocation is necessary to exit with non-zero
-      # status for old find binaries that don't support -exec fully.
-      if test ! -d "$local_gl_dir" \
-          || find "$local_gl_dir" -name "*.diff" -exec false {} \; ; then :
-      else
-          func_append buildreq 'patch - http://www.gnu.org/s/patch
-'
-      fi
+      eval "set dummy $local_gl_path_quoted" ; shift
+
+      for _G_dir
+      do
+        # The ugly find invocation is necessary to exit with non-zero
+        # status for old find binaries that don't support -exec fully.
+        if test ! -d "$_G_dir" \
+            || find "$_G_dir" -name "*.diff" -exec false {} \; ; then :
+        else
+          func_append buildreq "patch - http://www.gnu.org/s/patch$nl"
+          break
+        fi
+      done
     }
 
     require_buildreq_patch=:
@@ -1574,8 +1624,9 @@ func_require_gnulib_submodule ()
         trap func_cleanup_gnulib 1 2 13 15
 
         shallow=
-        $GIT clone -h 2>&1 |func_grep_q -- --depth \
-            && shallow='--depth 365'
+        test -n "$gnulib_clone_since" && \
+            $GIT clone -h 2>&1 |func_grep_q -- --shallow-since \
+            && shallow="--shallow-since=$gnulib_clone_since"
 
         func_show_eval "$GIT clone $shallow '$gnulib_url' '$gnulib_path'" \
           func_cleanup_gnulib
@@ -1654,9 +1705,14 @@ func_require_gnulib_tool_base_options ()
       $require_gnulib_name
       test -n "$gnulib_name" \
           && func_append_uniq gnulib_tool_base_options " --lib=$gnulib_name"
-      $require_local_gl_dir
-      test -n "$local_gl_dir" \
-          && func_append_uniq gnulib_tool_base_options " --local-dir=$local_gl_dir"
+      $require_local_gl_path
+      test -n "$local_gl_path" && {
+        eval "set dummy $local_gl_path_quoted" ; shift
+        for _G_dir
+        do
+          func_append_uniq gnulib_tool_base_options " --local-dir=$_G_dir"
+        done
+      }
       $require_source_base
       test -n "$source_base" \
           && func_append_uniq gnulib_tool_base_options " --source-base=$source_base"
@@ -1703,25 +1759,49 @@ Please install GNU Libtool, or 'export LIBTOOLIZE=/path/to/libtoolize'."
 }
 
 
-# require_local_gl_dir
-# --------------------
-# Ensure local_gl_dir has a sensible value, extracted from 'gnulib-cache.m4'
-# if possible, otherwise letting 'gnulib-tool' pick a default.
-require_local_gl_dir=func_require_local_gl_dir
-func_require_local_gl_dir ()
+# require_local_gl_path
+# ---------------------
+# Ensure local_gl_path has a sensible value, extracted from 'gnulib-cache.m4' if
+# possible, otherwise letting 'gnulib-tool' pick a default.
+require_local_gl_path=func_require_local_gl_path
+func_require_local_gl_path ()
 {
     $debug_cmd
 
     $require_gnulib_cache
 
-    test -f "$gnulib_cache" && test -z "$local_gl_dir" && {
-      func_extract_trace_first "gl_LOCAL_DIR" "$gnulib_cache"
-      local_gl_dir=$func_extract_trace_first_result
-
-      test -n "$local_gl_dir" && func_verbose "local_gl_dir='$local_gl_dir'"
+    # Compat with older bootstrap versions.
+    test -n "$local_gl_dir" && {
+      func_warning settings "\
+Please use 'local_gl_path' instead of 'local_gl_dir' in your
+'bootstrap.conf' file."
+      local_gl_path=$local_gl_dir
+      local_gl_dir=
     }
 
-    require_local_gl_dir=:
+    test -f "$gnulib_cache" && test -z "$local_gl_path" && {
+      func_extract_trace_first "gl_LOCAL_DIR" "$gnulib_cache"
+      local_gl_path=$func_extract_trace_first_result
+      test -n "$local_gl_path" && func_verbose "local_gl_path='$local_gl_path'"
+    }
+
+    test -z "$local_gl_path_quoted" && test -n "$local_gl_path" && {
+      save_IFS=$IFS
+      set dummy
+      # Don't use PATH_SEPARATOR here, gnulib must be fixed to store only ':' as
+      # path separator into gnulib-cache.m4 (consistency reasons among systems).
+      IFS=:
+      for _G_dir in $local_gl_path
+      do
+        set "$@" "$_G_dir"
+      done
+      shift
+      IFS=$save_IFS
+      func_quote eval "$@"
+      local_gl_path_quoted=$func_quote_result
+    }
+
+    require_local_gl_path=:
 }
 
 
@@ -2020,21 +2100,6 @@ else
 fi
 
 
-# func_unset VAR
-# --------------
-# Portably unset VAR.
-# In some shells, an 'unset VAR' statement leaves a non-zero return
-# status if VAR is already unset, which might be problematic if the
-# statement is used at the end of a function (thus poisoning its return
-# value) or when 'set -e' is active (causing even a spurious abort of
-# the script in this case).
-func_unset ()
-{
-    { eval $1=; unset $1; }
-}
-unset=func_unset
-
-
 # func_cmp_s FILE1 FILE2
 # ----------------------
 # Return non-zero exit status unless FILE1 and FILE2 are identical, without
@@ -2275,8 +2340,8 @@ func_show_eval ()
     _G_fail_exp=${2-':'}
 
     ${opt_silent-'false'} || {
-      func_quote_for_eval $_G_cmd
-      eval func_truncate_cmd $func_quote_for_eval_result
+      func_quote eval $_G_cmd
+      eval func_truncate_cmd $func_quote_result
       func_echo "running: $tc_bold$func_truncate_cmd_result$tc_reset"
     }
 
@@ -2663,8 +2728,8 @@ bootstrap_options_prep ()
     opt_skip_po=false
 
     # Pass back the list of options we consumed.
-    func_quote_for_eval ${1+"$@"}
-    bootstrap_options_prep_result=$func_quote_for_eval_result
+    func_quote eval ${1+"$@"}
+    bootstrap_options_prep_result=$func_quote_result
 }
 func_add_hook func_options_prep bootstrap_options_prep
 
@@ -2714,8 +2779,8 @@ bootstrap_parse_options ()
     done
 
     # save modified positional parameters for caller
-    func_quote_for_eval ${1+"$@"}
-    bootstrap_parse_options_result=$func_quote_for_eval_result
+    func_quote eval ${1+"$@"}
+    bootstrap_parse_options_result=$func_quote_result
 }
 func_add_hook func_parse_options bootstrap_parse_options
 
@@ -2733,8 +2798,8 @@ bootstrap_validate_options ()
         && func_fatal_help "too many arguments"
 
     # Pass back the (empty) list of unconsumed options.
-    func_quote_for_eval ${1+"$@"}
-    bootstrap_validate_options_result=$func_quote_for_eval_result
+    func_quote eval ${1+"$@"}
+    bootstrap_validate_options_result=$func_quote_result
 }
 func_add_hook func_validate_options bootstrap_validate_options
 

@@ -1,33 +1,23 @@
 # Set a version string for this script.
-scriptversion=2014-01-03.01; # UTC
+scriptversion=2019-02-19.15; # UTC
 
 # General shell script boiler plate, and helper functions.
 # Written by Gary V. Vaughan, 2004
 
-# Copyright (C) 2004-2014, 2016-2017, 2020-2021 Free Software
-# Foundation, Inc.
-# This is free software; see the source for copying conditions.  There is NO
-# warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# This is free software.  There is NO warranty; not even for
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# Copyright (C) 2004-2019 Bootstrap Authors
+#
+# This file is dual licensed under the terms of the MIT license
+# <https://opensource.org/license/MIT>, and GPL version 2 or later
+# <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
+# these licenses when using or redistributing this software or any of
+# the files within it.  See the URLs above, or the file `LICENSE`
+# included in the Bootstrap distribution for the full license texts.
 
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-
-# As a special exception to the GNU General Public License, if you distribute
-# this file as part of a program or library that is built using GNU Libtool,
-# you may include this file under the same distribution terms that you use
-# for the rest of that program.
-
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNES FOR A PARTICULAR PURPOSE. See the GNU
-# General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-# Please report bugs or propose patches to gary@gnu.org.
+# Please report bugs or propose patches to:
+# <https://github.com/gnulib-modules/bootstrap/issues>
 
 
 ## ------ ##
@@ -76,9 +66,6 @@ do
 	fi"
 done
 
-# CDPATH.
-(unset CDPATH) >/dev/null 2>&1 && unset CDPATH
-
 # Make sure IFS has a sensible default
 sp=' '
 nl='
@@ -94,6 +81,26 @@ if test "${PATH_SEPARATOR+set}" != set; then
   }
 fi
 
+
+# func_unset VAR
+# --------------
+# Portably unset VAR.
+# In some shells, an 'unset VAR' statement leaves a non-zero return
+# status if VAR is already unset, which might be problematic if the
+# statement is used at the end of a function (thus poisoning its return
+# value) or when 'set -e' is active (causing even a spurious abort of
+# the script in this case).
+func_unset ()
+{
+    { eval $1=; (eval unset $1) >/dev/null 2>&1 && eval unset $1 || : ; }
+}
+
+
+# Make sure CDPATH doesn't cause `cd` commands to output the target dir.
+func_unset CDPATH
+
+# Make sure ${,E,F}GREP behave sanely.
+func_unset GREP_OPTIONS
 
 
 ## ------------------------- ##
@@ -128,7 +135,7 @@ func_path_progs ()
 
     _G_path_prog_max=0
     _G_path_prog_found=false
-    _G_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+    _G_save_IFS=$IFS; IFS=${PATH_SEPARATOR-:}
     for _G_dir in $_G_PATH; do
       IFS=$_G_save_IFS
       test -z "$_G_dir" && _G_dir=.
@@ -195,7 +202,7 @@ test -z "$SED" && {
     rm -f conftest.in conftest.tmp conftest.nl conftest.out
   }
 
-  func_path_progs "sed gsed" func_check_prog_sed $PATH:/usr/xpg4/bin
+  func_path_progs "sed gsed" func_check_prog_sed "$PATH:/usr/xpg4/bin"
   rm -f conftest.sed
   SED=$func_path_progs_result
 }
@@ -231,7 +238,7 @@ test -z "$GREP" && {
     rm -f conftest.in conftest.tmp conftest.nl conftest.out
   }
 
-  func_path_progs "grep ggrep" func_check_prog_grep $PATH:/usr/xpg4/bin
+  func_path_progs "grep ggrep" func_check_prog_grep "$PATH:/usr/xpg4/bin"
   GREP=$func_path_progs_result
 }
 
@@ -516,16 +523,16 @@ if test yes = "$_G_HAVE_PLUSEQ_OP"; then
   {
     $debug_cmd
 
-    func_quote_for_eval "$2"
-    eval "$1+=\\ \$func_quote_for_eval_result"
+    func_quote_arg pretty "$2"
+    eval "$1+=\\ \$func_quote_arg_result"
   }'
 else
   func_append_quoted ()
   {
     $debug_cmd
 
-    func_quote_for_eval "$2"
-    eval "$1=\$$1\\ \$func_quote_for_eval_result"
+    func_quote_arg pretty "$2"
+    eval "$1=\$$1\\ \$func_quote_arg_result"
   }
 fi
 
@@ -1027,85 +1034,199 @@ func_relative_path ()
 }
 
 
-# func_quote_for_eval ARG...
-# --------------------------
-# Aesthetically quote ARGs to be evaled later.
-# This function returns two values:
-#   i) func_quote_for_eval_result
-#      double-quoted, suitable for a subsequent eval
-#  ii) func_quote_for_eval_unquoted_result
-#      has all characters that are still active within double
-#      quotes backslashified.
-func_quote_for_eval ()
+# func_quote_portable EVAL ARG
+# ----------------------------
+# Internal function to portably implement func_quote_arg.  Note that we still
+# keep attention to performance here so we as much as possible try to avoid
+# calling sed binary (so far O(N) complexity as long as func_append is O(1)).
+func_quote_portable ()
 {
     $debug_cmd
 
-    func_quote_for_eval_unquoted_result=
-    func_quote_for_eval_result=
-    while test 0 -lt $#; do
-      case $1 in
+    func_quote_portable_result=$2
+
+    # one-time-loop (easy break)
+    while true
+    do
+      if $1; then
+        func_quote_portable_result=`$ECHO "$2" | $SED \
+          -e "$sed_double_quote_subst" -e "$sed_double_backslash"`
+        break
+      fi
+
+      # Quote for eval.
+      case $func_quote_portable_result in
         *[\\\`\"\$]*)
-	  _G_unquoted_arg=`printf '%s\n' "$1" |$SED "$sed_quote_subst"` ;;
-        *)
-          _G_unquoted_arg=$1 ;;
-      esac
-      if test -n "$func_quote_for_eval_unquoted_result"; then
-	func_append func_quote_for_eval_unquoted_result " $_G_unquoted_arg"
-      else
-        func_append func_quote_for_eval_unquoted_result "$_G_unquoted_arg"
-      fi
+          case $func_quote_portable_result in
+            *[\[\*\?]*)
+              func_quote_portable_result=`$ECHO "$func_quote_portable_result" \
+                  | $SED "$sed_quote_subst"`
+              break
+              ;;
+          esac
 
-      case $_G_unquoted_arg in
-        # Double-quote args containing shell metacharacters to delay
-        # word splitting, command substitution and variable expansion
-        # for a subsequent eval.
-        # Many Bourne shells cannot handle close brackets correctly
-        # in scan sets, so we specify it separately.
-        *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
-          _G_quoted_arg=\"$_G_unquoted_arg\"
+          func_quote_portable_old_IFS=$IFS
+          for _G_char in '\' '`' '"' '$'
+          do
+            # STATE($1) PREV($2) SEPARATOR($3)
+            set start "" ""
+            func_quote_portable_result=dummy"$_G_char$func_quote_portable_result$_G_char"dummy
+            IFS=$_G_char
+            for _G_part in $func_quote_portable_result
+            do
+              case $1 in
+              quote)
+                func_append func_quote_portable_result "$3$2"
+                set quote "$_G_part" "\\$_G_char"
+                ;;
+              start)
+                set first "" ""
+                func_quote_portable_result=
+                ;;
+              first)
+                set quote "$_G_part" ""
+                ;;
+              esac
+            done
+          done
+          IFS=$func_quote_portable_old_IFS
           ;;
-        *)
-          _G_quoted_arg=$_G_unquoted_arg
-	  ;;
+        *) ;;
       esac
-
-      if test -n "$func_quote_for_eval_result"; then
-	func_append func_quote_for_eval_result " $_G_quoted_arg"
-      else
-        func_append func_quote_for_eval_result "$_G_quoted_arg"
-      fi
-      shift
+      break
     done
+
+    func_quote_portable_unquoted_result=$func_quote_portable_result
+    case $func_quote_portable_result in
+      # double-quote args containing shell metacharacters to delay
+      # word splitting, command substitution and variable expansion
+      # for a subsequent eval.
+      # many bourne shells cannot handle close brackets correctly
+      # in scan sets, so we specify it separately.
+      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
+        func_quote_portable_result=\"$func_quote_portable_result\"
+        ;;
+    esac
 }
 
 
-# func_quote_for_expand ARG
-# -------------------------
-# Aesthetically quote ARG to be evaled later; same as above,
-# but do not quote variable references.
-func_quote_for_expand ()
+# func_quotefast_eval ARG
+# -----------------------
+# Quote one ARG (internal).  This is equivalent to 'func_quote_arg eval ARG',
+# but optimized for speed.  Result is stored in $func_quotefast_eval.
+if test xyes = `(x=; printf -v x %q yes; echo x"$x") 2>/dev/null`; then
+  printf -v _GL_test_printf_tilde %q '~'
+  if test '\~' = "$_GL_test_printf_tilde"; then
+    func_quotefast_eval ()
+    {
+      printf -v func_quotefast_eval_result %q "$1"
+    }
+  else
+    # Broken older Bash implementations.  Make those faster too if possible.
+    func_quotefast_eval ()
+    {
+      case $1 in
+        '~'*)
+          func_quote_portable false "$1"
+          func_quotefast_eval_result=$func_quote_portable_result
+          ;;
+        *)
+          printf -v func_quotefast_eval_result %q "$1"
+          ;;
+      esac
+    }
+  fi
+else
+  func_quotefast_eval ()
+  {
+    func_quote_portable false "$1"
+    func_quotefast_eval_result=$func_quote_portable_result
+  }
+fi
+
+
+# func_quote_arg MODEs ARG
+# ------------------------
+# Quote one ARG to be evaled later.  MODEs argument may contain zero or more
+# specifiers listed below separated by ',' character.  This function returns two
+# values:
+#   i) func_quote_arg_result
+#      double-quoted (when needed), suitable for a subsequent eval
+#  ii) func_quote_arg_unquoted_result
+#      has all characters that are still active within double
+#      quotes backslashified.  Available only if 'unquoted' is specified.
+#
+# Available modes:
+# ----------------
+# 'eval' (default)
+#       - escape shell special characters
+# 'expand'
+#       - the same as 'eval';  but do not quote variable references
+# 'pretty'
+#       - request aesthetic output, i.e. '"a b"' instead of 'a\ b'.  This might
+#         be used later in func_quote to get output like: 'echo "a b"' instead
+#         of 'echo a\ b'.  This is slower than default on some shells.
+# 'unquoted'
+#       - produce also $func_quote_arg_unquoted_result which does not contain
+#         wrapping double-quotes.
+#
+# Examples for 'func_quote_arg pretty,unquoted string':
+#
+#   string      | *_result              | *_unquoted_result
+#   ------------+-----------------------+-------------------
+#   "           | \"                    | \"
+#   a b         | "a b"                 | a b
+#   "a b"       | "\"a b\""             | \"a b\"
+#   *           | "*"                   | *
+#   z="${x-$y}" | "z=\"\${x-\$y}\""     | z=\"\${x-\$y}\"
+#
+# Examples for 'func_quote_arg pretty,unquoted,expand string':
+#
+#   string        |   *_result          |  *_unquoted_result
+#   --------------+---------------------+--------------------
+#   z="${x-$y}"   | "z=\"${x-$y}\""     | z=\"${x-$y}\"
+func_quote_arg ()
 {
-    $debug_cmd
-
-    case $1 in
-      *[\\\`\"]*)
-	_G_arg=`$ECHO "$1" | $SED \
-	    -e "$sed_double_quote_subst" -e "$sed_double_backslash"` ;;
-      *)
-        _G_arg=$1 ;;
-    esac
-
-    case $_G_arg in
-      # Double-quote args containing shell metacharacters to delay
-      # word splitting and command substitution for a subsequent eval.
-      # Many Bourne shells cannot handle close brackets correctly
-      # in scan sets, so we specify it separately.
-      *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
-        _G_arg=\"$_G_arg\"
+    _G_quote_expand=false
+    case ,$1, in
+      *,expand,*)
+        _G_quote_expand=:
         ;;
     esac
 
-    func_quote_for_expand_result=$_G_arg
+    case ,$1, in
+      *,pretty,*|*,expand,*|*,unquoted,*)
+        func_quote_portable $_G_quote_expand "$2"
+        func_quote_arg_result=$func_quote_portable_result
+        func_quote_arg_unquoted_result=$func_quote_portable_unquoted_result
+        ;;
+      *)
+        # Faster quote-for-eval for some shells.
+        func_quotefast_eval "$2"
+        func_quote_arg_result=$func_quotefast_eval_result
+        ;;
+    esac
+}
+
+
+# func_quote MODEs ARGs...
+# ------------------------
+# Quote all ARGs to be evaled later and join them into single command.  See
+# func_quote_arg's description for more info.
+func_quote ()
+{
+    $debug_cmd
+    _G_func_quote_mode=$1 ; shift
+    func_quote_result=
+    while test 0 -lt $#; do
+      func_quote_arg "$_G_func_quote_mode" "$1"
+      if test -n "$func_quote_result"; then
+        func_append func_quote_result " $func_quote_arg_result"
+      else
+        func_append func_quote_result "$func_quote_arg_result"
+      fi
+      shift
+    done
 }
 
 
@@ -1151,8 +1272,8 @@ func_show_eval ()
     _G_cmd=$1
     _G_fail_exp=${2-':'}
 
-    func_quote_for_expand "$_G_cmd"
-    eval "func_notquiet $func_quote_for_expand_result"
+    func_quote_arg pretty,expand "$_G_cmd"
+    eval "func_notquiet $func_quote_arg_result"
 
     $opt_dry_run || {
       eval "$_G_cmd"
@@ -1177,8 +1298,8 @@ func_show_eval_locale ()
     _G_fail_exp=${2-':'}
 
     $opt_quiet || {
-      func_quote_for_expand "$_G_cmd"
-      eval "func_echo $func_quote_for_expand_result"
+      func_quote_arg expand,pretty "$_G_cmd"
+      eval "func_echo $func_quote_arg_result"
     }
 
     $opt_dry_run || {
