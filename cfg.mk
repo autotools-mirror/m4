@@ -34,7 +34,7 @@ local-checks-to-skip += sc_cast_of_x_alloc_return_value
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = 731dabee99ce5ab39369077806b6f854
+old_NEWS_hash = 9abe4a58cebb45c4b980db88e9f4b3c9
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
