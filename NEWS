@@ -120,13 +120,14 @@ GNU M4 NEWS - User visible changes.
 
 ** A number of portability improvements inherited from gnulib.
 
+
 * Noteworthy changes in Version 1.4.10b (2008-02-25) [beta]
   Released by Eric Blake, based on git version 1.4.10a
 
 Note that M4 1.4.10b was released prior to 1.4.11, and includes all the
-features of 1.4.11 except for C99 parsing in the `format' builtin.  It also
-contains the following beta features that were deemed worth deferring until
-1.6:
+features of 1.4.11 except for C99 parsing in the `format' builtin; it might
+have been better if it had been numbered 1.5.88a.  It also contains the
+following beta features that were deemed worth deferring until 1.6:
 
 ** Further enhance the `index' builtin to often achieve sublinear results.
 

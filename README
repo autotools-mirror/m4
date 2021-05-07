@@ -20,7 +20,7 @@ from git, more information can be found in the version-control-only
 file HACKING.
 
 M4 has an optional dependency on the libsigsegv library:
-  http://www.gnu.org/software/libsigsegv/
+  https://www.gnu.org/software/libsigsegv/
 If the library has not been installed in the standard location, you
 can use `./configure --with-libsigsegv-prefix=/path/to/dir', to make
 the build of `m4' use /path/to/dir/include/sigsegv.h as appropriate.

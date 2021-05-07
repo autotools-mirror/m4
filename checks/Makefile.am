@@ -16,7 +16,7 @@
 ## GNU General Public License for more details.
 ##
 ## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Vern says that the first star is required around an Alpha make bug.
 DOC_CHECKS = $(srcdir)/*[0-9][0-9][0-9].*
