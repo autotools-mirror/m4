@@ -1,6 +1,6 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release ?.? (????-??-??) [?]
+* Noteworthy changes in release 1.4.18b (2021-05-07) [beta]
 
 ** The symbol hash table now defaults to 65537 buckets instead of 509, as
    modern systems have enough memory to benefit from fewer hash collisions
