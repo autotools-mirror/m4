@@ -355,12 +355,13 @@ language being processed.  Techniques such as conditional and recursive
 macros, and using macros to define other macros, were described by Doug
 McIlroy of Bell Labs in ``Macro Instruction Extensions of Compiler
 Languages'', @emph{Communications of the ACM} 3, 4 (1960), 214--20,
-@url{http://dx.doi.org/10.1145/367177.367223}.
+@url{https://dl.acm.org/doi/10.1145/367177.367223}.
 
 An important precursor of @code{m4} was GPM; see C. Strachey,
 @c The title uses lower case and has no space between "macro" and "generator".
 ``A general purpose macrogenerator'', @emph{Computer Journal} 8, 3
-(1965), 225--41, @url{http://dx.doi.org/10.1093/comjnl/8.3.225}.  GPM is
+(1965), 225--41,
+@url{https://academic.oup.com/comjnl/article/8/3/225/336044}.  GPM is
 also succinctly described in David Gries's book @emph{Compiler
 Construction for Digital Computers}, Wiley (1971).  Strachey was a
 brilliant programmer: GPM fit into 250 machine instructions!
@@ -383,7 +384,7 @@ macro-processor language, which inspired Dennis Ritchie to write
 
 Kernighan and Ritchie then joined forces to develop the original
 @code{m4}, described in ``The M4 Macro Processor'', Bell Laboratories
-(1977), @url{http://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf}.
+(1977), @url{https://wolfram.schneider.org/bsd/7thEdManVol2/m4/m4.pdf}.
 It had only 21 builtin macros.
 
 While @code{GPM} was more @emph{pure}, @code{m4} is meant to deal with
@@ -1213,9 +1214,9 @@ round of scanning for the tokens @samp{Result}, @samp{@w{ }},
 
 As a more complicated example, we will contrast an actual code
 example from the Gnulib project@footnote{Derived from a patch in
-@uref{http://lists.gnu.org/archive/html/bug-gnulib/@/2007-01/@/msg00389.html},
+@uref{https://lists.gnu.org/archive/html/bug-gnulib/@/2007-01/@/msg00389.html},
 and a followup patch in
-@uref{http://lists.gnu.org/archive/html/bug-gnulib/@/2007-02/@/msg00000.html}},
+@uref{https://lists.gnu.org/archive/html/bug-gnulib/@/2007-02/@/msg00000.html}},
 showing both a buggy approach and the desired results.  The user desires
 to output a shell assignment statement that takes its argument and turns
 it into a shell variable by converting it to uppercase and prepending a
@@ -5700,7 +5701,7 @@ Manual}.
 @end ifnothtml
 @ifhtml
 See
-@uref{http://www.gnu.org/@/software/@/emacs/@/manual/@/emacs.html#Regexps,
+@uref{https://www.gnu.org/@/software/@/emacs/@/manual/@/emacs.html#Regexps,
 Syntax of Regular Expressions} in the GNU Emacs Manual.
 @end ifhtml
 Support for ERE, Extended Regular Expressions is not
@@ -7352,7 +7353,7 @@ POSIX is under development and includes several proposals for
 modifying what @code{m4} is required to do.  The requirements for
 @code{m4} are shared between SUSv3 and POSIX, and
 can be viewed at
-@uref{http://www.opengroup.org/onlinepubs/@/000095399/@/utilities/@/m4.html}.
+@uref{https://www.opengroup.org/onlinepubs/@/000095399/@/utilities/@/m4.html}.
 
 @menu
 * Extensions::                  Extensions in GNU M4

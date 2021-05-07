@@ -27,12 +27,12 @@ and is not part of a release distribution.
 * Changes with user-visible effects must be mentioned in NEWS.
 
 * GNU Coding Standards should be followed:
-    http://www.gnu.org/prep/standards/
+    https://www.gnu.org/prep/standards/
   Additionally, while GNU M4 is not yet POSIX compliant, we are trying
   to get closer to it (although some design decisions state that POSIX
   compliance should only happen when POSIXLY_CORRECT is in the
   environment or the -G option was passed on the command line):
-    http://www.opengroup.org/onlinepubs/009695399/utilities/m4.html
+    https://www.opengroup.org/onlinepubs/009695399/utilities/m4.html
 
 
 3. Bootstrapping
@@ -64,7 +64,7 @@ and is not part of a release distribution.
   script will attempt to run
     git submodule update --init
   to grab a gnulib clone from the official read-only location of
-    git://git.sv.gnu.org/gnulib.git
+    https://git.savannah.gnu.org/git/gnulib.git
 
   However, this can be network and disk intensive.  If you already have
   another gnulib clone on your disk, you can use the environment
@@ -78,10 +78,7 @@ and is not part of a release distribution.
       path/to/sh ./bootstrap
 
   A read-only copy of gnulib can be obtained by:
-      git clone git://git.sv.gnu.org/gnulib.git
-    or
-      cvs -d:pserver:anonymous@pserver.git.sv.gnu.org:/srv/git/gnulib.git \
-        co -d gnulib HEAD
+      git clone https://git.savannah.gnu.org/git/gnulib.git
 
   Using a CVS checkout might work, but it is relatively untested,
   particularly now that we use a git submodule for gnulib.
@@ -92,10 +89,10 @@ and is not part of a release distribution.
 
   If you are behind a firewall that blocks the git protocol, you may
   find it useful to do:
-    git config --global url.http://git.savannah.gnu.org/r/.insteadof \
+    git config --global url.https://git.savannah.gnu.org/r/.insteadof \
       git://git.sv.gnu.org/
   to force git to transparently rewrite all savannah git references to
-  instead use http.
+  instead use https.
 
 * When it is time for a release, it is a good idea to bootstrap with
   official releases of the autotools, rather than git builds, to reduce
@@ -137,7 +134,7 @@ and is not part of a release distribution.
   TAB, will not exceed 80 columns.  As for the ChangeLog-style content,
   please follow these guidelines:
 
-    http://www.gnu.org/software/guile/changelogs/guile-changelogs_3.html
+    https://www.gnu.org/software/guile/changelogs/guile-changelogs_3.html
 
 * When in doubt, check that emacs can syntax-color properly in
   change-log-mode.  And preferably use emacs 'C-x 4 a'
@@ -230,7 +227,7 @@ and is not part of a release distribution.
 
 * Run `make release-commit RELEASE="X.Y $type"' (for the correct X.Y and
   release type), to update the version number in NEWS.  See
-  http://www.gnu.org/software/libtool/contribute.html for details of the
+  https://www.gnu.org/software/libtool/contribute.html for details of the
   numbering scheme (M4 uses a similar scheme to libtool, although
   intra-release versions carry more information thanks to
   git-version-gen).  This tags the potential release, but do not push
@@ -264,7 +261,7 @@ and is not part of a release distribution.
   complete the release.
 
 * For non-alpha releases, update the webpages accessible via
-    http://www.gnu.org/software/m4/manual/
+    https://www.gnu.org/software/m4/manual/
   by running this:
     build-aux/gnu-web-doc-update --mirror
 
@@ -293,7 +290,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Local Variables:
 mode: text

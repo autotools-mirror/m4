@@ -13,7 +13,7 @@
 # GNU General Public License for more details.
 
 # You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 # Used in maint.mk's web-manual rule
 manual_title = GNU macro processor
@@ -34,7 +34,7 @@ local-checks-to-skip += sc_cast_of_x_alloc_return_value
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = 27c0634856d318a3666782fdec30937d
+old_NEWS_hash = 731dabee99ce5ab39369077806b6f854
 
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:

@@ -125,7 +125,7 @@ GNU M4 NEWS - User visible changes.
    overflow from other exceptions, such as Linux, you can optionally
    install the libsigsegv library (version 2.6 or newer recommended) to
    enhance m4's ability to accurately report stack overflow:
-   http://www.gnu.org/software/libsigsegv/
+   https://www.gnu.org/software/libsigsegv/
 
 ** A number of portability improvements inherited from gnulib.
 
