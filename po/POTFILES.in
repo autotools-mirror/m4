@@ -38,7 +38,12 @@ lib/version-etc.c
 lib/wait-process.c
 lib/xalloc-die.c
 lib/xprintf.c
+src/builtin.c
+src/debug.c
+src/eval.c
 src/format.c
 src/freeze.c
+src/input.c
 src/m4.c
+src/macro.c
 src/output.c
