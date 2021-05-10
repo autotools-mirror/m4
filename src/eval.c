@@ -115,7 +115,11 @@ eval_lex (int32_t *val)
 
   if (c_isdigit (*eval_text))
     {
-      int base, digit;
+      unsigned int base, digit;
+      /* The documentation says that "overflow silently results in wraparound".
+         Therefore use an unsigned integer type to avoid undefined behaviour
+         when parsing '-2147483648'.  */
+      uint32_t value;
 
       if (*eval_text == '0')
         {
@@ -152,8 +156,7 @@ eval_lex (int32_t *val)
       else
         base = 10;
 
-      /* FIXME - this calculation can overflow.  Consider xstrtol.  */
-      *val = 0;
+      value = 0;
       for (; *eval_text; eval_text++)
         {
           if (c_isdigit (*eval_text))
@@ -168,8 +171,8 @@ eval_lex (int32_t *val)
           if (base == 1)
             {
               if (digit == 1)
-                (*val)++;
-              else if (digit == 0 && !*val)
+                value++;
+              else if (digit == 0 && value == 0)
                 continue;
               else
                 break;
@@ -177,8 +180,9 @@ eval_lex (int32_t *val)
           else if (digit >= base)
             break;
           else
-            *val = *val * base + digit;
+            value = value * base + digit;
         }
+      *val = value;
       return NUMBER;
     }
 
