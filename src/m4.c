@@ -232,8 +232,11 @@ static _Noreturn void
 usage (int status)
 {
   if (status != EXIT_SUCCESS)
-    xfprintf (stderr, _("Try `%s --help' for more information.\n"),
-              program_name);
+    {
+      xfprintf (stderr, _("Try `%s --help' for more information."),
+                program_name);
+      fputs ("\n", stderr);
+    }
   else
     {
       xprintf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
@@ -245,17 +248,21 @@ is read.\n\
       fputs (_("\
 Mandatory or optional arguments to long options are mandatory or optional\n\
 for short options too.\n\
-\n\
+"), stdout);
+      puts ("");
+      fputs (_("\
 Operation modes:\n\
       --help                   display this help and exit\n\
       --version                output version information and exit\n\
 "), stdout);
-      xprintf (_("\
+      fputs (_("\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
                                  execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
   -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
+"), stdout);
+      xprintf (_("\
       --warn-macro-sequence[=REGEXP]\n\
                                warn if macro definition matches REGEXP,\n\
                                  default %s\n\
