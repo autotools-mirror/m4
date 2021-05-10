@@ -34,6 +34,9 @@ config_h_header = "m4\.h"
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
 old_NEWS_hash = fcdaacb192dbc7536db34bfff18bc971
 
+# Update m4-latest.tar.* symlinks during 'make stable/beta'.
+GNUPLOADFLAGS = --symlink-regex
+
 # Indent only with spaces.
 sc_prohibit_tab_based_indentation:
  @re='^ *    '                                               \
