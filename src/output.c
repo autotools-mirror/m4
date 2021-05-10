@@ -169,7 +169,7 @@ cleanup_tmpfile (void)
               && close_stream_temp (diversion->u.file) != 0)
             {
               M4ERROR ((0, errno,
-                        "cannot clean temporary file for diversion"));
+                        _("cannot clean temporary file for diversion")));
               fail = true;
             }
         }
@@ -219,7 +219,7 @@ m4_tmpfile (int divnum)
     {
       output_temp_dir = create_temp_dir ("m4-", NULL, true);
       if (output_temp_dir == NULL)
-        m4_failure (errno, "cannot create temporary file for diversion");
+        m4_failure (errno, _("cannot create temporary file for diversion"));
       atexit (cleanup_tmpfile);
     }
   name = m4_tmpname (divnum);
@@ -228,7 +228,7 @@ m4_tmpfile (int divnum)
   if (file == NULL)
     {
       unregister_temp_file (output_temp_dir, name);
-      m4_failure (errno, "cannot create temporary file for diversion");
+      m4_failure (errno, _("cannot create temporary file for diversion"));
     }
   return file;
 }
@@ -262,7 +262,7 @@ m4_tmpopen (int divnum, bool reread)
   /* We need update mode, to avoid truncation.  */
   file = fopen_temp (name, O_BINARY ? "rb+e" : "r+e", false);
   if (file == NULL)
-    m4_failure (errno, "cannot create temporary file for diversion");
+    m4_failure (errno, _("cannot create temporary file for diversion"));
   /* Update mode starts at the beginning of the stream, but sometimes
      we want the end.  */
   else if (!reread && fseeko (file, 0, SEEK_END) != 0)
@@ -471,7 +471,7 @@ make_room_for (int length)
                           1, selected_diversion->u.file);
           if (count != 1)
             m4_failure (errno,
-                        "ERROR: cannot flush diversion to temporary file");
+                        _("ERROR: cannot flush diversion to temporary file"));
         }
 
       /* Reclaim the buffer space for other diversions.  */
@@ -565,7 +565,7 @@ output_text (const char *text, int length)
     {
       count = fwrite (text, length, 1, output_file);
       if (count != 1)
-        m4_failure (errno, "ERROR: copying inserted file");
+        m4_failure (errno, _("ERROR: copying inserted file"));
     }
   else
     {
@@ -813,7 +813,7 @@ insert_file (FILE *file)
     {
       length = fread (buffer, 1, sizeof buffer, file);
       if (ferror (file))
-        m4_failure (errno, "error reading inserted file");
+        m4_failure (errno, _("error reading inserted file"));
       if (length == 0)
         break;
       output_text (buffer, length);
@@ -898,7 +898,7 @@ insert_diversion_helper (m4_diversion *diversion)
                       _("cannot clean temporary file for diversion"));
         }
       if (m4_tmpremove (diversion->divnum) != 0)
-        M4ERROR ((0, errno, "cannot clean temporary file for diversion"));
+        M4ERROR ((0, errno, _("cannot clean temporary file for diversion")));
     }
   diversion->used = 0;
   gl_oset_remove (diversion_table, diversion);
@@ -980,11 +980,11 @@ freeze_diversions (FILE *file)
               struct stat file_stat;
               diversion->u.file = m4_tmpopen (diversion->divnum, true);
               if (fstat (fileno (diversion->u.file), &file_stat) < 0)
-                m4_failure (errno, "cannot stat diversion");
+                m4_failure (errno, _("cannot stat diversion"));
               if (file_stat.st_size < 0
                   || (file_stat.st_size + 0UL
                       != (unsigned long int) file_stat.st_size))
-                m4_failure (0, "diversion too large");
+                m4_failure (0, _("diversion too large"));
               xfprintf (file, "D%d,%lu\n", diversion->divnum,
                         (unsigned long int) file_stat.st_size);
             }

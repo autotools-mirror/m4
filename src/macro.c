@@ -193,7 +193,7 @@ expand_argument (struct obstack *obs, token_data *argp)
           /* current_file changed to "" if we see TOKEN_EOF, use the
              previous value we stored earlier.  */
           m4_failure_at_line (0, file, line,
-                              "ERROR: end of file in argument list");
+                              _("ERROR: end of file in argument list"));
 
         case TOKEN_WORD:
         case TOKEN_STRING:
@@ -329,7 +329,7 @@ expand_macro (symbol *sym)
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
-    m4_failure (0, "recursion limit of %d exceeded, use -L<N> to change it",
+    m4_failure (0, _("recursion limit of %d exceeded, use -L<N> to change it"),
                 nesting_limit);
 
   macro_call_id++;

@@ -133,7 +133,7 @@ debug_set_file (FILE *fp)
   if (debug != NULL && debug != stderr && debug != stdout
       && close_stream (debug) != 0)
     {
-      M4ERROR ((warning_status, errno, "error writing to debug stream"));
+      M4ERROR ((warning_status, errno, _("error writing to debug stream")));
       retcode = EXIT_FAILURE;
     }
   debug = fp;
@@ -154,7 +154,7 @@ debug_set_file (FILE *fp)
           if (debug != stderr && close_stream (debug) != 0)
             {
               M4ERROR ((warning_status, errno,
-                        "error writing to debug stream"));
+                        _("error writing to debug stream")));
               retcode = EXIT_FAILURE;
             }
           debug = stdout;

@@ -305,7 +305,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
       if (sizeof ok <= c || !ok[c])
         {
           M4ERROR ((warning_status, 0,
-                    "Warning: unrecognized specifier in `%s'", f));
+                    _("Warning: unrecognized specifier in `%s'"), f));
           if (c == '\0')
             fmt--;
           continue;

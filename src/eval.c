@@ -315,44 +315,44 @@ evaluate (const char *expr, int32_t *val)
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
-                "bad expression in eval (missing right parenthesis): %s",
+                _("bad expression in eval (missing right parenthesis): %s"),
                 expr));
       break;
 
     case SYNTAX_ERROR:
       M4ERROR ((warning_status, 0,
-                "bad expression in eval: %s", expr));
+                _("bad expression in eval: %s"), expr));
       break;
 
     case UNKNOWN_INPUT:
       M4ERROR ((warning_status, 0,
-                "bad expression in eval (bad input): %s", expr));
+                _("bad expression in eval (bad input): %s"), expr));
       break;
 
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
-                "bad expression in eval (excess input): %s", expr));
+                _("bad expression in eval (excess input): %s"), expr));
       break;
 
     case INVALID_OPERATOR:
       M4ERROR ((warning_status, 0,
-                "invalid operator in eval: %s", expr));
+                _("invalid operator in eval: %s"), expr));
       retcode = EXIT_FAILURE;
       break;
 
     case DIVIDE_ZERO:
       M4ERROR ((warning_status, 0,
-                "divide by zero in eval: %s", expr));
+                _("divide by zero in eval: %s"), expr));
       break;
 
     case MODULO_ZERO:
       M4ERROR ((warning_status, 0,
-                "modulo by zero in eval: %s", expr));
+                _("modulo by zero in eval: %s"), expr));
       break;
 
     case NEGATIVE_EXPONENT:
       M4ERROR ((warning_status, 0,
-                "negative exponent in eval: %s", expr));
+                _("negative exponent in eval: %s"), expr));
       break;
 
     default:
@@ -535,8 +535,8 @@ equality_term (eval_token et, int32_t *v1)
 
       if (op == ASSIGN)
       {
-        M4ERROR ((warning_status, 0, "\
-Warning: recommend ==, not =, for equality operator"));
+        M4ERROR ((warning_status, 0, _("\
+Warning: recommend ==, not =, for equality operator")));
         op = EQ;
       }
       *v1 = (op == EQ) == (*v1 == v2);

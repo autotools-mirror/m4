@@ -112,7 +112,7 @@ produce_frozen_state (const char *name)
 
   file = fopen (name, O_BINARY ? "wbe" : "we");
   if (!file)
-    m4_failure (errno, "cannot open `%s'", name);
+    m4_failure (errno, _("cannot open `%s'"), name);
 
   /* Write a recognizable header.  */
 
@@ -153,7 +153,7 @@ produce_frozen_state (const char *name)
 
   fputs ("# End of frozen state file\n", file);
   if (close_stream (file) != 0)
-    m4_failure (errno, "unable to create frozen state");
+    m4_failure (errno, _("unable to create frozen state"));
 }
 
 /*----------------------------------------------------------------------.
@@ -164,9 +164,9 @@ static void
 issue_expect_message (int expected)
 {
   if (expected == '\n')
-    m4_failure (0, "expecting line feed in frozen file");
+    m4_failure (0, _("expecting line feed in frozen file"));
   else
-    m4_failure (0, "expecting character `%c' in frozen file", expected);
+    m4_failure (0, _("expecting character `%c' in frozen file"), expected);
 }
 
 /*-------------------------------------------------.
@@ -267,7 +267,7 @@ reload_frozen_state (const char *name)
 
   file = m4_path_search (name, NULL);
   if (file == NULL)
-    m4_failure (errno, "cannot open %s", name);
+    m4_failure (errno, _("cannot open %s"), name);
   current_file = name;
 
   allocated[0] = 100;
@@ -282,10 +282,10 @@ reload_frozen_state (const char *name)
   GET_NUMBER (number[0], false);
   if (number[0] > 1)
     M4ERROR ((EXIT_MISMATCH, 0,
-              "frozen file version %d greater than max supported of 1",
+              _("frozen file version %d greater than max supported of 1"),
               number[0]));
   else if (number[0] < 1)
-    m4_failure (0, "ill-formed frozen file, version directive expected");
+    m4_failure (0, _("ill-formed frozen file, version directive expected"));
   VALIDATE ('\n');
 
   GET_DIRECTIVE;
@@ -294,7 +294,7 @@ reload_frozen_state (const char *name)
       switch (character)
         {
         default:
-          m4_failure (0, "ill-formed frozen file");
+          m4_failure (0, _("ill-formed frozen file"));
 
         case 'C':
         case 'D':

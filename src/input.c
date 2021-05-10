@@ -356,14 +356,14 @@ pop_input (void)
 
       if (ferror (isp->u.u_f.fp))
         {
-          M4ERROR ((warning_status, 0, "read error"));
+          M4ERROR ((warning_status, 0, _("read error")));
           if (isp->u.u_f.close)
             fclose (isp->u.u_f.fp);
           retcode = EXIT_FAILURE;
         }
       else if (isp->u.u_f.close && fclose (isp->u.u_f.fp) == EOF)
         {
-          M4ERROR ((warning_status, errno, "error reading file"));
+          M4ERROR ((warning_status, errno, _("error reading file")));
           retcode = EXIT_FAILURE;
         }
       start_of_input_line = isp->u.u_f.advance;
@@ -586,7 +586,7 @@ skip_line (void)
     /* current_file changed to "" if we see CHAR_EOF, use the
        previous value we stored earlier.  */
     M4ERROR_AT_LINE ((warning_status, 0, file, line,
-                      "Warning: end of file treated as newline"));
+                      _("Warning: end of file treated as newline")));
   /* On the rare occasion that dnl crosses include file boundaries
      (either the input file did not end in a newline, or changeword
      was used), calling next_char can update current_file and
@@ -789,7 +789,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-                "bad regular expression `%s': %s", regexp, msg));
+                _("bad regular expression `%s': %s"), regexp, msg));
       return;
     }
 
@@ -878,7 +878,7 @@ next_token (token_data *td, int *line)
       else
         /* current_file changed to "" if we see CHAR_EOF, use the
            previous value we stored earlier.  */
-        m4_failure_at_line (0, file, *line, "ERROR: end of file in comment");
+        m4_failure_at_line (0, file, *line, _("ERROR: end of file in comment"));
 
       type = TOKEN_STRING;
     }
@@ -998,7 +998,7 @@ next_token (token_data *td, int *line)
             /* current_file changed to "" if we see CHAR_EOF, use
                the previous value we stored earlier.  */
             m4_failure_at_line (0, file, *line,
-                                "ERROR: end of file in string");
+                                _("ERROR: end of file in string"));
 
           if (MATCH (ch, rquote.string, true))
             {
