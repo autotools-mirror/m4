@@ -120,7 +120,16 @@ and is not part of a release distribution.
   "@comment ignore" are turned into tests in the checks directory.
 
 
-5. Editing 'ChangeLog'
+5. Continuous Integration
+=========================
+
+* The package is built automatically, at regular intervals.  You can
+  find the latest build results here:
+    https://gitlab.com/gnu-m4/ci-distcheck/pipelines
+    https://gitlab.com/gnu-m4/ci-distcheck/-/jobs?scope=finished
+
+
+6. Editing 'ChangeLog'
 ======================
 
 * The ChangeLog is generated from git commit comments.  Each commit log
@@ -145,7 +154,7 @@ and is not part of a release distribution.
 * See the GNU Coding Standards document for more details on ChangeLog
   formatting.
 
-6. Formatting
+7. Formatting
 =============
 
 * Use space-only indentation in nearly all files (Makefile inputs being
@@ -172,7 +181,7 @@ and is not part of a release distribution.
   that works around it, and have m4 use that module.
 
 
-7. Release Procedure
+8. Release Procedure
 ====================
 
 * If you are an m4 maintainer, but have not yet registered your
