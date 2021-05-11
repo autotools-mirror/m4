@@ -144,6 +144,11 @@ following beta features that were deemed worth deferring until 1.6:
 ** A number of portability improvements inherited from gnulib.
 
 
+* Noteworthy changes in release 1.4.18d (2021-05-11) [beta]
+
+** A number of portability improvements inherited from gnulib.
+
+
 * Noteworthy changes in release 1.4.18b (2021-05-07) [beta]
 
 ** The symbol hash table now defaults to 65537 buckets instead of 509, as
