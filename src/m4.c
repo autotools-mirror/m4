@@ -243,8 +243,8 @@ Operation modes:\n\
   -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n\
 "), stdout);
 #endif
+      puts ("");
       fputs (_("\
-\n\
 Preprocessor features:\n\
   -D, --define=NAME[=VALUE]    define NAME as having VALUE, or empty\n\
   -I, --include=DIRECTORY      append DIRECTORY to include path\n\
