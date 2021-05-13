@@ -42,6 +42,9 @@ gl_ASSERT_NO_GNULIB_POSIXCHECK
 
 # M4 is single-threaded; so we can optimize gnulib code by using this:
 gl_DISABLE_THREADS
+AC_DEFINE([GNULIB_REGEX_SINGLE_THREAD], [1], [Define to optimize regex.])
+AC_DEFINE([GNULIB_MBRTOWC_SINGLE_THREAD], [1], [Define to optimize mbrtowc.])
+AC_DEFINE([GNULIB_WCHAR_SINGLE_LOCALE], [1], [Define to optimize mbrtowc.])
 
 AC_ARG_ENABLE([gcc-warnings],
   [AS_HELP_STRING([--enable-gcc-warnings],
