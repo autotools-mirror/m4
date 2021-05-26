@@ -143,6 +143,9 @@ following beta features that were deemed worth deferring until 1.6:
 
 ** A number of portability improvements inherited from gnulib.
 
+** A number of portability improvements inherited from gnulib, including
+   the ability to perform stack overflow detection on more platforms
+   without linking to GNU libsigsegv.
 
 * Noteworthy changes in release 1.4.18d (2021-05-11) [beta]
 
