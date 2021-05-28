@@ -6745,14 +6745,22 @@ signal number shifted left by eight bits.
 @comment systems where /bin/sh does not create its own process group.
 @comment And PIPE is unreliable, since people tend to run with it
 @comment ignored, with m4 inheriting that choice.  That leaves KILL as
-@comment the only signal we can reliably test.
+@comment the only signal we can reliably test, but even that is tricky:
+@comment on Haiku, 'kill -9' actually causes a process to die with
+@comment signal 15 named KILLTHR on that platform.
 @example
 dnl This test assumes kill is a shell builtin, and that signals are
 dnl recognizable.
 ifdef(`__unix__', ,
       `errprint(` skipping: syscmd does not have unix semantics
 ')m4exit(`77')')dnl
-syscmd(`kill -9 $$')
+changequote(`[', `]')
+@result{}
+syscmd([/bin/sh -c 'kill -9 $$'; st=$?; test $st = 137 || test $st = 265])
+@result{}
+ifelse(sysval, [0], , [errprint([ skipping: shell does not send signal 9
+])m4exit([77])])dnl
+syscmd([kill -9 $$])
 @result{}
 sysval
 @result{}2304
@@ -6760,7 +6768,7 @@ syscmd()
 @result{}
 sysval
 @result{}0
-esyscmd(`kill -9 $$')
+esyscmd([kill -9 $$])
 @result{}
 sysval
 @result{}2304
