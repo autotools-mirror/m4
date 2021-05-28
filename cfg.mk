@@ -34,7 +34,7 @@ local-checks-to-skip += sc_cast_of_x_alloc_return_value
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = 9f7b57774172e11c4a0a9ea4d2e2effe
+old_NEWS_hash = 1a900762a4ed2b550e6abd8163f1dfea
 
 # Update m4-latest.tar.* symlinks during 'make stable/beta'.
 GNUPLOADFLAGS = --symlink-regex
