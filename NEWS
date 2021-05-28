@@ -1,6 +1,6 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release ?.? (????-??-??) [?]
+* Noteworthy changes in release 1.4.19 (2021-05-28) [stable]
 
 ** A number of portability improvements inherited from gnulib, including
    the ability to perform stack overflow detection on more platforms
