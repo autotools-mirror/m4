@@ -273,8 +273,13 @@ and is not part of a release distribution.
     https://www.gnu.org/software/m4/manual/
   by running this:
     build-aux/gnu-web-doc-update --mirror
+  You may also need to add a --user=YOUR_SAVANNAH_USERNAME option.
 
 * Make a News entry on savannah
+
+* Inform the translation project of the release.  Send mail to:
+  coordinator@translationproject.org with the subject "m4-VERSION.pot"
+  and a link to the tarball download URL in the body.
 
 * Update the Free Software Directory.  Checkout the CVS sources:
     cvs -d :pserver:anonymous@cvs.sv.gnu.org:/sources/directory \
