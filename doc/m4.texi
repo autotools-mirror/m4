@@ -6756,7 +6756,8 @@ ifdef(`__unix__', ,
 ')m4exit(`77')')dnl
 changequote(`[', `]')
 @result{}
-syscmd([/bin/sh -c 'kill -9 $$'; st=$?; test $st = 137 || test $st = 265])
+syscmd([/bin/sh -c 'kill -9 $$'; st=$?;
+test $st = 137 || test $st = 265])
 @result{}
 ifelse(sysval, [0], , [errprint([ skipping: shell does not send signal 9
 ])m4exit([77])])dnl
