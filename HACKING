@@ -275,6 +275,13 @@ and is not part of a release distribution.
     build-aux/gnu-web-doc-update --mirror
   You may also need to add a --user=YOUR_SAVANNAH_USERNAME option.
 
+  You may also need to update the main landing page
+    https://www.gnu.org/software/m4/
+  by running this:
+    cvs -d $YOUR_SAVANNAH_USERNAME@cvs.sv.gnu.org:/webcvs/m4 co m4
+    # edit m4/m4.html
+    cvs -d $YOUR_SAVANNAH_USERNAME@cvs.sv.gnu.org:/webcvs/m4 ci
+
 * Make a News entry on savannah
 
 * Inform the translation project of the release.  Send mail to:
