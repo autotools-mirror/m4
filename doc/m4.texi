@@ -16,6 +16,7 @@
 @c literal tabs in texinfo lead to formatting issues.
 @macro tabchar
 @	@c
+
 @end macro
 
 @c @ovar{ARG}
