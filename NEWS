@@ -143,6 +143,8 @@ following beta features that were deemed worth deferring until 1.6:
 
 ** A number of portability improvements inherited from gnulib.
 
+** The `syscmd' and `esyscmd' builtins no longer mishandle a command line
+   starting with `-' or `+'.
 
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]
 
