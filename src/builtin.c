@@ -947,7 +947,8 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
   const char *cmd = ARG (1);
   int status;
   int sig_status;
-  const char *prog_args[4] = { "sh", "-c" };
+  int slot = 3;
+  const char *prog_args[5] = { "sh", "-c", "--" };
   if (bad_argc (argv[0], argc, 2, 2) || !*cmd)
     {
       /* The empty command is successful.  */
@@ -961,9 +962,10 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
     {
       prog_args[0] = "cmd";
       prog_args[1] = "/c";
+      slot = 2;
     }
 #endif
-  prog_args[2] = cmd;
+  prog_args[slot] = cmd;
   errno = 0;
   status = execute (ARG (0), SYSCMD_SHELL, prog_args, NULL, false,
                     false, false, false, true, false, &sig_status);
@@ -984,7 +986,8 @@ static void
 m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 {
   const char *cmd = ARG (1);
-  const char *prog_args[4] = { "sh", "-c" };
+  int slot = 3;
+  const char *prog_args[5] = { "sh", "-c", "--" };
   pid_t child;
   int fd;
   FILE *pin;
@@ -1004,9 +1007,10 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     {
       prog_args[0] = "cmd";
       prog_args[1] = "/c";
+      slot = 2;
     }
 #endif
-  prog_args[2] = cmd;
+  prog_args[slot] = cmd;
   errno = 0;
   child = create_pipe_in (ARG (0), SYSCMD_SHELL, prog_args, NULL,
                           NULL, false, true, false, &fd);
