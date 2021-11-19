@@ -1060,7 +1060,8 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
   size_t len = ARG_LEN (1);
   int status;
   int sig_status;
-  const char *prog_args[4] = { "sh", "-c" };
+  int slot = 3;
+  const char *prog_args[5] = { "sh", "-c", "--" };
   const char *caller;
 
   if (strlen (cmd) != len)
@@ -1079,9 +1080,10 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
     {
       prog_args[0] = "cmd";
       prog_args[1] = "/c";
+      slot = 2;
     }
 #endif
-  prog_args[2] = cmd;
+  prog_args[slot] = cmd;
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
   status = execute (caller, SYSCMD_SHELL, prog_args, NULL, NULL, false,
@@ -1111,7 +1113,8 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   FILE *pin;
   int status;
   int sig_status;
-  const char *prog_args[4] = { "sh", "-c" };
+  int slot = 3;
+  const char *prog_args[5] = { "sh", "-c", "--" };
   const char *caller;
 
   if (strlen (cmd) != len)
@@ -1130,9 +1133,10 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
     {
       prog_args[0] = "cmd";
       prog_args[1] = "/c";
+      slot = 2;
     }
 #endif
-  prog_args[2] = cmd;
+  prog_args[slot] = cmd;
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
   child = create_pipe_in (caller, SYSCMD_SHELL, prog_args, NULL, NULL,
