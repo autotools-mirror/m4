@@ -2,6 +2,8 @@ GNU M4 NEWS - User visible changes.
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** The `syscmd' and `esyscmd' builtins no longer mishandle a command line
+   starting with `-' or `+'.
 
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]
 
