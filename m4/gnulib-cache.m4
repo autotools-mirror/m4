@@ -65,7 +65,6 @@
 #  error \
 #  execute \
 #  fclose \
-#  fdl-1.3 \
 #  fflush \
 #  filenamecat \
 #  flexmember \
@@ -147,7 +146,6 @@ gl_MODULES([
   error
   execute
   fclose
-  fdl-1.3
   fflush
   filenamecat
   flexmember
