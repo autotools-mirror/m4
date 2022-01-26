@@ -46,6 +46,7 @@
 #include "error.h"
 #include "exitfail.h"
 #include "filenamecat.h"
+#include "intprops.h"
 #include "obstack.h"
 #include "stdio--.h"
 #include "stdlib--.h"

@@ -191,11 +191,13 @@ m4_tmpname (int divnum)
   static char *tail;
   if (buffer == NULL)
     {
-      tail = xasprintf ("%s/m4-%d", output_temp_dir->dir_name, INT_MAX);
-      buffer = (char *) obstack_copy0 (&diversion_storage, tail,
-                                       strlen (tail));
-      free (tail);
-      tail = strrchr (buffer, '-') + 1;
+      size_t dirlen = strlen (output_temp_dir->dir_name);
+      static char const subprefix[] = "/m4-";
+      size_t size = dirlen + sizeof subprefix + INT_STRLEN_BOUND (int);
+      buffer = obstack_alloc (&diversion_storage, size);
+      memcpy (buffer, output_temp_dir->dir_name, dirlen);
+      memcpy (buffer + dirlen, subprefix, sizeof subprefix - 1);
+      tail = buffer + dirlen + sizeof subprefix - 1;
     }
   assert (0 < divnum);
   sprintf (tail, "%d", divnum);
