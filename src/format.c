@@ -22,7 +22,6 @@
 /* printf like formatting for m4.  */
 
 #include "m4.h"
-#include "xvasprintf.h"
 
 /* Simple varargs substitute.  We assume int and unsigned int are the
    same size; likewise for long and unsigned long.  */
