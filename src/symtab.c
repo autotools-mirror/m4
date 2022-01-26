@@ -277,8 +277,10 @@ lookup_symbol (const char *name, symbol_lookup mode)
          definition is still in use, let the caller free the memory
          after it is done with the symbol.  */
 
-      if (cmp != 0 || sym == NULL)
+      if (cmp != 0)
         return NULL;
+      if (sym == NULL)
+	return NULL;
       {
         bool traced = false;
         symbol *next;
