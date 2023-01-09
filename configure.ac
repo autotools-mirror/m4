@@ -133,7 +133,9 @@ if test "$gl_gcc_warnings" = yes; then
   [/* Enable compile-time and run-time bounds-checking, and some warnings,
       without upsetting newer glibc. */
    #if defined __OPTIMIZE__ && __OPTIMIZE__
-   # define _FORTIFY_SOURCE 2
+   # ifndef _FORTIFY_SOURCE
+   #  define _FORTIFY_SOURCE 2
+   # endif
    #endif
   ])
 fi
