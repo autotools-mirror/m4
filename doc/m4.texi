@@ -2393,6 +2393,21 @@ undefine(`a')
 @result{}
 @end example
 
+@ignore
+@comment This example is not worth putting in the manual, but triggers a
+@comment memory corruption regression during tracing in 1.4.19.
+
+@example
+define(`a', `popdef(`a')1')pushdef(`a', `2$*')dnl
+debugmode(`t')a(popdef(`a')a)
+@error{}m4trace: -2- popdef
+@error{}m4trace: -2- a
+@error{}m4trace: -2- popdef
+@error{}m4trace: -1- a
+@result{}21
+@end example
+@end ignore
+
 @node Defn
 @section Renaming macros
 
