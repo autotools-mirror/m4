@@ -7,10 +7,10 @@ scriptversion=2019-02-19.15; # UTC
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2004-2019 Bootstrap Authors
+# Copyright (C) 2004-2019, 2021, 2023 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
-# <https://opensource.org/license/MIT>, and GPL version 2 or later
+# <https://opensource.org/licenses/MIT>, and GPL version 2 or later
 # <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
 # these licenses when using or redistributing this software or any of
 # the files within it.  See the URLs above, or the file `LICENSE`
@@ -65,6 +65,12 @@ do
 	  _G_safe_locale=\"$_G_var=C; \$_G_safe_locale\"
 	fi"
 done
+# These NLS vars are set unconditionally (bootstrap issue #24).  Unset those
+# in case the environment reset is needed later and the $save_* variant is not
+# defined (see the code above).
+LC_ALL=C
+LANGUAGE=C
+export LANGUAGE LC_ALL
 
 # Make sure IFS has a sensible default
 sp=' '
@@ -72,7 +78,7 @@ nl='
 '
 IFS="$sp	$nl"
 
-# There are apparently some retarded systems that use ';' as a PATH separator!
+# There are apparently some systems that use ';' as a PATH separator!
 if test "${PATH_SEPARATOR+set}" != set; then
   PATH_SEPARATOR=:
   (PATH='/bin;/bin'; FPATH=$PATH; sh -c :) >/dev/null 2>&1 && {
@@ -302,6 +308,35 @@ sed_double_backslash="\
   s/^$_G_bs2$_G_dollar/$_G_bs&/
   s/\\([^$_G_bs]\\)$_G_bs2$_G_dollar/\\1$_G_bs2$_G_bs$_G_dollar/g
   s/\n//g"
+
+# require_check_ifs_backslash
+# ---------------------------
+# Check if we can use backslash as IFS='\' separator, and set
+# $check_ifs_backshlash_broken to ':' or 'false'.
+require_check_ifs_backslash=func_require_check_ifs_backslash
+func_require_check_ifs_backslash ()
+{
+  _G_save_IFS=$IFS
+  IFS='\'
+  _G_check_ifs_backshlash='a\\b'
+  for _G_i in $_G_check_ifs_backshlash
+  do
+  case $_G_i in
+  a)
+    check_ifs_backshlash_broken=false
+    ;;
+  '')
+    break
+    ;;
+  *)
+    check_ifs_backshlash_broken=:
+    break
+    ;;
+  esac
+  done
+  IFS=$_G_save_IFS
+  require_check_ifs_backslash=:
+}
 
 
 ## ----------------- ##
@@ -1043,6 +1078,8 @@ func_quote_portable ()
 {
     $debug_cmd
 
+    $require_check_ifs_backslash
+
     func_quote_portable_result=$2
 
     # one-time-loop (easy break)
@@ -1057,8 +1094,10 @@ func_quote_portable ()
       # Quote for eval.
       case $func_quote_portable_result in
         *[\\\`\"\$]*)
-          case $func_quote_portable_result in
-            *[\[\*\?]*)
+          # Fallback to sed for $func_check_bs_ifs_broken=:, or when the string
+          # contains the shell wildcard characters.
+          case $check_ifs_backshlash_broken$func_quote_portable_result in
+            :*|*[\[\*\?]*)
               func_quote_portable_result=`$ECHO "$func_quote_portable_result" \
                   | $SED "$sed_quote_subst"`
               break

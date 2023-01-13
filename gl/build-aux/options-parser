@@ -6,10 +6,10 @@
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2019 Bootstrap Authors
+# Copyright (C) 2010-2019, 2021, 2023 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
-# <https://opensource.org/license/MIT>, and GPL version 2 or later
+# <https://opensource.org/licenses/MIT>, and GPL version 2 or later
 # <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
 # these licenses when using or redistributing this software or any of
 # the files within it.  See the URLs above, or the file `LICENSE`
@@ -565,7 +565,7 @@ else
 
       func_split_equals_lhs=`expr "x$1" : 'x\([^=]*\)'`
       func_split_equals_rhs=
-      test "x$func_split_equals_lhs" = "x$1" \
+      test "x$func_split_equals_lhs=" = "x$1" \
         || func_split_equals_rhs=`expr "x$1" : 'x[^=]*=\(.*\)$'`
   }
 fi #func_split_equals
@@ -591,7 +591,7 @@ else
   {
       $debug_cmd
 
-      func_split_short_opt_name=`expr "x$1" : 'x-\(.\)'`
+      func_split_short_opt_name=`expr "x$1" : 'x\(-.\)'`
       func_split_short_opt_arg=`expr "x$1" : 'x-.\(.*\)$'`
   }
 fi #func_split_short_opt
