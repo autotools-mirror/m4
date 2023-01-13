@@ -1,6 +1,6 @@
 #!/bin/sh
 # Check GNU m4 against examples from the manual source.
-# Copyright (C) 1992, 2006-2014, 2016-2017, 2020-2022 Free Software
+# Copyright (C) 1992, 2006-2014, 2016-2017, 2020-2023 Free Software
 # Foundation, Inc.
 #
 # This file is part of GNU M4.
