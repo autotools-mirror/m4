@@ -508,7 +508,8 @@ make_room_for (int length)
       {
         char *buffer = output_diversion->u.buffer;
         output_diversion->u.buffer = xcharalloc ((size_t) wanted_size);
-        memcpy (output_diversion->u.buffer, buffer, output_diversion->used);
+        if (output_diversion->used)
+          memcpy (output_diversion->u.buffer, buffer, output_diversion->used);
         free (buffer);
       }
 
