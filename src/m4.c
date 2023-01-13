@@ -419,6 +419,10 @@ main (int argc, char *const *argv)
   set_program_name (argv[0]);
   retcode = EXIT_SUCCESS;
   setlocale (LC_ALL, "");
+  /* m4 1.4.x does not want locale-aware decimal separators in the
+     format builtin; easiest is to override the user's choice of
+     LC_NUMERIC. */
+  setlocale (LC_NUMERIC, "C");
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
   atexit (close_stdin);

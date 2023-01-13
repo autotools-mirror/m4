@@ -9,6 +9,13 @@ GNU M4 NEWS - User visible changes.
    `debugmode(t)') could read invalid memory when tracing a series of
    pushed macros that are popped during argument collection.
 
+** Fix regression introduced in 1.4.19 where the `format' builtin
+   inadvertently took on locale-dependent parsing and output of floating
+   point numbers as a side-effect of introducing message translations.
+   While it would be nice for m4 to be fully locale-aware, such a behavior
+   change belongs in a major version release such as 1.6, and not a minor
+   release.
+
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]
 
 ** A number of portability improvements inherited from gnulib, including
