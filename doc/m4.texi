@@ -2227,6 +2227,21 @@ f(`bye')
 @result{}f(bye)
 @end example
 
+@ignore
+@comment This example is not worth putting in the manual, but triggers a
+@comment memory corruption regression during tracing in 1.4.19.
+
+@example
+define(`a', `popdef(`a')1')pushdef(`a', `2$*')dnl
+debugmode(`t')a(popdef(`a')a)
+@error{}m4trace: -2- popdef
+@error{}m4trace: -2- a
+@error{}m4trace: -2- popdef
+@error{}m4trace: -1- a
+@result{}21
+@end example
+@end ignore
+
 It is not an error for @var{name} to have no macro definition.  In that
 case, @code{undefine} does nothing.
 

@@ -141,7 +141,13 @@ void
 free_symbol (symbol *sym)
 {
   if (SYMBOL_PENDING_EXPANSIONS (sym) > 0)
-    SYMBOL_DELETED (sym) = true;
+    {
+      SYMBOL_DELETED (sym) = true;
+      if (SYMBOL_STACK (sym)) {
+        SYMBOL_NAME (sym) = xstrdup (SYMBOL_NAME (sym));
+        SYMBOL_STACK (sym) = NULL;
+      }
+    }
   else
     {
       if (SYMBOL_STACK (sym) == NULL)
@@ -220,15 +226,14 @@ lookup_symbol (const char *name, symbol_lookup mode)
               SYMBOL_TYPE (sym) = TOKEN_VOID;
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
               sym->hash = h;
-              SYMBOL_NAME (sym) = old->name;
-              old->name = xstrdup (name);
+              SYMBOL_NAME (sym) = SYMBOL_NAME (old);
               SYMBOL_MACRO_ARGS (sym) = false;
               SYMBOL_BLIND_NO_ARGS (sym) = false;
               SYMBOL_DELETED (sym) = false;
               SYMBOL_PENDING_EXPANSIONS (sym) = 0;
 
               SYMBOL_STACK (sym) = SYMBOL_STACK (old);
-              SYMBOL_STACK (old) = NULL;
+              SYMBOL_STACK (old) = sym;
               sym->next = old->next;
               old->next = NULL;
               *spp = sym;

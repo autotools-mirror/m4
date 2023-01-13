@@ -5,6 +5,10 @@ GNU M4 NEWS - User visible changes.
 ** The `syscmd' and `esyscmd' builtins no longer mishandle a command line
    starting with `-' or `+'.
 
+** Fix regression introduced in 1.4.19 where trace output (such as with
+   `debugmode(t)') could read invalid memory when tracing a series of
+   pushed macros that are popped during argument collection.
+
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]
 
 ** A number of portability improvements inherited from gnulib, including
