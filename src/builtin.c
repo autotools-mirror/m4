@@ -945,10 +945,10 @@ static void
 m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   const char *cmd = ARG (1);
+  char *xcmd = NULL;
   int status;
   int sig_status;
-  int slot = 3;
-  const char *prog_args[5] = { "sh", "-c", "--" };
+  const char *prog_args[4] = { "sh", "-c" };
   if (bad_argc (argv[0], argc, 2, 2) || !*cmd)
     {
       /* The empty command is successful.  */
@@ -962,10 +962,20 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
     {
       prog_args[0] = "cmd";
       prog_args[1] = "/c";
-      slot = 2;
+      prog_args[2] = cmd;
     }
+  else
 #endif
-  prog_args[slot] = cmd;
+    {
+      /* If cmd starts with '-' or '+', 'sh -c "$cmd"' is not guaranteed to
+         work.  If we could assume a POSIX compliant SYSCMD_SHELL, we could use
+         'sh -c -- "$cmd"'.  But it does not work with /bin/sh on FreeBSD 13
+         and AIX 7, and on these platforms 'bash' is not guaranteed to be
+         installed.  Therefore use 'sh -c " $cmd"' instead.  */
+      xcmd = xasprintf (" %s", cmd);
+      prog_args[2] = xcmd;
+    }
+  prog_args[3] = NULL;
   errno = 0;
   status = execute (ARG (0), SYSCMD_SHELL, prog_args, NULL, NULL, false,
                     false, false, false, true, false, &sig_status);
@@ -980,14 +990,15 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
         M4ERROR ((warning_status, errno, _("cannot run command `%s'"), cmd));
       sysval = status;
     }
+  free (xcmd);
 }
 
 static void
 m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 {
   const char *cmd = ARG (1);
-  int slot = 3;
-  const char *prog_args[5] = { "sh", "-c", "--" };
+  char *xcmd = NULL;
+  const char *prog_args[4] = { "sh", "-c" };
   pid_t child;
   int fd;
   FILE *pin;
@@ -1007,10 +1018,20 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     {
       prog_args[0] = "cmd";
       prog_args[1] = "/c";
-      slot = 2;
+      prog_args[2] = cmd;
     }
+  else
 #endif
-  prog_args[slot] = cmd;
+    {
+      /* If cmd starts with '-' or '+', 'sh -c "$cmd"' is not guaranteed to
+         work.  If we could assume a POSIX compliant SYSCMD_SHELL, we could use
+         'sh -c -- "$cmd"'.  But it does not work with /bin/sh on FreeBSD 13
+         and AIX 7, and on these platforms 'bash' is not guaranteed to be
+         installed.  Therefore use 'sh -c " $cmd"' instead.  */
+      xcmd = xasprintf (" %s", cmd);
+      prog_args[2] = xcmd;
+    }
+  prog_args[3] = NULL;
   errno = 0;
   child = create_pipe_in (ARG (0), SYSCMD_SHELL, prog_args, NULL, NULL,
                           NULL, false, true, false, &fd);
@@ -1067,6 +1088,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
         M4ERROR ((warning_status, errno, _("cannot run command `%s'"), cmd));
       sysval = status;
     }
+  free (xcmd);
 }
 
 static void
