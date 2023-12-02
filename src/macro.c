@@ -385,5 +385,5 @@ expand_macro (symbol *sym)
     obstack_free (&argc_stack, argv[0]);
   else
     obstack_free (&arguments, NULL);
-  obstack_blank_fast (&argv_stack, -argc * sizeof (token_data *));
+  obstack_blank_fast (&argv_stack, -argc * (ptrdiff_t) sizeof (token_data *));
 }
