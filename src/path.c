@@ -50,7 +50,6 @@ void
 include_env_init (void)
 {
   char *path;
-  char *path_end;
   char *env_path;
 
   if (no_gnu_extensions)
@@ -63,15 +62,16 @@ include_env_init (void)
   env_path = xstrdup (env_path);
   path = env_path;
 
-  do
+  for (;;)
     {
-      path_end = strchr (path, ':');
+      char *path_end = strchr (path, ':');
       if (path_end)
         *path_end = '\0';
       add_include_directory (path);
+      if (!path_end)
+        break;
       path = path_end + 1;
     }
-  while (path_end);
   free (env_path);
 }
 
