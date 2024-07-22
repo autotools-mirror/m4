@@ -64,6 +64,19 @@ BUILT_SOURCES = $(top_srcdir)/.version
 $(top_srcdir)/.version:
 	echo $(VERSION) > $@-t && mv $@-t $@
 
+# Ensure that the manual page is up-to-date when "make dist" runs.
+BUILT_SOURCES += doc/m4.1
+doc/m4.1: $(top_srcdir)/src/m4.c
+	$(AM_V_GEN)(cd lib && $(MAKE) $(AM_MAKEFLAGS)) \
+	  && (cd src && $(MAKE) $(AM_MAKEFLAGS) m4$(EXEEXT)) \
+	  && (cd doc && $(MAKE) $(AM_MAKEFLAGS) m4.1)
+
+# Ensure that the checks/*[0-9][0-9][0-9].* files exist when "make dist" runs.
+BUILT_SOURCES += checks-files
+.PHONY: checks-files
+checks-files:
+	cd checks && $(MAKE) $(AM_MAKEFLAGS)
+
 # Arrange so that .tarball-version appears only in the distribution
 # tarball, and never in a checked-out repository.
 dist-hook: gen-ChangeLog
