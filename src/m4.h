@@ -52,7 +52,6 @@
 #include "stdlib--.h"
 #include "unistd--.h"
 #include "verify.h"
-#include "verror.h"
 #include "xalloc.h"
 #include "xprintf.h"
 #include "xvasprintf.h"
@@ -140,9 +139,9 @@ extern const char *user_word_regexp;    /* -W */
 extern int retcode;
 
 extern void m4_error (int, int, const char *, ...)
-  ATTRIBUTE_FORMAT ((__printf__, 3, 4));
+  ATTRIBUTE_COLD ATTRIBUTE_FORMAT ((__printf__, 3, 4));
 extern void m4_error_at_line (int, int, const char *, int, const char *, ...)
-  ATTRIBUTE_FORMAT ((__printf__, 5, 6));
+  ATTRIBUTE_COLD ATTRIBUTE_FORMAT ((__printf__, 5, 6));
 extern _Noreturn void m4_failure (int, const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 2, 3));
 extern _Noreturn void m4_failure_at_line (int, const char *, int,
@@ -437,7 +436,8 @@ extern void free_macro_sequence (void);
 extern void define_user_macro (const char *, const char *, symbol_lookup);
 extern void undivert_all (void);
 extern void expand_user_macro (struct obstack *, symbol *, int, token_data **);
-extern void m4_placeholder (struct obstack *, int, token_data **);
+extern void m4_placeholder (struct obstack *, int, token_data **)
+  ATTRIBUTE_COLD;
 extern void init_pattern_buffer (struct re_pattern_buffer *,
                                  struct re_registers *);
 extern const char *ntoa (int32_t, int);
