@@ -164,7 +164,7 @@ typedef struct call_info call_info;
 extern int retcode;
 
 extern void m4_error (int, int, const call_info *, const char *, ...)
-  ATTRIBUTE_FORMAT ((__printf__, 4, 5));
+  ATTRIBUTE_COLD ATTRIBUTE_FORMAT ((__printf__, 4, 5));
 extern void m4_warn (int, const call_info *, const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 3, 4));
 
@@ -540,7 +540,8 @@ extern void define_user_macro (const char *, size_t, const char *, size_t,
 extern void undivert_all (void);
 extern void expand_user_macro (struct obstack *, symbol *, int,
                                macro_arguments *);
-extern void m4_placeholder (struct obstack *, int, macro_arguments *);
+extern void m4_placeholder (struct obstack *, int, macro_arguments *)
+  ATTRIBUTE_COLD;
 extern void init_pattern_buffer (struct re_pattern_buffer *,
                                  struct re_registers *);
 
