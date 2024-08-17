@@ -33,7 +33,6 @@ lib/regcomp.c
 lib/siglist.h
 lib/spawn-pipe.c
 lib/strsignal.c
-lib/verror.c
 lib/version-etc.c
 lib/wait-process.c
 lib/xalloc-die.c
