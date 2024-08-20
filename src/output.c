@@ -27,6 +27,12 @@
 #include "gl_avltree_oset.h"
 #include "gl_xoset.h"
 
+/* Work around a bogus GCC warning
+   <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=116426>.  */
+#if __GNUC__ >= 6
+# pragma GCC diagnostic ignored "-Wnull-dereference"
+#endif
+
 /* Size of initial in-memory buffer size for diversions.  Small diversions
    would usually fit in.  */
 #define INITIAL_BUFFER_SIZE 512
