@@ -52,6 +52,7 @@
 #  avltree-oset \
 #  binary-io \
 #  bitrotate \
+#  bool \
 #  bootstrap \
 #  c-ctype \
 #  c-stack \
@@ -103,8 +104,7 @@
 #  sigpipe \
 #  snprintf-posix \
 #  spawn-pipe \
-#  stdbool \
-#  stdint \
+#  stdint-h \
 #  stdlib-safer \
 #  strsignal \
 #  strtod \
@@ -133,6 +133,7 @@ gl_MODULES([
   avltree-oset
   binary-io
   bitrotate
+  bool
   bootstrap
   c-ctype
   c-stack
@@ -184,8 +185,7 @@ gl_MODULES([
   sigpipe
   snprintf-posix
   spawn-pipe
-  stdbool
-  stdint
+  stdint-h
   stdlib-safer
   strsignal
   strtod
