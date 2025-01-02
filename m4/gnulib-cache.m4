@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 Free Software Foundation, Inc.
+# Copyright (C) 2002-2025 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@
 #  autobuild \
 #  avltree-oset \
 #  binary-io \
+#  bool \
 #  c-ctype \
 #  c-stack \
 #  clean-temp \
@@ -91,8 +92,7 @@
 #  sigaction \
 #  sigpipe \
 #  spawn-pipe \
-#  stdbool \
-#  stdint \
+#  stdint-h \
 #  stdlib-safer \
 #  strsignal \
 #  strstr \
@@ -119,6 +119,7 @@ gl_MODULES([
   autobuild
   avltree-oset
   binary-io
+  bool
   c-ctype
   c-stack
   clean-temp
@@ -160,8 +161,7 @@ gl_MODULES([
   sigaction
   sigpipe
   spawn-pipe
-  stdbool
-  stdint
+  stdint-h
   stdlib-safer
   strsignal
   strstr
