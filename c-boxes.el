@@ -1,5 +1,5 @@
 ;;; Boxed comments for C mode.
-;;; Copyright (C) 1991-1994, 2008-2014, 2016-2017, 2020-2023 Free
+;;; Copyright (C) 1991-1994, 2008-2014, 2016-2017, 2020-2025 Free
 ;;; Software Foundation, Inc.
 ;;; François Pinard <pinard@iro.umontreal.ca>, April 1991.
 ;;;
