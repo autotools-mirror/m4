@@ -967,7 +967,7 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 #endif
   prog_args[slot] = cmd;
   errno = 0;
-  status = execute (ARG (0), SYSCMD_SHELL, prog_args, NULL, false,
+  status = execute (ARG (0), SYSCMD_SHELL, prog_args, NULL, NULL, false,
                     false, false, false, true, false, &sig_status);
   if (sig_status)
     {
@@ -1012,7 +1012,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 #endif
   prog_args[slot] = cmd;
   errno = 0;
-  child = create_pipe_in (ARG (0), SYSCMD_SHELL, prog_args, NULL,
+  child = create_pipe_in (ARG (0), SYSCMD_SHELL, prog_args, NULL, NULL,
                           NULL, false, true, false, &fd);
   if (child == -1)
     {
