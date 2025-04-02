@@ -32,6 +32,7 @@
 #include "wait-process.h"
 
 #define ARG(i) (argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
+#define ARGLEN(i) (argc > (i) ? TOKEN_DATA_LEN (argv[i]) : 0)
 
 /* Initialization of builtin and predefined macros.  The table
    "builtin_tab" is both used for initialization, and by the "builtin"
@@ -289,6 +290,15 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 {
   symbol *s;
   char *defn = xstrdup (text ? text : "");
+  size_t len = strlen (defn);
+
+  if (len > INT_MAX)
+    {
+      M4ERROR ((warning_status, 0,
+                _("macro `%s' definition too long; truncating to INT_MAX bytes"),
+                  name));
+      len = INT_MAX;
+    }
 
   s = lookup_symbol (name, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
@@ -296,12 +306,12 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = defn;
+  SYMBOL_TEXT_LEN (s) = len;
 
   /* Implement --warn-macro-sequence.  */
   if (macro_sequence_inuse && text)
     {
       regoff_t offset = 0;
-      size_t len = strlen (defn);
 
       while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
                                   len - offset, &macro_sequence_regs)) >= 0)
@@ -347,9 +357,7 @@ builtin_init (void)
       {
         if (prefix_all_builtins)
           {
-            string = (char *) xmalloc (strlen (bp->name) + 4);
-            strcpy (string, "m4_");
-            strcat (string, bp->name);
+            string = xasprintf ("m4_%s", bp->name);
             define_builtin (string, bp, SYMBOL_INSERT);
             free (string);
           }
@@ -516,7 +524,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
       if (quoted)
         obstack_grow (obs, lquote.string, lquote.length);
       obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
-                    strlen (TOKEN_DATA_TEXT (argv[i])));
+                    TOKEN_DATA_LEN (argv[i]));
       if (quoted)
         obstack_grow (obs, rquote.string, rquote.length);
     }
@@ -625,27 +633,25 @@ static void
 m4_ifdef (struct obstack *obs, int argc, token_data **argv)
 {
   symbol *s;
-  const char *result;
+  int result = 0;
 
   if (bad_argc (argv[0], argc, 3, 4))
     return;
   s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
 
   if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
-    result = ARG (2);
+    result = 2;
   else if (argc >= 4)
-    result = ARG (3);
-  else
-    result = NULL;
+    result = 3;
 
-  if (result != NULL)
-    obstack_grow (obs, result, strlen (result));
+  if (result)
+    obstack_grow (obs, ARG (result), ARGLEN (result));
 }
 
 static void
 m4_ifelse (struct obstack *obs, int argc, token_data **argv)
 {
-  const char *result;
+  int result;
   token_data *me = argv[0];
 
   if (argc == 2)
@@ -660,11 +666,11 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
   argv++;
   argc--;
 
-  result = NULL;
-  while (result == NULL)
+  result = 0;
+  while (!result)
 
     if (STREQ (ARG (0), ARG (1)))
-      result = ARG (2);
+      result = 2;
 
     else
       switch (argc)
@@ -674,7 +680,7 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
 
         case 4:
         case 5:
-          result = ARG (3);
+          result = 3;
           break;
 
         default:
@@ -682,7 +688,7 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
           argv += 3;
         }
 
-  obstack_grow (obs, result, strlen (result));
+  obstack_grow (obs, ARG (result), ARGLEN (result));
 }
 
 /*-------------------------------------------------------------------.
@@ -834,6 +840,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
             {
               TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
               TOKEN_DATA_TEXT (argv[i]) = (char *) "";
+              TOKEN_DATA_LEN (argv[i]) = 0;
             }
       bp->func (obs, argc - 1, argv + 1);
     }
@@ -874,6 +881,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
             {
               TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
               TOKEN_DATA_TEXT (argv[i]) = (char *) "";
+              TOKEN_DATA_LEN (argv[i]) = 0;
             }
       call_macro (s, argc - 1, argv + 1, obs);
     }
@@ -907,7 +915,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
         {
         case TOKEN_TEXT:
           obstack_grow (obs, lquote.string, lquote.length);
-          obstack_grow (obs, SYMBOL_TEXT (s), strlen (SYMBOL_TEXT (s)));
+          obstack_grow (obs, SYMBOL_TEXT (s), SYMBOL_TEXT_LEN (s));
           obstack_grow (obs, rquote.string, rquote.length);
           break;
 
@@ -1121,7 +1129,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (*ARG (2) && !numeric_arg (argv[0], ARG (2), &radix))
     return;
 
-  if (radix < 1 || radix > (int) strlen (digits))
+  if (radix < 1 || radix > 36)
     {
       M4ERROR ((warning_status, 0,
                 _("radix %d in builtin `%s' out of range"), radix, ARG (0)));
@@ -1484,7 +1492,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
          maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
        */
       const char *str = ARG (1);
-      int len = strlen (str);
+      int len = ARGLEN (1);
       int i;
       int len2;
       const char *e;
@@ -1506,7 +1514,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
         }
     }
   else
-    mkstemp_helper (obs, ARG (0), ARG (1), strlen (ARG (1)));
+    mkstemp_helper (obs, ARG (0), ARG (1), ARGLEN (1));
 }
 
 static void
@@ -1514,7 +1522,7 @@ m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
-  mkstemp_helper (obs, ARG (0), ARG (1), strlen (ARG (1)));
+  mkstemp_helper (obs, ARG (0), ARG (1), ARGLEN (1));
 }
 
 /*----------------------------------------.
@@ -1609,7 +1617,7 @@ m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, -1))
     return;
   if (no_gnu_extensions)
-    obstack_grow (obs, ARG (1), strlen (ARG (1)));
+    obstack_grow (obs, ARG (1), ARGLEN (1));
   else
     dump_args (obs, argc, argv, ' ', false);
   obstack_1grow (obs, '\0');
@@ -1763,7 +1771,7 @@ m4_len (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
-  shipout_int (obs, strlen (ARG (1)));
+  shipout_int (obs, ARGLEN (1));
 }
 
 /*-------------------------------------------------------------------.
@@ -1811,11 +1819,11 @@ m4_substr (struct obstack *obs, int argc, token_data **argv)
     {
       /* builtin(`substr') is blank, but substr(`abc') is abc.  */
       if (argc == 2)
-        obstack_grow (obs, ARG (1), strlen (ARG (1)));
+        obstack_grow (obs, ARG (1), ARGLEN (1));
       return;
     }
 
-  length = avail = strlen (ARG (1));
+  length = avail = ARGLEN (1);
   if (!numeric_arg (argv[0], ARG (2), &start))
     return;
 
@@ -1888,6 +1896,7 @@ static void
 m4_translit (struct obstack *obs, int argc, token_data **argv)
 {
   const char *data = ARG (1);
+  int datalen = ARGLEN (1);
   const char *from = ARG (2);
   const char *to;
   char map[UCHAR_MAX + 1];
@@ -1898,7 +1907,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
     {
       /* builtin(`translit') is blank, but translit(`abc') is abc.  */
       if (2 <= argc)
-        obstack_grow (obs, data, strlen (data));
+        obstack_grow (obs, data, datalen);
       return;
     }
 
@@ -1915,7 +1924,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   if (!from[1] || !from[2])
     {
       const char *p;
-      size_t len = strlen (data);
+      size_t len = datalen;
       while ((p = (char *) memchr2 (data, from[0], from[1], len)))
         {
           obstack_grow (obs, data, p - data);
@@ -2106,7 +2115,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   regexp = TOKEN_DATA_TEXT (argv[2]);
 
   init_pattern_buffer (&buf, &regs);
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
+  msg = re_compile_pattern (regexp, ARGLEN (2), &buf);
 
   if (msg != NULL)
     {
@@ -2116,7 +2125,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  length = strlen (victim);
+  length = ARGLEN (1);
   /* Avoid overhead of allocating regs if we won't use it.  */
   startpos = re_search (&buf, victim, length, 0, length,
                         argc == 3 ? NULL : &regs);
@@ -2159,14 +2168,14 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
     {
       /* builtin(`patsubst') is blank, but patsubst(`abc') is abc.  */
       if (argc == 2)
-        obstack_grow (obs, ARG (1), strlen (ARG (1)));
+        obstack_grow (obs, ARG (1), ARGLEN (1));
       return;
     }
 
   regexp = TOKEN_DATA_TEXT (argv[2]);
 
   init_pattern_buffer (&buf, &regs);
-  msg = re_compile_pattern (regexp, strlen (regexp), &buf);
+  msg = re_compile_pattern (regexp, ARGLEN (2), &buf);
 
   if (msg != NULL)
     {
@@ -2177,7 +2186,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
     }
 
   victim = TOKEN_DATA_TEXT (argv[1]);
-  length = strlen (victim);
+  length = ARGLEN (1);
 
   offset = 0;
   while (offset <= length)
@@ -2256,13 +2265,14 @@ expand_user_macro (struct obstack *obs, symbol *sym,
                    int argc, token_data **argv)
 {
   const char *text = SYMBOL_TEXT (sym);
+  const char *end = text + SYMBOL_TEXT_LEN (sym);
   int i;
   while (1)
     {
       const char *dollar = strchr (text, '$');
       if (!dollar)
         {
-          obstack_grow (obs, text, strlen (text));
+          obstack_grow (obs, text, end - text);
           return;
         }
       obstack_grow (obs, text, dollar - text);
@@ -2288,9 +2298,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
               for (i = 0; c_isdigit (*text); text++)
                 i = i * 10 + (*text - '0');
             }
-          if (i < argc)
-            obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
-                          strlen (TOKEN_DATA_TEXT (argv[i])));
+          obstack_grow (obs, ARG (i), ARGLEN (i));
           break;
 
         case '#':              /* number of arguments */

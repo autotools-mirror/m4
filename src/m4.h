@@ -275,6 +275,11 @@ enum token_data_type
 struct token_data
 {
   enum token_data_type type;
+  /* Several places in the code only work with tokens no larger than
+     2G.  Although len only matters for a text token, putting it here
+     instead of in the union allows struct token_data to be
+     smaller.  */
+  int len;
   union
   {
     struct
@@ -291,6 +296,7 @@ struct token_data
 };
 
 #define TOKEN_DATA_TYPE(Td)             ((Td)->type)
+#define TOKEN_DATA_LEN(Td)              ((Td)->len)
 #define TOKEN_DATA_TEXT(Td)             ((Td)->u.u_t.text)
 #ifdef ENABLE_CHANGEWORD
 # define TOKEN_DATA_ORIG_TEXT(Td)       ((Td)->u.u_t.original_text)
@@ -384,6 +390,7 @@ struct symbol
 #define SYMBOL_NAME(S)          ((S)->name)
 #define SYMBOL_TYPE(S)          (TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))
+#define SYMBOL_TEXT_LEN(S)      (TOKEN_DATA_LEN (&(S)->data))
 #define SYMBOL_FUNC(S)          (TOKEN_DATA_FUNC (&(S)->data))
 
 typedef enum symbol_lookup symbol_lookup;

@@ -1042,6 +1042,7 @@ next_token (token_data *td, int *line)
   obstack_1grow (&token_stack, '\0');
 
   TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
+  TOKEN_DATA_LEN (td) = obstack_object_size (&token_stack) - 1;
   TOKEN_DATA_TEXT (td) = (char *) obstack_finish (&token_stack);
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)

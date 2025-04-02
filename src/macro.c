@@ -144,6 +144,7 @@ expand_argument (struct obstack *obs, token_data *argp)
   int paren_level;
   const char *file = current_file;
   int line = current_line;
+  size_t len;
 
   TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
 
@@ -167,12 +168,14 @@ expand_argument (struct obstack *obs, token_data *argp)
             {
               /* The argument MUST be finished, whether we want it or not.  */
               obstack_1grow (obs, '\0');
+              len = obstack_object_size (obs) - 1;
               text = (char *) obstack_finish (obs);
 
               if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
                 {
                   TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
                   TOKEN_DATA_TEXT (argp) = text;
+                  TOKEN_DATA_LEN (argp) = len;
                 }
               return t == TOKEN_COMMA;
             }
@@ -234,6 +237,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
+  TOKEN_DATA_LEN (&td) = strlen (SYMBOL_NAME (sym));
   tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
   obstack_ptr_grow (argptr, tdp);
 
@@ -248,6 +252,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
             {
               TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
               TOKEN_DATA_TEXT (&td) = (char *) "";
+              TOKEN_DATA_LEN (&td) = 0;
             }
           tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
           obstack_ptr_grow (argptr, tdp);
