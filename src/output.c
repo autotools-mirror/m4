@@ -578,6 +578,7 @@ output_text (const char *text, int length)
     }
   else
     {
+      assert (output_cursor);
       memcpy (output_cursor, text, (size_t) length);
       output_cursor += length;
       output_unused -= length;
