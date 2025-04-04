@@ -567,9 +567,9 @@ numeric_arg (const call_info *name, const char *arg, size_t len, int *valuep)
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 /* The function ntoa () converts VALUE to a signed ASCII
-   representation in radix RADIX.  */
+   representation in radix RADIX, with the ending \0 in *END.  */
 static const char *
-ntoa (int32_t value, int radix)
+ntoa (int32_t value, int radix, const char **end)
 {
   bool negative;
   uint32_t uvalue;
@@ -578,6 +578,7 @@ ntoa (int32_t value, int radix)
   char *s = &str[sizeof str];
 
   *--s = '\0';
+  *end = s;
 
   if (value < 0)
     {
@@ -608,9 +609,10 @@ static void
 shipout_int (struct obstack *obs, int val)
 {
   const char *s;
+  const char *e;
 
-  s = ntoa ((int32_t) val, 10);
-  obstack_grow (obs, s, strlen (s));
+  s = ntoa ((int32_t) val, 10, &e);
+  obstack_grow (obs, s, e - s);
 }
 
 
@@ -1237,6 +1239,7 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
   int min = 1;
   const char *s;
   size_t len;
+  const char *e;
 
   if (bad_argc (me, argc, 1, 3))
     return;
@@ -1279,14 +1282,14 @@ m4_eval (struct obstack *obs, int argc, macro_arguments *argv)
       return;
     }
 
-  s = ntoa (value, radix);
+  s = ntoa (value, radix, &e);
 
   if (*s == '-')
     {
       obstack_1grow (obs, '-');
       s++;
     }
-  len = strlen (s);
+  len = e - s;
   if (len < min + 0UL)
     {
       min -= len;
