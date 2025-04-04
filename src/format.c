@@ -381,7 +381,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
       *p = '\0';
 
       /* Our constructed format string in fstart is safe.  */
-#if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
+#if _GL_GNUC_PREREQ (4, 3) || defined __clang__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
@@ -420,7 +420,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
          we constructed fstart, the result should not be negative.  */
       assert (0 <= result);
 
-#if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
+#if _GL_GNUC_PREREQ (4, 3) || defined __clang__
 # pragma GCC diagnostic pop
 #endif
 
