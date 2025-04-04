@@ -707,12 +707,12 @@ following beta features that were deemed worth deferring until 1.6:
    returning the name of a nonexistent file.  This closes a security hole.
 
 * Noteworthy changes in Version 1.4 (Oct 1994) [stable]
-  Released by Franc,ois Pinard
+  Released by François Pinard
 
 ** (No user visible changes)
 
 
-Version 1.3 - September 1994, by Franc,ois Pinard
+Version 1.3 - September 1994, by François Pinard
 
 * Diversions are created as needed.  Option `-N' is still accepted, but
 otherwise ignored.  Users should use only negative diversion numbers,
@@ -724,7 +724,7 @@ at all if all diversions taken altogether do not use more than 512K.
 * Frozen state files may be produced with the `--freeze-state' (-F)
 option and later brought back through the `--reload-state' (-R) option.
 
-Version 1.2 - July 1994, by Franc,ois Pinard
+Version 1.2 - July 1994, by François Pinard
 
 * In patsubst(STRING, REGEXP, REPLACEMENT), \& in REPLACEMENT has been
 changed to represent this part of STRING matched by the whole REGEXP,
@@ -751,7 +751,7 @@ configure time to get these things.  Do *not* depend on them yet.
 * Various bugs have been corrected, m4 should be more portable.  See the
 ChangeLog for details.
 
-Version 1.1 - November 1993, by Franc,ois Pinard
+Version 1.1 - November 1993, by François Pinard
 
 Changes which might affect existing GNU m4 scripts:
 
@@ -786,7 +786,7 @@ exclusive-or, `~' for the bitwise negation, `<<' and `>>' for shifts.
 * `eval' recognizes the notation 0bDIGITS for binary numbers and the
 notation 0rRADIX:DIGITS for numbers in any radix from 1 to 36.
 
-Version 1.0.3 - December 1992, by Franc,ois Pinard
+Version 1.0.3 - December 1992, by François Pinard
 
 Changes for the user:
 

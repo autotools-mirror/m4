@@ -576,7 +576,7 @@ extern void reload_frozen_state (const char *);
 # define DEBUG_SYM    1
 #endif
 
-/* Generic utilties.  */
+/* Generic utilities.  */
 
 /* Convert a possibly-signed character to an unsigned character.  This is
    a bit safer than casting to unsigned char, since it catches some type

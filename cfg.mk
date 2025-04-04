@@ -27,14 +27,12 @@ update-copyright-env = \
 local-checks-to-skip =
 # M4 intentionally uses a coding style that compiles under C++.
 local-checks-to-skip += sc_cast_of_x_alloc_return_value
-# TODO enable this later
-local-checks-to-skip += sc_codespell
 
 # Our files include "m4.h", which in turn includes <config.h> first.
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = c37c70598aa9cbbc6f31351cb73cc9de
+old_NEWS_hash = 88ec470c5ac1bc9bd5a4ff3eab995c9b
 
 # Update m4-latest.tar.* symlinks during 'make stable/beta'.
 GNUPLOADFLAGS = --symlink-regex
@@ -51,3 +49,7 @@ exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \
   (^(GNU)?Makefile(\.am)?|\.mk|^HACKING|^ChangeLog.*)$$
 exclude_file_name_regexp--sc_trailing_blank = ^examples/null
 exclude_file_name_regexp--update-copyright = ^m4/gnulib-cache.m4$$
+exclude_file_name_regexp--sc_codespell = ^THANKS$$
+
+# Codespell exemptions:
+codespell_ignore_words_list = ois,WIDTHn

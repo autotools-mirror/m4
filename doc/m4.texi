@@ -6188,7 +6188,7 @@ As a GNU extension, if @var{from} is negative, it is added to
 the length of @var{string} to determine the starting index; if it is
 empty, the start of the string is used.  Likewise, if @var{length} is
 negative, it is added to the length of @var{string} to determine the
-ending index, and an emtpy @var{length} behaves like an omitted
+ending index, and an empty @var{length} behaves like an omitted
 @var{length}.  It is not an error if either of the resulting indices lie
 outside the string, but the selected substring only contains the bytes
 of @var{string} that overlap the selected indices.  If the end point
@@ -6283,7 +6283,7 @@ substr(`abcde', `6', `', `f')
 @result{}
 @end example
 
-If backwards compabitility to M4 1.4.x behavior is necessary, the
+If backwards compatibility to M4 1.4.x behavior is necessary, the
 following macro is sufficient to do the job (mimicking warnings about
 empty @var{from} or @var{length} or an ignored fourth argument is left
 as an exercise to the reader).
