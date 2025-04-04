@@ -9,11 +9,11 @@
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2019, 2021, 2023 Bootstrap Authors
+# Copyright (C) 2010-2019, 2021, 2023-2024 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
-# <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
+# <https://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
 # these licenses when using or redistributing this software or any of
 # the files within it.  See the URLs above, or the file `LICENSE`
 # included in the Bootstrap distribution for the full license texts.
@@ -48,12 +48,12 @@
 #   gl/build-aux/inline-source gl/build-aux/bootstrap.in > bootstrap
 #
 # You should then store than script in version control for other
-# developers in you project.  It will give you instructions about
+# developers in your project.  It will give you instructions about
 # how to keep it up to date if the sources change.
 #
 # See gl/doc/bootstrap.texi for documentation on how to write
 # a bootstrap.conf to customize it for your project's
-# idiosyncracies.
+# idiosyncrasies.
 
 
 ## ================================================================== ##
@@ -192,7 +192,7 @@ extra_locale_categories=
 
 # Additional xgettext options to use.  Gnulib might provide you with an
 # extensive list of additional options to append to this, but gettext
-# 0.16.1 and newer appends them automaticaly, so you can safely ignore
+# 0.16.1 and newer appends them automatically, so you can safely ignore
 # the complaints from 'gnulib-tool' if your $configure_ac states:
 #
 #    AM_GNU_GETTEXT_VERSION([0.16.1])
@@ -235,11 +235,11 @@ scriptversion=2019-02-19.15; # UTC
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2004-2019, 2021, 2023 Bootstrap Authors
+# Copyright (C) 2004-2019, 2021, 2023-2024 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
-# <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
+# <https://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
 # these licenses when using or redistributing this software or any of
 # the files within it.  See the URLs above, or the file `LICENSE`
 # included in the Bootstrap distribution for the full license texts.
@@ -752,7 +752,7 @@ func_require_term_colors ()
 
   # _G_HAVE_PLUSEQ_OP
   # Can be empty, in which case the shell is probed, "yes" if += is
-  # useable or anything else if it does not work.
+  # usable or anything else if it does not work.
   test -z "$_G_HAVE_PLUSEQ_OP" \
     && (eval 'x=a; x+=" b"; test "a b" = "$x"') 2>/dev/null \
     && _G_HAVE_PLUSEQ_OP=yes
@@ -902,7 +902,7 @@ eval 'func_dirname ()
 #             to NONDIR_REPLACEMENT.
 #             value returned in "$func_dirname_result"
 #   basename: Compute filename of FILE.
-#             value retuned in "$func_basename_result"
+#             value returned in "$func_basename_result"
 # For efficiency, we do not delegate to the functions above but instead
 # duplicate the functionality here.
 eval 'func_dirname_and_basename ()
@@ -1060,7 +1060,7 @@ func_mkdir_p ()
       # While some portion of DIR does not yet exist...
       while test ! -d "$_G_directory_path"; do
         # ...make a list in topmost first order.  Use a colon delimited
-	# list incase some portion of path contains whitespace.
+	# list in case some portion of path contains whitespace.
         _G_dir_list=$_G_directory_path:$_G_dir_list
 
         # If the last portion added has no slash in it, the list is done
@@ -1699,11 +1699,11 @@ func_lt_ver ()
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2019, 2021, 2023 Bootstrap Authors
+# Copyright (C) 2010-2019, 2021, 2023-2024 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
-# <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
+# <https://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
 # these licenses when using or redistributing this software or any of
 # the files within it.  See the URLs above, or the file `LICENSE`
 # included in the Bootstrap distribution for the full license texts.
@@ -2384,11 +2384,11 @@ func_version ()
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2019, 2021, 2023 Bootstrap Authors
+# Copyright (C) 2010-2019, 2021, 2023-2024 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
-# <http://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
+# <https://www.gnu.org/licenses/gpl-2.0.html>.  You must apply one of
 # these licenses when using or redistributing this software or any of
 # the files within it.  See the URLs above, or the file `LICENSE`
 # included in the Bootstrap distribution for the full license texts.
@@ -3832,7 +3832,7 @@ for tool in autoconf libtoolize autopoint; do
       _G_version=$func_extract_trace_result
       test -n "$_G_version" && {
         func_append buildreq "\
-            '$tool' $_G_version http://www.gnu.org/s/'$b'
+            '$tool' $_G_version https://www.gnu.org/s/'$b'
 "
         func_verbose \
             "auto-adding '\'$tool'-$_G_version'\'' to build requirements"
@@ -3865,7 +3865,7 @@ func_require_buildreq_automake ()
         test -n "$automake_version" || automake_version=-
 
         func_append buildreq "\
-            automake $automake_version http://www.gnu.org/s/automake
+            automake $automake_version https://www.gnu.org/s/automake
 "
         func_verbose \
             "auto-adding 'automake-$automake_version' to build requirements"
@@ -3902,7 +3902,7 @@ func_require_buildreq_patch ()
         if test ! -d "$_G_dir" \
             || find "$_G_dir" -name "*.diff" -exec false {} \; ; then :
         else
-          func_append buildreq "patch - http://www.gnu.org/s/patch$nl"
+          func_append buildreq "patch - https://www.gnu.org/s/patch$nl"
           break
         fi
       done
@@ -5082,7 +5082,7 @@ func_get_version ()
     _G_app=$1
 
     # Rather than uncomment the sed script in-situ, strip the comments
-    # programatically before passing the result to $SED for evaluation.
+    # programmatically before passing the result to $SED for evaluation.
     sed_get_version=`$ECHO '# extract version within line
           s|.*[v ]\{1,\}\([0-9]\{1,\}\.[.a-z0-9-]*\).*|\1|
           t done
@@ -5164,7 +5164,7 @@ delimited list of triples; 'program min-version url'."
       esac
 
       # Honor $APP variables ($TAR, $AUTOCONF, etc.)
-      _G_appvar=`echo $_G_app |tr '[a-z]' '[A-Z]'`
+      _G_appvar=`echo $_G_app |tr '[a-z-]' '[A-Z_]'`
       test TAR = "$_G_appvar" && _G_appvar=AMTAR
       eval "_G_app=\${$_G_appvar-$_G_app}"
 

@@ -28,6 +28,7 @@
 
 # Specification in the form of a command-line invocation:
 # gnulib-tool --import \
+#  --local-dir=gl-mod/bootstrap \
 #  --local-dir=gl \
 #  --lib=libm4 \
 #  --source-base=lib \
@@ -51,6 +52,7 @@
 #  avltree-oset \
 #  binary-io \
 #  bool \
+#  bootstrap \
 #  c-ctype \
 #  c-stack \
 #  clean-temp \
@@ -111,7 +113,7 @@
 #  xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_LOCAL_DIR([gl])
+gl_LOCAL_DIR([gl-mod/bootstrap:gl])
 gl_MODULES([
   announce-gen
   assert
@@ -120,6 +122,7 @@ gl_MODULES([
   avltree-oset
   binary-io
   bool
+  bootstrap
   c-ctype
   c-stack
   clean-temp
