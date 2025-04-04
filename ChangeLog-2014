@@ -5463,7 +5463,7 @@ Sun Mar  8 11:01:55 1992  François Pinard  (pinard at icule)
 	* eval.c, input.c, m4.h: Remove last comma in enums.
 	Reported by Mike Lijewski.
 
-	* Transfer of maintenance duties from Rene' to Franc,ois.
+	* Transfer of maintenance duties from René to François.
 
 Thu Oct 24 15:18:46 1991  René Seindal (seindal at diku.dk)
 

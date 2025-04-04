@@ -34,7 +34,7 @@ local-checks-to-skip += sc_cast_of_x_alloc_return_value
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = beb0fe1124e1148f05fc64abac57eff5
+old_NEWS_hash = 293273266bb174fb68ee74e80508d8f8
 
 # Update m4-latest.tar.* symlinks during 'make stable/beta'.
 GNUPLOADFLAGS = --symlink-regex
@@ -50,3 +50,7 @@ indent_args = --ignore-profile --preprocessor-indentation 1 --no-tabs
 exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \
   (^(GNU)?Makefile(\.am)?|\.mk|^HACKING|^ChangeLog.*)$$
 exclude_file_name_regexp--update-copyright = ^m4/gnulib-cache.m4$$
+exclude_file_name_regexp--sc_codespell = ^THANKS$$
+
+# Codespell exemptions:
+codespell_ignore_words_list = ois,WIDTHn

@@ -4702,40 +4702,40 @@ _indir(`esyscmd', `echo hi')
 Because @code{m4} constructs its words a character at a time, there
 is a restriction on the regular expressions that may be passed to
 @code{changeword}.  This is that if your regular expression accepts
-@samp{foo}, it must also accept @samp{f} and @samp{fo}.
+@samp{abc}, it must also accept @samp{a} and @samp{ab}.
 
 @example
 ifdef(`changeword', `', `errprint(` skipping: no changeword support
 ')m4exit(`77')')dnl
-define(`foo
+define(`abc
 ', `bar
 ')
 @result{}
-dnl This example wants to recognize changeword, dnl, and `foo\n'.
+dnl This example wants to recognize changeword, dnl, and `abc\n'.
 dnl First, we check that our regexp will match.
-regexp(`changeword', `[cd][a-z]*\|foo[
+regexp(`changeword', `[cd][a-z]*\|abc[
 ]')
 @result{}0
-regexp(`foo
-', `[cd][a-z]*\|foo[
+regexp(`abc
+', `[cd][a-z]*\|abc[
 ]')
 @result{}0
-regexp(`f', `[cd][a-z]*\|foo[
+regexp(`a', `[cd][a-z]*\|abc[
 ]')
 @result{}-1
-foo
-@result{}foo
-changeword(`[cd][a-z]*\|foo[
+abc
+@result{}abc
+changeword(`[cd][a-z]*\|abc[
 ]')
 @result{}
-dnl Even though `foo\n' matches, we forgot to allow `f'.
-foo
-@result{}foo
-changeword(`[cd][a-z]*\|fo*[
+dnl Even though `abc\n' matches, we forgot to allow `ab'.
+abc
+@result{}abc
+changeword(`[cd][a-z]*\|ab?c?[
 ]?')
 @result{}
-dnl Now we can call `foo\n'.
-foo
+dnl Now we can call `abc\n'.
+abc
 @result{}bar
 @end example
 
