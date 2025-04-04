@@ -113,7 +113,7 @@ typedef void builtin_func (struct obstack *, int, token_data **);
 /* Gnulib's stdbool doesn't work with bool bitfields.  For nicer
    debugging, use bool when we know it works, but use the more
    portable unsigned int elsewhere.  */
-#if __GNUC__ > 2
+#if _GL_GNUC_PREREQ (2, 0)
 typedef bool bool_bitfield;
 #else
 typedef unsigned int bool_bitfield;

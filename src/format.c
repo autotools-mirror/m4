@@ -351,7 +351,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
       *p = '\0';
 
       /* Our constructed format string in fstart is safe.  */
-#if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
+#if _GL_GNUC_PREREQ (4, 3) || defined __clang__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
@@ -381,7 +381,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
         default:
           abort ();
         }
-#if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
+#if _GL_GNUC_PREREQ (4, 3) || defined __clang__
 # pragma GCC diagnostic pop
 #endif
 
