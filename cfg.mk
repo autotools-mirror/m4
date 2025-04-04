@@ -34,7 +34,7 @@ local-checks-to-skip += sc_codespell
 config_h_header = "m4\.h"
 
 # Hash of NEWS contents, to ensure we don't add entries to wrong section.
-old_NEWS_hash = fcdaacb192dbc7536db34bfff18bc971
+old_NEWS_hash = c37c70598aa9cbbc6f31351cb73cc9de
 
 # Update m4-latest.tar.* symlinks during 'make stable/beta'.
 GNUPLOADFLAGS = --symlink-regex

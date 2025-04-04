@@ -8766,7 +8766,7 @@ macros of overhead per iteration.  Notice how the file
 @file{m4-@value{VERSION}/@/examples/@/forloop3.m4} rearranges the
 arguments of the helper @code{_forloop} to take two arguments that are
 placed around the current value.  By splitting a balanced set of
-parantheses across multiple arguments, the helper macro can now be
+parentheses across multiple arguments, the helper macro can now be
 shared by @code{forloop} and the new @code{forloop_arg}.
 
 @comment examples
@@ -9086,7 +9086,7 @@ As a final demonstration, both list styles are now able to handle
 several scenarios that would wreak havoc on one or both of the original
 implementations.  This points out one other difference between the
 list styles.  @code{foreach} evaluates unquoted list elements only once,
-in preparation for calling @code{@w{_foreach}}, similary for
+in preparation for calling @code{@w{_foreach}}, similarly for
 @code{foreachq} as provided by @file{foreachq3.m4} or
 @file{foreachq4.m4}.  But
 @code{foreachq}, as provided by @file{foreachq2.m4},

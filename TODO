@@ -19,7 +19,7 @@ of these ideas, listed more or less in decreasing order of priority.
         From David J. MacKenzie <djm@eng.umd.edu>, 1993-01-20
 
         GNU m4 should be sped up by a factor of three for competing
-        with other versions (I think that the lexer is not agressive
+        with other versions (I think that the lexer is not aggressive
         enough and too often return single characters; obstacks might
         be a little abused, too).
   - Have NULs go really undisturbed through GNU m4
