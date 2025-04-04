@@ -30,16 +30,35 @@
 
 typedef enum eval_token
 {
-  ERROR, BADOP,
-  PLUS, MINUS,
-  EXPONENT,
-  TIMES, DIVIDE, MODULO,
-  ASSIGN, EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
-  LSHIFT, RSHIFT,
-  LNOT, LAND, LOR,
-  NOT, AND, OR, XOR,
-  LEFTP, RIGHTP,
-  NUMBER, EOTEXT
+  /* Value / 10 is precedence order.  */
+  ERROR = 0,
+  BADOP,
+  EOTEXT,
+  LEFTP,
+  RIGHTP,
+  LNOT,
+  NOT,
+  NUMBER,
+  LOR = 10,
+  LAND = 20,
+  OR = 30,
+  XOR = 40,
+  AND = 50,
+  ASSIGN = 60,                  /* deprecated synonym to EQ */
+  EQ,
+  NOTEQ,
+  GT = 70,
+  GTEQ,
+  LS,
+  LSEQ,
+  LSHIFT = 80,
+  RSHIFT,
+  PLUS = 90,                    /* precedence for binary op; also serves as a unary op */
+  MINUS,                        /* precedence for binary op; also serves as a unary op */
+  TIMES = 100,
+  DIVIDE,
+  MODULO,
+  EXPONENT = 110
 }
 eval_token;
 
