@@ -6826,20 +6826,17 @@ The macro @code{eval} is recognized only with parameters.
 @end deffn
 
 All binary operators, except exponentiation, are left associative.  C
-operators that perform variable assignment, such as @samp{+=} or
+operators that perform variable assignment, such as @samp{+=}, @samp{=}, or
 @samp{--}, are not implemented, since @code{eval} only operates on
 constants, not variables.  Attempting to use them results in a warning.
-However, since traditional implementations treated @samp{=} as an
-undocumented alias for @samp{==} as opposed to an assignment operator,
-this usage is supported as a special case.  Be aware that a future
-version of GNU M4 may support assignment semantics as an
-extension when POSIX mode is not requested, and that using
-@samp{=} to check equality is not portable.
+Checks for equality must be performed with @samp{==}, or by string
+comparison when placing @code{eval} and the desired output as two
+arguments to @code{ifelse}.
 
 @example
 eval(`2 = 2')
-@error{}m4:stdin:1: warning: eval: recommend ==, not =, for equality
-@result{}1
+@error{}m4:stdin:1: warning: eval: invalid operator: '2 = 2'
+@result{}
 eval(`++0')
 @error{}m4:stdin:2: warning: eval: invalid operator: '++0'
 @result{}
