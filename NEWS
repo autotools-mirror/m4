@@ -1,6 +1,6 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release ?.? (????-??-??) [?]
+* Noteworthy changes in release 1.4.19b (2025-??-??) [beta]
 
 ** Fix a bug in the `eval' builtin where it does not suppress warnings
    about division by zero that occurs within a more complex expression on
@@ -8,7 +8,7 @@ GNU M4 NEWS - User visible changes.
    introduced in 1.4.8b).
 
 ** The `syscmd' and `esyscmd' builtins no longer mishandle a command line
-   starting with `-' or `+'.
+   starting with `-' or `+' (present since "the beginning").
 
 ** Fix regression introduced in 1.4.19 where trace output (such as with
    `debugmode(t)') could read invalid memory when tracing a series of
@@ -27,7 +27,14 @@ GNU M4 NEWS - User visible changes.
    is not recommended for production use, and will likely not be present
    in the next major version release.
 
-** Update to comply with newer C standards.
+** On non-Unix platforms where binary files differ from text, loading a
+   frozen file (which should be cross-platform compatible) now correctly
+   uses binary mode.
+
+** Several documentation improvements to the manual.
+
+** Update to comply with newer C standards, and inherit portability
+   improvements from gnulib.
 
 
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]

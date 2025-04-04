@@ -25,8 +25,6 @@ update-copyright-env = \
 
 # Tests not to run as part of "make syntax-check".
 local-checks-to-skip =
-# We haven't yet turned on i18n
-local-checks-to-skip += sc_bindtextdomain
 # M4 intentionally uses a coding style that compiles under C++.
 local-checks-to-skip += sc_cast_of_x_alloc_return_value
 
