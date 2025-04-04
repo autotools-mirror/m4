@@ -106,11 +106,12 @@ add_include_directory (const char *dir)
 }
 
 /* Attempt to open FILE; if it opens, verify that it is not a
-   directory, and ensure it does not leak across execs.  */
+   directory, and ensure it does not leak across execs.  Use binary
+   mode instead of text if BINARY is set.  */
 static FILE *
-m4_fopen (const char *file)
+m4_fopen (const char *file, bool binary)
 {
-  FILE *fp = fopen (file, "re");
+  FILE *fp = fopen (file, binary ? "rbe" : "re");
   if (fp)
     {
       struct stat st;
@@ -126,12 +127,13 @@ m4_fopen (const char *file)
 }
 
 /* Search for FILE, first in `.', then according to -I options.  If
-   successful, return the open file, and if RESULT is not NULL, set
-   *RESULT to a malloc'd string that represents the file found with
-   respect to the current working directory.  */
+   successful, return the open file (in BINARY mode if requested), and
+   if RESULT is not NULL, set *RESULT to a malloc'd string that
+   represents the file found with respect to the current working
+   directory.  */
 
 FILE *
-m4_path_search (const char *file, char **result)
+m4_path_search (const char *file, bool binary, char **result)
 {
   FILE *fp;
   includes *incl;
@@ -149,7 +151,7 @@ m4_path_search (const char *file, char **result)
     }
 
   /* Look in current working directory first.  */
-  fp = m4_fopen (file);
+  fp = m4_fopen (file, binary);
   if (fp != NULL)
     {
       if (result)
@@ -170,7 +172,7 @@ m4_path_search (const char *file, char **result)
       xfprintf (stderr, "m4_path_search (%s) -- trying %s\n", file, name);
 #endif
 
-      fp = m4_fopen (name);
+      fp = m4_fopen (name, binary);
       if (fp != NULL)
         {
           if (debug_level & DEBUG_TRACE_PATH)

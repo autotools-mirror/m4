@@ -402,7 +402,7 @@ process_file (const char *name)
   else
     {
       char *full_name;
-      FILE *fp = m4_path_search (name, &full_name);
+      FILE *fp = m4_path_search (name, false, &full_name);
       if (fp == NULL)
         {
           error (0, errno, _("cannot open %s"),

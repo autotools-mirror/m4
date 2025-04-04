@@ -1401,7 +1401,7 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc,
                    quotearg_style_mem (locale_quoting_style, str, len));
         else
           {
-            fp = m4_path_search (str, NULL);
+            fp = m4_path_search (str, false, NULL);
             if (fp != NULL)
               {
                 insert_file (fp);
@@ -1508,7 +1508,7 @@ include (int argc, macro_arguments *argv, bool silent)
   if (strlen (arg) != len)
     m4_warn (0, me, _("argument %s truncated"),
              quotearg_style_mem (locale_quoting_style, arg, len));
-  fp = m4_path_search (arg, &name);
+  fp = m4_path_search (arg, false, &name);
   if (fp == NULL)
     {
       if (!silent)
