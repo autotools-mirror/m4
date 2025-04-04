@@ -266,7 +266,7 @@ reload_frozen_state (const char *name)
     }                                                                   \
   while (0)
 
-  file = m4_path_search (name, NULL);
+  file = m4_path_search (name, !!O_BINARY, NULL);
   if (file == NULL)
     m4_failure (errno, _("cannot open %s"), name);
   current_file = name;

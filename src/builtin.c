@@ -1268,7 +1268,7 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
                     _("non-numeric argument to builtin `%s'"), ARG (0)));
         else
           {
-            fp = m4_path_search (ARG (i), NULL);
+            fp = m4_path_search (ARG (i), false, NULL);
             if (fp != NULL)
               {
                 insert_file (fp);
@@ -1382,7 +1382,7 @@ include (int argc, token_data **argv, bool silent)
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  fp = m4_path_search (ARG (1), &name);
+  fp = m4_path_search (ARG (1), false, &name);
   if (fp == NULL)
     {
       if (!silent)

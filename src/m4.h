@@ -458,7 +458,7 @@ extern const builtin *find_builtin_by_name (const char *);
 extern void include_init (void);
 extern void include_env_init (void);
 extern void add_include_directory (const char *);
-extern FILE *m4_path_search (const char *, char **);
+extern FILE *m4_path_search (const char *, bool, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
