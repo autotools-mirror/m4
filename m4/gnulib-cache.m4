@@ -1,5 +1,4 @@
-# Copyright (C) 2002-2025, 2011-2014, 2016-2017, 2020-2025 Free Software
-# Foundation, Inc.
+# Copyright (C) 2002-2025 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,7 +28,8 @@
 
 # Specification in the form of a command-line invocation:
 # gnulib-tool --import \
-#  --local-dir=local \
+#  --local-dir=gl-mod/bootstrap \
+#  --local-dir=gl \
 #  --lib=libm4 \
 #  --source-base=lib \
 #  --m4-base=m4 \
@@ -48,6 +48,7 @@
 #  avltree-oset \
 #  binary-io \
 #  bitrotate \
+#  bootstrap \
 #  clean-temp \
 #  cloexec \
 #  close-stream \
@@ -68,6 +69,7 @@
 #  gendocs \
 #  getopt-gnu \
 #  git-version-gen \
+#  gitlog-to-changelog \
 #  gnu-web-doc-update \
 #  gnumakefile \
 #  gnupload \
@@ -108,7 +110,7 @@
 #  xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
-gl_LOCAL_DIR([local])
+gl_LOCAL_DIR([gl-mod/bootstrap:gl])
 gl_MODULES([
   announce-gen
   assert
@@ -116,6 +118,7 @@ gl_MODULES([
   avltree-oset
   binary-io
   bitrotate
+  bootstrap
   clean-temp
   cloexec
   close-stream
