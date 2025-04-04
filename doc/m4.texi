@@ -8715,13 +8715,13 @@ forloop(`i', `a', `b', `non-numeric bounds')
 @end example
 
 One other change to notice is that the improved version used @samp{_$0}
-rather than @samp{_foreach} to invoke the helper routine.  In general,
+rather than @samp{_forloop} to invoke the helper routine.  In general,
 this is a good practice to follow, because then the set of macros can be
 uniformly transformed.  The following example shows a transformation
 that doubles the current quoting and appends a suffix @samp{2} to each
-transformed macro.  If @code{foreach} refers to the literal
-@samp{_foreach}, then @code{foreach2} invokes @code{_foreach} instead of
-the intended @code{_foreach2}, and the mixing of quoting paradigms leads
+transformed macro.  If @code{forloop} refers to the literal
+@samp{_forloop}, then @code{forloop2} invokes @code{_forloop} instead of
+the intended @code{_forloop2}, and the mixing of quoting paradigms leads
 to an infinite recursion loop in this example.
 
 @comment options: -L9
