@@ -1,6 +1,6 @@
 Beginning.
 include(`NOFILE')
-Intermidiate
+Intermediate
 include(`test/incl-test.m4')
 After
 include(`NOFILE')

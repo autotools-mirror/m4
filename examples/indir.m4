@@ -1,10 +1,10 @@
 define(`%%$$##', `>>>$0<<< cnt $#')
 
-# indir(`%%$$##', nonsens, nonsens)
-indir(`%%$$##', nonsens, nonsens)
+# indir(`%%$$##', nonsense, nonsense)
+indir(`%%$$##', nonsense, nonsense)
 
-# indir(`indir', `%%$$##', nonsens)
-indir(`indir', `%%$$##', nonsens)
+# indir(`indir', `%%$$##', nonsense)
+indir(`indir', `%%$$##', nonsense)
 
 # indir(`indir', `indir', `indir', `indir', `%%$$##')
 indir(`indir', `indir', `indir', `indir', `%%$$##')

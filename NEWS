@@ -682,7 +682,7 @@ Version 1.0 - October 1991, by René Seindal
 * Uses GNU getopt(), with long option names.
 
 * The -Q/+quiet option is added, which suppresses warnings about missing
-or superflous arguments to built-in macros.
+or superfluous arguments to built-in macros.
 
 * Added default options via the M4OPTS environment variable.
 
@@ -706,7 +706,7 @@ is defined.
 
 * Named files can now be undiverted.
 
-* The -Nnum option can be used to increase the number of divertions
+* The -Nnum option can be used to increase the number of diversions
 available.
 
 * Calling changecom without arguments now disables all comment handling.

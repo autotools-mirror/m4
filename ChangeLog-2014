@@ -2395,7 +2395,7 @@
 	end of a TeX line splits incorrectly.
 	(Foreach, Improved foreach): Write these sections, borrowing ideas
 	from CVS head and from m4sugar.
-	* checks/get-them: Accomodate new way to show trailing space in
+	* checks/get-them: Accommodate new way to show trailing space in
 	examples.
 	* examples/foreach.m4: Make usable in documentation.
 	* examples/foreachq.m4: New file.
@@ -2410,7 +2410,7 @@
 	* doc/m4.texinfo (Mkstemp): Rename from Maketemp.  Document the
 	new `mkstemp' macro and the flaws of the old `maketemp'.
 	(Incompatibilities): Move maketemp discussion to...
-	(Extensions): ...here, since -G now supresses the GNU extension.
+	(Extensions): ...here, since -G now suppresses the GNU extension.
 	* NEWS: Document this.
 
 	* examples/forloop.m4: Simplify.
@@ -3068,7 +3068,7 @@
 	more examples.
 	(Dnl): Update example to show side effects.
 	* checks/get-them: Generate three digit test names.
-	* checks/Makefile.in (CHECKS): Accomodate 100+ tests.
+	* checks/Makefile.in (CHECKS): Accommodate 100+ tests.
 
 2006-07-13  Eric Blake  <ebb9@byu.net>
 
@@ -3260,7 +3260,7 @@
 	(WTERMSIG, WIFSIGNALED, WIFEXITED): More fallback macros.
 	(M4SYSVAL_EXITBITS, M4SYSVAL_TERMSIGBITS): New helper macros.
 	(m4_esyscmd): Set sysval to -1 on failure.
-	(m4_sysval): Print 127 on failure, and accomodate signals if they
+	(m4_sysval): Print 127 on failure, and accommodate signals if they
 	are detectable.
 	* NEWS: Document this change.
 	* doc/m4.texinfo (Platform macros, Esyscmd, Sysval): Fix typos in
@@ -3467,7 +3467,7 @@
 	    Eric Blake  <ebb9@byu.net>
 
 	* src/builtin.c (WEXITSTATUS): Provide fallback definition.
-	(m4_esyscmd): Set sysval to 0xffff, to accomodate both
+	(m4_esyscmd): Set sysval to 0xffff, to accommodate both
 	big-endian and little-endian wait status definitions.
 	(m4_sysval): Use WEXITSTATUS.
 	Reported by Andreas Buening.
@@ -3482,7 +3482,7 @@
 	Beta Release 1.4.4b:
 	* configure.ac (AC_INIT): Bump version number.
 	* NEWS: Describe changes since 1.4.4.
-	* Makefile.maint (cvs-news): Accomodate copyright line wrapping.
+	* Makefile.maint (cvs-news): Accommodate copyright line wrapping.
 
 	* Makefile.am (MAINTAINERCLEANFILES): Clean files added by
 	bootstrap.
@@ -3888,7 +3888,7 @@
 
 2005-03-31  Eric Blake  <ebb9@byu.net>  (tiny change)
 
-	* doc/Makefile.in (install, uninstall): Accomodate DESTDIR.
+	* doc/Makefile.in (install, uninstall): Accommodate DESTDIR.
 	* src/Makefile.in (install, uninstall): Likewise.
 
 2005-02-07  Gary V. Vaughan  <gary@gnu.org>
@@ -4188,7 +4188,7 @@ Wed Sep 14 10:00:22 1994  François Pinard  (pinard@icule)
 	* configure.in: Use `choke me' in test, like everywhere!
 
 	* {doc,examples,lib,src}/Makefile.in (check): Deleted, as
-	unreacheable and useless.
+	unreachable and useless.
 
 	* doc/Makefile.in (texclean): Deleted, merged in mostlyclean.
 
@@ -4695,7 +4695,7 @@ Thu Jun 23 00:00:30 1994  François Pinard  (pinard@icule)
 Wed Jun 22 21:58:54 1994  François Pinard  (pinard@icule)
 
 	* configure.in: Avoid USE_STACKOVF if <siginfo.h> not found.  Note
-	that Jim developped stackovf.c on a 486 running SVR4.0 (ESIX), and
+	that Jim developed stackovf.c on a 486 running SVR4.0 (ESIX), and
 	also tested it on a Sun Sparc workstation running SunOS 4.x.
 
 	* format.c (format): When not HAVE_EFGCVT, m4 was failing the
@@ -4711,7 +4711,7 @@ Wed Jun 22 21:58:54 1994  François Pinard  (pinard@icule)
 	Reported by Joseph E. Sacco.
 
 	* Regenerate configure using Autoconf 1.11, this corrects a
-	problem about an incorrect cpp seting on NeXT 3.1.
+	problem about an incorrect cpp setting on NeXT 3.1.
 	Reported by Alexander Lehmann.
 
 Sun Jun  5 16:25:19 1994  François Pinard  (pinard@icule)
@@ -4844,7 +4844,7 @@ Wed Nov 17 09:34:55 1993  François Pinard  (pinard@icule)
 	* builtin.c (m4_eval): Cast strlen to (int) before comparing.
 
 	* input.c (input_init): Initialize quote and comment strings
-	explicitely instead of calling set_quotes and set_comment: by
+	explicitly instead of calling set_quotes and set_comment: by
 	doing so, we ensure we do not free uninitialized variables.
 
 	* checks/check-them: Reverse arguments to both diff, so the
@@ -5020,7 +5020,7 @@ Tue Nov  2 00:55:41 1993  François Pinard  (pinard@icule)
 Mon Nov  1 07:45:24 1993  François Pinard  (pinard@icule)
 
 	* m4.h: Add blind_if_no_args in struct builtin, blind_no_args in
-	struct symbol adn SYMBOL_BLIND_NO_ARGS macro.
+	struct symbol and SYMBOL_BLIND_NO_ARGS macro.
 	* builtin.c: Initialize all the blindness fields in builtin_tab.
 	(define_builtin): Copy the blindness of a builtin into its symbol.
 	* macro.c (expand_token): Avoid processing a blind builtin if the
@@ -5364,7 +5364,7 @@ Tue Nov 10 08:57:05 1992  François Pinard  (pinard at icule)
 	* configure.in: Define U through FP_PROTOTYPES for old compilers.
 	Add AC_ISC_POSIX, AC_CONST, AC_SIZE_T.
 	* aclocal.m4: New, provide FP_PROTOTYPES.
-	* m4.h: Conditionnaly protoized through Args, save for varags.
+	* m4.h: Conditionally protoized through Args, save for varags.
 	* builtin.c: Protoized.  Then:
 	Include <sys/types.h> if size_t is not defined, before "regex.h".
 	(m4_ifelse): Fetch built-in name properly for diagnostic.
@@ -5475,7 +5475,7 @@ Thu Oct 24 15:18:46 1991  René Seindal (seindal at diku.dk)
 	* Uses GNU getopt(), with long option names.
 
 	* The -Q/+quiet option is added, which suppresses warnings about
-	missing or superflous arguments to built-in macros.
+	missing or superfluous arguments to built-in macros.
 
 	* Added default options via the M4OPTS environment variable.
 
@@ -5509,7 +5509,7 @@ Fri Jul 26 15:28:42 1991  René Seindal (seindal at diku.dk)
 	* Named files can now be undiverted.
 
 	* The -Nnum option can be used to increase the number of
-	divertions available.
+	diversions available.
 
 	* Calling changecom without arguments now disables all comment
 	handling.

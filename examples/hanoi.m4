@@ -9,7 +9,7 @@ define(`_hanoi', `ifelse(eval(`$1'<=1), 1, `move($2, $3)',
 `$0(decr($1), $2, $4, $3)move($2, $3)$0(decr($1), $4, $3, $2)')')
 
 # hanoi (cnt)
-define(`hanoi', `_$0(`$1', source, destination, auxilliary)')
+define(`hanoi', `_$0(`$1', source, destination, auxiliary)')
 
 # traceon(`move', `_hanoi', `decr')
 divert`'dnl

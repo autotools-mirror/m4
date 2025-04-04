@@ -530,7 +530,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
    individual arguments to the macro.  Please note that in general
    argv[argc] != NULL.  */
 
-/* The first section are macros for definining, undefining, examining,
+/* The first section are macros for defining, undefining, examining,
    changing, ... other macros.  */
 
 /*-------------------------------------------------------------------.
@@ -2132,7 +2132,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
 }
 
 /*--------------------------------------------------------------------------.
-| Substitute all matches of a regexp occuring in a string.  Each match of   |
+| Substitute all matches of a regexp occurring in a string.  Each match of  |
 | the second argument (a regexp) in the first argument is changed to the    |
 | third argument, with \& substituted by the matched text, and \N           |
 | substituted by the text matched by the Nth parenthesized sub-expression.  |

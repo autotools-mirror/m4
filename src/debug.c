@@ -345,10 +345,10 @@ trace_flush (void)
   obstack_free (&trace, line);
 }
 
-/*-------------------------------------------------------------.
-| Do pre-argument-collction tracing for macro NAME.  Used from |
-| expand_macro ().                                             |
-`-------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| Do pre-argument-collection tracing for macro NAME.  Used from |
+| expand_macro ().                                              |
+`--------------------------------------------------------------*/
 
 void
 trace_prepre (const char *name, int id)
