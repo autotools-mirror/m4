@@ -4326,6 +4326,44 @@ temporary quote characters have to be defined.  To achieve this, two
 calls of @code{changequote} must be made, one for the temporary quotes
 and one for the new quotes.
 
+The following is an example of how to use @code{changequote} to output
+what would normally be an unmatched quote string:
+
+@deffn Composite lquo (@var{ignored@dots{}})
+@deffnx Composite rquo (@var{ignored@dots{}})
+Output the normal left or right quote string.
+@end deffn
+
+@example
+define(`lquo', `ifelse(`$#', `0', ``$0'', `changequote(`[', `]')`dnl'
+changequote([`], ['])')')
+@result{}
+define(`rquo', `ifelse(`$#', `0', ``$0'', `changequote(`[', `]')dnl`
+'changequote([`], ['])')')
+@result{}
+Quotes in reverse: rquo:rquo() lquo:lquo()
+@result{}Quotes in reverse: rquo:' lquo:`
+define(`hi', `HELLO')dnl
+lquo()hi`'rquo()
+@result{}`HELLO'
+substr(`-hi-', 1, 2) substr(`-`hi'-', `1', `4')
+@result{}HELLO hi
+substr(`-'lquo()`hi'rquo()`-', `1', `4')
+@result{}hi
+substr(`-'lquo()hi`'rquo()`-', `1', `2')rquo()'
+@result{}Hrquo()
+@end example
+
+The example chose to require an ignored parameter so that @code{lquo} or
+@code{rquo} are not recognized without @code{()}; but the use of
+@code{ifelse} to make the macros blind is not strictly needed.  On the
+other hand, the use of @code{dnl} in the macro bodies was essential for
+proper quote nesting during the @code{define}.  Note that the output of
+these macros do not directly behave as quote strings; however, any
+context where expanded text is rescanned back in the normal choice of
+quote strings does not care if the quotes were supplied literally or via
+these macros.
+
 Macros are recognized in preference to the begin-quote string, so if a
 prefix of @var{start} can be recognized as part of a potential macro
 name, the quoting mechanism is effectively disabled.  Unless you use
