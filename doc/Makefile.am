@@ -29,7 +29,7 @@ SUFFIXES = .1
 
 # The customization variable CHECK_NORMAL_MENU_STRUCTURE is necessary with
 # makeinfo versions ≥ 6.8.
-MAKEINFO = @MAKEINFO@ -c CHECK_NORMAL_MENU_STRUCTURE=1
+AM_MAKEINFOFLAGS = -c CHECK_NORMAL_MENU_STRUCTURE=1
 
 HELP2MAN = $(SHELL) $(top_srcdir)/build-aux/missing --run help2man
 
