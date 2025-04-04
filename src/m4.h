@@ -448,7 +448,7 @@ extern void m4_placeholder (struct obstack *, int, token_data **)
 
 extern void init_pattern_buffer (struct re_pattern_buffer *,
                                  struct re_registers *);
-extern const char *ntoa (int32_t, int);
+extern const char *ntoa (int32_t, int, const char **);
 
 extern const builtin *find_builtin_by_addr (builtin_func *);
 extern const builtin *find_builtin_by_name (const char *);

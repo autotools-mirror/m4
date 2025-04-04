@@ -289,7 +289,7 @@ trace_format (const char *fmt, ...)
 
         case 'd':
           d = va_arg (args, int);
-          s = ntoa (d, 10);
+          s = ntoa (d, 10, NULL);
           break;
 
         default:

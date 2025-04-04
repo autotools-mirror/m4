@@ -449,7 +449,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
 static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 const char *
-ntoa (int32_t value, int radix)
+ntoa (int32_t value, int radix, const char **end)
 {
   bool negative;
   uint32_t uvalue;
@@ -457,6 +457,8 @@ ntoa (int32_t value, int radix)
   char *s = &str[sizeof str];
 
   *--s = '\0';
+  if (end)
+    *end = s;
 
   if (value < 0)
     {
@@ -490,9 +492,10 @@ static void
 shipout_int (struct obstack *obs, int val)
 {
   const char *s;
+  const char *e;
 
-  s = ntoa ((int32_t) val, 10);
-  obstack_grow (obs, s, strlen (s));
+  s = ntoa ((int32_t) val, 10, &e);
+  obstack_grow (obs, s, e - s);
 }
 
 /*-------------------------------------------------------------------.
@@ -502,15 +505,14 @@ shipout_int (struct obstack *obs, int val)
 
 static void
 dump_args (struct obstack *obs, int argc, token_data **argv,
-           const char *sep, bool quoted)
+           char sep, bool quoted)
 {
   int i;
-  size_t len = strlen (sep);
 
   for (i = 1; i < argc; i++)
     {
       if (i > 1)
-        obstack_grow (obs, sep, len);
+        obstack_1grow (obs, sep);
       if (quoted)
         obstack_grow (obs, lquote.string, lquote.length);
       obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
@@ -1111,6 +1113,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   int radix = 10;
   int min = 1;
   const char *s;
+  const char *e;
 
   if (bad_argc (argv[0], argc, 2, 4))
     return;
@@ -1156,17 +1159,17 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  s = ntoa (value, radix);
+  s = ntoa (value, radix, &e);
 
   if (*s == '-')
     {
       obstack_1grow (obs, '-');
       s++;
     }
-  for (min -= strlen (s); --min >= 0;)
+  for (min -= e - s; --min >= 0;)
     obstack_1grow (obs, '0');
 
-  obstack_grow (obs, s, strlen (s));
+  obstack_grow (obs, s, e - s);
 }
 
 static void
@@ -1311,7 +1314,7 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, -1))
     return;
-  dump_args (obs, argc - 1, argv + 1, ",", true);
+  dump_args (obs, argc - 1, argv + 1, ',', true);
 }
 
 /*--------------------------------------------------------------------------.
@@ -1484,14 +1487,15 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
       int len = strlen (str);
       int i;
       int len2;
+      const char *e;
 
       M4ERROR ((warning_status, 0, _("recommend using mkstemp instead")));
       for (i = len; i > 1; i--)
         if (str[i - 1] != 'X')
           break;
       obstack_grow (obs, str, i);
-      str = ntoa ((int32_t) getpid (), 10);
-      len2 = strlen (str);
+      str = ntoa ((int32_t) getpid (), 10, &e);
+      len2 = e - str;
       if (len2 > len - i)
         obstack_grow0 (obs, str + len2 - (len - i), len - i);
       else
@@ -1522,7 +1526,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, -1))
     return;
-  dump_args (obs, argc, argv, " ", false);
+  dump_args (obs, argc, argv, ' ', false);
   obstack_1grow (obs, '\0');
   debug_flush_files ();
   xfprintf (stderr, "%s", (char *) obstack_finish (obs));
@@ -1607,7 +1611,7 @@ m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), strlen (ARG (1)));
   else
-    dump_args (obs, argc, argv, " ", false);
+    dump_args (obs, argc, argv, ' ', false);
   obstack_1grow (obs, '\0');
   push_wrapup ((char *) obstack_finish (obs));
 }
@@ -2296,7 +2300,7 @@ expand_user_macro (struct obstack *obs, symbol *sym,
 
         case '*':              /* all arguments */
         case '@':              /* ... same, but quoted */
-          dump_args (obs, argc, argv, ",", *text == '@');
+          dump_args (obs, argc, argv, ',', *text == '@');
           text++;
           break;
 

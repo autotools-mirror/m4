@@ -695,7 +695,7 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
               OUTPUT_CHARACTER ('n');
               OUTPUT_CHARACTER ('e');
               OUTPUT_CHARACTER (' ');
-              for (cursor = ntoa (line, 10); *cursor; cursor++)
+              for (cursor = ntoa (line, 10, NULL); *cursor; cursor++)
                 OUTPUT_CHARACTER (*cursor);
               if (output_current_line < 1 && current_file[0] != '\0')
                 {
