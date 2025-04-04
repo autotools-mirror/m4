@@ -100,7 +100,8 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
       break;
 
     case TOKEN_WORD:
-      sym = lookup_symbol (TOKEN_DATA_TEXT (td), SYMBOL_LOOKUP);
+      sym = lookup_symbol (TOKEN_DATA_TEXT (td), TOKEN_DATA_LEN (td),
+                           SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
           || (SYMBOL_TYPE (sym) == TOKEN_FUNC
               && SYMBOL_BLIND_NO_ARGS (sym) && peek_token () != TOKEN_OPEN))
@@ -237,7 +238,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  TOKEN_DATA_LEN (&td) = strlen (SYMBOL_NAME (sym));
+  TOKEN_DATA_LEN (&td) = SYMBOL_NAME_LEN (sym);
   tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
   obstack_ptr_grow (argptr, tdp);
 

@@ -358,7 +358,8 @@ reload_frozen_state (const char *name)
 
               /* Enter a macro having an expansion text as a definition.  */
 
-              define_user_macro (string[0], string[1], SYMBOL_PUSHDEF);
+              define_user_macro (string[0], strlen (string[0]), string[1],
+                                 strlen (string[1]), SYMBOL_PUSHDEF);
               break;
 
             case 'Q':

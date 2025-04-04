@@ -669,17 +669,20 @@ main (int argc, char *const *argv)
             char *macro_value = strchr (macro_name, '=');
             if (macro_value)
               *macro_value++ = '\0';
-            define_user_macro (macro_name, macro_value, SYMBOL_INSERT);
+            define_user_macro (macro_name, strlen (macro_name), macro_value,
+                               macro_value ? strlen (macro_value) : 0,
+                               SYMBOL_INSERT);
             free (macro_name);
           }
           break;
 
         case 'U':
-          lookup_symbol (defines->arg, SYMBOL_DELETE);
+          lookup_symbol (defines->arg, strlen (defines->arg), SYMBOL_DELETE);
           break;
 
         case 't':
-          sym = lookup_symbol (defines->arg, SYMBOL_INSERT);
+          sym = lookup_symbol (defines->arg, strlen (defines->arg),
+                               SYMBOL_INSERT);
           SYMBOL_TRACED (sym) = true;
           break;
 

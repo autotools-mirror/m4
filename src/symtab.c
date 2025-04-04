@@ -174,7 +174,7 @@ free_symbol (symbol *sym)
 `-------------------------------------------------------------------*/
 
 symbol *
-lookup_symbol (const char *name, symbol_lookup mode)
+lookup_symbol (const char *name, int len, symbol_lookup mode)
 {
   size_t h;
   int cmp = 1;
@@ -229,6 +229,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
               sym->hash = h;
               SYMBOL_NAME (sym) = SYMBOL_NAME (old);
+              SYMBOL_NAME_LEN (sym) = SYMBOL_NAME_LEN (old);
               SYMBOL_MACRO_ARGS (sym) = false;
               SYMBOL_BLIND_NO_ARGS (sym) = false;
               SYMBOL_DELETED (sym) = false;
@@ -269,9 +270,13 @@ lookup_symbol (const char *name, symbol_lookup mode)
           SYMBOL_STACK (sym)->next = NULL;
           SYMBOL_TRACED (sym) = SYMBOL_TRACED (SYMBOL_STACK (sym));
           SYMBOL_NAME (sym) = SYMBOL_NAME (SYMBOL_STACK (sym));
+          SYMBOL_NAME_LEN (sym) = SYMBOL_NAME_LEN (SYMBOL_STACK (sym));
         }
       else
-        SYMBOL_NAME (sym) = xstrdup (name);
+        {
+          SYMBOL_NAME (sym) = xstrdup (name);
+          SYMBOL_NAME_LEN (sym) = len;
+        }
       return sym;
 
     case SYMBOL_DELETE:
@@ -316,6 +321,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
             SYMBOL_TRACED (sym) = true;
             sym->hash = h;
             SYMBOL_NAME (sym) = xstrdup (name);
+            SYMBOL_NAME_LEN (sym) = len;
             SYMBOL_MACRO_ARGS (sym) = false;
             SYMBOL_BLIND_NO_ARGS (sym) = false;
             SYMBOL_DELETED (sym) = false;
@@ -379,24 +385,27 @@ symtab_debug (void)
   symbol *s;
   int delete;
   static int i;
+  int len;
 
   while (next_token (&td, NULL) == TOKEN_WORD)
     {
       text = TOKEN_DATA_TEXT (&td);
+      len = TOKEN_DATA_LEN (&td);
       if (*text == '_')
         {
           delete = 1;
           text++;
+          len--;
         }
       else
         delete = 0;
 
-      s = lookup_symbol (text, SYMBOL_LOOKUP);
+      s = lookup_symbol (text, len, SYMBOL_LOOKUP);
 
       if (s == NULL)
         xprintf ("Name `%s' is unknown\n", text);
 
-      lookup_symbol (text, delete ? SYMBOL_DELETE : SYMBOL_INSERT);
+      lookup_symbol (text, len, delete ? SYMBOL_DELETE : SYMBOL_INSERT);
     }
   symtab_print_list (i++);
 }
@@ -412,9 +421,10 @@ symtab_print_list (int i)
   for (h = 0; h < hash_table_size; h++)
     for (bucket = symtab[h]; bucket != NULL; bucket = bucket->next)
       for (sym = bucket; sym; sym = sym->stack)
-        xprintf ("\tname %s, hash %lu, bucket %lu, addr %p, stack %p, "
-                 "next %p, flags%s%s, pending %d\n",
-                 SYMBOL_NAME (sym), (unsigned long int) sym->hash,
+        xprintf ("\tname %s, len %i, hash %lu, bucket %lu, addr %p, "
+                 "stack %p, next %p, flags%s%s, pending %d\n",
+                 SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym),
+                 (unsigned long int) sym->hash,
                  (unsigned long int) h, sym, SYMBOL_STACK (sym),
                  sym->next,
                  SYMBOL_TRACED (sym) ? " traced" : "",

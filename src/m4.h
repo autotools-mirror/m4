@@ -378,6 +378,7 @@ struct symbol
 
   size_t hash;
   char *name;
+  int namelen;
   token_data data;
 };
 
@@ -388,6 +389,7 @@ struct symbol
 #define SYMBOL_DELETED(S)       ((S)->deleted)
 #define SYMBOL_PENDING_EXPANSIONS(S) ((S)->pending_expansions)
 #define SYMBOL_NAME(S)          ((S)->name)
+#define SYMBOL_NAME_LEN(S)      ((S)->namelen)
 #define SYMBOL_TYPE(S)          (TOKEN_DATA_TYPE (&(S)->data))
 #define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_TEXT_LEN(S)      (TOKEN_DATA_LEN (&(S)->data))
@@ -401,7 +403,7 @@ typedef void hack_symbol (symbol *, void *);
 
 extern void free_symbol (symbol * sym);
 extern void symtab_init (void);
-extern symbol *lookup_symbol (const char *, symbol_lookup);
+extern symbol *lookup_symbol (const char *, int, symbol_lookup);
 extern void hack_all_symbols (hack_symbol *, void *);
 
 /* File: macro.c  --- macro expansion.  */
@@ -443,7 +445,8 @@ extern void builtin_init (void);
 extern void define_builtin (const char *, const builtin *, symbol_lookup);
 extern void set_macro_sequence (const char *);
 extern void free_macro_sequence (void);
-extern void define_user_macro (const char *, const char *, symbol_lookup);
+extern void define_user_macro (const char *, int, const char *, size_t,
+                               symbol_lookup);
 extern void undivert_all (void);
 extern void expand_user_macro (struct obstack *, symbol *, int,
                                token_data **);

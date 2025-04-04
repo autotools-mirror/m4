@@ -212,7 +212,7 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode)
 {
   symbol *sym;
 
-  sym = lookup_symbol (name, mode);
+  sym = lookup_symbol (name, strlen (name), mode);
   SYMBOL_TYPE (sym) = TOKEN_FUNC;
   SYMBOL_MACRO_ARGS (sym) = bp->groks_macro_args;
   SYMBOL_BLIND_NO_ARGS (sym) = bp->blind_if_no_args;
@@ -286,35 +286,36 @@ free_macro_sequence (void)
 `-----------------------------------------------------------------*/
 
 void
-define_user_macro (const char *name, const char *text, symbol_lookup mode)
+define_user_macro (const char *name, int name_len, const char *text,
+                   size_t text_len, symbol_lookup mode)
 {
   symbol *s;
   char *defn = xstrdup (text ? text : "");
-  size_t len = strlen (defn);
 
-  if (len > INT_MAX)
+  if (text_len > INT_MAX)
     {
       M4ERROR ((warning_status, 0,
-                _("macro `%s' definition too long; truncating to INT_MAX bytes"),
-                  name));
-      len = INT_MAX;
+                _("truncating macro `%s' definition to INT_MAX bytes"),
+                name));
+      text_len = INT_MAX;
     }
 
-  s = lookup_symbol (name, mode);
+  s = lookup_symbol (name, name_len, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
     free (SYMBOL_TEXT (s));
 
   SYMBOL_TYPE (s) = TOKEN_TEXT;
   SYMBOL_TEXT (s) = defn;
-  SYMBOL_TEXT_LEN (s) = len;
+  SYMBOL_TEXT_LEN (s) = text_len;
 
   /* Implement --warn-macro-sequence.  */
   if (macro_sequence_inuse && text)
     {
       regoff_t offset = 0;
 
-      while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
-                                  len - offset, &macro_sequence_regs)) >= 0)
+      while ((offset = re_search (&macro_sequence_buf, defn, text_len, offset,
+                                  text_len - offset,
+                                  &macro_sequence_regs)) >= 0)
         {
           char tmp;
 
@@ -369,12 +370,14 @@ builtin_init (void)
     if (no_gnu_extensions)
       {
         if (pp->unix_name != NULL)
-          define_user_macro (pp->unix_name, pp->func, SYMBOL_INSERT);
+          define_user_macro (pp->unix_name, strlen (pp->unix_name), pp->func,
+                             strlen (pp->func), SYMBOL_INSERT);
       }
     else
       {
         if (pp->gnu_name != NULL)
-          define_user_macro (pp->gnu_name, pp->func, SYMBOL_INSERT);
+          define_user_macro (pp->gnu_name, strlen (pp->gnu_name), pp->func,
+                             strlen (pp->func), SYMBOL_INSERT);
       }
 }
 
@@ -523,8 +526,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
         obstack_1grow (obs, sep);
       if (quoted)
         obstack_grow (obs, lquote.string, lquote.length);
-      obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
-                    TOKEN_DATA_LEN (argv[i]));
+      obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]), TOKEN_DATA_LEN (argv[i]));
       if (quoted)
         obstack_grow (obs, rquote.string, rquote.length);
     }
@@ -567,14 +569,14 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 
   if (argc == 2)
     {
-      define_user_macro (ARG (1), "", mode);
+      define_user_macro (ARG (1), ARGLEN (1), "", 0, mode);
       return;
     }
 
   switch (TOKEN_DATA_TYPE (argv[2]))
     {
     case TOKEN_TEXT:
-      define_user_macro (ARG (1), ARG (2), mode);
+      define_user_macro (ARG (1), ARGLEN (1), ARG (2), ARGLEN (2), mode);
       break;
 
     case TOKEN_FUNC:
@@ -606,7 +608,7 @@ m4_undefine (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, -1))
     return;
   for (i = 1; i < argc; i++)
-    lookup_symbol (ARG (i), SYMBOL_DELETE);
+    lookup_symbol (ARG (i), ARGLEN (i), SYMBOL_DELETE);
 }
 
 static void
@@ -622,7 +624,7 @@ m4_popdef (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
   if (bad_argc (argv[0], argc, 2, -1))
     return;
   for (i = 1; i < argc; i++)
-    lookup_symbol (ARG (i), SYMBOL_POPDEF);
+    lookup_symbol (ARG (i), ARGLEN (i), SYMBOL_POPDEF);
 }
 
 /*---------------------.
@@ -637,7 +639,7 @@ m4_ifdef (struct obstack *obs, int argc, token_data **argv)
 
   if (bad_argc (argv[0], argc, 3, 4))
     return;
-  s = lookup_symbol (ARG (1), SYMBOL_LOOKUP);
+  s = lookup_symbol (ARG (1), ARGLEN (1), SYMBOL_LOOKUP);
 
   if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
     result = 2;
@@ -754,7 +756,8 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
     {
       for (i = 1; i < argc; i++)
         {
-          s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
+          s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]),
+                             TOKEN_DATA_LEN (argv[i]), SYMBOL_LOOKUP);
           if (s != NULL && SYMBOL_TYPE (s) != TOKEN_VOID)
             dump_symbol (s, &data);
           else
@@ -869,7 +872,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
     }
 
   name = ARG (1);
-  s = lookup_symbol (name, SYMBOL_LOOKUP);
+  s = lookup_symbol (name, ARGLEN (1), SYMBOL_LOOKUP);
   if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
     M4ERROR ((warning_status, 0, _("undefined macro `%s'"), name));
   else
@@ -898,16 +901,16 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 {
   symbol *s;
   builtin_func *b;
-  unsigned int i;
+  int i;
 
   if (bad_argc (argv[0], argc, 2, -1))
     return;
 
   assert (0 < argc);
-  for (i = 1; i < (unsigned) argc; i++)
+  for (i = 1; i < argc; i++)
     {
-      const char *arg = ARG ((int) i);
-      s = lookup_symbol (arg, SYMBOL_LOOKUP);
+      const char *arg = ARG (i);
+      s = lookup_symbol (arg, ARGLEN (i), SYMBOL_LOOKUP);
       if (s == NULL)
         continue;
 
@@ -1640,7 +1643,7 @@ set_trace (symbol *sym, void *data)
   SYMBOL_TRACED (sym) = data != NULL;
   /* Remove placeholder from table if macro is undefined and untraced.  */
   if (SYMBOL_TYPE (sym) == TOKEN_VOID && data == NULL)
-    lookup_symbol (SYMBOL_NAME (sym), SYMBOL_POPDEF);
+    lookup_symbol (SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym), SYMBOL_POPDEF);
 }
 
 static void
@@ -1654,9 +1657,9 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-        s = lookup_symbol (ARG (i), SYMBOL_LOOKUP);
+        s = lookup_symbol (ARG (i), ARGLEN (i), SYMBOL_LOOKUP);
         if (!s)
-          s = lookup_symbol (ARG (i), SYMBOL_INSERT);
+          s = lookup_symbol (ARG (i), ARGLEN (i), SYMBOL_INSERT);
         set_trace (s, obs);
       }
 }
@@ -1676,7 +1679,8 @@ m4_traceoff (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-        s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]), SYMBOL_LOOKUP);
+        s = lookup_symbol (TOKEN_DATA_TEXT (argv[i]),
+                           TOKEN_DATA_LEN (argv[i]), SYMBOL_LOOKUP);
         if (s != NULL)
           set_trace (s, NULL);
       }
