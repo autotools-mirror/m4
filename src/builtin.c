@@ -90,91 +90,89 @@ DECLARE (m4_undivert);
 
 #undef DECLARE
 
-static builtin const builtin_tab[] =
-{
+static builtin const builtin_tab[] = {
 
   /* name               GNUext  macros  blind   function */
 
-  { "__file__",         true,   false,  false,  m4___file__ },
-  { "__line__",         true,   false,  false,  m4___line__ },
-  { "__program__",      true,   false,  false,  m4___program__ },
-  { "builtin",          true,   true,   true,   m4_builtin },
-  { "changecom",        false,  false,  false,  m4_changecom },
-  { "changequote",      false,  false,  false,  m4_changequote },
+  {"__file__", true, false, false, m4___file__},
+  {"__line__", true, false, false, m4___line__},
+  {"__program__", true, false, false, m4___program__},
+  {"builtin", true, true, true, m4_builtin},
+  {"changecom", false, false, false, m4_changecom},
+  {"changequote", false, false, false, m4_changequote},
 #ifdef ENABLE_CHANGEWORD
-  { "changeword",       true,   false,  true,   m4_changeword },
+  {"changeword", true, false, true, m4_changeword},
 #endif
-  { "debugmode",        true,   false,  false,  m4_debugmode },
-  { "debugfile",        true,   false,  false,  m4_debugfile },
-  { "decr",             false,  false,  true,   m4_decr },
-  { "define",           false,  true,   true,   m4_define },
-  { "defn",             false,  false,  true,   m4_defn },
-  { "divert",           false,  false,  false,  m4_divert },
-  { "divnum",           false,  false,  false,  m4_divnum },
-  { "dnl",              false,  false,  false,  m4_dnl },
-  { "dumpdef",          false,  false,  false,  m4_dumpdef },
-  { "errprint",         false,  false,  true,   m4_errprint },
-  { "esyscmd",          true,   false,  true,   m4_esyscmd },
-  { "eval",             false,  false,  true,   m4_eval },
-  { "format",           true,   false,  true,   m4_format },
-  { "ifdef",            false,  false,  true,   m4_ifdef },
-  { "ifelse",           false,  false,  true,   m4_ifelse },
-  { "include",          false,  false,  true,   m4_include },
-  { "incr",             false,  false,  true,   m4_incr },
-  { "index",            false,  false,  true,   m4_index },
-  { "indir",            true,   true,   true,   m4_indir },
-  { "len",              false,  false,  true,   m4_len },
-  { "m4exit",           false,  false,  false,  m4_m4exit },
-  { "m4wrap",           false,  false,  true,   m4_m4wrap },
-  { "maketemp",         false,  false,  true,   m4_maketemp },
-  { "mkstemp",          false,  false,  true,   m4_mkstemp },
-  { "patsubst",         true,   false,  true,   m4_patsubst },
-  { "popdef",           false,  false,  true,   m4_popdef },
-  { "pushdef",          false,  true,   true,   m4_pushdef },
-  { "regexp",           true,   false,  true,   m4_regexp },
-  { "shift",            false,  false,  true,   m4_shift },
-  { "sinclude",         false,  false,  true,   m4_sinclude },
-  { "substr",           false,  false,  true,   m4_substr },
-  { "syscmd",           false,  false,  true,   m4_syscmd },
-  { "sysval",           false,  false,  false,  m4_sysval },
-  { "traceoff",         false,  false,  false,  m4_traceoff },
-  { "traceon",          false,  false,  false,  m4_traceon },
-  { "translit",         false,  false,  true,   m4_translit },
-  { "undefine",         false,  false,  true,   m4_undefine },
-  { "undivert",         false,  false,  false,  m4_undivert },
+  {"debugmode", true, false, false, m4_debugmode},
+  {"debugfile", true, false, false, m4_debugfile},
+  {"decr", false, false, true, m4_decr},
+  {"define", false, true, true, m4_define},
+  {"defn", false, false, true, m4_defn},
+  {"divert", false, false, false, m4_divert},
+  {"divnum", false, false, false, m4_divnum},
+  {"dnl", false, false, false, m4_dnl},
+  {"dumpdef", false, false, false, m4_dumpdef},
+  {"errprint", false, false, true, m4_errprint},
+  {"esyscmd", true, false, true, m4_esyscmd},
+  {"eval", false, false, true, m4_eval},
+  {"format", true, false, true, m4_format},
+  {"ifdef", false, false, true, m4_ifdef},
+  {"ifelse", false, false, true, m4_ifelse},
+  {"include", false, false, true, m4_include},
+  {"incr", false, false, true, m4_incr},
+  {"index", false, false, true, m4_index},
+  {"indir", true, true, true, m4_indir},
+  {"len", false, false, true, m4_len},
+  {"m4exit", false, false, false, m4_m4exit},
+  {"m4wrap", false, false, true, m4_m4wrap},
+  {"maketemp", false, false, true, m4_maketemp},
+  {"mkstemp", false, false, true, m4_mkstemp},
+  {"patsubst", true, false, true, m4_patsubst},
+  {"popdef", false, false, true, m4_popdef},
+  {"pushdef", false, true, true, m4_pushdef},
+  {"regexp", true, false, true, m4_regexp},
+  {"shift", false, false, true, m4_shift},
+  {"sinclude", false, false, true, m4_sinclude},
+  {"substr", false, false, true, m4_substr},
+  {"syscmd", false, false, true, m4_syscmd},
+  {"sysval", false, false, false, m4_sysval},
+  {"traceoff", false, false, false, m4_traceoff},
+  {"traceon", false, false, false, m4_traceon},
+  {"translit", false, false, true, m4_translit},
+  {"undefine", false, false, true, m4_undefine},
+  {"undivert", false, false, false, m4_undivert},
 
-  { 0,                  false,  false,  false,  0 },
+  {0, false, false, false, 0},
 
   /* placeholder is intentionally stuck after the table end delimiter,
      so that we can easily find it, while not treating it as a real
      builtin.  */
-  { "placeholder",      true,   false,  false,  m4_placeholder },
+  {"placeholder", true, false, false, m4_placeholder},
 };
 
-static predefined const predefined_tab[] =
-{
+static predefined const predefined_tab[] = {
 #if UNIX
-  { "unix",     "__unix__",     "" },
+  {"unix", "__unix__", ""},
 #endif
 #if W32_NATIVE
-  { "windows",  "__windows__",  "" },
+  {"windows", "__windows__", ""},
 #endif
 #if OS2
-  { "os2",      "__os2__",      "" },
+  {"os2", "__os2__", ""},
 #endif
 #if !UNIX && !W32_NATIVE && !OS2
 # warning Platform macro not provided
 #endif
-  { NULL,       "__gnu__",      "" },
+  {NULL, "__gnu__", ""},
 
-  { NULL,       NULL,           NULL },
+  {NULL, NULL, NULL},
 };
 
 /*----------------------------------------.
 | Find the builtin, which lives on ADDR.  |
 `----------------------------------------*/
 
-const builtin * ATTRIBUTE_PURE
+const builtin *ATTRIBUTE_PURE
 find_builtin_by_addr (builtin_func *func)
 {
   const builtin *bp;
@@ -192,7 +190,7 @@ find_builtin_by_addr (builtin_func *func)
 | placeholder builtin.                                      |
 `----------------------------------------------------------*/
 
-const builtin * ATTRIBUTE_PURE
+const builtin *ATTRIBUTE_PURE
 find_builtin_by_name (const char *name)
 {
   const builtin *bp;
@@ -251,7 +249,7 @@ set_macro_sequence (const char *regexp)
 {
   const char *msg;
 
-  if (! regexp)
+  if (!regexp)
     regexp = DEFAULT_MACRO_SEQUENCE;
   else if (regexp[0] == '\0')
     {
@@ -261,11 +259,12 @@ set_macro_sequence (const char *regexp)
 
   msg = re_compile_pattern (regexp, strlen (regexp), &macro_sequence_buf);
   if (msg != NULL)
-    m4_failure (0, _("--warn-macro-sequence: bad regular expression `%s': %s"),
+    m4_failure (0,
+                _("--warn-macro-sequence: bad regular expression `%s': %s"),
                 regexp, msg);
   re_set_registers (&macro_sequence_buf, &macro_sequence_regs,
-                    macro_sequence_regs.num_regs,
-                    macro_sequence_regs.start, macro_sequence_regs.end);
+                    macro_sequence_regs.num_regs, macro_sequence_regs.start,
+                    macro_sequence_regs.end);
   macro_sequence_inuse = true;
 }
 
@@ -307,20 +306,23 @@ define_user_macro (const char *name, const char *text, symbol_lookup mode)
       while ((offset = re_search (&macro_sequence_buf, defn, len, offset,
                                   len - offset, &macro_sequence_regs)) >= 0)
         {
+          char tmp;
+
           /* Skip empty matches.  */
           if (macro_sequence_regs.start[0] == macro_sequence_regs.end[0])
-            offset++;
-          else
             {
-              char tmp;
-              offset = macro_sequence_regs.end[0];
-              tmp = defn[offset];
-              defn[offset] = '\0';
-              M4ERROR ((warning_status, 0,
-                        _("Warning: definition of `%s' contains sequence `%s'"),
-                        name, defn + macro_sequence_regs.start[0]));
-              defn[offset] = tmp;
+              offset++;
+              continue;
             }
+
+          offset = macro_sequence_regs.end[0];
+          tmp = defn[offset];
+          defn[offset] = '\0';
+          M4ERROR ((warning_status, 0,
+                    _("Warning: definition of `%s' contains sequence `%s'"),
+                    name, defn + macro_sequence_regs.start[0]));
+          defn[offset] = tmp;
+
         }
       if (offset == -2)
         M4ERROR ((warning_status, 0,
@@ -600,7 +602,7 @@ m4_undefine (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 static void
 m4_pushdef (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
-  define_macro (argc, argv,  SYMBOL_PUSHDEF);
+  define_macro (argc, argv, SYMBOL_PUSHDEF);
 }
 
 static void
@@ -715,8 +717,8 @@ dump_symbol (symbol *sym, void *arg)
 static int
 dumpdef_cmp (const void *s1, const void *s2)
 {
-  return strcmp (SYMBOL_NAME (* (symbol *const *) s1),
-                 SYMBOL_NAME (* (symbol *const *) s2));
+  return strcmp (SYMBOL_NAME (*(symbol * const *) s1),
+                 SYMBOL_NAME (*(symbol * const *) s2));
 }
 
 /*-------------------------------------------------------------.
@@ -768,7 +770,8 @@ m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
         case TOKEN_TEXT:
           if (debug_level & DEBUG_TRACE_QUOTE)
             DEBUG_PRINT3 ("%s%s%s\n",
-                          lquote.string, SYMBOL_TEXT (data.base[0]), rquote.string);
+                          lquote.string, SYMBOL_TEXT (data.base[0]),
+                          rquote.string);
           else
             DEBUG_PRINT1 ("%s\n", SYMBOL_TEXT (data.base[0]));
           break;
@@ -819,12 +822,11 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
   name = ARG (1);
   bp = find_builtin_by_name (name);
   if (bp->func == m4_placeholder)
-    M4ERROR ((warning_status, 0,
-              _("undefined builtin `%s'"), name));
+    M4ERROR ((warning_status, 0, _("undefined builtin `%s'"), name));
   else
     {
       int i;
-      if (! bp->groks_macro_args)
+      if (!bp->groks_macro_args)
         for (i = 2; i < argc; i++)
           if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
             {
@@ -860,12 +862,11 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
   name = ARG (1);
   s = lookup_symbol (name, SYMBOL_LOOKUP);
   if (s == NULL || SYMBOL_TYPE (s) == TOKEN_VOID)
-    M4ERROR ((warning_status, 0,
-              _("undefined macro `%s'"), name));
+    M4ERROR ((warning_status, 0, _("undefined macro `%s'"), name));
   else
     {
       int i;
-      if (! SYMBOL_MACRO_ARGS (s))
+      if (!SYMBOL_MACRO_ARGS (s))
         for (i = 2; i < argc; i++)
           if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
             {
@@ -895,7 +896,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
   assert (0 < argc);
   for (i = 1; i < (unsigned) argc; i++)
     {
-      const char *arg = ARG((int) i);
+      const char *arg = ARG ((int) i);
       s = lookup_symbol (arg, SYMBOL_LOOKUP);
       if (s == NULL)
         continue;
@@ -915,8 +916,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 builtin `%s' requested by frozen file is not supported"), arg));
           else if (argc != 2)
             M4ERROR ((warning_status, 0,
-                      _("Warning: cannot concatenate builtin `%s'"),
-                      arg));
+                      _("Warning: cannot concatenate builtin `%s'"), arg));
           else
             push_macro (b);
           break;
@@ -1099,8 +1099,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (radix < 1 || radix > (int) strlen (digits))
     {
       M4ERROR ((warning_status, 0,
-                _("radix %d in builtin `%s' out of range"),
-                radix, ARG (0)));
+                _("radix %d in builtin `%s' out of range"), radix, ARG (0)));
       return;
     }
 
@@ -1298,15 +1297,14 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------------*/
 
 static void
-m4_changequote (struct obstack *obs MAYBE_UNUSED, int argc,
-                token_data **argv)
+m4_changequote (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 3))
     return;
 
   /* Explicit NULL distinguishes between empty and missing argument.  */
   set_quotes ((argc >= 2) ? TOKEN_DATA_TEXT (argv[1]) : NULL,
-             (argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
+              (argc >= 3) ? TOKEN_DATA_TEXT (argv[2]) : NULL);
 }
 
 /*-----------------------------------------------------------------.
@@ -1455,11 +1453,11 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
          are in traditional mode.
 
          For reference, Solaris m4 does:
-           maketemp() -> `'
-           maketemp(X) -> `X'
-           maketemp(XX) -> `Xn', where n is last digit of pid
-           maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
-      */
+         maketemp() -> `'
+         maketemp(X) -> `X'
+         maketemp(XX) -> `Xn', where n is last digit of pid
+         maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
+       */
       const char *str = ARG (1);
       int len = strlen (str);
       int i;
@@ -1923,9 +1921,9 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
      hence the found map.  */
   memset (map, 0, sizeof map);
   memset (found, 0, sizeof found);
-  for ( ; (ch = *from) != '\0'; from++)
+  for (; (ch = *from) != '\0'; from++)
     {
-      if (! found[ch])
+      if (!found[ch])
         {
           found[ch] = 1;
           map[ch] = *to;
@@ -1936,7 +1934,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 
   for (data = ARG (1); (ch = *data) != '\0'; data++)
     {
-      if (! found[ch])
+      if (!found[ch])
         obstack_1grow (obs, ch);
       else if (map[ch])
         obstack_1grow (obs, map[ch]);
@@ -2000,8 +1998,15 @@ Warning: \\0 will disappear, use \\& instead in replacements")));
           repl++;
           break;
 
-        case '1': case '2': case '3': case '4': case '5': case '6':
-        case '7': case '8': case '9':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
           ind = ch -= '0';
           if (regs->num_regs - 1 <= ind)
             M4ERROR ((warning_status, 0,
@@ -2206,8 +2211,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 void
-m4_placeholder (struct obstack *obs MAYBE_UNUSED, int argc,
-                token_data **argv)
+m4_placeholder (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   M4ERROR ((warning_status, 0, _("\
 builtin `%s' requested by frozen file is not supported"), ARG (0)));
@@ -2239,8 +2243,16 @@ expand_user_macro (struct obstack *obs, symbol *sym,
       text = dollar;
       switch (*++text)
         {
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
           if (no_gnu_extensions)
             {
               i = *text++ - '0';
@@ -2248,20 +2260,20 @@ expand_user_macro (struct obstack *obs, symbol *sym,
           else
             {
               for (i = 0; c_isdigit (*text); text++)
-                i = i*10 + (*text - '0');
+                i = i * 10 + (*text - '0');
             }
           if (i < argc)
             obstack_grow (obs, TOKEN_DATA_TEXT (argv[i]),
                           strlen (TOKEN_DATA_TEXT (argv[i])));
           break;
 
-        case '#': /* number of arguments */
+        case '#':              /* number of arguments */
           shipout_int (obs, argc - 1);
           text++;
           break;
 
-        case '*': /* all arguments */
-        case '@': /* ... same, but quoted */
+        case '*':              /* all arguments */
+        case '@':              /* ... same, but quoted */
           dump_args (obs, argc, argv, ",", *text == '@');
           text++;
           break;

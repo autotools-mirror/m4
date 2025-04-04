@@ -186,8 +186,7 @@ debug_flush_files (void)
      this attempt.  The stdio-safer module and friends are essential,
      so that if stdin was closed, this lseek is not on some other file
      that we have since opened.  */
-  if (lseek (STDIN_FILENO, 0, SEEK_CUR) >= 0
-      && fflush (stdin) == 0)
+  if (lseek (STDIN_FILENO, 0, SEEK_CUR) >= 0 && fflush (stdin) == 0)
     {
       fseeko (stdin, 0, SEEK_CUR);
     }
@@ -228,12 +227,12 @@ debug_message_prefix (void)
 {
   xfprintf (debug, "m4debug:");
   if (current_line)
-  {
-    if (debug_level & DEBUG_TRACE_FILE)
-      xfprintf (debug, "%s:", current_file);
-    if (debug_level & DEBUG_TRACE_LINE)
-      xfprintf (debug, "%d:", current_line);
-  }
+    {
+      if (debug_level & DEBUG_TRACE_FILE)
+        xfprintf (debug, "%s:", current_file);
+      if (debug_level & DEBUG_TRACE_LINE)
+        xfprintf (debug, "%d:", current_line);
+    }
   putc (' ', debug);
 }
 

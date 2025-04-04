@@ -29,37 +29,37 @@
 /* Evaluates token types.  */
 
 typedef enum eval_token
-  {
-    ERROR, BADOP,
-    PLUS, MINUS,
-    EXPONENT,
-    TIMES, DIVIDE, MODULO,
-    ASSIGN, EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
-    LSHIFT, RSHIFT,
-    LNOT, LAND, LOR,
-    NOT, AND, OR, XOR,
-    LEFTP, RIGHTP,
-    NUMBER, EOTEXT
-  }
+{
+  ERROR, BADOP,
+  PLUS, MINUS,
+  EXPONENT,
+  TIMES, DIVIDE, MODULO,
+  ASSIGN, EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
+  LSHIFT, RSHIFT,
+  LNOT, LAND, LOR,
+  NOT, AND, OR, XOR,
+  LEFTP, RIGHTP,
+  NUMBER, EOTEXT
+}
 eval_token;
 
 /* Error types.  */
 
 typedef enum eval_error
-  {
-    NO_ERROR,
-    DIVIDE_ZERO,
-    MODULO_ZERO,
-    NEGATIVE_EXPONENT,
-    /* All errors prior to SYNTAX_ERROR can be ignored in a dead
-       branch of && and ||.  All errors after are just more details
-       about a syntax error.  */
-    SYNTAX_ERROR,
-    MISSING_RIGHT,
-    UNKNOWN_INPUT,
-    EXCESS_INPUT,
-    INVALID_OPERATOR
-  }
+{
+  NO_ERROR,
+  DIVIDE_ZERO,
+  MODULO_ZERO,
+  NEGATIVE_EXPONENT,
+  /* All errors prior to SYNTAX_ERROR can be ignored in a dead
+     branch of && and ||.  All errors after are just more details
+     about a syntax error.  */
+  SYNTAX_ERROR,
+  MISSING_RIGHT,
+  UNKNOWN_INPUT,
+  EXCESS_INPUT,
+  INVALID_OPERATOR
+}
 eval_error;
 
 static eval_error logical_or_term (eval_token, int32_t *);
@@ -320,8 +320,7 @@ evaluate (const char *expr, int32_t *val)
       break;
 
     case SYNTAX_ERROR:
-      M4ERROR ((warning_status, 0,
-                _("bad expression in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("bad expression in eval: %s"), expr));
       break;
 
     case UNKNOWN_INPUT:
@@ -335,24 +334,20 @@ evaluate (const char *expr, int32_t *val)
       break;
 
     case INVALID_OPERATOR:
-      M4ERROR ((warning_status, 0,
-                _("invalid operator in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("invalid operator in eval: %s"), expr));
       retcode = EXIT_FAILURE;
       break;
 
     case DIVIDE_ZERO:
-      M4ERROR ((warning_status, 0,
-                _("divide by zero in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("divide by zero in eval: %s"), expr));
       break;
 
     case MODULO_ZERO:
-      M4ERROR ((warning_status, 0,
-                _("modulo by zero in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("modulo by zero in eval: %s"), expr));
       break;
 
     case NEGATIVE_EXPONENT:
-      M4ERROR ((warning_status, 0,
-                _("negative exponent in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("negative exponent in eval: %s"), expr));
       break;
 
     default:
@@ -419,7 +414,7 @@ logical_and_term (eval_token et, int32_t *v1)
       if (er == NO_ERROR)
         *v1 = *v1 && v2;
       else if (*v1 == 0 && er < SYNTAX_ERROR)
-        ; /* v1 is already 0 */
+        ;                       /* v1 is already 0 */
       else
         return er;
     }
@@ -534,11 +529,11 @@ equality_term (eval_token et, int32_t *v1)
         return er;
 
       if (op == ASSIGN)
-      {
-        M4ERROR ((warning_status, 0, _("\
+        {
+          M4ERROR ((warning_status, 0, _("\
 Warning: recommend ==, not =, for equality operator")));
-        op = EQ;
-      }
+          op = EQ;
+        }
       *v1 = (op == EQ) == (*v1 == v2);
     }
   if (op == ERROR)
@@ -558,8 +553,7 @@ cmp_term (eval_token et, int32_t *v1)
   if ((er = shift_term (et, v1)) != NO_ERROR)
     return er;
 
-  while ((op = eval_lex (&v2)) == GT || op == GTEQ
-         || op == LS || op == LSEQ)
+  while ((op = eval_lex (&v2)) == GT || op == GTEQ || op == LS || op == LSEQ)
     {
 
       et = eval_lex (&v2);
@@ -678,9 +672,9 @@ add_term (eval_token et, int32_t *v1)
          unsigned to signed is a silent twos-complement
          wrap-around.  */
       if (op == PLUS)
-        *v1 = (int32_t) ((uint32_t) *v1 + (uint32_t) v2);
+        *v1 = (int32_t) ((uint32_t) * v1 + (uint32_t) v2);
       else
-        *v1 = (int32_t) ((uint32_t) *v1 - (uint32_t) v2);
+        *v1 = (int32_t) ((uint32_t) * v1 - (uint32_t) v2);
     }
   if (op == ERROR)
     return UNKNOWN_INPUT;
@@ -715,7 +709,7 @@ mult_term (eval_token et, int32_t *v1)
       switch (op)
         {
         case TIMES:
-          *v1 = (int32_t) ((uint32_t) *v1 * (uint32_t) v2);
+          *v1 = (int32_t) ((uint32_t) * v1 * (uint32_t) v2);
           break;
 
         case DIVIDE:
@@ -723,7 +717,7 @@ mult_term (eval_token et, int32_t *v1)
             return DIVIDE_ZERO;
           else if (v2 == -1)
             /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
-            *v1 = (int32_t) -(uint32_t) *v1;
+            *v1 = (int32_t) - (uint32_t) * v1;
           else
             *v1 /= v2;
           break;
@@ -780,7 +774,7 @@ exp_term (eval_token et, int32_t *v1)
       if (*v1 == 0 && v2 == 0)
         return DIVIDE_ZERO;
       while (v2-- > 0)
-        result *= (uint32_t) *v1;
+        result *= (uint32_t) * v1;
       *v1 = result;
     }
   if (et == ERROR)
@@ -809,7 +803,7 @@ unary_term (eval_token et, int32_t *v1)
          unsigned to signed is a silent twos-complement
          wrap-around.  */
       if (et == MINUS)
-        *v1 = (int32_t) -(uint32_t) *v1;
+        *v1 = (int32_t) - (uint32_t) * v1;
       else if (et == NOT)
         *v1 = ~*v1;
       else if (et == LNOT)

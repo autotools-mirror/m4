@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <c-ctype.h>
 #include <errno.h>
+#include <error.h>
 #include <limits.h>
 #include <locale.h>
 #include <stdbool.h>
@@ -43,7 +44,6 @@
 #include "close-stream.h"
 #include "closein.h"
 #include "dirname.h"
-#include "error.h"
 #include "exitfail.h"
 #include "filenamecat.h"
 #include "intprops.h"
@@ -88,7 +88,7 @@
 # undef textdomain
 # define textdomain(Domainname) /* empty */
 # undef bindtextdomain
-# define bindtextdomain(Domainname, Dirname) /* empty */
+# define bindtextdomain(Domainname, Dirname)    /* empty */
 #endif
 
 #define _(msgid) gettext (msgid)
@@ -96,10 +96,10 @@
 /* Various declarations.  */
 
 struct string
-  {
-    char *string;               /* characters of the string */
-    size_t length;              /* length of the string */
-  };
+{
+  char *string;                 /* characters of the string */
+  size_t length;                /* length of the string */
+};
 typedef struct string STRING;
 
 /* Memory allocation.  */
@@ -122,15 +122,15 @@ typedef unsigned int bool_bitfield;
 /* File: m4.c  --- global definitions.  */
 
 /* Option flags.  */
-extern int sync_output;                 /* -s */
-extern int debug_level;                 /* -d */
-extern size_t hash_table_size;          /* -H */
-extern int no_gnu_extensions;           /* -G */
-extern int prefix_all_builtins;         /* -P */
+extern int sync_output;         /* -s */
+extern int debug_level;         /* -d */
+extern size_t hash_table_size;  /* -H */
+extern int no_gnu_extensions;   /* -G */
+extern int prefix_all_builtins; /* -P */
 extern int max_debug_argument_length;   /* -l */
-extern int suppress_warnings;           /* -Q */
-extern int warning_status;              /* -E */
-extern int nesting_limit;               /* -L */
+extern int suppress_warnings;   /* -Q */
+extern int warning_status;      /* -E */
+extern int nesting_limit;       /* -L */
 #ifdef ENABLE_CHANGEWORD
 extern const char *user_word_regexp;    /* -W */
 #endif
@@ -138,6 +138,8 @@ extern const char *user_word_regexp;    /* -W */
 /* Error handling.  */
 extern int retcode;
 
+
+/* *INDENT-OFF* */
 extern void m4_error (int, int, const char *, ...)
   ATTRIBUTE_COLD ATTRIBUTE_FORMAT ((__printf__, 3, 4));
 extern void m4_error_at_line (int, int, const char *, int, const char *, ...)
@@ -147,11 +149,12 @@ extern _Noreturn void m4_failure (int, const char *, ...)
 extern _Noreturn void m4_failure_at_line (int, const char *, int,
                                           const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 4, 5));
+/* *INDENT-ON* */
 
 #define M4ERROR(Arglist) (m4_error Arglist)
 #define M4ERROR_AT_LINE(Arglist) (m4_error_at_line Arglist)
-
 
+
 /* File: debug.c  --- debugging and tracing function.  */
 
 extern FILE *debug;
@@ -273,17 +276,17 @@ struct token_data
 {
   enum token_data_type type;
   union
+  {
+    struct
     {
-      struct
-        {
-          char *text;
+      char *text;
 #ifdef ENABLE_CHANGEWORD
-          char *original_text;
+      char *original_text;
 #endif
-        }
-      u_t;
-      builtin_func *func;
     }
+    u_t;
+    builtin_func *func;
+  }
   u;
 };
 
@@ -359,12 +362,12 @@ enum symbol_lookup
 /* Symbol table entry.  */
 struct symbol
 {
-  struct symbol *stack; /* pushdef stack */
-  struct symbol *next; /* hash bucket chain */
-  bool_bitfield traced : 1;
-  bool_bitfield macro_args : 1;
-  bool_bitfield blind_no_args : 1;
-  bool_bitfield deleted : 1;
+  struct symbol *stack;         /* pushdef stack */
+  struct symbol *next;          /* hash bucket chain */
+  bool_bitfield traced:1;
+  bool_bitfield macro_args:1;
+  bool_bitfield blind_no_args:1;
+  bool_bitfield deleted:1;
   int pending_expansions;
 
   size_t hash;
@@ -387,9 +390,9 @@ typedef enum symbol_lookup symbol_lookup;
 typedef struct symbol symbol;
 typedef void hack_symbol (symbol *, void *);
 
-#define HASHMAX 65537             /* default, overridden by -Hsize */
+#define HASHMAX 65537           /* default, overridden by -Hsize */
 
-extern void free_symbol (symbol *sym);
+extern void free_symbol (symbol * sym);
 extern void symtab_init (void);
 extern symbol *lookup_symbol (const char *, symbol_lookup);
 extern void hack_all_symbols (hack_symbol *, void *);
@@ -406,9 +409,9 @@ extern void call_macro (symbol *, int, token_data **, struct obstack *);
 struct builtin
 {
   const char *name;
-  bool_bitfield gnu_extension : 1;
-  bool_bitfield groks_macro_args : 1;
-  bool_bitfield blind_if_no_args : 1;
+  bool_bitfield gnu_extension:1;
+  bool_bitfield groks_macro_args:1;
+  bool_bitfield blind_if_no_args:1;
   builtin_func *func;
 };
 
@@ -435,9 +438,14 @@ extern void set_macro_sequence (const char *);
 extern void free_macro_sequence (void);
 extern void define_user_macro (const char *, const char *, symbol_lookup);
 extern void undivert_all (void);
-extern void expand_user_macro (struct obstack *, symbol *, int, token_data **);
+extern void expand_user_macro (struct obstack *, symbol *, int,
+                               token_data **);
+
+/* *INDENT-OFF* */
 extern void m4_placeholder (struct obstack *, int, token_data **)
   ATTRIBUTE_COLD;
+/* *INDENT-ON* */
+
 extern void init_pattern_buffer (struct re_pattern_buffer *,
                                  struct re_registers *);
 extern const char *ntoa (int32_t, int);
@@ -487,7 +495,11 @@ extern void reload_frozen_state (const char *);
    a bit safer than casting to unsigned char, since it catches some type
    errors that the cast doesn't.  */
 #if HAVE_INLINE
-static inline unsigned char to_uchar (char ch) { return ch; }
+static inline unsigned char
+to_uchar (char ch)
+{
+  return ch;
+}
 #else
 # define to_uchar(C) ((unsigned char) (C))
 #endif

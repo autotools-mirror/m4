@@ -33,11 +33,11 @@ struct includes
 
 typedef struct includes includes;
 
-static includes *dir_list;              /* the list of path directories */
-static includes *dir_list_end;          /* the end of same */
-static int dir_max_length;              /* length of longest directory name */
-
+static includes *dir_list;      /* the list of path directories */
+static includes *dir_list_end;  /* the end of same */
+static int dir_max_length;      /* length of longest directory name */
 
+
 void
 include_init (void)
 {
@@ -91,7 +91,7 @@ add_include_directory (const char *dir)
   incl->len = strlen (dir);
   incl->dir = xstrdup (dir);
 
-  if (incl->len > dir_max_length) /* remember len of longest directory */
+  if (incl->len > dir_max_length)       /* remember len of longest directory */
     dir_max_length = incl->len;
 
   if (dir_list_end == NULL)

@@ -126,22 +126,23 @@ arg_double (const char *str)
 void
 expand_format (struct obstack *obs, int argc, token_data **argv)
 {
-  const char *f;                        /* format control string */
-  const char *fmt;                      /* position within f */
+  const char *f;                /* format control string */
+  const char *fmt;              /* position within f */
   char fstart[] = "%'+- 0#*.*hhd";      /* current format spec */
-  char *p;                              /* position within fstart */
-  unsigned char c;                      /* a simple character */
+  char *p;                      /* position within fstart */
+  unsigned char c;              /* a simple character */
 
   /* Flags.  */
-  char flags;                           /* flags to use in fstart */
-  enum {
-    THOUSANDS   = 0x01, /* ' */
-    PLUS        = 0x02, /* + */
-    MINUS       = 0x04, /* - */
-    SPACE       = 0x08, /*   */
-    ZERO        = 0x10, /* 0 */
-    ALT         = 0x20, /* # */
-    DONE        = 0x40  /* no more flags */
+  char flags;                   /* flags to use in fstart */
+  enum
+  {
+    THOUSANDS = 0x01,           /* ' */
+    PLUS = 0x02,                /* + */
+    MINUS = 0x04,               /* - */
+    SPACE = 0x08,               /*   */
+    ZERO = 0x10,                /* 0 */
+    ALT = 0x20,                 /* # */
+    DONE = 0x40                 /* no more flags */
   };
 
   /* Precision specifiers.  */
@@ -156,7 +157,8 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
 
   /* Buffer and stuff.  */
   char *str;                    /* malloc'd buffer of formatted text */
-  enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
+  enum
+  { CHAR, INT, LONG, DOUBLE, STR } datatype;
 
   f = fmt = ARG_STR (argc, argv);
   memset (ok, 0, sizeof ok);
@@ -178,7 +180,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
           continue;
         }
 
-      p = fstart + 1; /* % */
+      p = fstart + 1;           /* % */
       lflag = 0;
       ok['a'] = ok['A'] = ok['c'] = ok['d'] = ok['e'] = ok['E']
         = ok['f'] = ok['F'] = ok['g'] = ok['G'] = ok['i'] = ok['o']
@@ -190,33 +192,33 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
         {
           switch (*fmt)
             {
-            case '\'': /* thousands separator */
+            case '\'':         /* thousands separator */
               ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E']
                 = ok['o'] = ok['s'] = ok['x'] = ok['X'] = 0;
               flags |= THOUSANDS;
               break;
 
-            case '+': /* mandatory sign */
+            case '+':          /* mandatory sign */
               ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
               flags |= PLUS;
               break;
 
-            case ' ': /* space instead of positive sign */
+            case ' ':          /* space instead of positive sign */
               ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
               flags |= SPACE;
               break;
 
-            case '0': /* zero padding */
+            case '0':          /* zero padding */
               ok['c'] = ok['s'] = 0;
               flags |= ZERO;
               break;
 
-            case '#': /* alternate output */
+            case '#':          /* alternate output */
               ok['c'] = ok['d'] = ok['i'] = ok['s'] = ok['u'] = 0;
               flags |= ALT;
               break;
 
-            case '-': /* left justification */
+            case '-':          /* left justification */
               flags |= MINUS;
               break;
 
@@ -315,7 +317,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
         {
         case 'c':
           datatype = CHAR;
-          p -= 2; /* %.*c is undefined, so undo the '.*'.  */
+          p -= 2;               /* %.*c is undefined, so undo the '.*'.  */
           break;
 
         case 's':
@@ -357,27 +359,27 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
       switch (datatype)
         {
         case CHAR:
-          str = xasprintf (fstart, width, ARG_INT(argc, argv));
+          str = xasprintf (fstart, width, ARG_INT (argc, argv));
           break;
 
         case INT:
-          str = xasprintf (fstart, width, prec, ARG_INT(argc, argv));
+          str = xasprintf (fstart, width, prec, ARG_INT (argc, argv));
           break;
 
         case LONG:
-          str = xasprintf (fstart, width, prec, ARG_LONG(argc, argv));
+          str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
           break;
 
         case DOUBLE:
-          str = xasprintf (fstart, width, prec, ARG_DOUBLE(argc, argv));
+          str = xasprintf (fstart, width, prec, ARG_DOUBLE (argc, argv));
           break;
 
         case STR:
-          str = xasprintf (fstart, width, prec, ARG_STR(argc, argv));
+          str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
           break;
 
         default:
-          abort();
+          abort ();
         }
 #if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
 # pragma GCC diagnostic pop

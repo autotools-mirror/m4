@@ -44,6 +44,7 @@ sc_prohibit_tab_based_indentation:
  @re='^ *    '                                               \
  msg='TAB in indentation; use only spaces'                   \
    $(_prohibit_regexp)
+indent_args = --ignore-profile --preprocessor-indentation 1 --no-tabs
 
 # List all syntax-check exemptions:
 exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \

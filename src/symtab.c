@@ -40,10 +40,11 @@
 
 struct profile
 {
-  int entry; /* Number of times lookup_symbol called with this mode.  */
-  int comparisons; /* Number of times strcmp was called.  */
-  int misses; /* Number of times strcmp did not return 0.  */
-  long long bytes; /* Number of bytes compared.  */
+  int entry;                    /* Number of times lookup_symbol called with
+                                   this mode.  */
+  int comparisons;              /* Number of times strcmp was called.  */
+  int misses;                   /* Number of times strcmp did not return 0.  */
+  long long bytes;              /* Number of bytes compared.  */
 };
 
 static struct profile profiles[5];
@@ -56,10 +57,10 @@ show_profile (void)
   int i;
   for (i = 0; i < 5; i++)
     {
-      xfprintf(stderr, "m4: lookup mode %d called %d times, %d compares, "
-               "%d misses, %lld bytes\n",
-               i, profiles[i].entry, profiles[i].comparisons,
-               profiles[i].misses, profiles[i].bytes);
+      xfprintf (stderr, "m4: lookup mode %d called %d times, %d compares, "
+                "%d misses, %lld bytes\n",
+                i, profiles[i].entry, profiles[i].comparisons,
+                profiles[i].misses, profiles[i].bytes);
     }
 }
 
@@ -85,8 +86,8 @@ profile_strcmp (const char *s1, const char *s2)
 
 # define strcmp profile_strcmp
 #endif /* DEBUG_SYM */
-
 
+
 /*------------------------------------------------------------------.
 | Initialise the symbol table, by allocating the necessary storage, |
 | and zeroing all the entries.                                      |
@@ -108,7 +109,7 @@ symtab_init (void)
 
 #ifdef DEBUG_SYM
   {
-    int e = atexit(show_profile);
+    int e = atexit (show_profile);
     if (e != 0)
       M4ERROR ((warning_status, 0,
                 "INTERNAL ERROR: unable to show symtab profile"));
@@ -143,10 +144,11 @@ free_symbol (symbol *sym)
   if (SYMBOL_PENDING_EXPANSIONS (sym) > 0)
     {
       SYMBOL_DELETED (sym) = true;
-      if (SYMBOL_STACK (sym)) {
-        SYMBOL_NAME (sym) = xstrdup (SYMBOL_NAME (sym));
-        SYMBOL_STACK (sym) = NULL;
-      }
+      if (SYMBOL_STACK (sym))
+        {
+          SYMBOL_NAME (sym) = xstrdup (SYMBOL_NAME (sym));
+          SYMBOL_STACK (sym) = NULL;
+        }
     }
   else
     {
@@ -203,7 +205,7 @@ lookup_symbol (const char *name, symbol_lookup mode)
 
   /* Symbol not found.  */
 
-  spp = (prev != NULL) ?  &prev->next : &symtab[h % hash_table_size];
+  spp = (prev != NULL) ? &prev->next : &symtab[h % hash_table_size];
 
   switch (mode)
     {
@@ -285,12 +287,11 @@ lookup_symbol (const char *name, symbol_lookup mode)
       if (cmp != 0)
         return NULL;
       if (sym == NULL)
-	return NULL;
+        return NULL;
       {
         bool traced = false;
         symbol *next;
-        if (SYMBOL_STACK (sym) != NULL
-            && mode == SYMBOL_POPDEF)
+        if (SYMBOL_STACK (sym) != NULL && mode == SYMBOL_POPDEF)
           {
             SYMBOL_TRACED (SYMBOL_STACK (sym)) = SYMBOL_TRACED (sym);
             SYMBOL_STACK (sym)->next = sym->next;

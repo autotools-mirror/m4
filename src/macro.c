@@ -85,7 +85,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
   symbol *sym;
 
   switch (t)
-    { /* TOKSW */
+    {                           /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
       break;
@@ -103,8 +103,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
       sym = lookup_symbol (TOKEN_DATA_TEXT (td), SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
           || (SYMBOL_TYPE (sym) == TOKEN_FUNC
-              && SYMBOL_BLIND_NO_ARGS (sym)
-              && peek_token () != TOKEN_OPEN))
+              && SYMBOL_BLIND_NO_ARGS (sym) && peek_token () != TOKEN_OPEN))
         {
 #ifdef ENABLE_CHANGEWORD
           shipout_text (obs, TOKEN_DATA_ORIG_TEXT (td),
@@ -161,7 +160,7 @@ expand_argument (struct obstack *obs, token_data *argp)
     {
 
       switch (t)
-        { /* TOKSW */
+        {                       /* TOKSW */
         case TOKEN_COMMA:
         case TOKEN_CLOSE:
           if (paren_level == 0)
@@ -240,7 +239,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
   if (peek_token () == TOKEN_OPEN)
     {
-      next_token (&td, NULL); /* gobble parenthesis */
+      next_token (&td, NULL);   /* gobble parenthesis */
       do
         {
           more_args = expand_argument (arguments, &td);
@@ -270,7 +269,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 
 void
 call_macro (symbol *sym, int argc, token_data **argv,
-                 struct obstack *expansion)
+            struct obstack *expansion)
 {
   switch (SYMBOL_TYPE (sym))
     {
@@ -329,7 +328,8 @@ expand_macro (symbol *sym)
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
   if (nesting_limit > 0 && expansion_level > nesting_limit)
-    m4_failure (0, _("recursion limit of %d exceeded, use -L<N> to change it"),
+    m4_failure (0,
+                _("recursion limit of %d exceeded, use -L<N> to change it"),
                 nesting_limit);
 
   macro_call_id++;

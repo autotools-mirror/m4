@@ -33,7 +33,7 @@
 #include "version-etc.h"
 
 #ifdef DEBUG_STKOVF
-# include "assert.h"
+# include <assert.h>
 #endif
 
 /* TRANSLATORS: This is a non-ASCII name: The first name is (with
@@ -84,7 +84,7 @@ int retcode;
 struct macro_definition
 {
   struct macro_definition *next;
-  int code; /* D, U, s, t, '\1', or DEBUGFILE_OPTION.  */
+  int code;                     /* D, U, s, t, '\1', or DEBUGFILE_OPTION.  */
   const char *arg;
 };
 typedef struct macro_definition macro_definition;
@@ -102,7 +102,7 @@ m4_error (int status, int errnum, const char *format, ...)
   va_start (args, format);
   verror_at_line (status, errnum, current_line ? current_file : NULL,
                   current_line, format, args);
-  if (fatal_warnings && ! retcode)
+  if (fatal_warnings && !retcode)
     retcode = EXIT_FAILURE;
   va_end (args);
 }
@@ -128,7 +128,7 @@ m4_error_at_line (int status, int errnum, const char *file, int line,
   va_list args;
   va_start (args, format);
   verror_at_line (status, errnum, line ? file : NULL, line, format, args);
-  if (fatal_warnings && ! retcode)
+  if (fatal_warnings && !retcode)
     retcode = EXIT_FAILURE;
   va_end (args);
 }
@@ -159,8 +159,8 @@ m4_failure_at_line (int errnum, const char *file, int line,
 /* Pre-translated messages for program errors.  Do not translate in
    the signal handler, since gettext and strsignal are not
    async-signal-safe.  */
-static const char * volatile program_error_message;
-static const char * volatile signal_message[NSIG];
+static const char *volatile program_error_message;
+static const char *volatile signal_message[NSIG];
 
 /* Print a nicer message about any programmer errors, then exit.  This
    must be aysnc-signal safe, since it is executed as a signal
@@ -315,19 +315,21 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 enum
 {
   DEBUGFILE_OPTION = CHAR_MAX + 1,      /* no short opt */
-  DIVERSIONS_OPTION,                    /* not quite -N, because of message */
-  WARN_MACRO_SEQUENCE_OPTION,           /* no short opt */
+  DIVERSIONS_OPTION,            /* not quite -N, because of message */
+  WARN_MACRO_SEQUENCE_OPTION,   /* no short opt */
 
-  HELP_OPTION,                          /* no short opt */
-  VERSION_OPTION                        /* no short opt */
+  HELP_OPTION,                  /* no short opt */
+  VERSION_OPTION                /* no short opt */
 };
 
-static const struct option long_options[] =
-{
+static const struct option long_options[] = {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
   {"define", required_argument, NULL, 'D'},
-  {"error-output", required_argument, NULL, 'o'}, /* FIXME: deprecate in 2.0 */
+
+  /* FIXME: deprecate in 2.0 */
+  {"error-output", required_argument, NULL, 'o'},
+
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
   {"gnu", no_argument, NULL, 'g'},
@@ -349,12 +351,13 @@ static const struct option long_options[] =
 
   {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
   {"diversions", required_argument, NULL, DIVERSIONS_OPTION},
-  {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
+  {"warn-macro-sequence", optional_argument, NULL,
+   WARN_MACRO_SEQUENCE_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
 
-  { NULL, 0, NULL, 0 },
+  {NULL, 0, NULL, 0},
 };
 
 /* Process a command line file NAME, and return true only if it was
@@ -394,9 +397,9 @@ process_file (const char *name)
    '-' forces getopt_long to hand back file names as arguments to opt
    '\1', rather than reordering the command line.  */
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::egil:o:st:"
+# define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:W:d::egil:o:st:"
 #else
-#define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:d::egil:o:st:"
+# define OPTSTRING "-B:D:EF:GH:I:L:N:PQR:S:T:U:d::egil:o:st:"
 #endif
 
 int
@@ -467,7 +470,7 @@ main (int argc, char *const *argv)
     if (crash)
       {
         if (!strtol (crash, NULL, 10))
-          ++*(int *) 8;
+          ++ * (int *) 8;
         assert (false);
         abort ();
       }
@@ -490,7 +493,8 @@ main (int argc, char *const *argv)
         /* Compatibility junk: options that other implementations
            support, but which we ignore as no-ops and don't list in
            --help.  */
-        error (0, 0, _("warning: `m4 -%c' may be removed in a future release"),
+        error (0, 0,
+               _("warning: `m4 -%c' may be removed in a future release"),
                optchar);
         break;
 
@@ -523,7 +527,7 @@ main (int argc, char *const *argv)
         break;
 
       case 'E':
-        if (! fatal_warnings)
+        if (!fatal_warnings)
           fatal_warnings = true;
         else
           warning_status = EXIT_FAILURE;
@@ -605,10 +609,10 @@ main (int argc, char *const *argv)
         break;
 
       case WARN_MACRO_SEQUENCE_OPTION:
-         /* Don't call set_macro_sequence here, as it can exit.
-            --warn-macro-sequence sets optarg to NULL (which uses the
-            default regexp); --warn-macro-sequence= sets optarg to ""
-            (which disables these warnings).  */
+        /* Don't call set_macro_sequence here, as it can exit.
+           --warn-macro-sequence sets optarg to NULL (which uses the
+           default regexp); --warn-macro-sequence= sets optarg to ""
+           (which disables these warnings).  */
         macro_sequence = optarg;
         break;
 
