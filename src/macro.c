@@ -42,17 +42,17 @@ struct macro_arguments
   /* False unless the macro expansion refers to $@; determines whether
      this object can be freed immediately at the end of expand_macro,
      or must wait until all recursion has completed.  */
-  bool_bitfield inuse : 1;
+  bool_bitfield inuse:1;
   /* False if all arguments are just text or func, true if this argv
      refers to another one.  */
-  bool_bitfield wrapper : 1;
+  bool_bitfield wrapper:1;
   /* False if all arguments belong to this argv, true if some of them
      include references to another.  */
-  bool_bitfield has_ref : 1;
+  bool_bitfield has_ref:1;
   /* True to flatten builtins contained in references.  */
-  bool_bitfield flatten : 1;
+  bool_bitfield flatten:1;
   /* True if any token contains builtins.  */
-  bool_bitfield has_func : 1;
+  bool_bitfield has_func:1;
   /* The value of quote_age used when parsing all arguments in this
      object, or 0 if quote_age changed during parsing or if any of the
      arguments might contain content that can affect rescan.  */
@@ -60,8 +60,8 @@ struct macro_arguments
   /* The context of this macro call during expansion, and NULL in a
      back-reference.  */
   call_info *info;
-  int level; /* Which obstack owns this argv.  */
-  unsigned int arraylen; /* True length of allocated elements in array.  */
+  int level;                    /* Which obstack owns this argv.  */
+  unsigned int arraylen;        /* True length of allocated elements in array.  */
   /* Used as a variable-length array, storing information about each
      argument.  */
   token_data *array[FLEXIBLE_ARRAY_MEMBER];
@@ -153,12 +153,12 @@ struct macro_arguments
 */
 struct macro_arg_stacks
 {
-  size_t refcount;      /* Number of active $@ references at this level.  */
-  size_t argcount;      /* Number of argv at this level.  */
-  struct obstack *args; /* Content of arguments.  */
-  struct obstack *argv; /* Argv pointers into args.  */
-  void *args_base;      /* Location for clearing the args obstack.  */
-  void *argv_base;      /* Location for clearing the argv obstack.  */
+  size_t refcount;              /* Number of active $@ refs at this level.  */
+  size_t argcount;              /* Number of argv at this level.  */
+  struct obstack *args;         /* Content of arguments.  */
+  struct obstack *argv;         /* Argv pointers into args.  */
+  void *args_base;              /* Location for clearing the args obstack.  */
+  void *argv_base;              /* Location for clearing the argv obstack.  */
 };
 
 typedef struct macro_arg_stacks macro_arg_stacks;
@@ -193,8 +193,8 @@ static int debug_macro_level;
 #define PRINT_ARGCOUNT_CHANGES 1
 #define PRINT_REFCOUNT_INCREASE 2
 #define PRINT_REFCOUNT_DECREASE 4
-
 
+
 
 /* This function reads all input, and expands each token, one at a
    time.  */
@@ -259,7 +259,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
   bool result = false;
 
   switch (t)
-    { /* TOKSW */
+    {                           /* TOKSW */
     case TOKEN_EOF:
     case TOKEN_MACDEF:
       /* Always safe, since there is no text to rescan.  */
@@ -310,8 +310,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
                            SYMBOL_LOOKUP);
       if (sym == NULL || SYMBOL_TYPE (sym) == TOKEN_VOID
           || (SYMBOL_TYPE (sym) == TOKEN_FUNC
-              && SYMBOL_BLIND_NO_ARGS (sym)
-              && peek_token () != TOKEN_OPEN))
+              && SYMBOL_BLIND_NO_ARGS (sym) && peek_token () != TOKEN_OPEN))
         {
 #ifdef ENABLE_CHANGEWORD
           divert_text (obs, TOKEN_DATA_ORIG_TEXT (td),
@@ -323,7 +322,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line,
              quote delimiters.  If it is false, we give the
              conservative answer of false rather than prove that no
              multi-byte delimiters are formed.  */
-          return safe_quotes();
+          return safe_quotes ();
         }
       expand_macro (sym);
       /* Expanding a macro creates new tokens to scan, and those new
@@ -374,7 +373,7 @@ expand_argument (struct obstack *obs, token_data *argp,
     {
 
       switch (t)
-        { /* TOKSW */
+        {                       /* TOKSW */
         case TOKEN_COMMA:
         case TOKEN_CLOSE:
           if (paren_level == 0)
@@ -774,8 +773,8 @@ arg_adjust_refcount (macro_arguments *argv, bool increase)
   adjust_refcount (argv->level, increase);
   return result;
 }
-
 
+
 /* Given ARGV, return the token_data that contains argument ARG; ARG
    must be > 0, < argv->argc.  If LEVEL is non-NULL, *LEVEL is set to
    the obstack level that contains the token (which is not necessarily
@@ -859,7 +858,7 @@ arg_argc (macro_arguments *argv)
 /* Given ARGV, return the call context in effect when argument
    collection began.  Only safe to call while the macro is being
    expanded.  */
-const call_info * ATTRIBUTE_PURE
+const call_info *ATTRIBUTE_PURE
 arg_info (macro_arguments *argv)
 {
   assert (argv->info);
@@ -890,12 +889,12 @@ arg_type (macro_arguments *argv, unsigned int arg)
    the empty string.  If FLATTEN, builtins are ignored.  The result is
    always NUL-terminated, even if it includes embedded NUL
    characters.  */
-const char * ATTRIBUTE_PURE
+const char *ATTRIBUTE_PURE
 arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
 {
   token_data *token;
   token_chain *chain;
-  struct obstack *obs; /* Scratch space; cleaned at end of macro_expand.  */
+  struct obstack *obs;          /* Scratch space; cleaned in macro_expand.  */
 
   if (arg == 0)
     {
@@ -1183,7 +1182,7 @@ arg_len (macro_arguments *argv, unsigned int arg, bool flatten)
 
 /* Given ARGV, return the builtin function referenced by argument ARG.
    Abort if it is not a builtin in isolation.  */
-builtin_func * ATTRIBUTE_PURE
+builtin_func *ATTRIBUTE_PURE
 arg_func (macro_arguments *argv, unsigned int arg)
 {
   token_data *token;
@@ -1196,7 +1195,7 @@ arg_func (macro_arguments *argv, unsigned int arg)
 /* Return an obstack useful for scratch calculations that will not
    interfere with macro expansion.  The obstack will be reset when
    expand_macro completes.  */
-struct obstack * ATTRIBUTE_PURE
+struct obstack *ATTRIBUTE_PURE
 arg_scratch (void)
 {
   assert (obstack_object_size (stacks[expansion_level - 1].args) == 0);
@@ -1338,8 +1337,7 @@ make_argv_ref_token (token_data *token, struct obstack *obs, int level,
       for (i = 0; i < argv->arraylen; i++)
         {
           if ((TOKEN_DATA_TYPE (argv->array[i]) == TOKEN_COMP
-               && argv->array[i]->u.u_c.wrapper)
-              || level >= 0)
+               && argv->array[i]->u.u_c.wrapper) || level >= 0)
             break;
           if (arg == 1)
             {

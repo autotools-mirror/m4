@@ -36,10 +36,11 @@
 
 struct profile
 {
-  int entry; /* Number of times lookup_symbol called with this mode.  */
-  int comparisons; /* Number of times strcmp was called.  */
-  int misses; /* Number of times strcmp did not return 0.  */
-  long long bytes; /* Number of bytes compared.  */
+  int entry;                    /* Number of times lookup_symbol called
+                                   with this mode.  */
+  int comparisons;              /* Number of times strcmp was called.  */
+  int misses;                   /* Number of times strcmp did not return 0.  */
+  long long bytes;              /* Number of bytes compared.  */
 };
 
 static struct profile profiles[5];
@@ -57,14 +58,14 @@ show_profile (void)
   FILE *f = fopen ("/dev/tty", "w");
   for (i = 0; i < 5; i++)
     {
-      xfprintf(f, "m4: lookup mode %d called %d times, %d compares, "
-               "%d misses, %lld bytes\n",
-               i, profiles[i].entry, profiles[i].comparisons,
-               profiles[i].misses, profiles[i].bytes);
+      xfprintf (f, "m4: lookup mode %d called %d times, %d compares, "
+                "%d misses, %lld bytes\n",
+                i, profiles[i].entry, profiles[i].comparisons,
+                profiles[i].misses, profiles[i].bytes);
     }
-  xfprintf(f, "m4: %llu hash callbacks, %llu compare callbacks, "
-           "%zu buckets, %u resizes\n",
-           hash_entry, comparator_entry, current_size, resizes - 1);
+  xfprintf (f, "m4: %llu hash callbacks, %llu compare callbacks, "
+            "%zu buckets, %u resizes\n",
+            hash_entry, comparator_entry, current_size, resizes - 1);
   fclose (f);
 }
 
@@ -91,8 +92,8 @@ profile_memcmp (const char *s1, const char *s2, size_t l)
 
 # define memcmp profile_memcmp
 #endif /* DEBUG_SYM */
-
 
+
 /* Pointer to symbol table.  */
 static Hash_table *symtab;
 
@@ -167,7 +168,7 @@ symtab_init (size_t size)
     xalloc_die ();
 
 #ifdef DEBUG_SYM
-  atexit (show_profile); /* Ignore failure, since this is debug code.  */
+  atexit (show_profile);        /* Ignore failure, since this is debug code.  */
 #endif /* DEBUG_SYM */
 }
 
@@ -462,7 +463,8 @@ symtab_print_list (int i)
           xprintf ("\tname %s, len %zu, hash %zu, addr %p, "
                    "stack %p, flags%s%s, pending %d\n",
                    SYMBOL_NAME (stack), SYMBOL_NAME_LEN (stack), stack->hash,
-                   stack, stack->stack, SYMBOL_TRACED (stack) ? " traced" : "",
+                   stack, stack->stack,
+                   SYMBOL_TRACED (stack) ? " traced" : "",
                    SYMBOL_DELETED (stack) ? " deleted" : "",
                    SYMBOL_PENDING_EXPANSIONS (stack));
           stack = stack->stack;

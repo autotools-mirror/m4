@@ -29,40 +29,40 @@
 /* Evaluates token types.  */
 
 typedef enum eval_token
-  {
-    ERROR, BADOP,
-    PLUS, MINUS,
-    EXPONENT,
-    TIMES, DIVIDE, MODULO,
-    ASSIGN, EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
-    LSHIFT, RSHIFT,
-    LNOT, LAND, LOR,
-    NOT, AND, OR, XOR,
-    LEFTP, RIGHTP,
-    QUESTION, COLON,
-    NUMBER, EOTEXT
-  }
+{
+  ERROR, BADOP,
+  PLUS, MINUS,
+  EXPONENT,
+  TIMES, DIVIDE, MODULO,
+  ASSIGN, EQ, NOTEQ, GT, GTEQ, LS, LSEQ,
+  LSHIFT, RSHIFT,
+  LNOT, LAND, LOR,
+  NOT, AND, OR, XOR,
+  LEFTP, RIGHTP,
+  QUESTION, COLON,
+  NUMBER, EOTEXT
+}
 eval_token;
 
 /* Error types.  */
 
 typedef enum eval_error
-  {
-    NO_ERROR,
-    DIVIDE_ZERO,
-    MODULO_ZERO,
-    NEGATIVE_EXPONENT,
-    /* All errors prior to SYNTAX_ERROR can be ignored in a dead
-       branch of && and ||.  All errors after are just more details
-       about a syntax error.  */
-    SYNTAX_ERROR,
-    MISSING_RIGHT,
-    MISSING_COLON,
-    UNKNOWN_INPUT,
-    EXCESS_INPUT,
-    INVALID_OPERATOR,
-    EMPTY_ARGUMENT
-  }
+{
+  NO_ERROR,
+  DIVIDE_ZERO,
+  MODULO_ZERO,
+  NEGATIVE_EXPONENT,
+  /* All errors prior to SYNTAX_ERROR can be ignored in a dead
+     branch of && and ||.  All errors after are just more details
+     about a syntax error.  */
+  SYNTAX_ERROR,
+  MISSING_RIGHT,
+  MISSING_COLON,
+  UNKNOWN_INPUT,
+  EXCESS_INPUT,
+  INVALID_OPERATOR,
+  EMPTY_ARGUMENT
+}
 eval_error;
 
 static eval_error condition_term (const call_info *, eval_token, int32_t *);
@@ -398,8 +398,7 @@ condition_term (const call_info *me, eval_token et, int32_t *v1)
          if we ever introduce assignment_term or comma_term, then
          condition_term and expression are no longer synonymous.  */
       er = condition_term (me, et, &v2);
-      if (er != NO_ERROR
-          && !(*v1 == 0 && er < SYNTAX_ERROR))
+      if (er != NO_ERROR && !(*v1 == 0 && er < SYNTAX_ERROR))
         return er;
 
       et = eval_lex (&v3);
@@ -413,8 +412,7 @@ condition_term (const call_info *me, eval_token et, int32_t *v1)
         return UNKNOWN_INPUT;
 
       er = condition_term (me, et, &v3);
-      if (er != NO_ERROR
-          && !(*v1 != 0 && er < SYNTAX_ERROR))
+      if (er != NO_ERROR && !(*v1 != 0 && er < SYNTAX_ERROR))
         return er;
 
       *v1 = *v1 ? v2 : v3;
@@ -477,7 +475,7 @@ logical_and_term (const call_info *me, eval_token et, int32_t *v1)
       if (er == NO_ERROR)
         *v1 = *v1 && v2;
       else if (*v1 == 0 && er < SYNTAX_ERROR)
-        ; /* v1 is already 0 */
+        ;                       /* v1 is already 0 */
       else
         return er;
     }
@@ -592,10 +590,10 @@ equality_term (const call_info *me, eval_token et, int32_t *v1)
         return er;
 
       if (op == ASSIGN)
-      {
-        m4_warn (0, me, _("recommend ==, not =, for equality"));
-        op = EQ;
-      }
+        {
+          m4_warn (0, me, _("recommend ==, not =, for equality"));
+          op = EQ;
+        }
       *v1 = (op == EQ) == (*v1 == v2);
     }
   if (op == ERROR)
@@ -615,8 +613,7 @@ cmp_term (const call_info *me, eval_token et, int32_t *v1)
   if ((er = shift_term (me, et, v1)) != NO_ERROR)
     return er;
 
-  while ((op = eval_lex (&v2)) == GT || op == GTEQ
-         || op == LS || op == LSEQ)
+  while ((op = eval_lex (&v2)) == GT || op == GTEQ || op == LS || op == LSEQ)
     {
 
       et = eval_lex (&v2);
@@ -733,9 +730,9 @@ add_term (const call_info *me, eval_token et, int32_t *v1)
          unsigned to signed is a silent twos-complement
          wrap-around.  */
       if (op == PLUS)
-        *v1 = (int32_t) ((uint32_t) *v1 + (uint32_t) v2);
+        *v1 = (int32_t) ((uint32_t) * v1 + (uint32_t) v2);
       else
-        *v1 = (int32_t) ((uint32_t) *v1 - (uint32_t) v2);
+        *v1 = (int32_t) ((uint32_t) * v1 - (uint32_t) v2);
     }
   if (op == ERROR)
     return UNKNOWN_INPUT;
@@ -770,7 +767,7 @@ mult_term (const call_info *me, eval_token et, int32_t *v1)
       switch (op)
         {
         case TIMES:
-          *v1 = (int32_t) ((uint32_t) *v1 * (uint32_t) v2);
+          *v1 = (int32_t) ((uint32_t) * v1 * (uint32_t) v2);
           break;
 
         case DIVIDE:
@@ -778,7 +775,7 @@ mult_term (const call_info *me, eval_token et, int32_t *v1)
             return DIVIDE_ZERO;
           else if (v2 == -1)
             /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
-            *v1 = (int32_t) -(uint32_t) *v1;
+            *v1 = (int32_t) - (uint32_t) * v1;
           else
             *v1 /= v2;
           break;
@@ -834,7 +831,7 @@ exp_term (const call_info *me, eval_token et, int32_t *v1)
       if (*v1 == 0 && v2 == 0)
         return DIVIDE_ZERO;
       while (v2-- > 0)
-        result *= (uint32_t) *v1;
+        result *= (uint32_t) * v1;
       *v1 = result;
     }
   if (et == ERROR)
@@ -863,7 +860,7 @@ unary_term (const call_info *me, eval_token et, int32_t *v1)
          unsigned to signed is a silent twos-complement
          wrap-around.  */
       if (et == MINUS)
-        *v1 = (int32_t) -(uint32_t) *v1;
+        *v1 = (int32_t) - (uint32_t) * v1;
       else if (et == NOT)
         *v1 = ~*v1;
       else if (et == LNOT)

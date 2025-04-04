@@ -28,6 +28,7 @@
 #include <assert.h>
 #include <c-ctype.h>
 #include <errno.h>
+#include <error.h>
 #include <limits.h>
 #include <locale.h>
 #include <stdbool.h>
@@ -43,7 +44,6 @@
 #include "close-stream.h"
 #include "closein.h"
 #include "dirname.h"
-#include "error.h"
 #include "exitfail.h"
 #include "filenamecat.h"
 #include "ignore-value.h"
@@ -92,7 +92,7 @@
 # undef textdomain
 # define textdomain(Domainname) /* empty */
 # undef bindtextdomain
-# define bindtextdomain(Domainname, Dirname) /* empty */
+# define bindtextdomain(Domainname, Dirname)    /* empty */
 #endif
 
 #define _(msgid) gettext (msgid)
@@ -101,12 +101,12 @@
 
 /* Describes a pair of strings, such as begin and end quotes.  */
 struct string_pair
-  {
-    char *str1;
-    size_t len1;
-    char *str2;
-    size_t len2;
-  };
+{
+  char *str1;
+  size_t len1;
+  char *str2;
+  size_t len2;
+};
 typedef struct string_pair string_pair;
 
 /* Memory allocation.  */
@@ -130,14 +130,14 @@ typedef unsigned int bool_bitfield;
 /* File: m4.c  --- global definitions.  */
 
 /* Option flags.  */
-extern int sync_output;                 /* -s */
-extern int debug_level;                 /* -d */
-extern int no_gnu_extensions;           /* -G */
-extern int prefix_all_builtins;         /* -P */
-extern size_t max_debug_argument_length;/* -l */
-extern int suppress_warnings;           /* -Q */
-extern int warning_status;              /* -E */
-extern int nesting_limit;               /* -L */
+extern int sync_output;         /* -s */
+extern int debug_level;         /* -d */
+extern int no_gnu_extensions;   /* -G */
+extern int prefix_all_builtins; /* -P */
+extern size_t max_debug_argument_length;        /* -l */
+extern int suppress_warnings;   /* -Q */
+extern int warning_status;      /* -E */
+extern int nesting_limit;       /* -L */
 #ifdef ENABLE_CHANGEWORD
 extern const char *user_word_regexp;    /* -W */
 #endif
@@ -149,26 +149,28 @@ extern const char *user_word_regexp;    /* -W */
    even when the global context changes in the meantime.  */
 struct call_info
 {
-  const char *file;     /* The file containing the macro invocation.  */
-  int line;             /* The line the macro was called on.  */
-  int call_id;          /* The unique sequence call id of the macro.  */
-  int trace : 1;        /* True to trace this macro.  */
-  int debug_level : 31; /* The debug level for tracing the macro call.  */
-  unsigned int start;   /* The start offset of the trace header.  */
-  unsigned int rest;    /* The offset after the header.  */
-  const char *name;     /* The macro name.  */
-  size_t name_len;      /* The length of name.  */
+  const char *file;             /* The file containing the macro invocation.  */
+  int line;                     /* The line the macro was called on.  */
+  int call_id;                  /* The unique sequence call id of the macro.  */
+  int trace:1;                  /* True to trace this macro.  */
+  int debug_level:31;           /* The debug level when the macro started.  */
+  unsigned int start;           /* The start offset of the trace header.  */
+  unsigned int rest;            /* The offset after the header.  */
+  const char *name;             /* The macro name.  */
+  size_t name_len;              /* The length of name.  */
 };
 typedef struct call_info call_info;
 
 extern int retcode;
 
+/* *INDENT-OFF* */
 extern void m4_error (int, int, const call_info *, const char *, ...)
   ATTRIBUTE_COLD ATTRIBUTE_FORMAT ((__printf__, 4, 5));
 extern void m4_warn (int, const call_info *, const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 3, 4));
-
+/* *INDENT-ON* */
 
+
 /* File: debug.c  --- debugging and tracing function.  */
 
 extern FILE *debug;
@@ -209,8 +211,11 @@ extern void debug_init (void);
 extern int debug_decode (const char *, size_t);
 extern void debug_flush_files (void);
 extern bool debug_set_output (const call_info *, const char *);
+
+/* *INDENT-OFF* */
 extern void debug_message (const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 1, 2));
+/* *INDENT_ON* */
 
 extern void trace_pre (call_info *);
 extern void trace_args (macro_arguments *);

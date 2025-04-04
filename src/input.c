@@ -76,10 +76,11 @@
 /* Type of an input block.  */
 enum input_type
 {
-  INPUT_STRING, /* String resulting from macro expansion.  */
-  INPUT_FILE,   /* File from command line or include.  */
-  INPUT_CHAIN,  /* FIFO chain of separate strings, builtins, and $@ refs.  */
-  INPUT_EOF     /* Placeholder at bottom of input stack.  */
+  INPUT_STRING,                 /* String resulting from macro expansion.  */
+  INPUT_FILE,                   /* File from command line or include.  */
+  INPUT_CHAIN,                  /* FIFO chain of separate strings,
+                                   builtins, and $@ refs.  */
+  INPUT_EOF                     /* Placeholder at bottom of input stack.  */
 };
 
 typedef enum input_type input_type;
@@ -94,32 +95,32 @@ struct input_block
   const char *file;             /* File where this input is from.  */
   int line;                     /* Line where this input is from.  */
   union
+  {
+    struct
     {
-      struct
-        {
-          char *str;            /* Remaining string value.  */
-          size_t len;           /* Remaining length.  */
-        }
-        u_s;    /* INPUT_STRING */
-      struct
-        {
-          FILE *fp;                  /* Input file handle.  */
-          bool_bitfield end : 1;     /* True if peek has seen EOF.  */
-          bool_bitfield close : 1;   /* True to close file on pop.  */
-          bool_bitfield advance : 1; /* Track previous start_of_input_line.  */
-        }
-        u_f;    /* INPUT_FILE */
-      struct
-        {
-          token_chain *chain;   /* Current link in chain.  */
-          token_chain *end;     /* Last link in chain.  */
-        }
-        u_c;    /* INPUT_CHAIN */
+      char *str;                /* Remaining string value.  */
+      size_t len;               /* Remaining length.  */
     }
+    u_s;                        /* INPUT_STRING */
+    struct
+    {
+      FILE *fp;                 /* Input file handle.  */
+      bool_bitfield end:1;      /* True if peek has seen EOF.  */
+      bool_bitfield close:1;    /* True to close file on pop.  */
+      bool_bitfield advance:1;  /* Track previous start_of_input_line.  */
+    }
+    u_f;                        /* INPUT_FILE */
+    struct
+    {
+      token_chain *chain;       /* Current link in chain.  */
+      token_chain *end;         /* Last link in chain.  */
+    }
+    u_c;                        /* INPUT_CHAIN */
+  }
   u;
 };
-
 
+
 /* Current input file name.  */
 const char *current_file;
 
@@ -152,7 +153,7 @@ static input_block *wsp;
 static input_block *next;
 
 /* Marker at the end of the input stack.  */
-static input_block input_eof = { NULL, INPUT_EOF, "", 0, { { NULL, 0 } } };
+static input_block input_eof = { NULL, INPUT_EOF, "", 0, {{NULL, 0}} };
 
 /* Flag for next_char () to increment current_line.  */
 static bool start_of_input_line;
@@ -382,8 +383,8 @@ push_token (token_data *token, int level, bool inuse)
           next->type = INPUT_CHAIN;
           next->u.u_c.chain = next->u.u_c.end = NULL;
         }
-      append_macro (current_input, TOKEN_DATA_FUNC (token), &next->u.u_c.chain,
-                    &next->u.u_c.end);
+      append_macro (current_input, TOKEN_DATA_FUNC (token),
+                    &next->u.u_c.chain, &next->u.u_c.end);
       return false;
     }
   else
@@ -610,9 +611,9 @@ pop_input (bool cleanup)
                 adjust_refcount (chain->u.u_s.level, false);
               break;
             case CHAIN_FUNC:
-               if (chain->u.func)
-                 return false;
-               break;
+              if (chain->u.func)
+                return false;
+              break;
             case CHAIN_ARGV:
               if (chain->u.u_a.index < arg_argc (chain->u.u_a.argv))
                 return false;
@@ -661,14 +662,14 @@ pop_input (bool cleanup)
     }
   obstack_free (current_input, isp);
   cached_quote = NULL;
-  next = NULL; /* might be set in push_string_init () */
+  next = NULL;                  /* might be set in push_string_init () */
 
   isp = tmp;
   input_change = true;
   return true;
 }
 
-/* To switch input over to the wrapup stack, main () calls pop_wrapup
+/* To switch input over to the wrapup stack, main calls pop_wrapup
    ().  Since wrapup text can install new wrapup text, pop_wrapup ()
    returns false when there is no wrapup text on the stack, and true
    otherwise.  */
@@ -749,7 +750,8 @@ input_print (struct obstack *obs)
               if (arg_print (obs, chain->u.u_a.argv, chain->u.u_a.index,
                              quote_cache (NULL, chain->quote_age,
                                           chain->u.u_a.quotes),
-                             chain->u.u_a.flatten, NULL, NULL, &maxlen, false))
+                             chain->u.u_a.flatten, NULL, NULL, &maxlen,
+                             false))
                 return;
               break;
             default:
@@ -820,7 +822,7 @@ next_buffer (size_t *len, bool allow_quote)
           while (chain)
             {
               if (allow_quote && chain->quote_age == current_quote_age)
-                return NULL; /* CHAR_QUOTE doesn't fit in buffer.  */
+                return NULL;    /* CHAR_QUOTE doesn't fit in buffer.  */
               switch (chain->type)
                 {
                 case CHAIN_STR:
@@ -834,7 +836,7 @@ next_buffer (size_t *len, bool allow_quote)
                   break;
                 case CHAIN_FUNC:
                   if (chain->u.func)
-                    return NULL; /* CHAR_MACRO doesn't fit in buffer.  */
+                    return NULL;        /* CHAR_MACRO doesn't fit in buffer.  */
                   break;
                 case CHAIN_ARGV:
                   if (chain->u.u_a.index == arg_argc (chain->u.u_a.argv))
@@ -842,7 +844,7 @@ next_buffer (size_t *len, bool allow_quote)
                       arg_adjust_refcount (chain->u.u_a.argv, false);
                       break;
                     }
-                  return NULL; /* No buffer to provide.  */
+                  return NULL;  /* No buffer to provide.  */
                 case CHAIN_LOC:
                   isp->file = chain->u.u_l.file;
                   isp->line = chain->u.u_l.line;
@@ -858,7 +860,7 @@ next_buffer (size_t *len, bool allow_quote)
           break;
 
         case INPUT_EOF:
-          return NULL; /* CHAR_EOF doesn't fit in buffer.  */
+          return NULL;          /* CHAR_EOF doesn't fit in buffer.  */
 
         default:
           assert (!"next_buffer");
@@ -1303,8 +1305,8 @@ init_argv_token (struct obstack *obs, token_data *td)
      ensures peek_input won't return CHAR_ARGV if the user is perverse
      enough to mix comment delimiters with argument separators:
 
-       define(n,`$#')define(echo,$*)changecom(`,,',`)')n(echo(a,`,b`)'',c))
-       => 2 (not 3)
+     define(n,`$#')define(echo,$*)changecom(`,,',`)')n(echo(a,`,b`)'',c))
+     => 2 (not 3)
 
      Therefore, we do not have to worry about calling MATCH, and thus
      do not have to worry about pop_input being called and
@@ -1369,11 +1371,11 @@ match_input (const char *s, size_t slen, bool consume)
     {
       if (consume)
         next_char (false, false);
-      return true;                      /* short match */
+      return true;              /* short match */
     }
 
   next_char (false, false);
-  for (n = 1, t = s++; peek_input (false) == to_uchar (*s++); )
+  for (n = 1, t = s++; peek_input (false) == to_uchar (*s++);)
     {
       next_char (false, false);
       n++;
@@ -1598,27 +1600,27 @@ set_quote_age (void)
      define(echo,``$1'')define(a,A)changequote(<[,]>)echo(<[]]><[>a]>)
      => A]> (not ]>a)
 
-   Also, unquoted close delimiters are unsafe, consider:
+     Also, unquoted close delimiters are unsafe, consider:
 
      define(echo,``$1'')define(a,A)echo(`a''`a')
      => aA' (not a'a)
 
-   Comment delimiters that overlap with quote delimiters or active
-   characters also present a problem, consider:
+     Comment delimiters that overlap with quote delimiters or active
+     characters also present a problem, consider:
 
      define(echo,$*)echo(a,a,a`'define(a,A)changecom(`,',`,'))
      => A,a,A (not A,A,A)
 
-   And let's not even think about the impact of changeword, since it
-   will disappear for M4 2.0.
+     And let's not even think about the impact of changeword, since it
+     will disappear for M4 2.0.
 
-   So rather than check every token for an unquoted delimiter, we
-   merely encode current_quote_age to 0 when things are unsafe, and
-   non-zero when safe (namely, to the 16-bit value composed of the
-   single-character start and end quote delimiters).  There may be
-   other situations which are safe even when this algorithm sets the
-   quote_age to zero, but at least a quote_age of zero always produces
-   correct results (although it may take more time in doing so).  */
+     So rather than check every token for an unquoted delimiter, we
+     merely encode current_quote_age to 0 when things are unsafe, and
+     non-zero when safe (namely, to the 16-bit value composed of the
+     single-character start and end quote delimiters).  There may be
+     other situations which are safe even when this algorithm sets the
+     quote_age to zero, but at least a quote_age of zero always produces
+     correct results (although it may take more time in doing so).  */
 
   /* Heuristic of characters that might impact rescan if they appear
      in a quote delimiter.  Using a single NUL as one of the two quote
@@ -1685,7 +1687,7 @@ quote_cache (struct obstack *obs, unsigned int age, const string_pair *quotes)
 {
   static char lquote[2];
   static char rquote[2];
-  static string_pair simple = {lquote, 1, rquote, 1};
+  static string_pair simple = { lquote, 1, rquote, 1 };
 
   /* Implementation - if AGE is non-zero, then the implementation of
      set_quote_age guarantees that we can recreate the return value on
@@ -2083,8 +2085,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
             links++;
             chain = chain->next;
           }
-        xfprintf (stderr, "), %d links, len %zu\n",
-                  links, len);
+        xfprintf (stderr, "), %d links, len %zu\n", links, len);
       }
 #endif /* DEBUG_INPUT */
     }
@@ -2112,9 +2113,9 @@ peek_token (void)
     }
   else if ((default_word_regexp && (c_isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
-      || (!default_word_regexp && word_regexp.fastmap[ch])
+           || (!default_word_regexp && word_regexp.fastmap[ch])
 #endif /* ENABLE_CHANGEWORD */
-      )
+    )
     {
       result = TOKEN_WORD;
     }
@@ -2150,8 +2151,8 @@ peek_token (void)
 static const char *
 token_type_string (token_type t)
 {
- switch (t)
-    { /* TOKSW */
+  switch (t)
+    {                           /* TOKSW */
     case TOKEN_EOF:
       return "EOF";
     case TOKEN_STRING:
@@ -2173,14 +2174,14 @@ token_type_string (token_type t)
     default:
       abort ();
     }
- }
+}
 
 static void
 print_token (const char *s, token_type t, token_data *td)
 {
   xfprintf (stderr, "%s: ", s);
   switch (t)
-    { /* TOKSW */
+    {                           /* TOKSW */
     case TOKEN_OPEN:
     case TOKEN_COMMA:
     case TOKEN_CLOSE:

@@ -55,17 +55,17 @@ typedef struct temp_dir m4_temp_dir;
 typedef struct m4_diversion m4_diversion;
 
 struct m4_diversion
+{
+  union
   {
-    union
-      {
-        FILE *file;             /* Diversion file on disk.  */
-        char *buffer;           /* Malloc'd diversion buffer.  */
-        m4_diversion *next;     /* Free-list pointer */
-      } u;
-    int divnum;                 /* Which diversion this represents.  */
-    int size;                   /* Usable size before reallocation.  */
-    int used;                   /* Used buffer length, or tmp file exists.  */
-  };
+    FILE *file;                 /* Diversion file on disk.  */
+    char *buffer;               /* Malloc'd diversion buffer.  */
+    m4_diversion *next;         /* Free-list pointer */
+  } u;
+  int divnum;                   /* Which diversion this represents.  */
+  int size;                     /* Usable size before reallocation.  */
+  int used;                     /* Used buffer length, or tmp file exists.  */
+};
 
 /* Table of diversions 1 through INT_MAX.  */
 static gl_oset_t diversion_table;
@@ -122,8 +122,8 @@ static int tmp_file2_owner;
 
 /* True if tmp_file2 is more recently used.  */
 static bool tmp_file2_recent;
-
 
+
 /* Internal routines.  */
 
 /* Callback for comparing list elements ELT1 and ELT2 for order in
@@ -190,13 +190,15 @@ m4_tmpname (int divnum)
   static size_t offset;
   if (buffer == NULL)
     {
-      obstack_printf (&diversion_storage, "%s/m4-", output_temp_dir->dir_name);
+      obstack_printf (&diversion_storage, "%s/m4-",
+                      output_temp_dir->dir_name);
       offset = obstack_object_size (&diversion_storage);
       buffer = (char *) obstack_alloc (&diversion_storage,
                                        INT_BUFSIZE_BOUND (divnum));
     }
   assert (0 < divnum);
-  if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) < 0)
+  if (snprintf (&buffer[offset], INT_BUFSIZE_BOUND (divnum), "%d", divnum) <
+      0)
     m4_error (EXIT_FAILURE, errno, NULL,
               _("cannot create temporary file for diversion"));
   return buffer;
@@ -271,8 +273,7 @@ m4_tmpopen (int divnum, bool reread)
   /* Update mode starts at the beginning of the stream, but sometimes
      we want the end.  */
   else if (!reread && fseeko (file, 0, SEEK_END) != 0)
-    m4_error (EXIT_FAILURE, errno, NULL,
-              _("cannot seek within diversion"));
+    m4_error (EXIT_FAILURE, errno, NULL, _("cannot seek within diversion"));
   return file;
 }
 
@@ -329,7 +330,7 @@ m4_tmpremove (int divnum)
 /* Transfer the temporary file for diversion OLDNUM to the previously
    unused diversion NEWNUM.  Return an open stream visiting the new
    temporary file, positioned at the end, or exit on failure.  */
-static FILE*
+static FILE *
 m4_tmprename (int oldnum, int newnum)
 {
   /* m4_tmpname reuses its return buffer.  */
@@ -371,8 +372,8 @@ m4_tmprename (int oldnum, int newnum)
   free (oldname);
   return m4_tmpopen (newnum, false);
 }
-
 
+
 /* Output initialization.  */
 void
 output_init (void)
@@ -562,7 +563,8 @@ output_text (const char *text, int length)
     {
       count = fwrite (text, length, 1, output_file);
       if (count != 1)
-        m4_error (EXIT_FAILURE, errno, NULL, _("error copying inserted file"));
+        m4_error (EXIT_FAILURE, errno, NULL,
+                  _("error copying inserted file"));
     }
   else
     {
@@ -611,21 +613,36 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
 
         /* In-line short texts.  */
 
-      case 8: OUTPUT_CHARACTER (*text); text++;
+      case 8:
+        OUTPUT_CHARACTER (*text);
+        text++;
         FALLTHROUGH;
-      case 7: OUTPUT_CHARACTER (*text); text++;
+      case 7:
+        OUTPUT_CHARACTER (*text);
+        text++;
         FALLTHROUGH;
-      case 6: OUTPUT_CHARACTER (*text); text++;
+      case 6:
+        OUTPUT_CHARACTER (*text);
+        text++;
         FALLTHROUGH;
-      case 5: OUTPUT_CHARACTER (*text); text++;
+      case 5:
+        OUTPUT_CHARACTER (*text);
+        text++;
         FALLTHROUGH;
-      case 4: OUTPUT_CHARACTER (*text); text++;
+      case 4:
+        OUTPUT_CHARACTER (*text);
+        text++;
         FALLTHROUGH;
-      case 3: OUTPUT_CHARACTER (*text); text++;
+      case 3:
+        OUTPUT_CHARACTER (*text);
+        text++;
         FALLTHROUGH;
-      case 2: OUTPUT_CHARACTER (*text); text++;
+      case 2:
+        OUTPUT_CHARACTER (*text);
+        text++;
         FALLTHROUGH;
-      case 1: OUTPUT_CHARACTER (*text);
+      case 1:
+        OUTPUT_CHARACTER (*text);
         FALLTHROUGH;
       case 0:
         return;
@@ -647,7 +664,7 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
           output_current_line++;
 #ifdef DEBUG_OUTPUT
           xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
-                   line, current_line, output_current_line);
+                    line, current_line, output_current_line);
 #endif
 
           /* Output a `#line NUM' synchronization directive if needed.
@@ -656,7 +673,8 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
 
           if (output_current_line != line)
             {
-              static char line_buf[sizeof "#line " + INT_BUFSIZE_BOUND (line)];
+              static char line_buf[sizeof "#line " +
+                                   INT_BUFSIZE_BOUND (line)];
               sprintf (line_buf, "#line %d", line);
               output_text (line_buf, strlen (line_buf));
               assert (strlen (line_buf) < sizeof line_buf);
@@ -681,7 +699,7 @@ divert_text (struct obstack *obs, const char *text, int length, int line)
               output_current_line++;
 #ifdef DEBUG_OUTPUT
               xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
-                       line, current_line, output_current_line);
+                        line, current_line, output_current_line);
 #endif
             }
           OUTPUT_CHARACTER (*text);
@@ -834,7 +852,8 @@ insert_file (FILE *file)
     {
       length = fread (buffer, 1, sizeof buffer, file);
       if (ferror (file))
-        m4_error (EXIT_FAILURE, errno, NULL, _("error reading inserted file"));
+        m4_error (EXIT_FAILURE, errno, NULL,
+                  _("error reading inserted file"));
       if (length == 0)
         break;
       output_text (buffer, length);
@@ -947,7 +966,7 @@ insert_diversion (int divnum)
 }
 
 /* Get back all diversions.  This is done just before exiting from
-   main (), and from m4_undivert (), if called without arguments.  */
+   main, and from m4_undivert (), if called without arguments.  */
 void
 undivert_all (void)
 {
@@ -974,7 +993,7 @@ freeze_diversions (FILE *file)
   saved_number = current_diversion;
   last_inserted = 0;
   make_diversion (0);
-  output_file = file; /* kludge in the frozen file */
+  output_file = file;           /* kludge in the frozen file */
 
   iter = gl_oset_iterator (diversion_table);
   while (gl_oset_iterator_next (&iter, &elt))

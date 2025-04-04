@@ -89,90 +89,88 @@ DECLARE (m4_undivert);
 
 #undef DECLARE
 
-static builtin const builtin_tab[] =
-{
+static builtin const builtin_tab[] = {
 
   /* name               GNUext  macros  blind   function */
 
-  { "__file__",         true,   false,  false,  m4___file__ },
-  { "__line__",         true,   false,  false,  m4___line__ },
-  { "__program__",      true,   false,  false,  m4___program__ },
-  { "builtin",          true,   true,   true,   m4_builtin },
-  { "changecom",        false,  false,  false,  m4_changecom },
-  { "changequote",      false,  false,  false,  m4_changequote },
+  {"__file__", true, false, false, m4___file__},
+  {"__line__", true, false, false, m4___line__},
+  {"__program__", true, false, false, m4___program__},
+  {"builtin", true, true, true, m4_builtin},
+  {"changecom", false, false, false, m4_changecom},
+  {"changequote", false, false, false, m4_changequote},
 #ifdef ENABLE_CHANGEWORD
-  { "changeword",       true,   false,  true,   m4_changeword },
+  {"changeword", true, false, true, m4_changeword},
 #endif
-  { "debugmode",        true,   false,  false,  m4_debugmode },
-  { "debugfile",        true,   false,  false,  m4_debugfile },
-  { "decr",             false,  false,  true,   m4_decr },
-  { "define",           false,  true,   true,   m4_define },
-  { "defn",             false,  true,   true,   m4_defn },
-  { "divert",           false,  false,  false,  m4_divert },
-  { "divnum",           false,  false,  false,  m4_divnum },
-  { "dnl",              false,  false,  false,  m4_dnl },
-  { "dumpdef",          false,  true,   false,  m4_dumpdef },
-  { "errprint",         false,  false,  true,   m4_errprint },
-  { "esyscmd",          true,   false,  true,   m4_esyscmd },
-  { "eval",             false,  false,  true,   m4_eval },
-  { "format",           true,   false,  true,   m4_format },
-  { "ifdef",            false,  true,   true,   m4_ifdef },
-  { "ifelse",           false,  true,   true,   m4_ifelse },
-  { "include",          false,  false,  true,   m4_include },
-  { "incr",             false,  false,  true,   m4_incr },
-  { "index",            false,  false,  true,   m4_index },
-  { "indir",            true,   true,   true,   m4_indir },
-  { "len",              false,  false,  true,   m4_len },
-  { "m4exit",           false,  false,  false,  m4_m4exit },
-  { "m4wrap",           false,  true,   true,   m4_m4wrap },
-  { "maketemp",         false,  false,  true,   m4_maketemp },
-  { "mkstemp",          false,  false,  true,   m4_mkstemp },
-  { "patsubst",         true,   false,  true,   m4_patsubst },
-  { "popdef",           false,  true,   true,   m4_popdef },
-  { "pushdef",          false,  true,   true,   m4_pushdef },
-  { "regexp",           true,   false,  true,   m4_regexp },
-  { "shift",            false,  true,   true,   m4_shift },
-  { "sinclude",         false,  false,  true,   m4_sinclude },
-  { "substr",           false,  false,  true,   m4_substr },
-  { "syscmd",           false,  false,  true,   m4_syscmd },
-  { "sysval",           false,  false,  false,  m4_sysval },
-  { "traceoff",         false,  true,   false,  m4_traceoff },
-  { "traceon",          false,  true,   false,  m4_traceon },
-  { "translit",         false,  false,  true,   m4_translit },
-  { "undefine",         false,  true,   true,   m4_undefine },
-  { "undivert",         false,  false,  false,  m4_undivert },
+  {"debugmode", true, false, false, m4_debugmode},
+  {"debugfile", true, false, false, m4_debugfile},
+  {"decr", false, false, true, m4_decr},
+  {"define", false, true, true, m4_define},
+  {"defn", false, true, true, m4_defn},
+  {"divert", false, false, false, m4_divert},
+  {"divnum", false, false, false, m4_divnum},
+  {"dnl", false, false, false, m4_dnl},
+  {"dumpdef", false, true, false, m4_dumpdef},
+  {"errprint", false, false, true, m4_errprint},
+  {"esyscmd", true, false, true, m4_esyscmd},
+  {"eval", false, false, true, m4_eval},
+  {"format", true, false, true, m4_format},
+  {"ifdef", false, true, true, m4_ifdef},
+  {"ifelse", false, true, true, m4_ifelse},
+  {"include", false, false, true, m4_include},
+  {"incr", false, false, true, m4_incr},
+  {"index", false, false, true, m4_index},
+  {"indir", true, true, true, m4_indir},
+  {"len", false, false, true, m4_len},
+  {"m4exit", false, false, false, m4_m4exit},
+  {"m4wrap", false, true, true, m4_m4wrap},
+  {"maketemp", false, false, true, m4_maketemp},
+  {"mkstemp", false, false, true, m4_mkstemp},
+  {"patsubst", true, false, true, m4_patsubst},
+  {"popdef", false, true, true, m4_popdef},
+  {"pushdef", false, true, true, m4_pushdef},
+  {"regexp", true, false, true, m4_regexp},
+  {"shift", false, true, true, m4_shift},
+  {"sinclude", false, false, true, m4_sinclude},
+  {"substr", false, false, true, m4_substr},
+  {"syscmd", false, false, true, m4_syscmd},
+  {"sysval", false, false, false, m4_sysval},
+  {"traceoff", false, true, false, m4_traceoff},
+  {"traceon", false, true, false, m4_traceon},
+  {"translit", false, false, true, m4_translit},
+  {"undefine", false, true, true, m4_undefine},
+  {"undivert", false, false, false, m4_undivert},
 
-  { 0,                  false,  false,  false,  0 },
+  {0, false, false, false, 0},
 
   /* placeholder is intentionally stuck after the table end delimiter,
      so that we can easily find it, while not treating it as a real
      builtin.  */
-  { "placeholder",      true,   false,  false,  m4_placeholder },
+  {"placeholder", true, false, false, m4_placeholder},
 };
 
-static predefined const predefined_tab[] =
-{
+static predefined const predefined_tab[] = {
 #if UNIX
-  { "unix",     "__unix__",     "" },
+  {"unix", "__unix__", ""},
 #endif
 #if W32_NATIVE
-  { "windows",  "__windows__",  "" },
+  {"windows", "__windows__", ""},
 #endif
 #if OS2
-  { "os2",      "__os2__",      "" },
+  {"os2", "__os2__", ""},
 #endif
 #if !UNIX && !W32_NATIVE && !OS2
 # warning Platform macro not provided
 #endif
-  { NULL,       "__gnu__",      "" },
-  { NULL,       "__m4_version__", VERSION },
+  {NULL, "__gnu__", ""},
+  {NULL, "__m4_version__", VERSION},
 
-  { NULL,       NULL,           NULL },
+  {NULL, NULL, NULL},
 };
 
 
 /* Find the builtin that owns FUNC.  */
-const builtin * ATTRIBUTE_PURE
+const builtin *ATTRIBUTE_PURE
 find_builtin_by_addr (builtin_func *func)
 {
   const builtin *bp;
@@ -187,7 +185,7 @@ find_builtin_by_addr (builtin_func *func)
 
 /* Find the builtin matching NAME.  On failure, return the placeholder
    builtin.  */
-const builtin * ATTRIBUTE_PURE
+const builtin *ATTRIBUTE_PURE
 find_builtin_by_name (const char *name)
 {
   const builtin *bp;
@@ -260,12 +258,13 @@ static bool macro_sequence_inuse;
 #define REGEX_CACHE_SIZE 16
 
 /* Structure for caching compiled regex.  */
-struct m4_regex {
-  unsigned count;                       /* usage counter */
-  size_t len;                           /* length of string */
-  char *str;                            /* copy of compiled string */
+struct m4_regex
+{
+  unsigned count;               /* usage counter */
+  size_t len;                   /* length of string */
+  char *str;                    /* copy of compiled string */
   struct re_pattern_buffer *buf;        /* compiled regex, allocated */
-  struct re_registers regs;             /* match registers, reused */
+  struct re_registers regs;     /* match registers, reused */
 };
 typedef struct m4_regex m4_regex;
 
@@ -429,7 +428,7 @@ free_regex (void)
    NAME_LEN, and expansion TEXT of length LEN.  LEN may be SIZE_MAX,
    to use the string length of TEXT instead.  MODE is SYMBOL_INSERT
    for "define" or SYMBOL_PUSHDEF for "pushdef".  This function is
-   also used from main ().  */
+   also used from main.  */
 void
 define_user_macro (const char *name, size_t name_len, const char *text,
                    size_t len, symbol_lookup mode)
@@ -619,8 +618,8 @@ shipout_int (struct obstack *obs, int val)
   s = ntoa ((int32_t) val, 10);
   obstack_grow (obs, s, strlen (s));
 }
-
 
+
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
 
@@ -709,8 +708,7 @@ m4_undefine (struct obstack *obs MAYBE_UNUSED, int argc,
 }
 
 static void
-m4_pushdef (struct obstack *obs MAYBE_UNUSED, int argc,
-            macro_arguments *argv)
+m4_pushdef (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   define_macro (argc, argv, SYMBOL_PUSHDEF);
 }
@@ -939,12 +937,14 @@ m4_builtin (struct obstack *obs, int argc, macro_arguments *argv)
     {
       if (debug_level & DEBUG_TRACE_DEREF)
         m4_warn (0, me, _("undefined builtin %s"),
-                 quotearg_style_mem (locale_quoting_style, name, ARG_LEN (1)));
+                 quotearg_style_mem (locale_quoting_style, name,
+                                     ARG_LEN (1)));
     }
   else
     {
       macro_arguments *new_argv = make_argv_ref (argv, name, ARG_LEN (1),
-                                                 !bp->groks_macro_args, false);
+                                                 !bp->groks_macro_args,
+                                                 false);
       trace_args (new_argv);
       bp->func (obs, argc - 1, new_argv);
       trace_post (arg_info (new_argv));
@@ -1501,8 +1501,7 @@ include (int argc, macro_arguments *argv, bool silent)
 
 /* Include a file, complaining in case of errors.  */
 static void
-m4_include (struct obstack *obs MAYBE_UNUSED, int argc,
-            macro_arguments *argv)
+m4_include (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
   include (argc, argv, false);
 }
@@ -1580,11 +1579,11 @@ m4_maketemp (struct obstack *obs, int argc, macro_arguments *argv)
          are in traditional mode.
 
          For reference, Solaris m4 does:
-           maketemp() -> `'
-           maketemp(X) -> `X'
-           maketemp(XX) -> `Xn', where n is last digit of pid
-           maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
-      */
+         maketemp() -> `'
+         maketemp(X) -> `X'
+         maketemp(XX) -> `Xn', where n is last digit of pid
+         maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
+       */
       const char *str = ARG (1);
       size_t len = ARG_LEN (1);
       size_t i;
@@ -1701,8 +1700,8 @@ m4_m4wrap (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
     return;
   wrap_args (argv);
 }
-
 
+
 /* Enable tracing of all specified macros, or all, if none is specified.
    Tracing is disabled by default, when a macro is defined.  This can be
    overridden by the "t" debug flag.  */
@@ -1970,7 +1969,7 @@ expand_ranges (const char *s, size_t *len, struct obstack *obs)
   from = *s++;
   obstack_1grow (obs, from);
 
-  for ( ; s != end; from = *s++)
+  for (; s != end; from = *s++)
     {
       if (*s == '-')
         {
@@ -2016,7 +2015,8 @@ m4_translit (struct obstack *obs, int argc, macro_arguments *argv)
   char found[UCHAR_MAX + 1];
   unsigned char ch;
 
-  enum { ASIS, REPLACE, DELETE };
+  enum
+  { ASIS, REPLACE, DELETE };
 
   if (bad_argc (arg_info (argv), argc, 2, 3) || arg_empty (argv, 1)
       || arg_empty (argv, 2))
@@ -2170,8 +2170,15 @@ substitute (struct obstack *obs, const call_info *me, const char *victim,
                           regs->end[0] - regs->start[0]);
           break;
 
-        case '1': case '2': case '3': case '4': case '5': case '6':
-        case '7': case '8': case '9':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
           ind = ch -= '0';
           if (!regs || regs->num_regs - 1 <= ind)
             m4_warn (0, me, _("sub-expression %d not present"), ch);
@@ -2214,7 +2221,7 @@ m4_regexp (struct obstack *obs, int argc, macro_arguments *argv)
   const char *regexp;           /* regular expression */
   const char *repl;             /* replacement string */
 
-  struct re_pattern_buffer *buf;/* compiled regular expression */
+  struct re_pattern_buffer *buf;        /* compiled regular expression */
   struct re_registers *regs;    /* for subexpression matches */
   const char *msg;              /* error message from re_compile_pattern */
   int startpos;                 /* start position of match */
@@ -2292,7 +2299,7 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
   const char *regexp;           /* Regular expression.  */
   const char *repl;             /* Replacement text.  */
 
-  struct re_pattern_buffer *buf;/* Compiled regular expression.  */
+  struct re_pattern_buffer *buf;        /* Compiled regular expression.  */
   struct re_registers *regs;    /* For subexpression matches.  */
   const char *msg;              /* Error message from re_compile_pattern.  */
   int matchpos;                 /* Start position of match.  */
@@ -2438,8 +2445,16 @@ expand_user_macro (struct obstack *obs, symbol *sym,
       len--;
       switch (*++text)
         {
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
           if (no_gnu_extensions)
             {
               i = *text++ - '0';
@@ -2453,14 +2468,14 @@ expand_user_macro (struct obstack *obs, symbol *sym,
           push_arg (obs, argv, i);
           break;
 
-        case '#': /* number of arguments */
+        case '#':              /* number of arguments */
           shipout_int (obs, argc - 1);
           text++;
           len--;
           break;
 
-        case '*': /* all arguments */
-        case '@': /* ... same, but quoted */
+        case '*':              /* all arguments */
+        case '@':              /* ... same, but quoted */
           push_args (obs, argv, false, *text == '@');
           text++;
           len--;

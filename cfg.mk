@@ -27,6 +27,8 @@ update-copyright-env = \
 local-checks-to-skip =
 # M4 intentionally uses a coding style that compiles under C++.
 local-checks-to-skip += sc_cast_of_x_alloc_return_value
+# TODO enable this later
+local-checks-to-skip += sc_codespell
 
 # Our files include "m4.h", which in turn includes <config.h> first.
 config_h_header = "m4\.h"
@@ -42,8 +44,10 @@ sc_prohibit_tab_based_indentation:
  @re='^ *    '                                               \
  msg='TAB in indentation; use only spaces'                   \
    $(_prohibit_regexp)
+indent_args = --ignore-profile --preprocessor-indentation 1 --no-tabs
 
 # List all syntax-check exemptions:
 exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \
   (^(GNU)?Makefile(\.am)?|\.mk|^HACKING|^ChangeLog.*)$$
+exclude_file_name_regexp--sc_trailing_blank = ^examples/null
 exclude_file_name_regexp--update-copyright = ^m4/gnulib-cache.m4$$

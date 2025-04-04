@@ -32,10 +32,6 @@
 #include "propername.h"
 #include "version-etc.h"
 
-#ifdef DEBUG_STKOVF
-# include "assert.h"
-#endif
-
 /* TRANSLATORS: This is a non-ASCII name: The first name is (with
    Unicode escapes) "Ren\u00e9" or (with HTML entities) "Ren&eacute;".  */
 #define AUTHORS                                                 \
@@ -94,7 +90,8 @@ typedef struct macro_definition macro_definition;
    location.  If ERRNUM, decode the errno value that caused the error.
    If STATUS, exit immediately with that status.  If WARN, prepend
    'warning: '.  */
-static void ATTRIBUTE_FORMAT ((__printf__, 5, 0))
+static void
+ATTRIBUTE_FORMAT ((__printf__, 5, 0))
 m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
                    const char *format, va_list args)
 {
@@ -191,8 +188,8 @@ m4_warn (int errnum, const call_info *caller, const char *format, ...)
 /* Pre-translated messages for program errors.  Do not translate in
    the signal handler, since gettext and strsignal are not
    async-signal-safe.  */
-static const char * volatile program_error_message;
-static const char * volatile signal_message[NSIG];
+static const char *volatile program_error_message;
+static const char *volatile signal_message[NSIG];
 
 /* Print a nicer message about any programmer errors, then exit.  This
    must be aysnc-signal safe, since it is executed as a signal
@@ -207,8 +204,8 @@ fault_handler (int signo)
          async-safe.  However, the static variables that we read are
          never modified once this handler is installed, so this
          particular usage is safe.  And it seems an oversight that
-	 POSIX claims strlen is not async-safe.  Ignore write
-	 failures, since we will exit with non-zero status anyway.  */
+         POSIX claims strlen is not async-safe.  Ignore write
+         failures, since we will exit with non-zero status anyway.  */
 #define WRITE(f, b, l) ignore_value (write (f, b, l))
       WRITE (STDERR_FILENO, program_name, strlen (program_name));
       WRITE (STDERR_FILENO, ": ", 2);
@@ -345,19 +342,19 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 enum
 {
   DEBUGFILE_OPTION = CHAR_MAX + 1,      /* no short opt */
-  WARN_MACRO_SEQUENCE_OPTION,           /* no short opt */
+  WARN_MACRO_SEQUENCE_OPTION,   /* no short opt */
 
-  HELP_OPTION,                          /* no short opt */
-  VERSION_OPTION                        /* no short opt */
+  HELP_OPTION,                  /* no short opt */
+  VERSION_OPTION                /* no short opt */
 };
 
-static const struct option long_options[] =
-{
+static const struct option long_options[] = {
   {"arglength", required_argument, NULL, 'l'},
   {"debug", optional_argument, NULL, 'd'},
   {"debugmode", optional_argument, NULL, 'd'},
   {"define", required_argument, NULL, 'D'},
-  {"error-output", required_argument, NULL, 'o'}, /* FIXME: deprecate in 2.0 */
+  /* FIXME: deprecate in 2.0 */
+  {"error-output", required_argument, NULL, 'o'},
   {"fatal-warnings", no_argument, NULL, 'E'},
   {"freeze-state", required_argument, NULL, 'F'},
   {"gnu", no_argument, NULL, 'g'},
@@ -378,12 +375,13 @@ static const struct option long_options[] =
 #endif
 
   {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
-  {"warn-macro-sequence", optional_argument, NULL, WARN_MACRO_SEQUENCE_OPTION},
+  {"warn-macro-sequence", optional_argument, NULL,
+   WARN_MACRO_SEQUENCE_OPTION},
 
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
 
-  { NULL, 0, NULL, 0 },
+  {NULL, 0, NULL, 0},
 };
 
 /* Process a command line file NAME, and return true only if it was
@@ -426,9 +424,9 @@ process_file (const char *name)
    '-' forces getopt_long to hand back file names as arguments to opt
    '\1', rather than reordering the command line.  */
 #ifdef ENABLE_CHANGEWORD
-#define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:W:d::egil:o:st:"
+# define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:W:d::egil:o:st:"
 #else
-#define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:d::egil:o:st:"
+# define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:d::egil:o:st:"
 #endif
 
 #ifdef DEBUG_REGEX
@@ -439,7 +437,7 @@ int
 main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
 {
   struct sigaction act;
-  macro_definition *head;	/* head of deferred argument list */
+  macro_definition *head;       /* head of deferred argument list */
   macro_definition *tail;
   macro_definition *defn;
   int optchar;                  /* option character */
@@ -516,10 +514,10 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
     char *crash = getenv ("M4_CRASH");
     if (crash)
       {
-	if (!strtol (crash, NULL, 10))
-	  ++*(int *) 8;
-	assert (false);
-	abort ();
+        if (!strtol (crash, NULL, 10))
+          ++ * (int *) 8;
+        assert (false);
+        abort ();
       }
   }
 #endif /* DEBUG_STKOVF */
@@ -540,7 +538,8 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
         /* Compatibility junk: options that other implementations
            support, but which we ignore as no-ops and don't list in
            --help.  */
-        error (0, 0, _("warning: `m4 -%c' may be removed in a future release"),
+        error (0, 0,
+               _("warning: `m4 -%c' may be removed in a future release"),
                optchar);
         break;
 
@@ -632,7 +631,7 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
 
       case 'e':
         error (0, 0, _("warning: `%s' is deprecated, use `%s' instead"),
-                       "-e", "-i");
+               "-e", "-i");
         FALLTHROUGH;
       case 'i':
         interactive = true;
@@ -659,10 +658,10 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
         break;
 
       case WARN_MACRO_SEQUENCE_OPTION:
-         /* Don't call set_macro_sequence here, as it can exit.
-            --warn-macro-sequence sets optarg to NULL (which uses the
-            default regexp); --warn-macro-sequence= sets optarg to ""
-            (which disables these warnings).  */
+        /* Don't call set_macro_sequence here, as it can exit.
+           --warn-macro-sequence sets optarg to NULL (which uses the
+           default regexp); --warn-macro-sequence= sets optarg to ""
+           (which disables these warnings).  */
         macro_sequence = optarg;
         break;
 
@@ -751,9 +750,9 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
 
         case DEBUGFILE_OPTION:
           if (!debug_set_output (NULL, arg))
-             m4_error (0, errno, NULL, _("cannot set debug file %s"),
-                       quotearg_style (locale_quoting_style,
-                                       arg ? arg : _("stderr")));
+            m4_error (0, errno, NULL, _("cannot set debug file %s"),
+                      quotearg_style (locale_quoting_style,
+                                      arg ? arg : _("stderr")));
           break;
 
         default:

@@ -33,11 +33,11 @@ struct includes
 
 typedef struct includes includes;
 
-static includes *dir_list;              /* the list of path directories */
-static includes *dir_list_end;          /* the end of same */
-static int dir_max_length;              /* length of longest directory name */
-
+static includes *dir_list;      /* the list of path directories */
+static includes *dir_list_end;  /* the end of same */
+static int dir_max_length;      /* length of longest directory name */
 
+
 void
 include_init (void)
 {
@@ -91,7 +91,7 @@ add_include_directory (const char *dir)
   incl->len = strlen (dir);
   incl->dir = xstrdup (dir);
 
-  if (incl->len > dir_max_length) /* remember len of longest directory */
+  if (incl->len > dir_max_length)       /* remember len of longest directory */
     dir_max_length = incl->len;
 
   if (dir_list_end == NULL)
@@ -135,7 +135,7 @@ m4_path_search (const char *file, char **result)
 {
   FILE *fp;
   includes *incl;
-  char *name; /* buffer for constructed name */
+  char *name;                   /* buffer for constructed name */
   int e;
 
   if (result)
@@ -178,7 +178,8 @@ m4_path_search (const char *file, char **result)
                            quotearg_style (locale_quoting_style, file),
                            quotearg_n_style (1, locale_quoting_style, name));
           if (set_cloexec_flag (fileno (fp), true) != 0)
-            m4_warn (errno, NULL, _("cannot protect input file across forks"));
+            m4_warn (errno, NULL,
+                     _("cannot protect input file across forks"));
           if (result)
             *result = name;
           else

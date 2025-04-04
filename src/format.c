@@ -138,26 +138,27 @@ arg_double (const call_info *me, const char *str, size_t len)
 void
 expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 {
-  const call_info *me = arg_info (argv);/* Macro name.  */
-  const char *f;                        /* Format control string.  */
-  size_t f_len;                         /* Length of f.  */
-  const char *fmt;                      /* Position within f.  */
+  const call_info *me = arg_info (argv);        /* Macro name.  */
+  const char *f;                /* Format control string.  */
+  size_t f_len;                 /* Length of f.  */
+  const char *fmt;              /* Position within f.  */
   char fstart[] = "%'+- 0#*.*hhd";      /* Current format spec.  */
-  char *p;                              /* Position within fstart.  */
-  unsigned char c;                      /* A simple character.  */
-  int i = 1;                            /* Index within argc used so far.  */
-  bool valid_format = true;             /* True if entire format string ok.  */
+  char *p;                      /* Position within fstart.  */
+  unsigned char c;              /* A simple character.  */
+  int i = 1;                    /* Index within argc used so far.  */
+  bool valid_format = true;     /* True if entire format string ok.  */
 
   /* Flags.  */
-  char flags;                           /* Flags to use in fstart.  */
-  enum {
-    THOUSANDS   = 0x01, /* '\''. */
-    PLUS        = 0x02, /* '+'. */
-    MINUS       = 0x04, /* '-'. */
-    SPACE       = 0x08, /* ' '. */
-    ZERO        = 0x10, /* '0'. */
-    ALT         = 0x20, /* '#'. */
-    DONE        = 0x40  /* No more flags.  */
+  char flags;                   /* Flags to use in fstart.  */
+  enum
+  {
+    THOUSANDS = 0x01,           /* '\''. */
+    PLUS = 0x02,                /* '+'. */
+    MINUS = 0x04,               /* '-'. */
+    SPACE = 0x08,               /* ' '. */
+    ZERO = 0x10,                /* '0'. */
+    ALT = 0x20,                 /* '#'. */
+    DONE = 0x40                 /* No more flags.  */
   };
 
   /* Precision specifiers.  */
@@ -172,11 +173,13 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
 
   /* Buffer and stuff.  */
   int result = 0;
-  enum {CHAR, INT, LONG, DOUBLE, STR} datatype;
+  enum
+  { CHAR, INT, LONG, DOUBLE, STR } datatype;
 
   f = fmt = ARG (1);
   f_len = ARG_LEN (1);
-  assert (!f[f_len]); /* Requiring a terminating NUL makes parsing simpler.  */
+  /* Requiring a terminating NUL makes parsing simpler.  */
+  assert (!f[f_len]);
   memset (ok, 0, sizeof ok);
   while (1)
     {
@@ -198,7 +201,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
           continue;
         }
 
-      p = fstart + 1; /* % */
+      p = fstart + 1;           /* % */
       lflag = 0;
       ok['a'] = ok['A'] = ok['c'] = ok['d'] = ok['e'] = ok['E']
         = ok['f'] = ok['F'] = ok['g'] = ok['G'] = ok['i'] = ok['o']
@@ -210,33 +213,33 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
         {
           switch (*fmt)
             {
-            case '\'': /* thousands separator */
+            case '\'':         /* thousands separator */
               ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E']
                 = ok['o'] = ok['s'] = ok['x'] = ok['X'] = 0;
               flags |= THOUSANDS;
               break;
 
-            case '+': /* mandatory sign */
+            case '+':          /* mandatory sign */
               ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
               flags |= PLUS;
               break;
 
-            case ' ': /* space instead of positive sign */
+            case ' ':          /* space instead of positive sign */
               ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
               flags |= SPACE;
               break;
 
-            case '0': /* zero padding */
+            case '0':          /* zero padding */
               ok['c'] = ok['s'] = 0;
               flags |= ZERO;
               break;
 
-            case '#': /* alternate output */
+            case '#':          /* alternate output */
               ok['c'] = ok['d'] = ok['i'] = ok['s'] = ok['u'] = 0;
               flags |= ALT;
               break;
 
-            case '-': /* left justification */
+            case '-':          /* left justification */
               flags |= MINUS;
               break;
 
@@ -344,7 +347,7 @@ expand_format (struct obstack *obs, int argc, macro_arguments *argv)
         {
         case 'c':
           datatype = CHAR;
-          p -= 2; /* %.*c is undefined, so undo the '.*'.  */
+          p -= 2;               /* %.*c is undefined, so undo the '.*'.  */
           break;
 
         case 's':
