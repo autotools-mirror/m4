@@ -146,7 +146,8 @@ free_symbol (symbol *sym)
       SYMBOL_DELETED (sym) = true;
       if (SYMBOL_STACK (sym))
         {
-          SYMBOL_NAME (sym) = xstrdup (SYMBOL_NAME (sym));
+          SYMBOL_NAME (sym) = xmemdup0 (SYMBOL_NAME (sym),
+                                        SYMBOL_NAME_LEN (sym));
           SYMBOL_STACK (sym) = NULL;
         }
     }
@@ -274,7 +275,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
         }
       else
         {
-          SYMBOL_NAME (sym) = xstrdup (name);
+          SYMBOL_NAME (sym) = xmemdup0 (name, len);
           SYMBOL_NAME_LEN (sym) = len;
         }
       return sym;
@@ -320,7 +321,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
             SYMBOL_TYPE (sym) = TOKEN_VOID;
             SYMBOL_TRACED (sym) = true;
             sym->hash = h;
-            SYMBOL_NAME (sym) = xstrdup (name);
+            SYMBOL_NAME (sym) = xmemdup0 (name, len);
             SYMBOL_NAME_LEN (sym) = len;
             SYMBOL_MACRO_ARGS (sym) = false;
             SYMBOL_BLIND_NO_ARGS (sym) = false;

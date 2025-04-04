@@ -290,7 +290,7 @@ define_user_macro (const char *name, int name_len, const char *text,
                    size_t text_len, symbol_lookup mode)
 {
   symbol *s;
-  char *defn = xstrdup (text ? text : "");
+  char *defn = xmemdup0 (text ? text : "", text_len);
 
   if (text_len > INT_MAX)
     {

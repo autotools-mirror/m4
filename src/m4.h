@@ -53,6 +53,7 @@
 #include "unistd--.h"
 #include "verify.h"
 #include "xalloc.h"
+#include "xmemdup0.h"
 #include "xprintf.h"
 #include "xvasprintf.h"
 

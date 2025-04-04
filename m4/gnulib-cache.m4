@@ -108,6 +108,7 @@
 #  version-etc-fsf \
 #  wait-process \
 #  xalloc \
+#  xmemdup0 \
 #  xoset \
 #  xprintf \
 #  xvasprintf-posix
@@ -178,6 +179,7 @@ gl_MODULES([
   version-etc-fsf
   wait-process
   xalloc
+  xmemdup0
   xoset
   xprintf
   xvasprintf-posix
