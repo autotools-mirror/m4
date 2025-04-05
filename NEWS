@@ -2,6 +2,11 @@ GNU M4 NEWS - User visible changes.
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Fix a bug in the `eval' builtin where it does not suppress warnings
+   about division by zero that occurs within a more complex expression on
+   the right hand side of || or && (present since short-circuiting was
+   introduced in 1.4.8b).
+
 ** The `syscmd' and `esyscmd' builtins no longer mishandle a command line
    starting with `-' or `+'.
 
@@ -21,6 +26,8 @@ GNU M4 NEWS - User visible changes.
    one-byte prefixes of valid longer matches.  As a reminder, `changeword'
    is not recommended for production use, and will likely not be present
    in the next major version release.
+
+** Update to comply with newer C standards.
 
 
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]

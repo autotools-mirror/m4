@@ -6341,10 +6341,10 @@ eval(`2 || 1 / 0')
 eval(`0 || 1 / 0')
 @error{}m4:stdin:9: divide by zero in eval: 0 || 1 / 0
 @result{}
-eval(`0 && 1 % 0')
+eval(`0 && (1 % 0)')
 @result{}0
-eval(`2 && 1 % 0')
-@error{}m4:stdin:11: modulo by zero in eval: 2 && 1 % 0
+eval(`2 && (1 % 0)')
+@error{}m4:stdin:11: modulo by zero in eval: 2 && (1 % 0)
 @result{}
 @end example
 
@@ -6412,7 +6412,7 @@ square(square(`5')` + 1')
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: bad expression in eval: foo / 6
+@error{}m4:stdin:11: bad expression in eval (bad input): foo / 6
 @result{}
 eval(foo / 6)
 @result{}111
