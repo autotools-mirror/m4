@@ -6274,7 +6274,7 @@ arguments, output and increment the internal counter.
 @example
 define(`_counter', `-1')dnl
 define(`counter', `ifelse(`$#', `0', `define(`_$0', incr(_$0))_$0`'',
-`define(`_$0', decr(`0$1'))')')
+`define(`_$0', eval(`$1-1'))')')
 @result{}
 counter counter counter
 @result{}0 1 2
@@ -6288,8 +6288,8 @@ counter()counter
 
 It is worth noting how the implementation treats a default empty string
 as @code{0} - this is done by storing one less than @var{seed} into the
-internal counter @code{_counter}, with a prefix of 0 since @code{decr}
-always interprets its parameter in decimal.
+internal counter @code{_counter}, by using @code{eval} in a way that
+works even when @code{$1} is blank.
 
 @node Eval
 @section Evaluating integer expressions
