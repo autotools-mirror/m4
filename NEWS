@@ -66,8 +66,7 @@ GNU M4 NEWS - User visible changes.
    `-d-V' to disable prior debug settings from the command line, similar to
    using the builtin `debugmode' without arguments.  The option
    `--debugmode' is added as an alias for `-d'.  The new flag `d' is added
-   to control whether dereferencing an undefined macro causes a warning;
-   this flag is enabled by default if neither `-d' nor `-E' are specified.
+   to control whether dereferencing an undefined macro causes a warning.
    The new flag `o' is added to control whether `dumpdef' outputs to stderr
    or the current `debugfile' location.  When the command line option is
    given the empty string, the mode is treated as `+adeq' instead of `aeq'.

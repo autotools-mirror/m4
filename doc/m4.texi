@@ -905,11 +905,11 @@ scripts.
 Set the debug-level according to the flags @var{flags}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debugmode}, for more details on the format and
-meaning of @var{flags}.  If omitted, @var{flags} defaults to
+meaning of @var{flags}.  If @var{flags} is omitted, it defaults to
 @samp{+adeq}.  If the option occurs multiple times, @var{flags} starting
 with @samp{-} or @samp{+} are cumulative, while @var{flags} starting
 with a letter override all earlier settings.  The debug-level starts
-with @samp{d} enabled and all other flags disabled.  To disable all
+with no flags enabled.  To disable all
 previously set flags, specify an explicit @var{flags} of @samp{-V}.  For
 backward compatibility reasons, the option @option{--fatal-warnings}
 implies @samp{--debug=-d} as part of its effects.  The spelling

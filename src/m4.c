@@ -34,7 +34,7 @@
 int sync_output = 0;
 
 /* Debug (-d[flags]).  */
-int debug_level = DEBUG_TRACE_DEREF;
+int debug_level = 0;
 
 /* Disable GNU extensions (-G).  */
 int no_gnu_extensions = 0;
@@ -251,7 +251,7 @@ Debugging:\n\
 FLAGS is any of:\n\
   a   show actual arguments in trace\n\
   c   show collection line in trace\n\
-  d   warn when dereferencing undefined macros (default on unless -E)\n\
+  d   warn when dereferencing undefined macros\n\
   e   show expansion in trace\n\
   f   include current input file name in trace and debug\n\
   i   show changes in input files in debug\n\
