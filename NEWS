@@ -148,6 +148,11 @@ following beta features that were deemed worth deferring until 1.6:
 
 ** A number of portability improvements inherited from gnulib.
 
+** Fix a bug in the `eval' builtin where it does not suppress warnings
+   about division by zero that occurs within a more complex expression on
+   the right hand side of || or && (present since short-circuiting was
+   introduced in 1.4.8b).
+
 ** The `syscmd' and `esyscmd' builtins no longer mishandle a command line
    starting with `-' or `+'.
 
@@ -161,6 +166,15 @@ following beta features that were deemed worth deferring until 1.6:
    While it would be nice for m4 to be fully locale-aware, such a behavior
    change belongs in a major version release such as 1.6, and not a minor
    release.
+
+** Fix regression introduced in 1.4.11 where the experimental `changeword'
+   builtin could cause a crash if given a regex that does not match all
+   one-byte prefixes of valid longer matches.  As a reminder, `changeword'
+   is not recommended for production use, and will likely not be present
+   in the next major version release.
+
+** Update to comply with newer C standards.
+
 
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]
 
