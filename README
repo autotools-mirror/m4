@@ -33,7 +33,6 @@ In the subdirectory `examples' you will find various m4 files, ranging
 from trivial test files to rather advanced macros.  If you intend to
 use m4 seriously, you might find useful material down there.
 
-See file `BACKLOG' for a summary of pending mail and articles.
 See file `COPYING' for copying conditions.  Note that M4 is distributed
 under the GNU Public License version 3 or later.  Some files in the
 distribution are copied from the gnulib project, and hence bear the
