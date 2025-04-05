@@ -300,7 +300,7 @@ trace_flush (unsigned int start)
       xfwrite (&base[start], 1, len - start, debug);
       fputc ('\n', debug);
     }
-  obstack_blank (&trace, start - len);
+  obstack_blank_fast (&trace, start - len);
 }
 
 /* Do pre-argument-collection tracing for the macro call described in

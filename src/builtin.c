@@ -27,8 +27,8 @@
 #include "execute.h"
 #include "memchr2.h"
 #include "memcmp2.h"
-#include "pipe.h"
 #include "regex.h"
+#include "spawn-pipe.h"
 #include "wait-process.h"
 
 /* Initialization of builtin and predefined macros.  The table
@@ -1082,7 +1082,7 @@ m4_syscmd (struct obstack *obs M4_GNUC_UNUSED, int argc, macro_arguments *argv)
   prog_args[2] = cmd;
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
-  status = execute (caller, SYSCMD_SHELL, (char **) prog_args, false,
+  status = execute (caller, SYSCMD_SHELL, prog_args, NULL, NULL, false,
                     false, false, false, true, false, &sig_status);
   if (sig_status)
     {
@@ -1133,7 +1133,7 @@ m4_esyscmd (struct obstack *obs, int argc, macro_arguments *argv)
   prog_args[2] = cmd;
   caller = quotearg_style_mem (locale_quoting_style, me->name, me->name_len);
   errno = 0;
-  child = create_pipe_in (caller, SYSCMD_SHELL, (char **) prog_args,
+  child = create_pipe_in (caller, SYSCMD_SHELL, prog_args, NULL, NULL,
                           NULL, false, true, false, &fd);
   if (child == -1)
     {
@@ -1536,7 +1536,7 @@ mkstemp_helper (struct obstack *obs, const call_info *me, const char *pattern,
     {
       close (fd);
       /* Remove NUL, then finish quote.  */
-      obstack_blank (obs, -1);
+      obstack_blank_fast (obs, -1);
       obstack_grow (obs, curr_quote.str2, curr_quote.len2);
     }
 }

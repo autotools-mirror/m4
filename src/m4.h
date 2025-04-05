@@ -52,7 +52,6 @@
 #include "stdlib--.h"
 #include "unistd--.h"
 #include "vasnprintf.h"
-#include "verror.h"
 #include "xalloc.h"
 #include "xmemdup0.h"
 #include "xprintf.h"

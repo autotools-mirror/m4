@@ -9,12 +9,21 @@
 *.tar.gz
 *.tar.lzma
 *.tar.xz
+\#*
+.#*
 .deps
 /.tarball-version
 /.version
 /aclocal.m4
 /autom4te.cache
-/build-aux/.gitignore
+/build-aux/*
+!/build-aux/compile
+!/build-aux/config.guess
+!/build-aux/config.sub
+!/build-aux/depcomp
+!/build-aux/install-sh
+!/build-aux/mdate-sh
+!/build-aux/texinfo.tex
 /checks/[0-9][0-9].*
 /checks/[0-9][0-9][0-9].*
 /checks/stamp-checks
@@ -39,7 +48,6 @@
 /doc/stamp-vti
 /doc/version.texi
 /gendocs.sh
-/GNUmakefile
 /gnupload
 /install-sh
 /lib/*
@@ -48,7 +56,6 @@
 /m4-*
 /m4/.gitignore
 /m4/gnulib-comp.m4
-/maint.mk
 Makefile.in
 Makefile
 /missing
@@ -58,3 +65,5 @@ Makefile
 /stamp-h.in
 /tests/*
 !/tests/Makefile.am
+/GNUmakefile
+/maint.mk

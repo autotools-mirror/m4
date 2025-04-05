@@ -257,7 +257,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 
               if (old == entry)
                 {
-                  old = (symbol *) hash_delete (symtab, entry);
+                  old = (symbol *) hash_remove (symtab, entry);
                   assert (entry == old);
                   sym->stack = sym;
                   entry = (symbol *) hash_insert (symtab, sym);
@@ -347,7 +347,7 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
                 old->stack = NULL;
                 free_symbol (old);
               }
-            sym = (symbol *) hash_delete (symtab, entry);
+            sym = (symbol *) hash_remove (symtab, entry);
             assert (sym == entry);
             sym->stack = NULL;
             free_symbol (sym);

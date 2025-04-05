@@ -225,7 +225,7 @@ m4_tmpfile (int divnum)
     }
   name = m4_tmpname (divnum);
   register_temp_file (output_temp_dir, name);
-  file = fopen_temp (name, O_BINARY ? "wb+" : "w+");
+  file = fopen_temp (name, O_BINARY ? "wb+" : "w+", false);
   if (file == NULL)
     {
       unregister_temp_file (output_temp_dir, name);
@@ -266,7 +266,7 @@ m4_tmpopen (int divnum, bool reread)
     }
   name = m4_tmpname (divnum);
   /* We need update mode, to avoid truncation.  */
-  file = fopen_temp (name, O_BINARY ? "rb+" : "r+");
+  file = fopen_temp (name, O_BINARY ? "rb+" : "r+", false);
   if (file == NULL)
     m4_error (EXIT_FAILURE, errno, NULL,
               _("cannot create temporary file for diversion"));

@@ -1845,7 +1845,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
                         obstack_object_size (&token_stack), 0, &regs)
               != (regoff_t) obstack_object_size (&token_stack))
             {
-              obstack_blank (&token_stack, -1);
+              obstack_blank_fast (&token_stack, -1);
               break;
             }
           next_char (false, false);

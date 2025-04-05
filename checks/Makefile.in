@@ -42,9 +42,9 @@ DISTFILES = $(srcdir)/get-them $(srcdir)/check-them $(srcdir)/stamp-checks
 
 all: $(srcdir)/stamp-checks
 
-$(srcdir)/stamp-checks: $(srcdir)/get-them $(srcdir)/../doc/m4.texinfo
+$(srcdir)/stamp-checks: $(srcdir)/get-them $(srcdir)/../doc/m4.texi
 	rm -f $(CHECKS)
-	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texinfo
+	cd $(srcdir) && AWK=$(AWK) ./get-them ../doc/m4.texi
 	touch $(srcdir)/stamp-checks
 
 install:
