@@ -6262,6 +6262,35 @@ decr()
 @result{}-1
 @end example
 
+It is possible to use @code{incr} to write a macro that produces a
+different value each time it is invoked:
+
+@deffn Composite counter (@ovar{seed})
+When invoked with one argument, reset the counter to @var{seed} (where
+an empty seed is silently treated like 0), without output.  Without
+arguments, output and increment the internal counter.
+@end deffn
+
+@example
+define(`_counter', `-1')dnl
+define(`counter', `ifelse(`$#', `0', `define(`_$0', incr(_$0))_$0`'',
+`define(`_$0', decr(`0$1'))')')
+@result{}
+counter counter counter
+@result{}0 1 2
+counter(`42')
+@result{}
+counter counter
+@result{}42 43
+counter()counter
+@result{}0
+@end example
+
+It is worth noting how the implementation treats a default empty string
+as @code{0} - this is done by storing one less than @var{seed} into the
+internal counter @code{_counter}, with a prefix of 0 since @code{decr}
+always interprets its parameter in decimal.
+
 @node Eval
 @section Evaluating integer expressions
 
