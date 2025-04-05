@@ -38,9 +38,13 @@ struct profile
 {
   int entry;                    /* Number of times lookup_symbol called
                                    with this mode.  */
-  int comparisons;              /* Number of times strcmp was called.  */
-  int misses;                   /* Number of times strcmp did not return 0.  */
-  long long bytes;              /* Number of bytes compared.  */
+  int allocations;              /* Number of times a symbol is malloc'd.  */
+  int hits;                     /* Number of times a symbol is found.  */
+  int checks;                   /* Number of times a hash is checked.  */
+  int comparisons;              /* Number of times memcmp was called.  */
+  int misses;                   /* Number of times memcmp did not return 0.  */
+  long long bytes_hashed;       /* Number of bytes hashed.  */
+  long long bytes_compared;     /* Number of bytes compared.  */
 };
 
 static struct profile profiles[5];
@@ -58,10 +62,13 @@ show_profile (void)
   FILE *f = fopen ("/dev/tty", "w");
   for (i = 0; i < 5; i++)
     {
-      xfprintf (f, "m4: lookup mode %d called %d times, %d compares, "
-                "%d misses, %lld bytes\n",
-                i, profiles[i].entry, profiles[i].comparisons,
-                profiles[i].misses, profiles[i].bytes);
+      xfprintf (f, "m4debug: lookup mode %d called %d times, %d hits:\n"
+                "m4debug:  symbols: %d allocs, %d checks, %lld bytes hashed\n"
+                "m4debug:  str: %d compares, %d misses, %lld bytes compared\n",
+                i, profiles[i].entry, profiles[i].hits,
+                profiles[i].allocations, profiles[i].checks,
+                profiles[i].bytes_hashed, profiles[i].comparisons,
+                profiles[i].misses, profiles[i].bytes_compared);
     }
   xfprintf (f, "m4: %llu hash callbacks, %llu compare callbacks, "
             "%zu buckets, %u resizes\n",
@@ -86,7 +93,7 @@ profile_memcmp (const char *s1, const char *s2, size_t l)
   profiles[current_mode].comparisons++;
   if (result != 0)
     profiles[current_mode].misses++;
-  profiles[current_mode].bytes += i;
+  profiles[current_mode].bytes_compared += i;
   return result;
 }
 
@@ -132,6 +139,7 @@ symtab_comparator (const void *entry_a, const void *entry_b)
 {
 #ifdef DEBUG_SYM
   comparator_entry++;
+  profiles[current_mode].checks++;
 #endif /* DEBUG_SYM */
   const symbol *sym_a = (const symbol *) entry_a;
   const symbol *sym_b = (const symbol *) entry_b;
@@ -216,12 +224,17 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
 #if DEBUG_SYM
   current_mode = mode;
   profiles[mode].entry++;
+  profiles[mode].bytes_hashed += len;
 #endif /* DEBUG_SYM */
 
   tmp.name = (char *) name;
   tmp.len = len;
   tmp.hash = hash (name, len);
   entry = (symbol *) hash_lookup (symtab, &tmp);
+#if DEBUG_SYM
+  if (entry)
+    profiles[mode].hits++;
+#endif /* DEBUG_SYM */
 
   switch (mode)
     {
@@ -243,6 +256,9 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
               symbol *old = sym;
               SYMBOL_DELETED (old) = true;
 
+#ifdef DEBUG_SYM
+              profiles[mode].allocations++;
+#endif
               sym = (symbol *) xmalloc (sizeof *sym);
               SYMBOL_TYPE (sym) = TOKEN_VOID;
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
@@ -285,6 +301,9 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
          pushdef stack is a circular chain; the hash entry is the
          oldest entry, which points to the newest entry; all other
          entries point to the next older entry.  */
+#ifdef DEBUG_SYM
+      profiles[mode].allocations++;
+#endif
       sym = (symbol *) xmalloc (sizeof *sym);
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
@@ -358,6 +377,9 @@ lookup_symbol (const char *name, size_t len, symbol_lookup mode)
           }
         if (traced)
           {
+#ifdef DEBUG_SYM
+            profiles[mode].allocations++;
+#endif
             sym = (symbol *) xmalloc (sizeof *sym);
             SYMBOL_TYPE (sym) = TOKEN_VOID;
             SYMBOL_TRACED (sym) = true;
