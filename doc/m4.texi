@@ -4740,6 +4740,19 @@ foo
 @end example
 
 @ignore
+@comment Expose a core dump introduced in 1.4.11.
+@example
+ifdef(`changeword', `', `errprint(` skipping: no changeword support
+')m4exit(`77')')dnl
+define(`foo
+', `bar
+')
+@result{}
+changeword(`[cd][a-z]*\|foo[
+]')foo
+@result{}foo
+@end example
+
 @comment One more test of including newline in a macro name; but this
 @comment does not need to be displayed in the manual.  This ensures
 @comment that line numbering is correct when dnl cuts across include

@@ -154,6 +154,7 @@ STRING ecomm;
 
 # define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
 
+static char word_start[256];
 static struct re_pattern_buffer word_regexp;
 static int default_word_regexp;
 static struct re_registers regs;
@@ -772,6 +773,8 @@ set_comment (const char *bc, const char *ec)
 void
 set_word_regexp (const char *regexp)
 {
+  int i;
+  char test[2] = "";
   const char *msg;
   struct re_pattern_buffer new_word_regexp;
 
@@ -806,6 +809,20 @@ set_word_regexp (const char *regexp)
     assert (false);
 
   default_word_regexp = false;
+
+  /* The fastmap contains any byte that can start a word. But we still
+     need to know which bytes can be matched as a word in isolation
+     (although the documentations requires that all prefixes of a
+     user's desired words to also be matched, this catches when a user
+     did not follow that limitation).  */
+  for (i = 1; i < 256; i++)
+    {
+      if (word_regexp.fastmap[i])
+        {
+          test[0] = i;
+          word_start[i] = re_search (&word_regexp, test, 1, 0, 0, NULL) >= 0;
+        }
+    }
 }
 
 #endif /* ENABLE_CHANGEWORD */
@@ -897,7 +914,7 @@ next_token (token_data *td, int *line)
 
 #ifdef ENABLE_CHANGEWORD
 
-  else if (!default_word_regexp && word_regexp.fastmap[ch])
+  else if (!default_word_regexp && word_start[ch])
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -915,6 +932,9 @@ next_token (token_data *td, int *line)
             {
               *(((char *) obstack_base (&token_stack)
                  + obstack_object_size (&token_stack)) - 1) = '\0';
+              re_search (&word_regexp,
+                         (char *) obstack_base (&token_stack),
+                         obstack_object_size (&token_stack) - 1, 0, 0, &regs);
               break;
             }
           next_char ();
@@ -923,7 +943,7 @@ next_token (token_data *td, int *line)
       obstack_1grow (&token_stack, '\0');
       orig_text = (char *) obstack_finish (&token_stack);
 
-      if (regs.start[1] != -1)
+      if (regs.num_regs && regs.start[1] != -1)
         obstack_grow (&token_stack, orig_text + regs.start[1],
                       regs.end[1] - regs.start[1]);
       else
@@ -1059,7 +1079,7 @@ peek_token (void)
     }
   else if ((default_word_regexp && (c_isalpha (ch) || ch == '_'))
 #ifdef ENABLE_CHANGEWORD
-           || (!default_word_regexp && word_regexp.fastmap[ch])
+           || (!default_word_regexp && word_start[ch])
 #endif /* ENABLE_CHANGEWORD */
     )
     {

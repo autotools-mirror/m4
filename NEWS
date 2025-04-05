@@ -16,11 +16,19 @@ GNU M4 NEWS - User visible changes.
    change belongs in a major version release such as 1.6, and not a minor
    release.
 
+** Fix regression introduced in 1.4.11 where the experimental `changeword'
+   builtin could cause a crash if given a regex that does not match all
+   one-byte prefixes of valid longer matches.  As a reminder, `changeword'
+   is not recommended for production use, and will likely not be present
+   in the next major version release.
+
+
 * Noteworthy changes in release 1.4.19 (2021-05-28) [stable]
 
 ** A number of portability improvements inherited from gnulib, including
    the ability to perform stack overflow detection on more platforms
    without linking to GNU libsigsegv.
+
 
 * Noteworthy changes in release 1.4.18d (2021-05-11) [beta]
 
