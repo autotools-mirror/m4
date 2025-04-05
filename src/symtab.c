@@ -42,9 +42,13 @@ struct profile
 {
   int entry;                    /* Number of times lookup_symbol called with
                                    this mode.  */
+  int allocations;              /* Number of times a symbol is malloc'd.  */
+  int hits;                     /* Number of times a symbol is found.  */
+  int checks;                   /* Number of times a hash is checked.  */
   int comparisons;              /* Number of times strcmp was called.  */
   int misses;                   /* Number of times strcmp did not return 0.  */
-  long long bytes;              /* Number of bytes compared.  */
+  long long bytes_hashed;       /* Number of bytes hashed.  */
+  long long bytes_compared;     /* Number of bytes compared.  */
 };
 
 static struct profile profiles[5];
@@ -57,10 +61,13 @@ show_profile (void)
   int i;
   for (i = 0; i < 5; i++)
     {
-      xfprintf (stderr, "m4: lookup mode %d called %d times, %d compares, "
-                "%d misses, %lld bytes\n",
-                i, profiles[i].entry, profiles[i].comparisons,
-                profiles[i].misses, profiles[i].bytes);
+      xfprintf (stderr, "m4debug: lookup mode %d called %d times, %d hits:\n"
+                "m4debug:  symbols: %d allocs, %d checks, %lld bytes hashed\n"
+                "m4debug:  str: %d compares, %d misses, %lld bytes compared\n",
+                i, profiles[i].entry, profiles[i].hits,
+                profiles[i].allocations, profiles[i].checks,
+                profiles[i].bytes_hashed, profiles[i].comparisons,
+                profiles[i].misses, profiles[i].bytes_compared);
     }
 }
 
@@ -80,7 +87,7 @@ profile_strcmp (const char *s1, const char *s2)
   profiles[current_mode].comparisons++;
   if (result != 0)
     profiles[current_mode].misses++;
-  profiles[current_mode].bytes += i;
+  profiles[current_mode].bytes_compared += i;
   return result;
 }
 
@@ -185,6 +192,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
 #if DEBUG_SYM
   current_mode = mode;
   profiles[mode].entry++;
+  profiles[mode].bytes_hashed += len;
 #endif /* DEBUG_SYM */
 
   h = hash (name);
@@ -192,6 +200,9 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
 
   for (prev = NULL; sym != NULL; prev = sym, sym = sym->next)
     {
+#ifdef DEBUG_SYM
+      profiles[mode].checks++;
+#endif
       cmp = (h > sym->hash) - (h < sym->hash);
       if (cmp == 0)
         cmp = strcmp (SYMBOL_NAME (sym), name);
@@ -201,6 +212,10 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
 
   /* If just searching, return status of search.  */
 
+#ifdef DEBUG_SYM
+  if (cmp == 0)
+    profiles[mode].hits++;
+#endif
   if (mode == SYMBOL_LOOKUP)
     return cmp == 0 ? sym : NULL;
 
@@ -225,6 +240,9 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
               symbol *old = sym;
               SYMBOL_DELETED (old) = true;
 
+#ifdef DEBUG_SYM
+              profiles[mode].allocations++;
+#endif
               sym = (symbol *) xmalloc (sizeof (symbol));
               SYMBOL_TYPE (sym) = TOKEN_VOID;
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
@@ -251,6 +269,9 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
       /* Insert a name in the symbol table.  If there is already a symbol
          with the name, insert this in front of it.  */
 
+#ifdef DEBUG_SYM
+      profiles[mode].allocations++;
+#endif
       sym = (symbol *) xmalloc (sizeof (symbol));
       SYMBOL_TYPE (sym) = TOKEN_VOID;
       SYMBOL_TRACED (sym) = false;
@@ -317,6 +338,9 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
         while (next != NULL && mode == SYMBOL_DELETE);
         if (traced)
           {
+#ifdef DEBUG_SYM
+            profiles[mode].allocations++;
+#endif
             sym = (symbol *) xmalloc (sizeof (symbol));
             SYMBOL_TYPE (sym) = TOKEN_VOID;
             SYMBOL_TRACED (sym) = true;
