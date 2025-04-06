@@ -29,6 +29,7 @@
 #include <c-ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <locale.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -84,9 +85,17 @@
 /* Used for version mismatch, when -R detects a frozen file it can't parse.  */
 #define EXIT_MISMATCH 63
 
-/* M4 1.4.x is not yet internationalized.  But when it is, this can be
-   redefined as gettext().  */
-#define _(STRING) STRING
+/* NLS.  */
+
+#include "gettext.h"
+#if ! ENABLE_NLS
+# undef textdomain
+# define textdomain(Domainname) /* empty */
+# undef bindtextdomain
+# define bindtextdomain(Domainname, Dirname) /* empty */
+#endif
+
+#define _(msgid) gettext (msgid)
 
 /* Various declarations.  */
 

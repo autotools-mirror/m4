@@ -59,6 +59,7 @@
 #  close-stream \
 #  closein \
 #  config-h \
+#  configmake \
 #  dirname \
 #  do-release-commit-and-tag \
 #  error \
@@ -75,6 +76,7 @@
 #  fseeko \
 #  gendocs \
 #  getopt-gnu \
+#  gettext-h \
 #  git-version-gen \
 #  gitlog-to-changelog \
 #  gnu-web-doc-update \
@@ -93,9 +95,11 @@
 #  obstack \
 #  obstack-printf-posix \
 #  progname \
+#  propername \
 #  quote \
 #  regex \
 #  rename \
+#  setlocale \
 #  sigaction \
 #  sigpipe \
 #  snprintf-posix \
@@ -138,6 +142,7 @@ gl_MODULES([
   close-stream
   closein
   config-h
+  configmake
   dirname
   do-release-commit-and-tag
   error
@@ -154,6 +159,7 @@ gl_MODULES([
   fseeko
   gendocs
   getopt-gnu
+  gettext-h
   git-version-gen
   gitlog-to-changelog
   gnu-web-doc-update
@@ -172,9 +178,11 @@ gl_MODULES([
   obstack
   obstack-printf-posix
   progname
+  propername
   quote
   regex
   rename
+  setlocale
   sigaction
   sigpipe
   snprintf-posix

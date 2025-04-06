@@ -106,7 +106,7 @@ do
 
   options=`${SED} -ne '3s/^dnl @ extra options: //p;3q' "$file"`
   ${SED} -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
-    | LC_MESSAGES=C M4PATH=$examples "$m4" -d $options - >$out 2>$err
+    | LC_MESSAGES=C LANG=C M4PATH=$examples "$m4" -d $options - >$out 2>$err
   stat=$?
 
   xstat=`${SED} -ne '2s/^dnl @ expected status: //p;2q' "$file"`

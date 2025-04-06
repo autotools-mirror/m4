@@ -83,6 +83,7 @@ if test "$gl_gcc_warnings" = yes; then
   nw="$nw -Wundef"                  # K&R is anachronistic
   nw="$nw -Wtraditional"            # K&R is anachronistic
   nw="$nw -Wlong-long"              # C90 is anachronistic
+  nw="$nw -Wvla"		    # gettext's use of VLAs is safe
   nw="$nw -Wsystem-headers"         # Don't let system headers trigger warnings
   nw="$nw -Wpadded"                 # Our structs are not packed
   nw="$nw -Wconversion"             # Too many warnings for now
@@ -221,9 +222,13 @@ AC_CONFIG_COMMANDS([stamp-h], [[test -z "$CONFIG_HEADERS" || date > stamp-h]])
 AS_CASE([$host], [*-*-os2*], [OS2_LDFLAGS="-Zargs-resp"])
 AC_SUBST([OS2_LDFLAGS])
 
+AM_GNU_GETTEXT([external], [need-formatstring-macros])
+AM_GNU_GETTEXT_VERSION([0.19.2])
+
 AC_CONFIG_FILES([Makefile
                  doc/Makefile
                  lib/Makefile
+		 po/Makefile.in
                  src/Makefile
                  tests/Makefile
                  checks/Makefile

@@ -26,15 +26,21 @@
 #include <stdarg.h>
 
 #include "c-stack.h"
+#include "configmake.h"
 #include "ignore-value.h"
 #include "progname.h"
+#include "propername.h"
 #include "version-etc.h"
 
 #ifdef DEBUG_STKOVF
 # include "assert.h"
 #endif
 
-#define AUTHORS "Rene' Seindal", "Eric Blake"
+/* TRANSLATORS: This is a non-ASCII name: The first name is (with
+   Unicode escapes) "Ren\u00e9" or (with HTML entities) "Ren&eacute;".  */
+#define AUTHORS                                                 \
+  proper_name_utf8 ("Rene' Seindal", "Ren\xC3\xA9 Seindal"),    \
+  proper_name ("Eric Blake")
 
 /* Enable sync output for /lib/cpp (-s).  */
 int sync_output = 0;
@@ -443,6 +449,9 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
 
   set_program_name (argv[0]);
   retcode = EXIT_SUCCESS;
+  setlocale (LC_ALL, "");
+  bindtextdomain (PACKAGE, LOCALEDIR);
+  textdomain (PACKAGE);
   atexit (close_stdin);
 
 #ifdef DEBUG_REGEX
