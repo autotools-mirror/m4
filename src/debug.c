@@ -284,9 +284,9 @@ trace_header (const call_info *info)
 }
 
 /* Print current tracing line starting at offset START, as returned
-   from an earlier trace_header(), then clear the obstack.  */
+   from an earlier trace_header(), then clear the obstack to END.  */
 static void
-trace_flush (unsigned int start)
+trace_flush (unsigned int start, unsigned int end)
 {
   char *base = (char *) obstack_base (&trace);
   size_t len = obstack_object_size (&trace);
@@ -297,20 +297,22 @@ trace_flush (unsigned int start)
       xfwrite (&base[start], 1, len - start, debug);
       fputc ('\n', debug);
     }
-  obstack_blank_fast (&trace, start - len);
+  obstack_blank_fast (&trace, end - len);
 }
 
 /* Do pre-argument-collection tracing for the macro call described in
    INFO.  Used from expand_macro ().  */
 void
-trace_prepre (const call_info *info)
+trace_pre (call_info *info)
 {
-  if (info->trace && (info->debug_level & DEBUG_TRACE_CALL))
+  assert (info->trace);
+  info->start = trace_header (info);
+  obstack_grow (&trace, info->name, info->name_len);
+  info->rest = obstack_object_size (&trace);
+  if (info->debug_level & DEBUG_TRACE_CALL)
     {
-      unsigned int start = trace_header (info);
-      obstack_grow (&trace, info->name, info->name_len);
       obstack_grow (&trace, " ...", 4);
-      trace_flush (start);
+      trace_flush (info->start, info->rest);
     }
 }
 
@@ -318,15 +320,15 @@ trace_prepre (const call_info *info)
    macro is actually expanded.  Used from call_macro ().  Return the
    start of the current trace, in case other traces are printed before
    this trace completes trace_post.  */
-unsigned int
-trace_pre (macro_arguments *argv)
+void
+trace_args (macro_arguments *argv)
 {
   const call_info *info = arg_info (argv);
   int trace_level = info->debug_level;
-  unsigned int start = trace_header (info);
 
-  assert (info->trace);
-  obstack_grow (&trace, ARG (0), ARG_LEN (0));
+  if (!info->trace)
+    return;
+  obstack_blank_fast (&trace, info->rest - obstack_object_size (&trace));
   if (1 < arg_argc (argv) && (trace_level & DEBUG_TRACE_ARGS))
     {
       size_t len = max_debug_argument_length;
@@ -336,16 +338,16 @@ trace_pre (macro_arguments *argv)
                  false, NULL, ", ", &len, true);
       obstack_1grow (&trace, ')');
     }
-  return start;
 }
 
 /* If requested by the trace state in INFO, format the final part of a
    trace line.  Then print all collected information from START,
    returned from a prior trace_pre().  Used from call_macro ().  */
 void
-trace_post (unsigned int start, const call_info *info)
+trace_post (const call_info *info)
 {
-  assert (info->trace);
+  if (!info->trace)
+    return;
   if (info->debug_level & DEBUG_TRACE_EXPANSION)
     {
       obstack_grow (&trace, " -> ", 4);
@@ -355,5 +357,5 @@ trace_post (unsigned int start, const call_info *info)
       if (info->debug_level & DEBUG_TRACE_QUOTE)
         obstack_grow (&trace, curr_quote.str2, curr_quote.len2);
     }
-  trace_flush (start);
+  trace_flush (info->start, info->start);
 }

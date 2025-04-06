@@ -154,6 +154,8 @@ struct call_info
   int call_id;          /* The unique sequence call id of the macro.  */
   int trace : 1;        /* True to trace this macro.  */
   int debug_level : 31; /* The debug level for tracing the macro call.  */
+  unsigned int start;   /* The start offset of the trace header.  */
+  unsigned int rest;    /* The offset after the header.  */
   const char *name;     /* The macro name.  */
   size_t name_len;      /* The length of name.  */
 };
@@ -210,9 +212,9 @@ extern bool debug_set_output (const call_info *, const char *);
 extern void debug_message (const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 1, 2));
 
-extern void trace_prepre (const call_info *);
-extern unsigned int trace_pre (macro_arguments *);
-extern void trace_post (unsigned int, const call_info *);
+extern void trace_pre (call_info *);
+extern void trace_args (macro_arguments *);
+extern void trace_post (const call_info *);
 
 
 /* File: input.c  --- lexical definitions.  */

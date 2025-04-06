@@ -575,10 +575,8 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
 void
 call_macro (symbol *sym, macro_arguments *argv, struct obstack *expansion)
 {
-  unsigned int trace_start = 0;
-
   if (argv->info->trace)
-    trace_start = trace_pre (argv);
+    trace_args (argv);
   switch (SYMBOL_TYPE (sym))
     {
     case TOKEN_FUNC:
@@ -594,7 +592,7 @@ call_macro (symbol *sym, macro_arguments *argv, struct obstack *expansion)
       abort ();
     }
   if (argv->info->trace)
-    trace_post (trace_start, argv->info);
+    trace_post (argv->info);
 }
 
 /* The macro expansion is handled by expand_macro ().  It parses the
@@ -662,7 +660,8 @@ expand_macro (symbol *sym)
   my_call_info.debug_level = debug_level;
   my_call_info.name = SYMBOL_NAME (sym);
   my_call_info.name_len = SYMBOL_NAME_LEN (sym);
-  trace_prepre (&my_call_info);
+  if (my_call_info.trace)
+    trace_pre (&my_call_info);
 
   /* Collect the arguments.  */
   argv = collect_arguments (sym, &my_call_info, stacks[level].args,
@@ -1440,6 +1439,8 @@ make_argv_ref (macro_arguments *argv, const char *argv0, size_t argv0_len,
   info->trace = (argv->info->debug_level & DEBUG_TRACE_ALL) || trace;
   info->name = argv0;
   info->name_len = argv0_len;
+  if (info->trace)
+    trace_pre (info);
   new_argv->level = argv->level;
   return new_argv;
 }
