@@ -172,22 +172,6 @@ fi
 AC_DEFINE_UNQUOTED([RENAME_OPEN_FILE_WORKS], [$M4_rename_open_works],
   [Define to 1 if a file can be renamed while open, or to 0 if not.])
 
-dnl Don't let changeword get in our way, if bootstrapping with a version of
-dnl m4 that already turned the feature on.
-m4_ifdef([changeword], [m4_undefine([changeword])])dnl
-
-AC_MSG_CHECKING([[if changeword is wanted]])
-AC_ARG_ENABLE([changeword],
-  [AS_HELP_STRING([--enable-changeword],
-     [enable -W and changeword() builtin])],
-  [if test "$enableval" = yes; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE([ENABLE_CHANGEWORD], [1],
-      [Define to 1 if the changeword(REGEXP) functionality is wanted])
-  else
-    AC_MSG_RESULT([no])
-  fi], [AC_MSG_RESULT([no])])
-
 AC_MSG_CHECKING([[which shell to use for syscmd]])
 AC_ARG_WITH([syscmd-shell],
   [AS_HELP_STRING([--with-syscmd-shell], [shell used by syscmd [/bin/sh]])],

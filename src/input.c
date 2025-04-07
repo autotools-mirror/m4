@@ -64,10 +64,6 @@
    swapping between input blocks updates the global variables
    accordingly.  */
 
-#ifdef ENABLE_CHANGEWORD
-# include "regex.h"
-#endif /* ENABLE_CHANGEWORD */
-
 /* Number of bytes where it is more efficient to inline the reference
    as a string than it is to track reference bookkeeping for those
    bytes.  */
@@ -171,23 +167,6 @@ string_pair curr_quote;
 
 /* Comment chars.  */
 string_pair curr_comm;
-
-#ifdef ENABLE_CHANGEWORD
-
-# define DEFAULT_WORD_REGEXP "[_a-zA-Z][_a-zA-Z0-9]*"
-
-/* Current regular expression for detecting words.  */
-static struct re_pattern_buffer word_regexp;
-
-/* True if changeword is not active.  */
-static bool default_word_regexp;
-
-/* Reused memory for detecting matches in word detection.  */
-static struct re_registers regs;
-
-#else /* !ENABLE_CHANGEWORD */
-# define default_word_regexp true
-#endif /* !ENABLE_CHANGEWORD */
 
 /* Track the current quote age, determined by all significant
    changequote, changecom, and changeword calls, since any one of
@@ -688,9 +667,6 @@ pop_wrapup (void)
       obstack_free (&file_names, NULL);
       obstack_free (wrapup_stack, NULL);
       free (wrapup_stack);
-#ifdef ENABLE_CHANGEWORD
-      regfree (&word_regexp);
-#endif /* ENABLE_CHANGEWORD */
       return false;
     }
 
@@ -1445,10 +1421,6 @@ input_init (void)
   curr_comm.str2 = xmemdup0 (DEF_ECOMM, 1);
   curr_comm.len2 = 1;
 
-#ifdef ENABLE_CHANGEWORD
-  set_word_regexp (NULL, user_word_regexp, SIZE_MAX);
-#endif /* ENABLE_CHANGEWORD */
-
   set_quote_age ();
 }
 
@@ -1535,59 +1507,6 @@ set_comment (const char *bc, size_t bc_len, const char *ec, size_t ec_len)
   set_quote_age ();
 }
 
-#ifdef ENABLE_CHANGEWORD
-
-/* Set the regular expression for recognizing words to REGEXP of
-   length LEN, and report errors on behalf of CALLER.  If REGEXP is
-   NULL, revert back to the default parsing rules.  If LEN is
-   SIZE_MAX, use strlen(REGEXP) instead.  */
-void
-set_word_regexp (const call_info *caller, const char *regexp, size_t len)
-{
-  const char *msg;
-  struct re_pattern_buffer new_word_regexp;
-
-  if (len == SIZE_MAX)
-    len = strlen (regexp);
-  if (len == 0
-      || (len == strlen (DEFAULT_WORD_REGEXP)
-          && !memcmp (regexp, DEFAULT_WORD_REGEXP, len)))
-    {
-      default_word_regexp = true;
-      set_quote_age ();
-      return;
-    }
-
-  /* Dry run to see whether the new expression is compilable.  */
-  init_pattern_buffer (&new_word_regexp, NULL);
-  msg = re_compile_pattern (regexp, len, &new_word_regexp);
-  regfree (&new_word_regexp);
-
-  if (msg != NULL)
-    {
-      m4_warn (0, caller, _("bad regular expression %s: %s"),
-               quotearg_style_mem (locale_quoting_style, regexp, len), msg);
-      return;
-    }
-
-  /* If compilation worked, retry using the word_regexp struct.  We
-     can't rely on struct assigns working, so redo the compilation.
-     The fastmap can be reused between compilations, and will be freed
-     by the final regfree.  */
-  if (!word_regexp.fastmap)
-    word_regexp.fastmap = xcharalloc (UCHAR_MAX + 1);
-  msg = re_compile_pattern (regexp, len, &word_regexp);
-  assert (!msg);
-  re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
-  if (re_compile_fastmap (&word_regexp))
-    assert (false);
-
-  default_word_regexp = false;
-  set_quote_age ();
-}
-
-#endif /* ENABLE_CHANGEWORD */
-
 /* Call this when changing anything that might impact the quote age,
    so that quote_age and safe_quotes will reflect the change.  */
 static void
@@ -1610,9 +1529,6 @@ set_quote_age (void)
 
      define(echo,$*)echo(a,a,a`'define(a,A)changecom(`,',`,'))
      => A,a,A (not A,A,A)
-
-     And let's not even think about the impact of changeword, since it
-     will disappear for M4 2.0.
 
      So rather than check every token for an unquoted delimiter, we
      merely encode current_quote_age to 0 when things are unsafe, and
@@ -1637,7 +1553,7 @@ set_quote_age (void)
   if (curr_quote.len1 == 1 && curr_quote.len2 == 1
       && (!*curr_quote.str1 || strchr (unsafe, *curr_quote.str1) == NULL)
       && (!*curr_quote.str2 || strchr (unsafe, *curr_quote.str2) == NULL)
-      && default_word_regexp && *curr_quote.str1 != *curr_quote.str2
+      && *curr_quote.str1 != *curr_quote.str2
       && (!curr_comm.len1
           || (*curr_comm.str1 != '(' && *curr_comm.str1 != ','
               && *curr_comm.str1 != ')'
@@ -1748,9 +1664,6 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
   int ch;
   int quote_level;
   token_type type;
-#ifdef ENABLE_CHANGEWORD
-  char *orig_text = NULL;
-#endif /* ENABLE_CHANGEWORD */
   const char *file = NULL;
   /* The obstack where token data is stored.  Generally token_stack,
      for tokens where argument collection might not use the literal
@@ -1794,7 +1707,7 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       return TOKEN_ARGV;
     }
 
-  if (default_word_regexp && (c_isalpha (ch) || ch == '_'))
+  if (c_isalpha (ch) || ch == '_')
     {
       obstack_1grow (&token_stack, ch);
       while (1)
@@ -1831,43 +1744,6 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
         }
       type = TOKEN_WORD;
     }
-
-#ifdef ENABLE_CHANGEWORD
-
-  else if (!default_word_regexp && word_regexp.fastmap[ch])
-    {
-      obstack_1grow (&token_stack, ch);
-      while (1)
-        {
-          ch = peek_input (false);
-          if (ch >= CHAR_EOF)
-            break;
-          obstack_1grow (&token_stack, ch);
-          if (re_match (&word_regexp, (char *) obstack_base (&token_stack),
-                        obstack_object_size (&token_stack), 0, &regs)
-              != (regoff_t) obstack_object_size (&token_stack))
-            {
-              obstack_blank_fast (&token_stack, -1);
-              break;
-            }
-          next_char (false, false);
-        }
-
-      TOKEN_DATA_ORIG_LEN (td) = obstack_object_size (&token_stack);
-      obstack_1grow (&token_stack, '\0');
-      orig_text = (char *) obstack_finish (&token_stack);
-      TOKEN_DATA_ORIG_TEXT (td) = orig_text;
-
-      if (regs.start[1] != -1)
-        obstack_grow (&token_stack, orig_text + regs.start[1],
-                      regs.end[1] - regs.start[1]);
-      else
-        obstack_grow (&token_stack, orig_text, regs.end[0]);
-
-      type = TOKEN_WORD;
-    }
-
-#endif /* ENABLE_CHANGEWORD */
 
   else if (MATCH (ch, curr_quote.str1, curr_quote.len1, true))
     {
@@ -2039,13 +1915,6 @@ next_token (token_data *td, int *line, struct obstack *obs, bool allow_argv,
       else
         TOKEN_DATA_TEXT (td) = NULL;
       TOKEN_DATA_QUOTE_AGE (td) = current_quote_age;
-#ifdef ENABLE_CHANGEWORD
-      if (!orig_text)
-        {
-          TOKEN_DATA_ORIG_TEXT (td) = TOKEN_DATA_TEXT (td);
-          TOKEN_DATA_ORIG_LEN (td) = TOKEN_DATA_LEN (td);
-        }
-#endif /* ENABLE_CHANGEWORD */
 #ifdef DEBUG_INPUT
       xfprintf (stderr, "next_token -> %s (%s), len %zu\n",
                 token_type_string (type), TOKEN_DATA_TEXT (td),
@@ -2111,11 +1980,7 @@ peek_token (void)
     {
       result = TOKEN_COMMENT;
     }
-  else if ((default_word_regexp && (c_isalpha (ch) || ch == '_'))
-#ifdef ENABLE_CHANGEWORD
-           || (!default_word_regexp && word_regexp.fastmap[ch])
-#endif /* ENABLE_CHANGEWORD */
-    )
+  else if (c_isalpha (ch) || ch == '_')
     {
       result = TOKEN_WORD;
     }

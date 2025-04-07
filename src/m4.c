@@ -65,11 +65,6 @@ int warning_status = 0;
 /* Artificial limit for expansion_level in macro.c.  */
 int nesting_limit = 1024;
 
-#ifdef ENABLE_CHANGEWORD
-/* User provided regexp for describing m4 words.  */
-const char *user_word_regexp = "";
-#endif
-
 /* Global catchall for any errors that should affect final error status, but
    where we try to continue execution in the meantime.  */
 int retcode;
@@ -104,7 +99,7 @@ m4_verror_at_line (bool warn, int status, int errnum, const call_info *caller,
 
   /* Sanitize MACRO, since we are turning around and using it in a
      format string.  The allocation is overly conservative, but
-     problematic macro names only occur via indir or changeword.  */
+     problematic macro names only occur via indir.  */
   if (macro && memchr (macro, '%', len))
     {
       char *p = safe_macro = xcharalloc (2 * len);
@@ -264,11 +259,6 @@ Operation modes:\n\
                                warn if macro definition matches REGEXP,\n\
                                  default %s\n\
 "), DEFAULT_MACRO_SEQUENCE);
-#ifdef ENABLE_CHANGEWORD
-      fputs (_("\
-  -W, --word-regexp=REGEXP     use REGEXP for macro name syntax\n\
-"), stdout);
-#endif
       puts ("");
       fputs (_("\
 Preprocessor features:\n\
@@ -370,9 +360,6 @@ static const struct option long_options[] = {
   {"trace", required_argument, NULL, 't'},
   {"traditional", no_argument, NULL, 'G'},
   {"undefine", required_argument, NULL, 'U'},
-#ifdef ENABLE_CHANGEWORD
-  {"word-regexp", required_argument, NULL, 'W'},
-#endif
 
   {"debugfile", optional_argument, NULL, DEBUGFILE_OPTION},
   {"warn-macro-sequence", optional_argument, NULL,
@@ -423,11 +410,7 @@ process_file (const char *name)
    behavior also handles -s between files.  Starting OPTSTRING with
    '-' forces getopt_long to hand back file names as arguments to opt
    '\1', rather than reordering the command line.  */
-#ifdef ENABLE_CHANGEWORD
-# define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:W:d::egil:o:st:"
-#else
-# define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:d::egil:o:st:"
-#endif
+#define OPTSTRING "-B:D:EF:GH:I:L:PQR:S:T:U:d::egil:o:st:"
 
 #ifdef DEBUG_REGEX
 FILE *trace_file;
@@ -614,12 +597,6 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
       case 'R':
         frozen_file_to_read = optarg;
         break;
-
-#ifdef ENABLE_CHANGEWORD
-      case 'W':
-        user_word_regexp = optarg;
-        break;
-#endif
 
       case 'd':
         if (seen_file)

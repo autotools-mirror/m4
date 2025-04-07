@@ -103,20 +103,6 @@ This is release @value{VERSION}.  It is now considered stable:  future
 releases in the 1.4.x series are only meant to fix bugs, increase speed,
 or improve documentation.  However@dots{}
 
-An experimental feature, which would improve @code{m4} usefulness,
-allows for changing the syntax for what is a @dfn{word} in @code{m4}.
-You should use:
-@comment ignore
-@example
-./configure --enable-changeword
-@end example
-@noindent
-if you want this feature compiled in.  The current implementation
-slows down @code{m4} considerably and is hardly acceptable.  In the
-future, @code{m4} 2.0 will come with a different set of new features
-that provide similar capabilities, but without the inefficiencies, so
-changeword will go away and @emph{you should not count on it}.
-
 @menu
 * Preliminaries::               Introduction and preliminaries
 * Invoking m4::                 Invoking @code{m4}
@@ -214,7 +200,6 @@ Input control
 * Dnl::                         Deleting whitespace in input
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
-* Changeword::                  Changing the lexical structure of words
 * M4wrap::                      Saving text until end of input
 
 File inclusion
@@ -714,11 +699,6 @@ handled, @pxref{Arguments}).  Providing an alternate regular
 expression can provide a useful reverse lookup feature of finding
 where a macro is defined to have a given definition.
 
-@item -W @var{regexp}
-@itemx --word-regexp=@var{regexp}
-Use @var{regexp} as an alternative syntax for macro names.  This
-experimental option will not be present in all GNU @code{m4}
-implementations (@pxref{Changeword}).
 @end table
 
 @node Preprocessor features
@@ -1588,11 +1568,6 @@ m4_eval(`1')
 Another alternative is to redefine problematic macros to a name less
 likely to cause conflicts, using @ref{Definitions}.
 
-If your version of GNU @code{m4} has the @code{changeword} feature
-compiled in, it offers far more flexibility in specifying the
-syntax of macro names, both builtin or user-defined.  @xref{Changeword},
-for more information on this experimental feature.
-
 Of course, the simplest way to prevent a name from being interpreted
 as a call to an existing macro is to quote it.  The remainder of
 this section studies a little more deeply how quoting affects macro
@@ -1838,8 +1813,7 @@ bit harder, if you are not careful to follow a consistent quoting style.
 For consistency, this manual follows the rule of thumb that each layer
 of parentheses introduces another layer of single quoting, except when
 showing the consequences of quoting rules.  This is done even when the
-quoted string cannot be a macro, such as with integers when you have not
-changed the syntax via @code{changeword} (@pxref{Changeword}).
+quoted string cannot be a macro, such as with integers.
 
 The quoting rule of thumb of one level of quoting per parentheses has a
 nice property: when a macro name appears inside parentheses, you can
@@ -4670,7 +4644,6 @@ to @code{m4}.
 * Dnl::                         Deleting whitespace in input
 * Changequote::                 Changing the quote characters
 * Changecom::                   Changing the comment delimiters
-* Changeword::                  Changing the lexical structure of words
 * M4wrap::                      Saving text until end of input
 @end menu
 
@@ -4827,8 +4800,8 @@ and one for the new quotes.
 
 Macros are recognized in preference to the begin-quote string, so if a
 prefix of @var{start} can be recognized as part of a potential macro
-name, the quoting mechanism is effectively disabled.  Unless you use
-@code{changeword} (@pxref{Changeword}), this means that @var{start}
+name, the quoting mechanism is effectively disabled.
+This means that @var{start}
 should not begin with a letter, digit, or @samp{_} (underscore).
 However, even though quoted strings are not recognized, the quote
 characters can still be discerned in macro expansion and in trace
@@ -5059,7 +5032,7 @@ comments, so if a prefix of @var{start} can be recognized as part of a
 potential macro name, or confused with a quoted string, the comment
 mechanism is effectively disabled (earlier versions of GNU M4
 favored comments, but this was inconsistent with other implementations).
-Unless you use @code{changeword} (@pxref{Changeword}), this means
+This means
 that @var{start} should not begin with a letter, digit, or @samp{_}
 (underscore), and that neither the start-quote nor the start-comment
 string should be a prefix of the other.
@@ -5155,230 +5128,6 @@ len(/*dangling comment
 ^D
 @error{}m4:stdin:2: len: end of file in comment
 @end example
-
-@node Changeword
-@section Changing the lexical structure of words
-
-@cindex lexical structure of words
-@cindex words, lexical structure of
-@cindex syntax, changing
-@cindex changing syntax
-@cindex regular expressions
-@quotation
-The macro @code{changeword} and all associated functionality is
-experimental.  It is only available if the @option{--enable-changeword}
-option was given to @command{configure}, at GNU @code{m4}
-installation
-time.  The functionality will go away in the future, to be replaced by
-other new features that are more efficient at providing the same
-capabilities.  @emph{Do not rely on it}.  Please direct your comments
-about it the same way you would do for bugs.
-@end quotation
-
-A file being processed by @code{m4} is split into quoted strings, words
-(potential macro names) and simple tokens (any other single character).
-Initially a word is defined by the following regular expression:
-
-@comment ignore
-@example
-[_a-zA-Z][_a-zA-Z0-9]*
-@end example
-
-Using @code{changeword}, you can change this regular expression:
-
-@deffn {Optional builtin} changeword (@var{regex})
-Changes the regular expression for recognizing macro names to be
-@var{regex}.  If @var{regex} is empty, use
-@samp{[_a-zA-Z][_a-zA-Z0-9]*}.  @var{regex} must obey the constraint
-that every prefix of the desired final pattern is also accepted by the
-regular expression.  If @var{regex} contains grouping parentheses, the
-macro invoked is the portion that matched the first group, rather than
-the entire matching string.
-
-The expansion of @code{changeword} is void.
-The macro @code{changeword} is recognized only with parameters.
-@end deffn
-
-Relaxing the lexical rules of @code{m4} might be useful (for example) if
-you wanted to apply translations to a file of numbers:
-
-@example
-ifdef(`changeword', `', `errprint(` skipping: no changeword support
-')m4exit(`77')')dnl
-changeword(`[_a-zA-Z0-9]+')
-@result{}
-define(`1', `0')1
-@result{}0
-@end example
-
-Tightening the lexical rules is less useful, because it will generally
-make some of the builtins unavailable.  You could use it to prevent
-accidental call of builtins, for example:
-
-@example
-ifdef(`changeword', `', `errprint(` skipping: no changeword support
-')m4exit(`77')')dnl
-define(`_indir', defn(`indir'))
-@result{}
-changeword(`_[_a-zA-Z0-9]*')
-@result{}
-esyscmd(`foo')
-@result{}esyscmd(foo)
-_indir(`esyscmd', `echo hi')
-@result{}hi
-@result{}
-@end example
-
-Because @code{m4} constructs its words a character at a time, there
-is a restriction on the regular expressions that may be passed to
-@code{changeword}.  This is that if your regular expression accepts
-@samp{foo}, it must also accept @samp{f} and @samp{fo}.
-
-@example
-ifdef(`changeword', `', `errprint(` skipping: no changeword support
-')m4exit(`77')')dnl
-define(`foo
-', `bar
-')
-@result{}
-dnl This example wants to recognize changeword, dnl, and `foo\n'.
-dnl First, we check that our regexp will match.
-regexp(`changeword', `[cd][a-z]*\|foo[
-]')
-@result{}0
-regexp(`foo
-', `[cd][a-z]*\|foo[
-]')
-@result{}0
-regexp(`f', `[cd][a-z]*\|foo[
-]')
-@result{}-1
-foo
-@result{}foo
-changeword(`[cd][a-z]*\|foo[
-]')
-@result{}
-dnl Even though `foo\n' matches, we forgot to allow `f'.
-foo
-@result{}foo
-changeword(`[cd][a-z]*\|fo*[
-]?')
-@result{}
-dnl Now we can call `foo\n'.
-foo
-@result{}bar
-@end example
-
-@ignore
-@comment One more test of including newline in a macro name; but this
-@comment does not need to be displayed in the manual.  This ensures
-@comment that line numbering is correct when dnl cuts across include
-@comment file boundaries, and when __file__ or __line__ is the last
-@comment token in an include file.
-
-@example
-ifdef(`changeword', `', `errprint(` skipping: no changeword support
-')m4exit(`77')')dnl
-define(`bar
-', defn(`dnl'))dnl
-define(`baz', `dnl
-include(`foo') ignored
-dnl')dnl
-changeword(`\([_a-zA-Z][_a-zA-Z0-9]*\|bar
-\)')
-@result{}
-__file__:__line__
-@result{}stdin:10
-include(`foo') ignored
-__file__:__line__
-@result{}stdin:12
-baz ignored
-__file__:__line__
-@result{}stdin:14
-define(`bar
-', defn(`__file__'))
-@result{}
-include(`foo')
-@result{}examples/foo
-define(`bar
-', defn(`__line__'))
-@result{}
-include(`foo')
-@result{}1
-__file__:__line__
-@result{}stdin:21
-@end example
-@end ignore
-
-@code{changeword} has another function.  If the regular expression
-supplied contains any grouped subexpressions, then text outside
-the first of these is discarded before symbol lookup.  So:
-
-@example
-ifdef(`changeword', `', `errprint(` skipping: no changeword support
-')m4exit(`77')')dnl
-ifdef(`__unix__', ,
-      `errprint(` skipping: syscmd does not have unix semantics
-')m4exit(`77')')dnl
-changecom(`/*', `*/')dnl
-define(`foo', `bar')dnl
-changeword(`#\([_a-zA-Z0-9]*\)')
-@result{}
-#esyscmd(`echo foo \#foo')
-@result{}foo bar
-@result{}
-@end example
-
-@code{m4} now requires a @samp{#} mark at the beginning of every
-macro invocation, so one can use @code{m4} to preprocess plain
-text without losing various words like @samp{divert}.
-
-In @code{m4}, macro substitution is based on text, while in @TeX{}, it
-is based on tokens.  @code{changeword} can throw this difference into
-relief.  For example, here is the same idea represented in @TeX{} and
-@code{m4}.  First, the @TeX{} version:
-
-@comment ignore
-@example
-\def\a@{\message@{Hello@}@}
-\catcode`\@@=0
-\catcode`\\=12
-@@a
-@@bye
-@result{}Hello
-@end example
-
-@noindent
-Then, the @code{m4} version:
-
-@example
-ifdef(`changeword', `', `errprint(` skipping: no changeword support
-')m4exit(`77')')dnl
-define(`a', `errprint(`Hello')')dnl
-changeword(`@@\([_a-zA-Z0-9]*\)')
-@result{}
-@@a
-@result{}errprint(Hello)
-@end example
-
-In the @TeX{} example, the first line defines a macro @code{a} to
-print the message @samp{Hello}.  The second line defines @key{@@} to
-be usable instead of @key{\} as an escape character.  The third line
-defines @key{\} to be a normal printing character, not an escape.
-The fourth line invokes the macro @code{a}.  So, when @TeX{} is run
-on this file, it displays the message @samp{Hello}.
-
-When the @code{m4} example is passed through @code{m4}, it outputs
-@samp{errprint(Hello)}.  The reason for this is that @TeX{} does
-lexical analysis of macro definition when the macro is @emph{defined}.
-@code{m4} just stores the text, postponing the lexical analysis until
-the macro is @emph{used}.
-
-You should note that using @code{changeword} will slow @code{m4} down
-by a factor of about seven, once it is changed to something other
-than the default regular expression.  You can invoke @code{changeword}
-with the empty string to restore the default word definition, and regain
-the parsing speed.
 
 @node M4wrap
 @section Saving text until end of input
@@ -8079,7 +7828,7 @@ $ @kbd{m4 -R file3.m4f file4.m4}
 
 Some care is necessary because not every effort has been made for
 this to work in all cases.  In particular, the trace attribute of
-macros is not handled, nor the current setting of @code{changeword}.
+macros is not handled.
 Currently, @code{m4wrap} and @code{sysval} also have problems.
 Also, interactions for some options of @code{m4}, being used in one call
 and not in the next, have not been fully analyzed yet.  On the other
@@ -8219,8 +7968,8 @@ diversion 0 is current.
 Defines, through @code{pushdef}, a definition for @var{str1}
 expanding to the function whose builtin name is @var{str2}.  If the
 builtin does not exist (for example, if the frozen file was produced by
-a copy of @code{m4} compiled with changeword support, but the version
-of @code{m4} reloading was compiled without it), the reload is silent,
+a copy of @code{m4} 1.4.x compiled with the now-withdrawn experimental
+changeword support), the reload is silent,
 but any subsequent use of the definition of @var{str1} will result in
 a warning.  This directive may appear more than once for the same name,
 and its order, along with @samp{T}, is important.  If omitted, you will

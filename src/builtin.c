@@ -45,9 +45,6 @@ DECLARE (m4___program__);
 DECLARE (m4_builtin);
 DECLARE (m4_changecom);
 DECLARE (m4_changequote);
-#ifdef ENABLE_CHANGEWORD
-DECLARE (m4_changeword);
-#endif
 DECLARE (m4_debugmode);
 DECLARE (m4_debugfile);
 DECLARE (m4_decr);
@@ -99,9 +96,6 @@ static builtin const builtin_tab[] = {
   {"builtin", true, true, true, m4_builtin},
   {"changecom", false, false, false, m4_changecom},
   {"changequote", false, false, false, m4_changequote},
-#ifdef ENABLE_CHANGEWORD
-  {"changeword", true, false, true, m4_changeword},
-#endif
   {"debugmode", true, false, false, m4_debugmode},
   {"debugfile", true, false, false, m4_debugfile},
   {"decr", false, false, true, m4_decr},
@@ -1417,8 +1411,8 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc,
 }
 
 /* This section contains various macros, which does not fall into any
-   specific group.  These are "dnl", "shift", "changequote", "changecom"
-   and "changeword".  */
+   specific group.  These are "dnl", "shift", "changequote", and
+   "changecom".  */
 
 /* Delete all subsequent whitespace from input.  The function
    skip_line () lives in input.c.  */
@@ -1466,23 +1460,6 @@ m4_changecom (struct obstack *obs MAYBE_UNUSED, int argc,
   set_comment ((argc >= 2) ? ARG (1) : NULL, ARG_LEN (1),
                (argc >= 3) ? ARG (2) : NULL, ARG_LEN (2));
 }
-
-#ifdef ENABLE_CHANGEWORD
-
-/* Change the regular expression used for breaking the input into
-   words.  The function set_word_regexp () lives in input.c.  */
-static void
-m4_changeword (struct obstack *obs MAYBE_UNUSED, int argc,
-               macro_arguments *argv)
-{
-  const call_info *me = arg_info (argv);
-
-  if (bad_argc (me, argc, 1, 1))
-    return;
-  set_word_regexp (me, ARG (1), ARG_LEN (1));
-}
-
-#endif /* ENABLE_CHANGEWORD */
 
 /* This section contains macros for inclusion of other files -- "include"
    and "sinclude".  This differs from bringing back diversions, in that
@@ -2419,8 +2396,7 @@ m4_patsubst (struct obstack *obs, int argc, macro_arguments *argv)
 /* Finally, a placeholder builtin.  This builtin is not installed by
    default, but when reading back frozen files, this is associated
    with any builtin we don't recognize (for example, if the frozen
-   file was created with a changeword capable m4, but is then loaded
-   by a different m4 that does not support changeword).  This way, we
+   file was created with a changeword capable m4 1.4.x).  This way, we
    can keep 'm4 -R' quiet in the common case that the user did not
    know or care about the builtin when the frozen file was created,
    while still flagging it as a potential error if an attempt is made

@@ -138,9 +138,6 @@ extern size_t max_debug_argument_length;        /* -l */
 extern int suppress_warnings;   /* -Q */
 extern int warning_status;      /* -E */
 extern int nesting_limit;       /* -L */
-#ifdef ENABLE_CHANGEWORD
-extern const char *user_word_regexp;    /* -W */
-#endif
 
 /* Error handling.  */
 
@@ -319,14 +316,6 @@ struct token_data
              zero, then this string potentially contains content that
              might change the parse on rescan.  Ignored for 0 len.  */
           unsigned int quote_age;
-#ifdef ENABLE_CHANGEWORD
-          /* If changeword is in effect, and contains a () group, then
-             this contains the entire token, while text contains the
-             portion that matched the () group to form a macro name.
-             Otherwise, this field is unused.  */
-          const char *original_text;
-          size_t original_len; /* Length of original_text.  */
-#endif
         }
       u_t;
       builtin_func *func;
@@ -349,10 +338,6 @@ struct token_data
 #define TOKEN_DATA_LEN(Td)              ((Td)->u.u_t.len)
 #define TOKEN_DATA_TEXT(Td)             ((Td)->u.u_t.text)
 #define TOKEN_DATA_QUOTE_AGE(Td)        ((Td)->u.u_t.quote_age)
-#ifdef ENABLE_CHANGEWORD
-# define TOKEN_DATA_ORIG_TEXT(Td)       ((Td)->u.u_t.original_text)
-# define TOKEN_DATA_ORIG_LEN(Td)        ((Td)->u.u_t.original_len)
-#endif
 #define TOKEN_DATA_FUNC(Td)             ((Td)->u.func)
 
 typedef enum token_type token_type;
@@ -393,9 +378,6 @@ extern string_pair curr_quote;
 
 extern void set_quotes (const char *, size_t, const char *, size_t);
 extern void set_comment (const char *, size_t, const char *, size_t);
-#ifdef ENABLE_CHANGEWORD
-extern void set_word_regexp (const call_info *, const char *, size_t);
-#endif
 extern unsigned int quote_age (void);
 extern bool safe_quotes (void);
 extern const string_pair *quote_cache (struct obstack *, unsigned int,

@@ -50,12 +50,6 @@ with a default of `/bin/sh'.  If that default is inappropriate, you
 can use `./configure --with-syscmd-shell=location' to specify the
 shell to use.
 
-By using `./configure --enable-changeword', you get an experimental
-feature which allows for changing the syntax of what is a "word" in
-`m4'.  This feature will not be present in m4 2.0, but will be
-replaced by other new features which provide similar capability, so
-do not count on it.
-
 Send bug reports to `bug-m4@gnu.org'.  A bug report is an adequate
 description of the problem: your input, what you expected, what you got,
 and why this is wrong.  Diffs are welcome, but they only describe a

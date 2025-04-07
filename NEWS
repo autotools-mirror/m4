@@ -16,6 +16,10 @@ GNU M4 NEWS - User visible changes.
 ** Remove the undocumented command-line option '-N', as no one complained
    about the assertion failure regression that it introduced in 1.4.7.
 
+** Remove the experimental `changeword` builtin, as it causes severe
+   performance penalties and most distros did not enable it.  What's more,
+   it had many years of being able to trigger a crash if used incorrectly.
+
 ** The `-o'/`--error-output' command-line options, which were replaced by
    `--debugfile' in 1.4.7, now issue a deprecation warning.  This warning
    harmlessly triggers with versions of Autoconf 2.60 and earlier, but can
@@ -91,7 +95,7 @@ GNU M4 NEWS - User visible changes.
    is requested via `traceon' or the command-line option `-t'.  Previously,
    it was impossible to trace macro names such as `foo-bar' which could
    only be invoked indirectly, without relying on global tracing (such as
-   with `debugmode(`t')') or the experimental `changeword'.
+   with `debugmode(`t')').
 
 ** Aspects of tracing output that were previously undocumented have been
    slightly altered, and the effect of the builtin `debugmode' on trace
