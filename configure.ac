@@ -17,12 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-AC_PREREQ([2.64])
+AC_PREREQ([2.69])
 AC_INIT([GNU M4], m4_esyscmd([build-aux/git-version-gen .tarball-version]),
   [bug-m4@gnu.org])
 AC_CONFIG_AUX_DIR([build-aux])
 
-AM_INIT_AUTOMAKE([1.11.6 dist-bzip2 dist-xz color-tests parallel-tests
+AM_INIT_AUTOMAKE([1.14 dist-bzip2 dist-xz color-tests parallel-tests
 silent-rules subdir-objects gnu])
 AM_SILENT_RULES([yes]) # make --enable-silent-rules the default.
 
