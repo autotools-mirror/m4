@@ -408,7 +408,7 @@ addressed some long standing bugs in the venerable 1.4 release.  Then in
 GNU @code{m4} 1.4 that were floating around the net and
 released 1.4.3 and 1.4.4.  And in 2006, Eric Blake joined the team and
 prepared patches for the release of 1.4.5, with subsequent releases
-through intervening years, as recent as 1.4.18 in 2016.
+through intervening years, as recent as 1.4.20 in 2025.
 
 Additionally, in 2008, Eric rewrote the scanning engine to reduce
 recursive evaluation from quadratic to linear complexity.  This was
