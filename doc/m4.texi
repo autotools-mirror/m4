@@ -5761,8 +5761,14 @@ Searching for regular expressions is done with the builtin
 
 @deffn Builtin regexp (@var{string}, @var{regexp}, @ovar{replacement})
 Searches for @var{regexp} in @var{string}.  The syntax for regular
-expressions is the same as in GNU Emacs, which is similar to
-BRE, Basic Regular Expressions in POSIX.
+expressions is closest to older GNU Emacs (grouping via @samp{\(} and
+@samp{\)}, alternation via @samp{\|}, one-or-more matching via @samp{+},
+zero-or-one matching via @samp{?}), although for backwards compatibility
+reasons, M4 1.4.x does not enable intervals (that is, both @samp{@{} and
+@samp{\@{} match a literal @samp{@{}), nor character classes (that is,
+@samp{[[:alpha:]]} matches a sequence of one of six bytes followed by a
+literal close bracket, rather than all letters, the same as
+@samp{[[ahlp:]} followed by @samp{]}).
 @ifnothtml
 @xref{Regexps, , Syntax of Regular Expressions, emacs, The GNU Emacs
 Manual}.
@@ -5772,8 +5778,10 @@ See
 @uref{https://www.gnu.org/@/software/@/emacs/@/manual/@/emacs.html#Regexps,
 Syntax of Regular Expressions} in the GNU Emacs Manual.
 @end ifhtml
-Support for ERE, Extended Regular Expressions is not
-available, but will be added in GNU M4 2.0.
+Support for intervals, character classes, non-greedy matches, or even
+alternative regular expression syntax (such as POSIX Basic or Extended
+Regular Expressions) are likely to be added in a future version of GNU
+M4.
 
 If @var{replacement} is omitted, @code{regexp} expands to the index of
 the first match of @var{regexp} in @var{string}.  If @var{regexp} does
@@ -5987,7 +5995,7 @@ Global substitution in a string is done by @code{patsubst}:
 @deffn Builtin patsubst (@var{string}, @var{regexp}, @ovar{replacement})
 Searches @var{string} for matches of @var{regexp}, and substitutes
 @var{replacement} for each match.  The syntax for regular expressions
-is the same as in GNU Emacs (@pxref{Regexp}).
+is the same as in the @code{regexp} builtin (@pxref{Regexp}).
 
 The parts of @var{string} that are not covered by any match of
 @var{regexp} are copied to the expansion.  Whenever a match is found, the
