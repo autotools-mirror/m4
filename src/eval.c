@@ -82,7 +82,7 @@ typedef enum eval_error
 eval_error;
 
 static eval_error primary (int32_t *);
-static eval_error parse_expr (int32_t *, unsigned);
+static eval_error parse_expr (int32_t *, eval_error, unsigned);
 
 /*--------------------.
 | Lexical functions.  |
@@ -303,7 +303,6 @@ static eval_error
 primary (int32_t *v1)
 {
   eval_error er;
-  eval_error er2;
   int32_t v2;
 
   switch (eval_lex (v1))
@@ -314,12 +313,10 @@ primary (int32_t *v1)
 
       /* Parenthesis */
     case LEFTP:
-      if ((er = primary (v1)) >= SYNTAX_ERROR)
+      er = primary (v1);
+      er = parse_expr (v1, er, 1);
+      if (er >= SYNTAX_ERROR)
         return er;
-      if ((er2 = parse_expr (v1, 1)) >= SYNTAX_ERROR)
-        return er2;
-      if (er == NO_ERROR)
-        er = er2;
       switch (eval_lex (&v2))
         {
         case ERROR:
@@ -362,30 +359,29 @@ primary (int32_t *v1)
 
 /* Parse binary operators with at least MIN_PREC precedence.  */
 static eval_error
-parse_expr (int32_t *v1, unsigned min_prec)
+parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
 {
   eval_token et;
   eval_token et2;
-  eval_error er = NO_ERROR;
   eval_error er2;
   int32_t v2;
   int32_t v3;
   uint32_t u1;
 
+  if (er >= SYNTAX_ERROR)
+    return er;
   et = eval_lex (&v2);
   while (et / 10 >= min_prec)
     {
-      if ((er = primary (&v2)) >= SYNTAX_ERROR)
-        return er;
+      if ((er2 = primary (&v2)) >= SYNTAX_ERROR)
+        return er2;
       et2 = eval_lex (&v3);
       /* Handle binary operators of higher precedence or right-associativity */
       while (et2 / 10 > et / 10 || et2 == EXPONENT)
         {
           eval_undo ();
-          if ((er2 = parse_expr (&v2, et2 / 10)) >= SYNTAX_ERROR)
+          if ((er2 = parse_expr (&v2, er2, et2 / 10)) >= SYNTAX_ERROR)
             return er2;
-          if (er == NO_ERROR)
-            er = er2;
           et2 = eval_lex (&v3);
         }
       /* Reduce the two values by the given binary operator */
@@ -487,20 +483,15 @@ Warning: recommend ==, not =, for equality operator")));
 
           /* Implement short-circuiting of valid syntax.  */
         case LAND:
-          if (er == NO_ERROR)
-            *v1 = *v1 && v2;
-          else if (*v1 == 0)
-            er = NO_ERROR;
+          if (!*v1)
+            er2 = NO_ERROR;
+          *v1 = *v1 && v2;
           break;
 
         case LOR:
-          if (er == NO_ERROR)
-            *v1 = *v1 || v2;
-          else if (*v1 != 0)
-            {
-              *v1 = 1;
-              er = NO_ERROR;
-            }
+          if (*v1)
+            er2 = NO_ERROR;
+          *v1 = *v1 || v2;
           break;
 
         default:
@@ -508,6 +499,8 @@ Warning: recommend ==, not =, for equality operator")));
                     "INTERNAL ERROR: unexpected operator in evaluate ()"));
           abort ();
         }
+      if (er == NO_ERROR)
+        er = er2;
       et = et2;
     }
 
@@ -526,8 +519,7 @@ evaluate (const char *expr, int32_t *val)
 
   eval_init_lex (expr);
   err = primary (val);
-  if (err == NO_ERROR)
-    err = parse_expr (val, 1);
+  err = parse_expr (val, err, 1);
 
   if (err == NO_ERROR && *eval_text != '\0')
     {
