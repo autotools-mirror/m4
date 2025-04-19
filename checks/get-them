@@ -60,7 +60,7 @@ BEGIN {
   status = 0;
   options = "";
   xout = "";
-  xout = "";
+  xerr = "";
   next;
 }
 
