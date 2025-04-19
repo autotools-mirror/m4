@@ -9,7 +9,7 @@
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2019, 2021, 2023-2024 Bootstrap Authors
+# Copyright (C) 2010-2019, 2021, 2023-2025 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
@@ -235,7 +235,7 @@ scriptversion=2019-02-19.15; # UTC
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2004-2019, 2021, 2023-2024 Bootstrap Authors
+# Copyright (C) 2004-2019, 2021, 2023-2025 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
@@ -1699,7 +1699,7 @@ func_lt_ver ()
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2019, 2021, 2023-2024 Bootstrap Authors
+# Copyright (C) 2010-2019, 2021, 2023-2025 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
@@ -2384,7 +2384,7 @@ func_version ()
 # This is free software.  There is NO warranty; not even for
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
-# Copyright (C) 2010-2019, 2021, 2023-2024 Bootstrap Authors
+# Copyright (C) 2010-2019, 2021, 2023-2025 Bootstrap Authors
 #
 # This file is dual licensed under the terms of the MIT license
 # <https://opensource.org/licenses/MIT>, and GPL version 2 or later
