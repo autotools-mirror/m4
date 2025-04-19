@@ -127,6 +127,20 @@ if test "$gl_gcc_warnings" = yes; then
   ])
 fi
 
+# Git tends to change the mtime of files according to when you clone or
+# checkout a different commit, rather than the time the commit was created.
+# But for reproducible builds, we want the generated doc/version.texi to
+# reflect the timestamp of the commit, not when git was used.
+AC_MSG_CHECKING([for timestamps of last git commit])
+st_touch=skipped
+if test -e "$srcdir"/.git && command -v git > /dev/null; then
+  if st_touch=$(env TZ=UTC0 git log -1 --format=%cd \
+             --date=format-local:%Y%m%d%H%M.%S); then
+    env TZ=UTC0 touch -m -t "$st_touch" "$srcdir"/doc/$PACKAGE.texi
+  fi
+fi
+AC_MSG_RESULT(touch $st_touch)
+
 # Tandem/NSK is broken - it has 'long long int' but not
 # 'unsigned long long int', which confuses assumptions made by gnulib.
 # Simply pretend that neither type exists if both do not work.
