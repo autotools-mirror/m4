@@ -6978,8 +6978,9 @@ eval(`2 && (1 % 0)')
 As a GNU extension, the operator @samp{**} performs integral
 exponentiation.  The operator is right-associative, and if evaluated,
 the exponent must be non-negative, and at least one of the arguments
-must be non-zero, or a warning is issued.  Also, the C operator
-@samp{?:} is supported.
+must be non-zero, or a warning is issued.  Also, the ternary C operator
+@samp{?:} is supported, including the GNU extension of reusing the
+non-zero value of the left side if the middle term is empty.
 
 @example
 eval(`2 ** 3 ** 2')
@@ -7009,6 +7010,8 @@ eval(`1 ? 2 ? 3 : 4 : 5')
 eval(`1/0 ? 2 : 3')
 @error{}m4:stdin:12: warning: eval: divide by zero: '1/0 ? 2 : 3'
 @result{}
+eval(`2 ?: 3')
+@result{}2
 @end example
 
 Within @var{expression}, (but not @var{radix} or @var{width}), numbers

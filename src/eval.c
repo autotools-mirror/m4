@@ -393,7 +393,21 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
   et = eval_lex (&v2);
   while (et / 10 >= min_prec)
     {
-      if ((er2 = primary (&v2)) >= SYNTAX_ERROR)
+      if (et == QUESTION)
+        {
+          et2 = eval_lex (&v2);
+          eval_undo ();
+          if (et2 == COLON)
+            {
+              v2 = *v1;
+              er2 = er;
+            }
+          else
+            er2 = primary (&v2);
+        }
+      else
+        er2 = primary (&v2);
+      if (er2 >= SYNTAX_ERROR)
         return er2;
       et2 = eval_lex (&v3);
       /* Handle binary operators of higher precedence or right-associativity */
