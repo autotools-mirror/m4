@@ -1125,11 +1125,13 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   int min = 1;
   const char *s;
   const char *e;
+  const char *expr = ARG (1);
+  const char *base = ARG (2);
 
   if (bad_argc (argv[0], argc, 2, 4))
     return;
 
-  if (*ARG (2) && !numeric_arg (argv[0], ARG (2), &radix))
+  if (*base && !numeric_arg (argv[0], base, &radix))
     return;
 
   if (radix < 1 || radix > 36)
@@ -1148,10 +1150,10 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
       return;
     }
 
-  if (!*ARG (1))
+  if (!*expr)
     M4ERROR ((warning_status, 0,
               _("empty string treated as 0 in builtin `%s'"), ARG (0)));
-  else if (evaluate (ARG (1), &value))
+  else if (evaluate (expr, &value))
     return;
 
   if (radix == 1)
@@ -1274,25 +1276,26 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
   else
     for (i = 1; i < argc; i++)
       {
-        file = strtol (ARG (i), &endp, 10);
-        if (*endp == '\0' && !c_isspace (*ARG (i)))
+        const char *arg = ARG (i);
+        file = strtol (arg, &endp, 10);
+        if (*endp == '\0' && !c_isspace (*arg))
           insert_diversion (file);
         else if (no_gnu_extensions)
           M4ERROR ((warning_status, 0,
                     _("non-numeric argument to builtin `%s'"), ARG (0)));
         else
           {
-            fp = m4_path_search (ARG (i), false, NULL);
+            fp = m4_path_search (arg, false, NULL);
             if (fp != NULL)
               {
                 insert_file (fp);
                 if (fclose (fp) == EOF)
                   M4ERROR ((warning_status, errno,
-                            _("error undiverting `%s'"), ARG (i)));
+                            _("error undiverting `%s'"), arg));
               }
             else
               M4ERROR ((warning_status, errno,
-                        _("cannot undivert `%s'"), ARG (i)));
+                        _("cannot undivert `%s'"), arg));
           }
       }
 }
@@ -1392,16 +1395,17 @@ include (int argc, token_data **argv, bool silent)
 {
   FILE *fp;
   char *name;
+  const char *arg = ARG (1);
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  fp = m4_path_search (ARG (1), false, &name);
+  fp = m4_path_search (arg, false, &name);
   if (fp == NULL)
     {
       if (!silent)
         {
-          M4ERROR ((warning_status, errno, _("cannot open `%s'"), ARG (1)));
+          M4ERROR ((warning_status, errno, _("cannot open `%s'"), arg));
           retcode = EXIT_FAILURE;
         }
       return;
@@ -1697,6 +1701,7 @@ m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
   int new_debug_level;
   int change_flag;
+  const char *str = ARG (1);
 
   if (bad_argc (argv[0], argc, 1, 2))
     return;
@@ -1705,20 +1710,20 @@ m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
     debug_level = 0;
   else
     {
-      if (ARG (1)[0] == '+' || ARG (1)[0] == '-')
+      if (str[0] == '+' || str[0] == '-')
         {
-          change_flag = ARG (1)[0];
-          new_debug_level = debug_decode (ARG (1) + 1);
+          change_flag = str[0];
+          new_debug_level = debug_decode (str + 1);
         }
       else
         {
           change_flag = 0;
-          new_debug_level = debug_decode (ARG (1));
+          new_debug_level = debug_decode (str);
         }
 
       if (new_debug_level < 0)
         M4ERROR ((warning_status, 0,
-                  _("Debugmode: bad debug flags: `%s'"), ARG (1)));
+                  _("Debugmode: bad debug flags: `%s'"), str));
       else
         {
           switch (change_flag)
