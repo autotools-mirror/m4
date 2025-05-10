@@ -2864,7 +2864,7 @@ test extract-trace = "$progname" && func_main "$@"
 # End:
 
 # Set a version string for *this* script.
-scriptversion=2019-03-22.11; # UTC
+scriptversion=2025-04-22.21; # UTC
 
 
 ## ------------------- ##
@@ -4260,7 +4260,7 @@ func_require_gnulib_submodule ()
 
         shallow=
         test -n "$gnulib_clone_since" && \
-            $GIT clone -h 2>&1 |func_grep_q -- --shallow-since \
+            $GIT clone -h 2>&1 |func_grep_q shallow-since \
             && shallow="--shallow-since=$gnulib_clone_since"
 
         func_show_eval "$GIT clone $shallow '$gnulib_url' '$gnulib_path'" \
