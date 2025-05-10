@@ -1,6 +1,6 @@
 GNU M4 NEWS - User visible changes.
 
-* Noteworthy changes in release 1.4.19b (2025-??-??) [beta]
+* Noteworthy changes in release ?.? (????-??-??) [?]
 
 ** Fix a bug in the `eval' builtin where it does not suppress warnings
    about division by zero that occurs within a more complex expression on
