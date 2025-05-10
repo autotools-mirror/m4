@@ -1,5 +1,8 @@
 GNU M4 NEWS - User visible changes.
 
+* Noteworthy changes in release ?.? (????-??-??) [?]
+
+
 * Noteworthy changes in release 1.4.20 (2025-05-10) [stable]
 
 ** Fix a bug in the `eval' builtin where it does not suppress warnings
