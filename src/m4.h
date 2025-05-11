@@ -357,6 +357,7 @@ extern void append_macro (struct obstack *, builtin_func *, token_chain **,
 extern void push_macro (struct obstack *, builtin_func *);
 extern struct obstack *push_string_init (const char *, int);
 extern bool push_token (token_data *, int, bool);
+extern void push_quote_wrapper (void);
 extern void push_string_finish (void);
 extern struct obstack *push_wrapup_init (const call_info *, token_chain ***);
 extern void push_wrapup_finish (void);

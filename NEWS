@@ -77,6 +77,9 @@ GNU M4 NEWS - User visible changes.
    Also, the position of `-d' with respect to files on the command line is
    now significant.
 
+** A new `qindir' builtin is added, similar to `indir', but where the
+   output is quoted rather than rescanned for further macro expansion.
+
 ** A new predefined text macro, `__m4_version__', expands to the unquoted
    version number of M4, if GNU extensions are enabled.  While you should
    generally favor feature tests over version number checks, this macro can
