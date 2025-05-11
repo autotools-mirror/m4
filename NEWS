@@ -68,14 +68,19 @@ GNU M4 NEWS - User visible changes.
 ** The `-d'/`--debug' command-line option now understands `-' and `+'
    modifiers, the way the builtin `debugmode' has always done; this allows
    `-d-V' to disable prior debug settings from the command line, similar to
-   using the builtin `debugmode' without arguments.  The option
+   using the builtin `debugmode' without arguments.  The mode string can
+   now contain `-' or `+' at more than just the first byte.  The option
    `--debugmode' is added as an alias for `-d'.  The new flag `d' is added
    to control whether dereferencing an undefined macro causes a warning.
    The new flag `o' is added to control whether `dumpdef' outputs to stderr
    or the current `debugfile' location.  When the command line option is
-   given the empty string, the mode is treated as `+adeq' instead of `aeq'.
+   given the empty string, the mode is treated as `adeq' instead of `aeq'.
    Also, the position of `-d' with respect to files on the command line is
    now significant.
+
+** The `debugmode' builtin (but not the `-d' command line option) now
+   understands an argument of "?" as a request to expand to a quoted string
+   describing the current debug flag settings.
 
 ** A new `qindir' builtin is added, similar to `indir', but where the
    output is quoted rather than rescanned for further macro expansion.

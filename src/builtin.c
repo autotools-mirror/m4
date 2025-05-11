@@ -1794,10 +1794,11 @@ m4_traceoff (struct obstack *obs MAYBE_UNUSED, int argc,
 
 /* On-the-fly control of the format of the tracing output.  It takes
    one argument, which is a character string like that given to the -d
-   option, or none in which case the debug_level is zeroed.  */
+   option, or none in which case the debug_level is zeroed.  In
+   addition to the strings accepted by -d, a single argument of "?"
+   results in a quoted representation of the current flag setting.  */
 static void
-m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc,
-              macro_arguments *argv)
+m4_debugmode (struct obstack *obs, int argc, macro_arguments *argv)
 {
   const call_info *me = arg_info (argv);
   const char *str = ARG (1);
@@ -1807,6 +1808,8 @@ m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc,
 
   if (argc == 1)
     debug_level = 0;
+  else if (len == 1 && *str == '?')
+    debug_dump (obs);
   else if (debug_decode (str, len) < 0)
     m4_warn (0, me, _("bad debug flags: %s"),
              quotearg_style_mem (locale_quoting_style, str, len));

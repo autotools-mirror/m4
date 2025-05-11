@@ -206,6 +206,7 @@ extern FILE *debug;
 
 extern void debug_init (void);
 extern int debug_decode (const char *, size_t);
+extern void debug_dump (struct obstack *obs);
 extern void debug_flush_files (void);
 extern bool debug_set_output (const call_info *, const char *);
 

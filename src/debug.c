@@ -40,6 +40,68 @@ debug_init (void)
   obstack_init (&trace);
 }
 
+/* Dump the current set of debug flags into OBS, in a way that can be
+   be passed back to debugmode to restore that state.  */
+void
+debug_dump (struct obstack *obs)
+{
+  int i;
+
+  obstack_grow (obs, curr_quote.str1, curr_quote.len1);
+
+#define DEBUG_DUMP(bit, ch)               \
+  if (!(debug_level & bit) == (i != '+')) \
+    obstack_1grow (obs, ch)
+
+  /* Both ASCII and EBCDIC sort '+' before '-'.  */
+  for (i = '+'; i <= '-'; i += '-' - '+') {
+    obstack_1grow (obs, i);
+    DEBUG_DUMP (DEBUG_TRACE_ARGS, 'a');
+    DEBUG_DUMP (DEBUG_TRACE_CALL, 'c');
+    DEBUG_DUMP (DEBUG_TRACE_DEREF, 'd');
+    DEBUG_DUMP (DEBUG_TRACE_EXPANSION, 'e');
+    DEBUG_DUMP (DEBUG_TRACE_FILE, 'f');
+    DEBUG_DUMP (DEBUG_TRACE_INPUT, 'i');
+    DEBUG_DUMP (DEBUG_TRACE_LINE, 'l');
+    DEBUG_DUMP (DEBUG_TRACE_OUTPUT_DUMPDEF, 'o');
+    DEBUG_DUMP (DEBUG_TRACE_PATH, 'p');
+    DEBUG_DUMP (DEBUG_TRACE_QUOTE, 'q');
+    DEBUG_DUMP (DEBUG_TRACE_ALL, 't');
+    DEBUG_DUMP (DEBUG_TRACE_CALLID, 'x');
+  }
+#undef DEBUG_DUMP
+
+  obstack_grow (obs, curr_quote.str2, curr_quote.len2);
+}
+
+/* Merge LEVEL into ACCUM according to MODE, then set LEVEL to 0.  */
+static void
+debug_set (char mode, int *accum, int *level)
+{
+  switch (mode)
+    {
+    case '\0':
+      /* Replace old level.  */
+      *accum = *level;
+      break;
+
+    case '-':
+      /* Subtract flags.  */
+      *accum &= ~*level;
+      break;
+
+    case '+':
+      /* Add flags.  */
+      *accum |= *level;
+      break;
+
+    default:
+      assert (!"debug_set");
+      abort ();
+    }
+  *level = 0;
+}
+
 /* Function to decode the debugging flags OPTS of length LEN.  If LEN
    is SIZE_MAX, use strlen (OPTS) instead.  Used by main while
    processing option -d, and by the builtin debugmode.  Return -1 if
@@ -47,6 +109,7 @@ debug_init (void)
 int
 debug_decode (const char *opts, size_t len)
 {
+  int accum = debug_level;
   int level;
   char mode = '\0';
 
@@ -54,15 +117,15 @@ debug_decode (const char *opts, size_t len)
     opts = "";
   if (len == SIZE_MAX)
     len = strlen (opts);
+  if (*opts == '-' || *opts == '+')
+    {
+      len--;
+      mode = *opts++;
+    }
   if (!len)
-    level = DEBUG_TRACE_DEFAULT | debug_level;
+    level = DEBUG_TRACE_DEFAULT;
   else
     {
-      if (*opts == '-' || *opts == '+')
-        {
-          len--;
-          mode = *opts++;
-        }
       for (level = 0; len--; opts++)
         {
           switch (*opts)
@@ -119,33 +182,20 @@ debug_decode (const char *opts, size_t len)
               level |= DEBUG_TRACE_VERBOSE;
               break;
 
+            case '-':
+            case '+':
+              debug_set (mode, &accum, &level);
+              mode = *opts;
+              break;
+
             default:
               return -1;
             }
         }
     }
-  switch (mode)
-    {
-    case '\0':
-      /* Replace old level.  */
-      break;
-
-    case '-':
-      /* Subtract flags.  */
-      level = debug_level & ~level;
-      break;
-
-    case '+':
-      /* Add flags.  */
-      level |= debug_level;
-      break;
-
-    default:
-      assert (!"debug_decode");
-      abort ();
-    }
-  debug_level = level;
-  return level;
+  debug_set (mode, &accum, &level);
+  debug_level = accum;
+  return 0;
 }
 
 /* Change the debug output stream to FP.  If the underlying file is

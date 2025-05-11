@@ -918,7 +918,7 @@ Set the debug-level according to the flags @var{flags}.  The debug-level
 controls the format and amount of information presented by the debugging
 functions.  @xref{Debugmode}, for more details on the format and
 meaning of @var{flags}.  If @var{flags} is omitted, it defaults to
-@samp{+adeq}.  If the option occurs multiple times, @var{flags} starting
+@samp{adeq}.  If the option occurs multiple times, @var{flags} starting
 with @samp{-} or @samp{+} are cumulative, while @var{flags} starting
 with a letter override all earlier settings.  The debug-level starts
 with no flags enabled.  To disable all
@@ -933,9 +933,9 @@ consistency with the builtin name, you can also use the spelling
 The cumulative effect of the various options in this example is
 equivalent to a single invocation of @code{debugmode(`adlqx')}:
 
-@comment options: -d-V -d+lx --debug --debugmode=-e
+@comment options: -d-V --debug -d+x --debugmode=-e+l
 @example
-$ @kbd{m4 -d+lx --debug --debugmode=-e}
+$ @kbd{m4 --debug -d+x --debugmode=-e+l}
 traceon(`len')
 @result{}
 len(`123')
@@ -4579,14 +4579,15 @@ expansion determined.  This is often used with the @samp{x} flag.
 @item d
 Output a warning on any attempt to dereference an undefined macro via
 @code{builtin}, @code{defn}, @code{dumpdef}, @code{indir},
-@code{popdef}, or @code{undefine}.  Note that @code{indef},
+@code{popdef}, @code{qindir}, or @code{undefine}.  Note that @code{ifdef},
 @code{traceon}, and @code{traceoff} do not dereference undefined macros.
 Like any other warning, the warnings enabled by this flag go to standard
 error regardless of the current @code{debugfile} setting, and will
 change exit status if the command line option @option{--fatal-warnings}
 was specified.  This flag is useful in diagnosing spelling mistakes in
 macro names.  It is enabled by default when neither @option{--debug} nor
-@option{--fatal-warnings} are specified on the command line.
+@option{--fatal-warnings} are specified on the command line.  This flag
+was introduced in M4 1.6.
 
 @item e
 In trace output, show the expansion of each macro call, if it is not
@@ -4610,7 +4611,8 @@ output line.
 @item o
 Output @code{dumpdef} data to standard error instead of the current
 debug file.  This can be useful when post-processing trace output, where
-interleaving dumpdef and trace output can cause ambiguities.
+interleaving dumpdef and trace output can cause ambiguities.  This flag
+was introduced in M4 1.6.
 
 @item p
 In debug output, print a message when a named file is found through the
@@ -4652,9 +4654,15 @@ As special cases, if the argument starts with a @samp{+}, the flags are
 added to the current debug flags, and if it starts with a @samp{-}, they
 are removed.  If no argument is present, all debugging flags are cleared
 (as if by @samp{-V}), and with an empty argument the flags are reset to
-the default of @samp{+adeq}.
+the default of @samp{+adeq}.  As of M4 1.6, it is possible to use both
+@samp{+} and @samp{-} in the same invocation.  M4 1.6 also added the
+ability to query the current debug flags, by passing @var{flags} of
+exactly @samp{?}.
 
-The expansion of @code{debugmode} is void.
+The expansion of @code{debugmode} is void, unless @var{flags} is
+@samp{?}; in that case, the output is a quoted string that can be
+passed back to a future @code{debugmode} call to restore flags to the
+current state.
 @end deffn
 
 @comment options: -d-V
@@ -4726,6 +4734,42 @@ include(`foo')dnl
 @error{}m4debug: input reverted to stdin, line 1
 ^D
 @error{}m4debug: input exhausted
+@end example
+
+This example shows how to query the current flags, then change them for
+a bit, before restoring them.  Since future versions of M4 may
+understand additional flags, the ability to query known flags also
+serves as a way to learn if a given flag is understood by the current
+version of M4, when writing a script that wants to take advantage of a
+new flag when available but still operate without warnings on older M4.
+
+@example
+$ @kbd{m4 -d}
+debugmode(`?')
+@result{}+adeq-cfiloptx
+popdef(`unknown')
+@result{}
+@error{}m4:stdin:2: warning: popdef: undefined macro 'unknown'
+define(`flags', debugmode(?))dnl
+ifelse(index(defn(`flags'), `d'), -1, ``flag d unknown'',
+       `debugmode(`-d')')
+@result{}
+popdef(`unknown')
+@result{}
+debugmode(`?')
+@result{}+aeq-cdfiloptx
+debugmode(defn(`flags'))
+@result{}
+debugmode(`?')
+@result{}+adeq-cfiloptx
+define(`x', `X')
+@result{}
+debugmode(`+x')
+@result{}
+debugmode(`-')
+@result{}
+debugmode(`?')
+@result{}+x-acdefilopqt
 @end example
 
 @node Debugfile
