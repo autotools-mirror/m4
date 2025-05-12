@@ -321,6 +321,8 @@ primary (int32_t *v1)
         {
         case ERROR:
           return UNKNOWN_INPUT;
+        case BADOP:
+          return INVALID_OPERATOR;
         case RIGHTP:
           return er;
         default:

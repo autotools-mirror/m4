@@ -6419,6 +6419,9 @@ eval(`++0')
 eval(`0 |= 1')
 @error{}m4:stdin:3: invalid operator in eval: 0 |= 1
 @result{}
+eval(`(1 += 2)')
+@error{}m4:stdin:4: invalid operator in eval: (1 += 2)
+@result{}
 @end example
 
 Note that some older @code{m4} implementations use @samp{^} as an
