@@ -7133,6 +7133,9 @@ eval(`++0')
 eval(`0 |= 1')
 @error{}m4:stdin:3: warning: eval: invalid operator: '0 |= 1'
 @result{}
+eval(`(1 += 2)')
+@error{}m4:stdin:4: warning: eval: invalid operator: '(1 += 2)'
+@result{}
 @end example
 
 Note that some older @code{m4} implementations use @samp{^} as an
@@ -7227,6 +7230,9 @@ eval(`1/0 ? 2 : 3')
 @result{}
 eval(`2 ?: 3')
 @result{}2
+eval(`1 ? 2-=3 : 4')
+@error{}m4:stdin:14: warning: eval: invalid operator: '1 ? 2-=3 : 4'
+@result{}
 @end example
 
 Within @var{expression}, (but not @var{radix} or @var{width}), numbers

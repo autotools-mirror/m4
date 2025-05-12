@@ -335,6 +335,8 @@ primary (int32_t *v1)
         {
         case ERROR:
           return UNKNOWN_INPUT;
+        case BADOP:
+          return INVALID_OPERATOR;
         case RIGHTP:
           return er;
         default:
@@ -526,7 +528,9 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
           break;
 
         case QUESTION:
-          if (et2 != COLON)
+          if (et2 == BADOP)
+            er = INVALID_OPERATOR;
+          else if (et2 != COLON)
             er = MISSING_COLON;
           else
             {
