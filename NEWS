@@ -126,10 +126,11 @@ GNU M4 NEWS - User visible changes.
    context of a macro name, rather than acting on the empty string.  This
    was already done for `define', `pushdef', `builtin', and `indir'.
 
-** Enhance the `eval' builtin to understand the `?:' operator, and
-   downgrade a failed parse due to an unknown operator from an error to a
-   warning.  Further, the builtin now refuses to recognize `=' as a
-   synonym for `==' (this had emitted a warning since 1.4.8b).
+** Enhance the `eval' builtin to understand the `?:' and `>>>' operators,
+   and downgrade a failed parse due to an unknown operator from an error to
+   a warning (the same as for all other syntax errors).  Further, the
+   builtin now refuses to recognize `=' as a synonym for `==' (this had
+   emitted a warning since 1.4.8b).
 
 ** A number of portability improvements inherited from gnulib.
 

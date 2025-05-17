@@ -55,6 +55,7 @@ typedef enum eval_token
   LSEQ,
   LSHIFT = 90,
   RSHIFT,
+  URSHIFT,
   /* precedence given for binary op; PLUS and MINUS also serve as a unary op */
   PLUS = 100,
   MINUS,
@@ -255,7 +256,14 @@ eval_lex (int32_t *val)
         }
       else if (*eval_text == '>')
         {
-          if (*++eval_text == '=')
+          eval_text++;
+          if (*eval_text == '>')
+            {
+              if (*++eval_text == '=')
+                return BADOP;
+              return URSHIFT;
+            }
+          else if (*eval_text == '=')
             return BADOP;
           return RSHIFT;
         }
@@ -489,6 +497,11 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
           u1 = *v1 < 0 ? ~*v1 : *v1;
           u1 >>= (uint32_t) (v2 & 0x1f);
           *v1 = *v1 < 0 ? ~u1 : u1;
+          break;
+        case URSHIFT:
+          u1 = *v1;
+          u1 >>= (uint32_t) (v2 & 0x1f);
+          *v1 = u1;
           break;
 
         case GT:

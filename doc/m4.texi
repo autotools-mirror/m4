@@ -7092,7 +7092,7 @@ Exponentiation
 Multiplication, division, and modulo
 @item +  -
 Addition and subtraction
-@item <<  >>
+@item <<  >>  >>>
 Shift left or right
 @item >  >=  <  <=
 Relational operators
@@ -7193,12 +7193,19 @@ eval(`2 && (1 % 0)')
 @end example
 
 @cindex GNU extensions
-As a GNU extension, the operator @samp{**} performs integral
-exponentiation.  The operator is right-associative, and if evaluated,
-the exponent must be non-negative, and at least one of the arguments
-must be non-zero, or a warning is issued.  Also, the ternary C operator
-@samp{?:} is supported, including the GNU extension of reusing the
-non-zero value of the left side if the middle term is empty.
+As a GNU extension, several additional operators are supported.  Since
+M4 1.4, the operator @samp{**} performs integral exponentiation.  This
+operator is right-associative, and if evaluated, the exponent must be
+non-negative, and at least one of the arguments must be non-zero, or a
+warning is issued.  Additionally, M4 1.6 introduced the @samp{>>>} and
+@samp{?:} operators.  The operator @samp{>>>} has the same precedence as
+@samp{>>}, but where @samp{>>} extends the sign bit into the most
+significant bits, @samp{>>>} performs an unsigned shift that always
+supplies zero bits on the left.  Finally, the right-associative ternary
+C operator @samp{?:} is supported, including the GNU extension of
+reusing the non-zero value of the left side if the middle term is empty.
+This operator evaluates the first term, then if the first is non-zero
+evaluates the second term, otherwise it evaluates the third term.
 
 @example
 eval(`2 ** 3 ** 2')
@@ -7215,6 +7222,10 @@ eval(`0 ** 0')
 eval(`4 ** -2')
 @error{}m4:stdin:6: warning: eval: negative exponent: '4 ** -2'
 @result{}
+eval(`-1 >> 1')
+@result{}-1
+eval(`-1 >>> 1')
+@result{}2147483647
 eval(`0 ? 2 : 3')
 @result{}3
 eval(`1 ? 2 : 1/0')
@@ -7226,12 +7237,12 @@ eval(`0 ? 1 : 2 ? 3 : 4')
 eval(`1 ? 2 ? 3 : 4 : 5')
 @result{}3
 eval(`1/0 ? 2 : 3')
-@error{}m4:stdin:12: warning: eval: divide by zero: '1/0 ? 2 : 3'
+@error{}m4:stdin:14: warning: eval: divide by zero: '1/0 ? 2 : 3'
 @result{}
 eval(`2 ?: 3')
 @result{}2
 eval(`1 ? 2-=3 : 4')
-@error{}m4:stdin:14: warning: eval: invalid operator: '1 ? 2-=3 : 4'
+@error{}m4:stdin:16: warning: eval: invalid operator: '1 ? 2-=3 : 4'
 @result{}
 @end example
 
