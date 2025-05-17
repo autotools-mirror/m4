@@ -389,6 +389,8 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
   int32_t v2;
   int32_t v3;
   uint32_t u1;
+  uint32_t u2;
+  uint32_t u3;
 
   if (er >= SYNTAX_ERROR)
     return er;
@@ -429,17 +431,24 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
              that the implementation-defined overflow when casting
              unsigned to signed is a silent twos-complement
              wrap-around.  */
-          u1 = 1;
           if (v2 < 0)
             er = NEGATIVE_EXPONENT;
           else if (*v1 == 0 && v2 == 0)
             er = DIVIDE_ZERO;
           else
             {
-              while (v2-- > 0)
-                u1 *= (uint32_t) *v1;
+              u1 = *v1;
+              u2 = v2;
+              u3 = 1;
+              while (u2)
+                {
+                  if (u2 & 1)
+                    u3 *= u1;
+                  u1 *= u1;
+                  u2 >>= 1;
+                }
             }
-          *v1 = u1;
+          *v1 = u3;
           break;
 
         case TIMES:
