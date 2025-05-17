@@ -6501,6 +6501,22 @@ eval(`4 ** -2')
 @result{}
 @end example
 
+@ignore
+@comment This test makes sure the algorithm is fast, but does not
+@comment need to be displayed as-is in the manual.
+
+@example
+eval(`3**2000000000')
+@result{}632360961
+define(`loop', `ifelse(`$1', `1000', `pass',
+`loop(eval($1+!!(3**2000000000)))')')loop(0)
+@result{}pass
+define(`check', `ifelse(`$1', `100', `pass', `$2', eval(-3**$1),
+`check(incr($1), eval(-3*$2))', `oops')')check(0, 1)
+@result{}pass
+@end example
+@end ignore
+
 Within @var{expression}, (but not @var{radix} or @var{width}), numbers
 without a special prefix are decimal.  A simple @samp{0} prefix
 introduces an octal number.  @samp{0x} introduces a hexadecimal number.
