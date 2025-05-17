@@ -7262,13 +7262,17 @@ leading zeros are ignored, and all remaining digits must be @samp{1};
 for all other radices, the digits are @samp{0}, @samp{1}, @samp{2},
 @dots{}.  Beyond @samp{9}, the digits are @samp{a}, @samp{b} @dots{} up
 to @samp{z}.  Lower and upper case letters can be used interchangeably
-in numbers prefixes and as number digits.
+in numbers prefixes and as number digits.  Note that when using an
+alternative radix on input, input literals may need to be quoted to
+avoid inadvertent macro expansion before @code{eval} gets the string to
+operate on; the @code{defn} macro can be useful for grabbing non-decimal
+integer values out of other macros.
 
 Parentheses may be used to group subexpressions whenever needed.  For the
 relational operators, a true relation returns @code{1}, and a false
 relation return @code{0}.
 
-Here are a few examples of use of @code{eval}.
+Here are a few more examples of the use of @code{eval}.
 
 @example
 eval(`-3 * 5')
@@ -7289,16 +7293,22 @@ square(`9')
 @result{}81
 square(square(`5')` + 1')
 @result{}676
+eval(`1+')
+@error{}m4:stdin:10: warning: eval: missing operand: '1+'
+@result{}
 define(`foo', `666')
 @result{}
+eval(0r36:foo)
+@result{}7998
+eval(`0r36:foo')
+@result{}20328
+eval(`0R36:'defn(`foo'))
+@result{}7998
 eval(`foo / 6')
-@error{}m4:stdin:11: warning: eval: bad input: 'foo / 6'
+@error{}m4:stdin:15: warning: eval: bad input: 'foo / 6'
 @result{}
 eval(foo / 6)
 @result{}111
-eval(`1+')
-@error{}m4:stdin:13: warning: eval: missing operand: '1+'
-@result{}
 @end example
 
 As the last two lines show, @code{eval} does not handle macro
@@ -7329,6 +7339,8 @@ eval(`0x80000000 % -1')
 @result{}0
 eval(`-4 >> 1')
 @result{}-2
+eval(`-4 >> -31')
+@result{}-2
 eval(`-4 >> 33')
 @result{}-2
 @end example
@@ -7340,12 +7352,14 @@ outside the range of 1 through 36, inclusive.  The result of @code{eval}
 is always taken to be signed.  No radix prefix is output, and for
 radices greater than 10, the digits are lower case (although some
 other implementations use upper case).  The output is unquoted, and
-subject to further macro expansion.  The @var{width}
+therefore subject to further macro expansion, although @code{qindir}
+(@pxref{Qindir}) can be used to work around this.  The @var{width}
 argument specifies the minimum output width, excluding any negative
 sign.  The result is zero-padded to extend the expansion to the
 requested width.  A warning results if the width is negative.  If
 @var{radix} or @var{width} is out of bounds, the expansion of
-@code{eval} is empty.
+@code{eval} is empty.  For padding with spaces or left-justification,
+use @code{format} (@pxref{Format}).
 
 @example
 eval(`666', `10')
@@ -7378,6 +7392,8 @@ eval(` ')
 @result{}0
 define(`a', `hi')eval(` 10 ', `16')
 @result{}hi
+qindir(`eval', ` 10 ', `16')
+@result{}a
 @end example
 
 @node Shell commands
