@@ -3637,21 +3637,26 @@ defn(`blah')
 @cindex currying arguments
 @cindex argument currying
 Another interesting composition tactic is argument @dfn{currying}, or
-factoring a macro that takes multiple arguments for use in a context
-that provides exactly one argument.
+wrapping a macro that normally takes multiple arguments in a way that
+the initial arguments can be supplied early, and the remaining arguments
+are applied later in a context that normally expects a macro name that
+accepts fewer arguments (often just one).
 
 @deffn Composite curry (@var{macro}, @dots{})
-Expand to a macro call that takes exactly one argument, then appends
-that argument to the original arguments and invokes @var{macro} with the
+Accept a list of early arguments, then expand to an unspecified macro
+name that takes one or more late arguments, appends those extra
+arguments to the earlier, and finally invokes @var{macro} with the
 resulting list of arguments.
 @end deffn
 
 A demonstration of currying makes the intent of this macro a little more
 obvious.  The macro @code{stack_foreach} mentioned earlier is an example
 of a context that provides exactly one argument to a macro name.  But
-coupled with currying, we can invoke @code{reverse} with two arguments
-for each definition of a macro stack.  This example uses the file
-@file{m4-@value{VERSION}/@/examples/@/curry.m4} included in the
+coupled with currying, we can invoke @code{reverse} with two or more
+arguments for each definition of a macro stack (that is, we factor out
+the early argument @code{`4'} and couple it with a different late
+argument for each member of the stack @code{a}).  This example uses the
+file @file{m4-@value{VERSION}/@/examples/@/curry.m4} included in the
 distribution.
 
 @comment examples
@@ -3666,14 +3671,18 @@ pushdef(`a', `1')pushdef(`a', `2')pushdef(`a', `3')
 @result{}
 stack_foreach(`a', `:curry(`reverse', `4')')
 @result{}:1, 4:2, 4:3, 4
+stack_foreach(`a', `:curry(`reverse', `4', `5')')
+@result{}:1, 5, 4:2, 5, 4:3, 5, 4
 curry(`curry', `reverse', `1')(`2')(`3')
+@result{}3, 2, 1
+curry(`reverse', `1')(`2', `3')
 @result{}3, 2, 1
 @end example
 
 Now for the implementation.  Notice how @code{curry} leaves off with a
 macro name but no open parenthesis, while still in the middle of
 collecting arguments for @samp{$1}.  The macro @code{_curry} is the
-helper macro that takes one argument, then adds it to the list and
+helper macro that takes one or more late arguments, then adds to the list and
 finally supplies the closing parenthesis.  The use of a comma inside the
 @code{shift} call allows currying to also work for a macro that takes
 one argument, although it often makes more sense to invoke that macro
@@ -3684,11 +3693,27 @@ directly rather than going through @code{curry}.
 $ @kbd{m4 -I examples}
 undivert(`curry.m4')dnl
 @result{}divert(`-1')
-@result{}# curry(macro, args)
-@result{}# Expand to a macro call that takes one argument, then invoke
-@result{}# macro(args, extra).
-@result{}define(`curry', `$1(shift($@@,)_$0')
-@result{}define(`_curry', ``$1')')
+@result{}# curry(macro, args...)
+@result{}# Perform partial argument application on the given macro.  This
+@result{}# expands to an unspecified macro name that accepts one or more extra
+@result{}# arguments, and appends those to the args supplied to the original
+@result{}# curry call as the overall set of arguments to pass to macro.  That
+@result{}# is, curry(`macro', args1...)(args2...) is the same as invoking
+@result{}# macro(args1..., args2...).
+@result{}#
+@result{}# Most often, argument currying comes in handy when given a context
+@result{}# that normally takes a macro name to call with one argument, but
+@result{}# where you want to combine that variable argument with other fixed
+@result{}# arguments to forward to a macro that takes multiple arguments.  For
+@result{}# example, given a "foreach" macro that calls its first argument once
+@result{}# for each successive argument, "foreach(`curry(`mult', 3)', 1, 2, 3)"
+@result{}# would behave the same as "mult(3, 1), mult(3, 2), mult(3, 3)".
+@result{}#
+@result{}# It is also possible to create a named function curry.  For example:
+@result{}# define(`mult3', `curry(`mult', 3)($1)')
+@result{}# Later use of mult3(value) will compute the same as mult(3, value).
+@result{}define(`curry', `$1(shift($@@,)_curry')
+@result{}define(`_curry', `$@@)')
 @result{}divert`'dnl
 @end example
 
