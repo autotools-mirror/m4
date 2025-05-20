@@ -54,21 +54,22 @@ debug_dump (struct obstack *obs)
     obstack_1grow (obs, ch)
 
   /* Both ASCII and EBCDIC sort '+' before '-'.  */
-  for (i = '+'; i <= '-'; i += '-' - '+') {
-    obstack_1grow (obs, i);
-    DEBUG_DUMP (DEBUG_TRACE_ARGS, 'a');
-    DEBUG_DUMP (DEBUG_TRACE_CALL, 'c');
-    DEBUG_DUMP (DEBUG_TRACE_DEREF, 'd');
-    DEBUG_DUMP (DEBUG_TRACE_EXPANSION, 'e');
-    DEBUG_DUMP (DEBUG_TRACE_FILE, 'f');
-    DEBUG_DUMP (DEBUG_TRACE_INPUT, 'i');
-    DEBUG_DUMP (DEBUG_TRACE_LINE, 'l');
-    DEBUG_DUMP (DEBUG_TRACE_OUTPUT_DUMPDEF, 'o');
-    DEBUG_DUMP (DEBUG_TRACE_PATH, 'p');
-    DEBUG_DUMP (DEBUG_TRACE_QUOTE, 'q');
-    DEBUG_DUMP (DEBUG_TRACE_ALL, 't');
-    DEBUG_DUMP (DEBUG_TRACE_CALLID, 'x');
-  }
+  for (i = '+'; i <= '-'; i += '-' - '+')
+    {
+      obstack_1grow (obs, i);
+      DEBUG_DUMP (DEBUG_TRACE_ARGS, 'a');
+      DEBUG_DUMP (DEBUG_TRACE_CALL, 'c');
+      DEBUG_DUMP (DEBUG_TRACE_DEREF, 'd');
+      DEBUG_DUMP (DEBUG_TRACE_EXPANSION, 'e');
+      DEBUG_DUMP (DEBUG_TRACE_FILE, 'f');
+      DEBUG_DUMP (DEBUG_TRACE_INPUT, 'i');
+      DEBUG_DUMP (DEBUG_TRACE_LINE, 'l');
+      DEBUG_DUMP (DEBUG_TRACE_OUTPUT_DUMPDEF, 'o');
+      DEBUG_DUMP (DEBUG_TRACE_PATH, 'p');
+      DEBUG_DUMP (DEBUG_TRACE_QUOTE, 'q');
+      DEBUG_DUMP (DEBUG_TRACE_ALL, 't');
+      DEBUG_DUMP (DEBUG_TRACE_CALLID, 'x');
+    }
 #undef DEBUG_DUMP
 
   obstack_grow (obs, curr_quote.str2, curr_quote.len2);
