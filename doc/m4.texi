@@ -8477,7 +8477,7 @@ foreachq(`x', ```active'', ``active''', `<x>
 @comment examples
 @comment options: -Dlimit=10 -Dverbose
 @example
-$ @kbd {m4 -I examples -Dlimit=10 -Dverbose}
+$ @kbd{m4 -I examples -Dlimit=10 -Dverbose}
 include(`loop.m4')dnl
 @result{} 1 2 3 4 5 6 7 8 9 10
 @end example
@@ -8487,7 +8487,7 @@ include(`loop.m4')dnl
 @comment examples
 @comment options: -Dlimit=10 -Dverbose -Dalt
 @example
-$ @kbd {m4 -I examples -Dlimit=10 -Dverbose -Dalt}
+$ @kbd{m4 -I examples -Dlimit=10 -Dverbose -Dalt}
 include(`loop.m4')dnl
 @result{} 1 2 3 4 5 6 7 8 9 10
 @end example
@@ -8497,7 +8497,7 @@ include(`loop.m4')dnl
 @comment examples
 @comment options: -Dlimit=10 -Dverbose -Dalt=4
 @example
-$ @kbd {m4 -I examples -Dlimit=10 -Dverbose -Dalt=4}
+$ @kbd{m4 -I examples -Dlimit=10 -Dverbose -Dalt=4}
 include(`loop.m4')dnl
 @result{} 1 2 3 4 5 6 7 8 9 10
 @end example
@@ -8505,14 +8505,14 @@ include(`loop.m4')dnl
 @comment examples
 @comment options: -Dlimit=2500 -Dalt=4
 @example
-$ @kbd {m4 -I examples -Dlimit=2500 -Dalt=4}
+$ @kbd{m4 -I examples -Dlimit=2500 -Dalt=4}
 include(`loop.m4')dnl
 @end example
 
 @comment examples
 @comment options: -Dlimit=10000 -Dalt=4
 @example
-$ @kbd {m4 -I examples -Dlimit=10000 -Dalt=4}
+$ @kbd{m4 -I examples -Dlimit=10000 -Dalt=4}
 define(`foo', `divert`'len(popdef(`_foreachq')_foreachq($@@))')dnl
 define(`debug', `pushdef(`_foreachq', defn(`foo'))')
 @result{}
@@ -8621,7 +8621,7 @@ undivert(`stack_sep.m4')dnl
 
 @comment examples
 @example
-$ @kbd {m4 -I examples}
+$ @kbd{m4 -I examples}
 include(`forloop3.m4')include(`stack_sep.m4')dnl
 forloop(`i', `1', `10000', `pushdef(`s', i)')
 @result{}
