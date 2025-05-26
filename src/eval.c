@@ -412,8 +412,8 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
                   u1 *= u1;
                   u2 >>= 1;
                 }
+              *v1 = u3;
             }
-          *v1 = u3;
           break;
 
         case TIMES:
