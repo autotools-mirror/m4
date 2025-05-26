@@ -37,6 +37,7 @@ out=$tmp/m4-out
 err=$tmp/m4-err
 xout=$tmp/m4-xout
 xerr=$tmp/m4-xerr
+xaux=$tmp/m4-xaux
 failed=
 skipped=
 strip_needed=false
@@ -97,14 +98,15 @@ do
     *stackovf.test)
       "$file" "$m4"
       case $? in
-	77) skipped="$skipped $file";;
-	0) ;;
-	*) failed="$failed $file"
+        77) skipped="$skipped $file" ;;
+        0) ;;
+        *) failed="$failed $file" ;;
       esac
       continue ;;
   esac
 
-  options=`${SED} -ne '3s/^dnl @ extra options: //p;3q' "$file"`
+  options=`${SED} -ne "3 { s|TMP/|$tmp/|g; s/^dnl @ extra options: //p; q }" \
+     "$file"`
   ${SED} -e '/^dnl @/d' -e '/^\^D$/q' "$file" \
     | LC_MESSAGES=C LANG=C M4PATH=$examples "$m4" -d $options - >$out 2>$err
   stat=$?
@@ -149,6 +151,8 @@ do
         "$examples/$xerrfile" > $xerr ;;
   esac
 
+  auxfile=`${SED} -n 's/^dnl @ expected auxfile: //p' "$file"`
+
   # For the benefit of mingw, normalize \r\n line endings
   if $strip_needed ; then
     tr -d '\015' < $out > $out.t
@@ -177,6 +181,32 @@ do
     echo `${SED} -e 's/^dnl //' -e 1q $file`
     echo "$file: stderr mismatch"
     diff $diffopts $xerr $err
+  fi
+
+  if test -n "$auxfile"; then
+    tauxfile=`echo "$auxfile" | ${SED} -e "s|TMP/|$tmp/|g"`
+    if test -f "$tauxfile"; then
+      ${SED} -ne 's|^dnl @auxresult{[A-Za-z0-9_/]*}||p' < $file >$xaux
+      if $strip_needed ; then
+        tr -d '\015' < $tauxfile > $tauxfile.t
+        mv $tauxfile.t $tauxfile
+        tr -d '\015' < $xaux > $xaux.t
+        mv $xaux.t $xaux
+      fi
+      if cmp -s $tauxfile $xaux; then
+        :
+      else
+        failed="$failed $file:aux"
+        echo `${SED} -e 's/^dnl //' -e 1q $file`
+        echo "$file auxfile mismatch"
+        diff $diffopts $xaux $tauxfile
+      fi
+      rm -f $tauxfile
+    else
+      failed="$failed $file:aux"
+      echo `${SED} -e 's/^dnl //' -e 1q $file`
+      echo "$file aux outfile $auxfile does not exist"
+    fi
   fi
 
 done
