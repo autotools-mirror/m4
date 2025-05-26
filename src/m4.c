@@ -65,6 +65,21 @@ int warning_status = 0;
 /* Artificial limit for expansion_level in macro.c.  */
 int nesting_limit = 1024;
 
+/* Pathname of dependency file being made (--makedep=PATH). */
+static const char *makedep_path = NULL;
+
+/* Target for dependency rule being made (--makedep-target=TARGET). */
+static const char *makedep_target = NULL;
+
+/* Bitmask of places that will assume non-existent files are actually
+   generated, and so a dependency should be listed regardless
+   (--makedep-gen-missing-*). */
+int makedep_gen_missing = REF_NONE;
+
+/* Bitmask of which places files are referenced from that will trigger
+   phony rules to be generated (--makedep-phony-*). */
+static int makedep_phony = REF_NONE;
+
 /* Global catchall for any errors that should affect final error status, but
    where we try to continue execution in the meantime.  */
 int retcode;
@@ -283,6 +298,37 @@ Frozen state files:\n\
 "), stdout);
       puts ("");
       fputs (_("\
+Make dependency generation:\n\
+      --makedep=FILE           write make dependency rule(s) into FILE\n\
+      --makedep-target=TARGET  specify target of generated dependency rule\n\
+                                 The --makedep and --makedep-target options\n\
+                                 must be used together, either both present,\n\
+                                 or neither present.\n\
+      --makedep-gen-missing-argfiles\n\
+      --makedep-gen-missing-include\n\
+      --makedep-gen-missing-sinclude\n\
+                               files that do not exist (on command line,\n\
+                                 via include(), or via sinclude(),\n\
+                                 respectively) are assumed to be generated\n\
+                                 files and become dependencies regardless.\n\
+      --makedep-gen-missing-all\n\
+                               equivalent to --makedep-gen-missing-argfiles\n\
+                                 --makedep-gen-missing-include\n\
+                                 --makedep-gen-missing-sinclude\n\
+      --makedep-phony-argfiles\n\
+      --makedep-phony-include\n\
+      --makedep-phony-sinclude\n\
+                               generate a \"phony\" target for each file\n\
+                                 that is specified on the command line, the\n\
+                                 subject of an include() macro, or the\n\
+                                 subject of an sinclude() macro,\n\
+                                 respectively.\n\
+      --makedep-phony-all      equivalent to --makedep-phony-argfiles\n\
+                                 --makedep-phony-include\n\
+                                 --makedep-phony-sinclude\n\
+"), stdout);
+      puts ("");
+      fputs (_("\
 Debugging:\n\
   -d, --debug[=[-|+]FLAGS], --debugmode[=[-|+]FLAGS]\n\
                                set debug level (no FLAGS implies `+adeq')\n\
@@ -332,6 +378,16 @@ mismatch, or whatever value was passed to the m4exit macro.\n\
 enum
 {
   DEBUGFILE_OPTION = CHAR_MAX + 1,      /* no short opt */
+  MAKEDEP_OPTION,               /* no short opt */
+  MAKEDEP_TARGET_OPTION,        /* no short opt */
+  MAKEDEP_GEN_MISSING_ARGFILES_OPTION,  /* no short opt */
+  MAKEDEP_GEN_MISSING_INCLUDE_OPTION,   /* no short opt */
+  MAKEDEP_GEN_MISSING_SINCLUDE_OPTION,  /* no short opt */
+  MAKEDEP_GEN_MISSING_ALL_OPTION,       /* no short opt */
+  MAKEDEP_PHONY_ARGFILES_OPTION,        /* no short opt */
+  MAKEDEP_PHONY_INCLUDE_OPTION, /* no short opt */
+  MAKEDEP_PHONY_SINCLUDE_OPTION,        /* no short opt */
+  MAKEDEP_PHONY_ALL_OPTION,     /* no short opt */
   WARN_MACRO_SEQUENCE_OPTION,   /* no short opt */
 
   HELP_OPTION,                  /* no short opt */
@@ -365,6 +421,23 @@ static const struct option long_options[] = {
   {"warn-macro-sequence", optional_argument, NULL,
    WARN_MACRO_SEQUENCE_OPTION},
 
+  {"makedep", required_argument, NULL, MAKEDEP_OPTION},
+  {"makedep-target", required_argument, NULL, MAKEDEP_TARGET_OPTION},
+  {"makedep-gen-missing-argfiles", no_argument, NULL,
+   MAKEDEP_GEN_MISSING_ARGFILES_OPTION},
+  {"makedep-gen-missing-include", no_argument, NULL,
+   MAKEDEP_GEN_MISSING_INCLUDE_OPTION},
+  {"makedep-gen-missing-sinclude", no_argument, NULL,
+   MAKEDEP_GEN_MISSING_SINCLUDE_OPTION},
+  {"makedep-gen-missing-all", no_argument, NULL,
+   MAKEDEP_GEN_MISSING_ALL_OPTION},
+  {"makedep-phony-argfiles", no_argument, NULL,
+   MAKEDEP_PHONY_ARGFILES_OPTION},
+  {"makedep-phony-include", no_argument, NULL, MAKEDEP_PHONY_INCLUDE_OPTION},
+  {"makedep-phony-sinclude", no_argument, NULL,
+   MAKEDEP_PHONY_SINCLUDE_OPTION},
+  {"makedep-phony-all", no_argument, NULL, MAKEDEP_PHONY_ALL_OPTION},
+
   {"help", no_argument, NULL, HELP_OPTION},
   {"version", no_argument, NULL, VERSION_OPTION},
 
@@ -394,11 +467,15 @@ process_file (const char *name)
         {
           error (0, errno, _("cannot open %s"),
                  quotearg_style (locale_quoting_style, name));
-          /* Set the status to EXIT_FAILURE, even though we
-             continue to process files after a missing file.  */
-          retcode = EXIT_FAILURE;
+          if ((makedep_gen_missing & REF_CMD_LINE) != 0)
+            record_dependency (name, REF_CMD_LINE);
+          else
+            /* Set the status to EXIT_FAILURE, even though we
+               continue to process files after a missing file.  */
+            retcode = EXIT_FAILURE;
           return;
         }
+      record_dependency (full_name, REF_CMD_LINE);
       push_file (fp, full_name, true);
       free (full_name);
     }
@@ -642,6 +719,50 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
         macro_sequence = optarg;
         break;
 
+      case MAKEDEP_OPTION:
+        if (makedep_path != NULL)
+          usage (EXIT_FAILURE);
+        makedep_path = optarg;
+        break;
+
+      case MAKEDEP_TARGET_OPTION:
+        if (makedep_target != NULL)
+          usage (EXIT_FAILURE);
+        makedep_target = optarg;
+        break;
+
+      case MAKEDEP_GEN_MISSING_ARGFILES_OPTION:
+        makedep_gen_missing |= REF_CMD_LINE;
+        break;
+
+      case MAKEDEP_GEN_MISSING_INCLUDE_OPTION:
+        makedep_gen_missing |= REF_INCLUDE;
+        break;
+
+      case MAKEDEP_GEN_MISSING_SINCLUDE_OPTION:
+        makedep_gen_missing |= REF_SINCLUDE;
+        break;
+
+      case MAKEDEP_GEN_MISSING_ALL_OPTION:
+        makedep_gen_missing |= REF_ALL;
+        break;
+
+      case MAKEDEP_PHONY_ARGFILES_OPTION:
+        makedep_phony |= REF_CMD_LINE;
+        break;
+
+      case MAKEDEP_PHONY_INCLUDE_OPTION:
+        makedep_phony |= REF_INCLUDE;
+        break;
+
+      case MAKEDEP_PHONY_SINCLUDE_OPTION:
+        makedep_phony |= REF_SINCLUDE;
+        break;
+
+      case MAKEDEP_PHONY_ALL_OPTION:
+        makedep_phony |= REF_ALL;
+        break;
+
       case VERSION_OPTION:
         version_etc (stdout, PACKAGE, PACKAGE_NAME, VERSION, AUTHORS, NULL);
         exit (EXIT_SUCCESS);
@@ -658,6 +779,32 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
   if (debugfile && !debug_set_output (NULL, debugfile))
     m4_error (0, errno, NULL, _("cannot set debug file %s"),
               quotearg_style (locale_quoting_style, debugfile));
+
+  /* Verify mutual consistency of makedep options. */
+  if ((makedep_path == NULL) && (makedep_target == NULL))
+    {
+      /* Makedep mode is NOT active. */
+      if (makedep_gen_missing != 0)
+        m4_error (0, 0, NULL,
+                  _("--makedep-gen-missing-* requires --makedep and "
+                    "--makedep-target"));
+      if (makedep_phony != 0)
+        m4_error (0, 0, NULL,
+                  _("--makedep-phony-* requires --makedep and "
+                    "--makedep-target"));
+      if ((makedep_gen_missing | makedep_phony) != 0)
+        exit (EXIT_FAILURE);
+    }
+  else if ((makedep_path != NULL) && (makedep_target != NULL))
+    {
+      /* Makedep mode is active. */
+    }
+  else
+    {
+      m4_error (0, 0, NULL,
+                _("--makedep must be used with --makedep-target"));
+      exit (EXIT_FAILURE);
+    }
 
   input_init ();
   output_init ();
@@ -769,6 +916,8 @@ main (int argc, char *const *argv, char *const *envp MAYBE_UNUSED)
       undivert_all ();
     }
   output_exit ();
+  if (makedep_path != NULL)
+    generate_make_dependencies (makedep_path, makedep_target, makedep_phony);
 #ifndef NDEBUG
   /* Only spend time freeing memory to help isolate leaks; if
      assertions are disabled, save the time and exit now.  */

@@ -1494,13 +1494,14 @@ m4_changecom (struct obstack *obs MAYBE_UNUSED, int argc,
    argument, if it exists.  Complain about inaccessible files iff
    SILENT is false.  */
 static void
-include (int argc, macro_arguments *argv, bool silent)
+include (int argc, macro_arguments *argv, bool silent, int ref_from)
 {
   const call_info *me = arg_info (argv);
   FILE *fp;
   char *name;
   const char *arg;
   size_t len;
+  int fail;
 
   if (bad_argc (me, argc, 1, 1))
     return;
@@ -1513,12 +1514,21 @@ include (int argc, macro_arguments *argv, bool silent)
   fp = m4_path_search (arg, false, &name);
   if (fp == NULL)
     {
+      fail = !silent;
+      if ((makedep_gen_missing & ref_from) != 0)
+        {
+          record_dependency (arg, ref_from);
+          fail = 0;
+        }
       if (!silent)
         m4_error (0, errno, me, _("cannot open %s"),
                   quotearg_style (locale_quoting_style, arg));
+      if (fail)
+        retcode = EXIT_FAILURE;
       return;
     }
 
+  record_dependency (name, ref_from);
   push_file (fp, name, true);
   free (name);
 }
@@ -1527,7 +1537,7 @@ include (int argc, macro_arguments *argv, bool silent)
 static void
 m4_include (struct obstack *obs MAYBE_UNUSED, int argc, macro_arguments *argv)
 {
-  include (argc, argv, false);
+  include (argc, argv, false, REF_INCLUDE);
 }
 
 /* Include a file, ignoring errors.  */
@@ -1535,7 +1545,7 @@ static void
 m4_sinclude (struct obstack *obs MAYBE_UNUSED, int argc,
              macro_arguments *argv)
 {
-  include (argc, argv, true);
+  include (argc, argv, true, REF_SINCLUDE);
 }
 
 /* More miscellaneous builtins -- "maketemp", "errprint", "__file__",

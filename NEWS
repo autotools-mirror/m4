@@ -3,6 +3,14 @@ GNU M4 NEWS - User visible changes.
 * Noteworthy changes in Version 1.6 (????-??-??) [stable]
   Released by ????, based on git versions 1.4.10b.x-* and 1.5.*
 
+** Add new capability to automatically generate make dependency rules.
+   This is enabled by the new command-line option pair '--makedep=FILE'
+   and '--makedep-target=TARGET' and further tuned by
+   '--makedep-gen-missing-argfiles', '--makedep-gen-missing-include',
+   '--makedep-gen-missing-sinclude', '--makedep-gen-missing-all',
+   '--makedep-phony-argfiles', '--makedep-phony-include',
+   '--makedep-phony-sinclude', and '--makedep-phony-all'.
+
 ** Fix regressions introduced in 1.4.10b:
 *** Using `builtin' or `indir' to perform nested `shift' calls triggered
     an assertion failure (not present in 1.4.11).

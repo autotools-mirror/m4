@@ -36,6 +36,7 @@ BEGIN {
   options = "";
   xout = "";
   xerr = "";
+  auxfile = "";
 }
 
 /^@node / {
@@ -83,6 +84,11 @@ BEGIN {
   gsub ("@comment xerr: ", "", xerr);
 }
 
+/^@comment auxfile: / {
+  auxfile = $0;
+  gsub ("@comment auxfile: ", "", auxfile);
+}
+
 /^@example$/, /^@end example$/ {
   if (seq < 0)
     next;
@@ -105,10 +111,13 @@ BEGIN {
         printf("dnl @ expected output: %s\n", xout) > file;
     if (xerr)
         printf("dnl @ expected error: %s\n", xerr) > file;
+    if (auxfile)
+        printf("dnl @ expected auxfile: %s\n", auxfile) > file;
     status = 0;
     options = "";
     xout = "";
     xerr = "";
+    auxfile = "";
     next;
   }
   if ($0 ~ /^@end example$/) {
@@ -116,9 +125,9 @@ BEGIN {
   }
   if ($0 ~ /^\^D$/)
     next;
-  if ($0 ~ /^\$ @kbd\{/)
+  if ($0 ~ /^(\$ )?@kbd\{/)
     next;
-  if ($0 ~ /^@result\{\}/ || $0 ~ /^@error\{\}/)
+  if ($0 ~ /^@result\{\}/ || $0 ~ /^@error\{\}/ || $0 ~ /^@auxresult\{[A-Za-z0-9_\/]*\}/)
     prefix = "dnl ";
   else
     prefix = "";

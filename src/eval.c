@@ -439,6 +439,7 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
              that the implementation-defined overflow when casting
              unsigned to signed is a silent twos-complement
              wrap-around.  */
+          u3 = 1;
           if (v2 < 0)
             er = NEGATIVE_EXPONENT;
           else if (*v1 == 0 && v2 == 0)

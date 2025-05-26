@@ -94,6 +94,14 @@
 # undef bindtextdomain
 # define bindtextdomain(Domainname, Dirname)    /* empty */
 #endif
+extern int makedep_gen_missing; /* --makedep-gen-missing-* */
+
+/* Bit masks indicating places a file is referenced from. */
+#define REF_CMD_LINE    0x01    /* File referenced from command line */
+#define REF_INCLUDE     0x02    /* File referenced from m4_include() */
+#define REF_SINCLUDE    0x04    /* File referenced from m4_sinclude() */
+#define REF_ALL         0x07    /* All of the above */
+#define REF_NONE        0x00    /* None of the above */
 
 #define _(msgid) gettext (msgid)
 
@@ -545,6 +553,8 @@ extern void include_init (void);
 extern void include_env_init (void);
 extern void add_include_directory (const char *);
 extern FILE *m4_path_search (const char *, bool, char **);
+extern void record_dependency (const char *, int);
+extern void generate_make_dependencies (const char *, const char *, int);
 
 /* File: eval.c  --- expression evaluation.  */
 
