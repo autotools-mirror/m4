@@ -7341,6 +7341,12 @@ square(square(`5')` + 1')
 eval(`1+')
 @error{}m4:stdin:10: warning: eval: missing operand: '1+'
 @result{}
+eval(`0x')
+@error{}m4:stdin:11: warning: eval: invalid number: '0x'
+@result{}
+eval(`01239')
+@error{}m4:stdin:12: warning: eval: invalid number: '01239'
+@result{}
 define(`foo', `666')
 @result{}
 eval(0r36:foo)
@@ -7350,7 +7356,7 @@ eval(`0r36:foo')
 eval(`0R36:'defn(`foo'))
 @result{}7998
 eval(`foo / 6')
-@error{}m4:stdin:15: warning: eval: bad input: 'foo / 6'
+@error{}m4:stdin:17: warning: eval: bad input: 'foo / 6'
 @result{}
 eval(foo / 6)
 @result{}111

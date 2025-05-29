@@ -122,6 +122,10 @@ GNU M4 NEWS - User visible changes.
    context of a macro name, rather than acting on the empty string.  This
    was already done for `define', `pushdef', `builtin', and `indir'.
 
+** Fix the `eval' builtin to reject input like `0x' that C does not
+   accept as an integer literal, rather than silently treating it as zero
+   (present since "the beginning").
+
 ** Enhance the `eval' builtin to understand the `?:' and `>>>' operators,
    and downgrade a failed parse due to an unknown operator from an error to
    a warning (the same as for all other syntax errors).  Further, the
