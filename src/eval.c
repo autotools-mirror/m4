@@ -28,10 +28,13 @@
 
 /* Evaluates token types.  */
 
+#define MIN_PREC 1
+
 typedef enum eval_token
 {
-  /* Value / 10 is precedence order.  */
+  /* Value / 10 is precedence order, if >= MIN_PREC.  */
   ERROR = 0,
+  BADNUM,
   BADOP,
   EOTEXT,
   LEFTP,
@@ -77,6 +80,7 @@ typedef enum eval_error
   MISSING_RIGHT,
   UNKNOWN_INPUT,
   EXCESS_INPUT,
+  INVALID_NUMBER,
   INVALID_OPERATOR
 }
 eval_error;
@@ -128,6 +132,7 @@ eval_lex (int32_t *val)
          Therefore use an unsigned integer type to avoid undefined behaviour
          when parsing '-2147483648'.  */
       uint32_t value;
+      bool seen_digit = false;
 
       if (*eval_text == '0')
         {
@@ -153,19 +158,20 @@ eval_lex (int32_t *val)
               while (c_isdigit (*eval_text) && base <= 36)
                 base = 10 * base + *eval_text++ - '0';
               if (base == 0 || base > 36 || *eval_text != ':')
-                return ERROR;
+                return BADNUM;
               eval_text++;
               break;
 
             default:
               base = 8;
+              seen_digit = true;
             }
         }
       else
         base = 10;
 
       value = 0;
-      for (; *eval_text; eval_text++)
+      for (; *eval_text; eval_text++, seen_digit = true)
         {
           if (c_isdigit (*eval_text))
             digit = *eval_text - '0';
@@ -183,14 +189,16 @@ eval_lex (int32_t *val)
               else if (digit == 0 && value == 0)
                 continue;
               else
-                break;
+                return BADNUM;
             }
           else if (digit >= base)
-            break;
+            return BADNUM;
           else
             value = value * base + digit;
         }
       *val = value;
+      if (!seen_digit)
+        return BADNUM;
       return NUMBER;
     }
 
@@ -314,13 +322,15 @@ primary (int32_t *v1)
       /* Parenthesis */
     case LEFTP:
       er = primary (v1);
-      er = parse_expr (v1, er, 1);
+      er = parse_expr (v1, er, MIN_PREC);
       if (er >= SYNTAX_ERROR)
         return er;
       switch (eval_lex (&v2))
         {
         case ERROR:
           return UNKNOWN_INPUT;
+        case BADNUM:
+          return INVALID_NUMBER;
         case BADOP:
           return INVALID_OPERATOR;
         case RIGHTP:
@@ -352,6 +362,8 @@ primary (int32_t *v1)
       /* Anything else */
     case ERROR:
       return UNKNOWN_INPUT;
+    case BADNUM:
+      return INVALID_NUMBER;
     case BADOP:
       return INVALID_OPERATOR;
     default:
@@ -530,14 +542,21 @@ evaluate (const char *expr, int32_t *val)
 
   eval_init_lex (expr);
   err = primary (val);
-  err = parse_expr (val, err, 1);
+  err = parse_expr (val, err, MIN_PREC);
 
   if (err == NO_ERROR && *eval_text != '\0')
     {
-      if (eval_lex (val) == BADOP)
-        err = INVALID_OPERATOR;
-      else
-        err = EXCESS_INPUT;
+      switch (eval_lex (val))
+        {
+        case BADNUM:
+          err = INVALID_NUMBER;
+          break;
+        case BADOP:
+          err = INVALID_OPERATOR;
+          break;
+        default:
+          err = EXCESS_INPUT;
+        }
     }
 
   switch (err)
@@ -563,6 +582,10 @@ evaluate (const char *expr, int32_t *val)
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
                 _("bad expression in eval (excess input): %s"), expr));
+      break;
+
+    case INVALID_NUMBER:
+      M4ERROR ((warning_status, 0, _("invalid number in eval: %s"), expr));
       break;
 
     case INVALID_OPERATOR:

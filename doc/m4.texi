@@ -6580,10 +6580,19 @@ square(`9')
 @result{}81
 square(square(`5')` + 1')
 @result{}676
+eval(`1+')
+@error{}m4:stdin:10: bad expression in eval: 1+
+@result{}
+eval(`0x')
+@error{}m4:stdin:11: invalid number in eval: 0x
+@result{}
+eval(`01239')
+@error{}m4:stdin:12: invalid number in eval: 01239
+@result{}
 define(`foo', `666')
 @result{}
 eval(`foo / 6')
-@error{}m4:stdin:11: bad expression in eval (bad input): foo / 6
+@error{}m4:stdin:14: bad expression in eval (bad input): foo / 6
 @result{}
 eval(foo / 6)
 @result{}111

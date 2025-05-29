@@ -2,6 +2,10 @@ GNU M4 NEWS - User visible changes.
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Fix the `eval' builtin to reject input like `0x' that C does not
+   accept as an integer literal, rather than silently treating it as zero
+   (present since "the beginning").
+
 
 * Noteworthy changes in release 1.4.20 (2025-05-10) [stable]
 
