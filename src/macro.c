@@ -559,7 +559,7 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
   argv->wrapper = args.wrapper;
   argv->has_ref = args.has_ref;
   argv->has_func = args.has_func;
-  if (args.quote_age != quote_age ())
+  if (args.quote_age != quote_age () || !quote_age ())
     argv->quote_age = 0;
   argv->arraylen = args.arraylen;
   return argv;

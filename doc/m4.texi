@@ -5396,6 +5396,52 @@ changequote(`"', `"')
 @result{}hiHIhi
 @end example
 
+During macro expansion, instances of @code{$@@} in the macro's
+definition will use the quotation strings that are in effect at the end
+of argument collection, even if this is different than the quotation
+strings in effect when the macro was defined.  When combined with
+@code{translit} (@pxref{Translit}), this can be exploited for splitting
+a string containing multiple instances of a single-byte separator into a
+macro call on each token of the string with linear scaling (a naive loop
+that uses @code{index} to search for the first instance of the
+separator, followed by @code{substr} to process the rest of the input
+string, scales quadratically, since each iteration of the loop can only
+process one substring before re-processing an average of half of the
+overall input to get to the next substring, instead of getting at all
+substrings in a single pass).  However, note that this trick cannot
+prevent premature expansion of tokens within the string.
+
+@example
+define(`some', `several')
+@result{}
+define(`text', `long.string.with.some.separators')
+@result{}
+define(`display', ``<$1>'')
+@result{}
+display(text)
+@result{}<long.string.with.several.separators>
+display(defn(`text'))
+@result{}<long.string.with.some.separators>
+dnl quotes are still `' at the time requote is defined:
+define(`requote', `"[$@@]')
+@result{}
+define(`tokenized', requote(translit(defn(`text'), `.',
+changequote(`"[', `]')"[,])))
+@result{}
+dnl but quotes are "[] at the time $@@ in requote is computed
+changequote
+@result{}
+dnl quotes are back to `', yet the content of tokenized still has "[]
+dnl however, this form of tokenizing already expanded "some"
+tokenized
+@result{}"[long],"[string],"[with],"[several],"[separators]
+define(`a', ` display(`$1')')
+@result{}
+dnl now it is possible to call `a' on each token
+translit(defn(`tokenized'), `"[],', `a()')
+@result{} <long> <string> <with> <several> <separators>
+@end example
+
 @ignore
 @comment And another stress test, not worth documenting in the manual.
 @example
