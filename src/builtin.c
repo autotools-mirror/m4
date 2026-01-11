@@ -137,7 +137,7 @@ static builtin const builtin_tab[] = {
   {"undefine", false, true, true, m4_undefine},
   {"undivert", false, false, false, m4_undivert},
 
-  {0, false, false, false, 0},
+  {NULL, false, false, false, NULL},
 
   /* placeholder is intentionally stuck after the table end delimiter,
      so that we can easily find it, while not treating it as a real
