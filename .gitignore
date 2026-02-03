@@ -64,7 +64,6 @@ gnupload
 !/lib/Makefile.am
 link-warning.h
 /m4/*
-!/m4/gnulib-cache.m4
 m4-*
 /maint.mk
 Makefile.in
