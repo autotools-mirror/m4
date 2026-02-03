@@ -21,6 +21,7 @@
 ## This file written by Eric Blake <ebb9@byu.net>
 
 EXTRA_DIST =\
+barem4.m4 \
 capitalize.m4 \
 capitalize2.m4 \
 comments.m4 \
@@ -59,6 +60,7 @@ stack.m4 \
 stack_sep.m4 \
 sync-lines.m4 \
 sysv-args.m4 \
+testbarem4.m4 \
 trace.m4 \
 translit.m4 \
 undivert.incl \

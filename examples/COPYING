@@ -1,6 +1,7 @@
 The files in this directory provide example uses of GNU M4.
 The following copyright notice applies to each of these
-description files.
+description files, except for barem4.m4 and testbarem4.m4
+(which have their own license included).
 
 Copyright (C) 2006, 2010-2012 Free Software Foundation, Inc.
 This file is free software; the Free Software Foundation
