@@ -137,7 +137,7 @@ expand_token (struct obstack *obs, token_type t, token_data *td, int line)
 `-------------------------------------------------------------------*/
 
 static bool
-expand_argument (struct obstack *obs, token_data *argp)
+expand_argument (struct obstack *obs, token_data *argp, bool groks_macro)
 {
   token_type t;
   token_data td;
@@ -172,6 +172,12 @@ expand_argument (struct obstack *obs, token_data *argp)
               len = obstack_object_size (obs) - 1;
               text = (char *) obstack_finish (obs);
 
+              if (TOKEN_DATA_TYPE (argp) == TOKEN_FUNC && len)
+                {
+                  M4ERROR ((warning_status, 0,
+                            _("Warning: cannot concatenate builtin tokens")));
+                  TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
+                }
               if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
                 {
                   TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
@@ -204,10 +210,21 @@ expand_argument (struct obstack *obs, token_data *argp)
           break;
 
         case TOKEN_MACDEF:
-          if (obstack_object_size (obs) == 0)
+          /* Silently ignore macro tokens outside of certain builtins */
+          if (groks_macro)
             {
-              TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
-              TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
+              if (obstack_object_size (obs) == 0 &&
+                  TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
+                {
+                  TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
+                  TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
+                }
+              else
+                {
+                  M4ERROR ((warning_status, 0,
+                            _("Warning: cannot concatenate builtin tokens")));
+                  TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
+                }
             }
           break;
 
@@ -234,7 +251,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
   token_data td;
   token_data *tdp;
   bool more_args;
-  bool groks_macro_args = SYMBOL_MACRO_ARGS (sym);
+  bool groks_macro = SYMBOL_MACRO_ARGS (sym);
 
   TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
   TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
@@ -247,14 +264,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
       next_token (&td, NULL);   /* gobble parenthesis */
       do
         {
-          more_args = expand_argument (arguments, &td);
-
-          if (!groks_macro_args && TOKEN_DATA_TYPE (&td) == TOKEN_FUNC)
-            {
-              TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-              TOKEN_DATA_TEXT (&td) = (char *) "";
-              TOKEN_DATA_LEN (&td) = 0;
-            }
+          more_args = expand_argument (arguments, &td, groks_macro);
           tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
           obstack_ptr_grow (argptr, tdp);
         }

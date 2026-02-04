@@ -2267,9 +2267,10 @@ and it is a builtin, the
 expansion is a special token, which points to the builtin's internal
 definition.  This token is only meaningful as the second argument to
 @code{define} (and @code{pushdef}), and is silently converted to an
-empty string in most other contexts.  Combining a builtin with anything
-else is not supported; a warning is issued and the builtin is omitted
-from the final expansion.
+empty string in most other contexts.  When defining a macro, combining a
+builtin with anything else is not supported; a warning is issued and the
+builtin is omitted from the final definition (other implementations may
+do other unexpected things).
 
 The macro @code{defn} is recognized only with parameters.
 @end deffn
@@ -2379,6 +2380,10 @@ divnum
 @result{}0
 len(defn(`divnum'))
 @result{}0
+eval(`1'defn(`divnum')) eval(defn(`divnum')8)
+@result{}1 8
+ifelse(defn(`divnum'), defn(`define'), `indistinguishable')
+@result{}indistinguishable
 @end example
 
 Also note that @code{defn} with multiple arguments can only join text
@@ -2401,6 +2406,12 @@ define(`mydivnum', defn(`divnum', `divnum'))mydivnum
 @error{}m4trace: -2- defn(`divnum', `divnum')
 @error{}m4trace: -1- define(`mydivnum', `')
 @result{}
+define(`mydivnum+', defn(`divnum')`+'defn(`divnum'))mydivnum+
+@error{}m4trace: -2- defn(`divnum')
+@error{}m4trace: -2- defn(`divnum')
+@error{}m4:stdin:5: Warning: cannot concatenate builtin tokens
+@error{}m4trace: -1- define(`mydivnum+', `+')
+@result{}+
 traceoff(`defn', `define')
 @result{}
 @end example
