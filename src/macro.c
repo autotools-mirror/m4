@@ -485,7 +485,7 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
   token_data td;
   token_data *tdp;
   bool more_args;
-  bool groks_macro_args = SYMBOL_MACRO_ARGS (sym);
+  bool groks_macro = SYMBOL_MACRO_ARGS (sym);
   macro_arguments args;
   macro_arguments *argv;
 
@@ -493,7 +493,7 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
   args.inuse = false;
   args.wrapper = false;
   args.has_ref = false;
-  args.flatten = !groks_macro_args;
+  args.flatten = !groks_macro;
   args.has_func = false;
   args.quote_age = quote_age ();
   args.info = info;
@@ -511,7 +511,7 @@ collect_arguments (symbol *sym, call_info *info, struct obstack *arguments,
           more_args = expand_argument (arguments, tdp, info);
 
           if ((TOKEN_DATA_TYPE (tdp) == TOKEN_TEXT && !TOKEN_DATA_LEN (tdp))
-              || (!groks_macro_args && TOKEN_DATA_TYPE (tdp) == TOKEN_FUNC))
+              || (!groks_macro && TOKEN_DATA_TYPE (tdp) == TOKEN_FUNC))
             {
               obstack_free (arguments, tdp);
               tdp = &empty_token;
@@ -903,6 +903,7 @@ arg_text (macro_arguments *argv, unsigned int arg, bool flatten)
     }
   if (arg >= argv->argc)
     return "";
+  flatten |= argv->flatten;
   token = arg_token (argv, arg, NULL, flatten);
   switch (TOKEN_DATA_TYPE (token))
     {
@@ -1129,6 +1130,7 @@ arg_len (macro_arguments *argv, unsigned int arg, bool flatten)
     }
   if (arg >= argv->argc)
     return 0;
+  flatten |= argv->flatten;
   token = arg_token (argv, arg, NULL, flatten);
   switch (TOKEN_DATA_TYPE (token))
     {

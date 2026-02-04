@@ -130,10 +130,6 @@ GNU M4 NEWS - User visible changes.
    context of a macro name, rather than acting on the empty string.  This
    was already done for `define', `pushdef', `builtin', and `indir'.
 
-** Fix the `eval' builtin to reject input like `0x' that C does not
-   accept as an integer literal, rather than silently treating it as zero
-   (present since "the beginning").
-
 ** Enhance the `eval' builtin to understand the `?:' and `>>>' operators,
    and downgrade a failed parse due to an unknown operator from an error to
    a warning (the same as for all other syntax errors).  Further, the
@@ -162,6 +158,25 @@ following beta features that were deemed worth deferring until 1.6:
 ** Enhance the `ifelse' and `shift' builtins so that tail-recursive
    algorithms based on `$@' operate in linear, rather than quadratic, time
    and memory.
+
+* Noteworthy changes in release 1.4.21 (2026-??-??) [stable]
+
+** Fix the `eval' builtin to reject input like `0x' that C does not
+   accept as an integer literal, rather than silently treating it as zero
+   (present since "the beginning").
+
+** Fix the `define' and `pushdef' builtins to always warn when attempting
+   to concatenate the result of using the `defn' macro on a builtin macro
+   with anything else.  This is a counterpart to the change in m4 1.4.11
+   that issues a warning when `defn' with multiple arguments attempts to
+   perform concatenation.  Attempting to use the output of `defn' anywhere
+   other than a lone argument during macro definition has never been
+   portable, but now the outcome is always the remaining text, rather
+   than being dependent on whether `defn' was used before or after the
+   other text (present since "the beginning").
+
+** Port to glibc 2.43, which implements functions like strchr as macros
+   when compiled with a C23 compiler.
 
 ** A number of portability improvements inherited from gnulib.
 

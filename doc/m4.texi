@@ -2759,6 +2759,10 @@ foo(`bar', defn(`divnum'))
 @result{}
 bar
 @result{}0
+eval(`1'defn(`divnum')) eval(defn(`divnum')8)
+@result{}1 8
+ifelse(defn(`divnum'), defn(`define'), `', `distinct')
+@result{}distinct
 @end example
 
 As of M4 1.6, @code{defn} can warn if @var{name} is not a macro, by
@@ -2791,22 +2795,28 @@ define(`mydivnum', defn(`divnum', `divnum'))mydivnum
 @error{}m4:stdin:7: warning: define: cannot concatenate builtins
 @error{}m4trace: -1- define(`mydivnum', `<divnum><divnum>') -> `'
 @result{}
+define(`mydivnum+', defn(`divnum')`+'defn(`divnum'))mydivnum+
+@error{}m4trace: -2- defn(`divnum') -> `<divnum>'
+@error{}m4trace: -2- defn(`divnum') -> `<divnum>'
+@error{}m4:stdin:8: warning: define: cannot concatenate builtins
+@error{}m4trace: -1- define(`mydivnum+', `<divnum>+<divnum>') -> `'
+@result{}+
 traceoff(`defn', `define')dumpdef(`mydivnum')
 @error{}mydivnum:@tabchar{}`'
 @result{}
 define(`mydivnum', defn(`divnum')defn(`divnum'))mydivnum
-@error{}m4:stdin:9: warning: define: cannot concatenate builtins
+@error{}m4:stdin:10: warning: define: cannot concatenate builtins
 @result{}
 define(`mydivnum', defn(`divnum')`a')mydivnum
-@error{}m4:stdin:10: warning: define: cannot concatenate builtins
+@error{}m4:stdin:11: warning: define: cannot concatenate builtins
 @result{}A
 define(`mydivnum', `a'defn(`divnum'))mydivnum
-@error{}m4:stdin:11: warning: define: cannot concatenate builtins
+@error{}m4:stdin:12: warning: define: cannot concatenate builtins
 @result{}A
 define(`q', ``$@@'')
 @result{}
 define(`foo', q(`a', defn(`divnum')))foo
-@error{}m4:stdin:13: warning: define: cannot concatenate builtins
+@error{}m4:stdin:14: warning: define: cannot concatenate builtins
 @result{}a,
 ifdef(`foo', `yes', `no')
 @result{}yes
