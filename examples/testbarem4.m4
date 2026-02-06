@@ -9,7 +9,7 @@ _  Uses the builtin ifelse to compare (nearly) arbitrary strings.
 _
 define(test,`ifelse($1,$2,`',``$1' != `$2'
 ')')_
-_ 
+_
 _
 `t0: here a deliberate error should print just "one != two"'
 _
@@ -90,7 +90,7 @@ _ characters are deemed to precede it. If <c> is duplicated,
 _ the second instance is deemed to come after the first. `ttab'
 _ (transition table) tells whether adjacent judgements conform
 _ to the specification.
-_ 
+_
 switch2of2(`ttab',`$1',`$2')_
 case(`ttab_LT_LT', `T')_
 case(`ttab_LT_EQ', `T')_

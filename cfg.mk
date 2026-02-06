@@ -50,6 +50,7 @@ exclude_file_name_regexp--sc_prohibit_tab_based_indentation = \
   (^(GNU)?Makefile(\.am)?|\.mk|^HACKING|^ChangeLog.*)$$
 exclude_file_name_regexp--update-copyright = ^m4/gnulib-cache.m4$$
 exclude_file_name_regexp--sc_codespell = ^THANKS$$
+exclude_file_name_regexp--sc_trailing_blank = ^examples/barem4.m4$$
 
 # Codespell exemptions:
 codespell_ignore_words_list = ois,WIDTHn

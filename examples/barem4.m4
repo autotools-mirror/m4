@@ -23,7 +23,7 @@ _ execution, case-switching, and some higher-level operators
 _ from functional programming. In support of these normal
 _ facilities, however, the program exploits some unusual
 _ programming idioms:
-_ 
+_
 _ 1. Case-switching via macro names constructed on the fly.
 _ 2. Equality testing by redefining macros.
 _ 3. Representing data structures by nested parenthesized lists.
@@ -167,7 +167,7 @@ _
 _    eq(a,b)`'eq(c,d) ==> FF
 _    eq(a,b)eq(c,d) ==> Feq(c,d)
 _
-_ Unfortunately the temporary definitions stick around as 
+_ Unfortunately the temporary definitions stick around as
 _ "ghosts" that waste memory. We could relax our notion of
 _ purity and use the builtin macro `undefine' to clean up.
 _
@@ -266,7 +266,7 @@ _
 define(`case', `define(`$1', `$2')')_
 _
 _ The name of a case macro comprises the name of the
-_ original function and values of the decison
+_ original function and values of the decision
 _ attributes separated by underscores. For example,
 _ to define `iszero' in switch style, the decision
 _ attribute is the head of the argument; and we must
@@ -480,7 +480,7 @@ _
 define(`map',_
 __`if(isempty($2), `()',_
 __`($1(head($2)),map(`$1',tail($2)))')')_
-_ 
+_
 _ Folds combine all the elements of a list into a single value by
 _ applying a binary operation <op> iteratively, beginning with <z>,
 _ and proceeding in right-associative order for `foldr' and left-
@@ -538,8 +538,8 @@ __`if(gt($1,$2), `',_
 __`$3($1)'_
 __`for(succ($1),$2,`$3')')')_
 _
-_ `forA' allows a further argument to be passed to `func'. 
-_ A hack for passing multiple arguments is to hide the 
+_ `forA' allows a further argument to be passed to `func'.
+_ A hack for passing multiple arguments is to hide the
 _ separating commas in quotes.
 _
 _    forA(lo,hi,`func',arg) = for i from low to high do func(arg,i)
@@ -608,7 +608,7 @@ __`case(`$1_GT', `$4')')_
 _
 mkcomp(`lt', `T', `F', `F')_
 mkcomp(`le', `T', `T', `F')_
-mkcomp(`et', `F', `T', `F')_  equal to, differs from eq 
+mkcomp(`et', `F', `T', `F')_  equal to, differs from eq
 mkcomp(`ne', `T', `F', `T')_
 mkcomp(`ge', `F', `T', `T')_
 mkcomp(`gt', `F', `F', `T')_
@@ -747,7 +747,7 @@ _ that give the ordinal position of each character <c>
 _ in the alphabet would achieve a different time-space
 _ tradeoff, in which `cmp' becomes `compare(ord_$1,ord_$2)'
 _ and takes O(log N) time.
-_ 
+_
 _
 _       Universality
 _
@@ -797,7 +797,7 @@ _       Footnotes
 _
 _ Some efficiency may be gained by replacing separate calls
 _ of `head' and `tail' with a single call of a `split' macro,
-_ at some loss of clarity. In the version of the succcessor
+_ at some loss of clarity. In the version of the successor
 _ function below, `_succ' has head and tail arguments, yet
 _ no commas are visible in calls for `_succ'.
 _
@@ -814,7 +814,7 @@ _
 _       Acknowledgement and Colophon
 _
 _ I am indebted to Eric Blake for his careful reading of, and
-_ insightful comments on a previous version of this program. 
+_ insightful comments on a previous version of this program.
 _ He inspired the current implementation of the critical
 _ dollar macro and suggested `split'.
 _
@@ -915,7 +915,7 @@ _ div           integer quotient
 _ mod           integer remainder
 _ pow           integer power
 _ square
-_ compare       comparsion yielding LT, EQ, GT
+_ compare       comparison yielding LT, EQ, GT
 _ lt, le, et, ne, ge, gt
 _               numeric predicates (et = equal to)
 _ trim          delete insignificant zeros
