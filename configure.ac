@@ -141,18 +141,6 @@ if test -e "$srcdir"/.git && command -v git > /dev/null; then
 fi
 AC_MSG_RESULT(touch $st_touch)
 
-# Tandem/NSK is broken - it has 'long long int' but not
-# 'unsigned long long int', which confuses assumptions made by gnulib.
-# Simply pretend that neither type exists if both do not work.
-AC_TYPE_LONG_LONG_INT
-AC_TYPE_UNSIGNED_LONG_LONG_INT
-if test $ac_cv_type_long_long_int:$ac_cv_type_unsigned_long_long_int = yes:no
-then
-  ac_cv_type_long_long_int=no
-  AC_DEFINE([HAVE_LONG_LONG_INT], 0,
-    [Define to 1 if the system has the type `long long int'.])
-fi
-
 M4_INIT
 
 AC_CACHE_CHECK([whether an open file can be renamed],
