@@ -29,6 +29,7 @@
 #include "c-stack.h"
 #include "configmake.h"
 #include "ignore-value.h"
+#include "minmax.h"
 #include "progname.h"
 #include "propername.h"
 #include "version-etc.h"
@@ -149,19 +150,13 @@ m4_failure_at_line (int errnum, const char *file, int line,
 # define SIGBUS SIGILL
 #endif
 
-#ifndef NSIG
-# ifndef MAX
-#  define MAX(a,b) ((a) < (b) ? (b) : (a))
-# endif
-# define NSIG (MAX (SIGABRT, MAX (SIGILL, MAX (SIGFPE,  \
-                                               MAX (SIGSEGV, SIGBUS)))) + 1)
-#endif
-
 /* Pre-translated messages for program errors.  Do not translate in
    the signal handler, since gettext and strsignal are not
    async-signal-safe.  */
 static const char *volatile program_error_message;
-static const char *volatile signal_message[NSIG];
+static const char *volatile
+  signal_message[1 + MAX (MAX (MAX (SIGABRT, SIGBUS), MAX (SIGFPE, SIGILL)),
+			  SIGSEGV)];
 
 /* Print a nicer message about any programmer errors, then exit.  This
    must be aysnc-signal safe, since it is executed as a signal
