@@ -197,7 +197,7 @@ find_builtin_by_name (const char *name)
   const builtin *bp;
 
   for (bp = &builtin_tab[0]; bp->name != NULL; bp++)
-    if (STREQ (bp->name, name))
+    if (streq (bp->name, name))
       return bp;
   return bp + 1;
 }
@@ -671,7 +671,7 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
   result = 0;
   while (!result)
 
-    if (STREQ (ARG (0), ARG (1)))
+    if (streq (ARG (0), ARG (1)))
       result = 2;
 
     else

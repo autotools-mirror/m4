@@ -516,7 +516,4 @@ to_uchar (char ch)
   return ch;
 }
 
-/* Avoid negative logic when comparing two strings.  */
-#define STREQ(a, b) (strcmp (a, b) == 0)
-
 _GL_INLINE_HEADER_END

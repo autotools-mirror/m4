@@ -122,8 +122,8 @@ produce_frozen_state (const char *name)
 
   /* Dump quote delimiters.  */
 
-  if (strcmp (lquote.string, DEF_LQUOTE)
-      || strcmp (rquote.string, DEF_RQUOTE))
+  if (! (streq (lquote.string, DEF_LQUOTE)
+	 && streq (rquote.string, DEF_RQUOTE)))
     {
       xfprintf (file, "Q%d,%d\n", (int) lquote.length, (int) rquote.length);
       fputs (lquote.string, file);
@@ -133,7 +133,8 @@ produce_frozen_state (const char *name)
 
   /* Dump comment delimiters.  */
 
-  if (strcmp (bcomm.string, DEF_BCOMM) || strcmp (ecomm.string, DEF_ECOMM))
+  if (! (streq (bcomm.string, DEF_BCOMM)
+	 && streq (ecomm.string, DEF_ECOMM)))
     {
       xfprintf (file, "C%d,%d\n", (int) bcomm.length, (int) ecomm.length);
       fputs (bcomm.string, file);

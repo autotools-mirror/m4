@@ -366,7 +366,7 @@ static const struct option long_options[] = {
 static void
 process_file (const char *name)
 {
-  if (STREQ (name, "-"))
+  if (streq (name, "-"))
     {
       /* If stdin is a terminal, we want to allow 'm4 - file -'
          to read input from stdin twice, like GNU cat.  Besides,
