@@ -19,6 +19,7 @@
    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#define M4_INLINE _GL_EXTERN_INLINE
 #include "m4.h"
 
 #include <getopt.h>

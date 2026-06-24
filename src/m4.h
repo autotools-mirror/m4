@@ -93,6 +93,11 @@
 #endif
 
 #define _(msgid) gettext (msgid)
+
+_GL_INLINE_HEADER_BEGIN
+#ifndef M4_INLINE
+# define M4_INLINE _GL_INLINE
+#endif
 
 /* Various declarations.  */
 
@@ -505,15 +510,13 @@ extern void reload_frozen_state (const char *);
 /* Convert a possibly-signed character to an unsigned character.  This is
    a bit safer than casting to unsigned char, since it catches some type
    errors that the cast doesn't.  */
-#if HAVE_INLINE
-static inline unsigned char
+M4_INLINE unsigned char
 to_uchar (char ch)
 {
   return ch;
 }
-#else
-# define to_uchar(C) ((unsigned char) (C))
-#endif
 
 /* Avoid negative logic when comparing two strings.  */
 #define STREQ(a, b) (strcmp (a, b) == 0)
+
+_GL_INLINE_HEADER_END
