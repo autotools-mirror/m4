@@ -342,10 +342,6 @@ primary (int *v1)
         }
 
       /* Unary operators */
-      /* Minimize undefined C behavior on overflow.  This code assumes
-         that the implementation-defined overflow when casting
-         unsigned to signed is a silent twos-complement
-         wrap-around.  */
     case PLUS:
       return primary (v1);
     case MINUS:
@@ -404,10 +400,6 @@ parse_expr (int *v1, eval_error er, unsigned min_prec)
       switch (et)
         {
         case EXPONENT:
-          /* Minimize undefined C behavior on overflow.  This code assumes
-             that the implementation-defined overflow when casting
-             unsigned to signed is a silent twos-complement
-             wrap-around.  */
           if (v2 < 0)
             er = NEGATIVE_EXPONENT;
           else if (*v1 == 0 && v2 == 0)
