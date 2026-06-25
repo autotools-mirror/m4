@@ -32,16 +32,15 @@ arg_int (const char *str)
 {
   char *endp;
   long value;
-  size_t len = strlen (str);
 
-  if (!len)
+  if (!*str)
     {
       M4ERROR ((warning_status, 0, _("empty string treated as 0")));
       return 0;
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (endp - str - len)
+  if (*endp)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
@@ -56,16 +55,15 @@ arg_long (const char *str)
 {
   char *endp;
   long value;
-  size_t len = strlen (str);
 
-  if (!len)
+  if (!*str)
     {
       M4ERROR ((warning_status, 0, _("empty string treated as 0")));
       return 0L;
     }
   errno = 0;
   value = strtol (str, &endp, 10);
-  if (endp - str - len)
+  if (*endp)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
@@ -80,16 +78,15 @@ arg_double (const char *str)
 {
   char *endp;
   double value;
-  size_t len = strlen (str);
 
-  if (!len)
+  if (!*str)
     {
       M4ERROR ((warning_status, 0, _("empty string treated as 0")));
       return 0.0;
     }
   errno = 0;
   value = strtod (str, &endp);
-  if (endp - str - len)
+  if (*endp)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));

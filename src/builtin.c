@@ -292,10 +292,10 @@ free_macro_sequence (void)
 
 void
 define_user_macro (const char *name, int name_len, const char *text,
-                   size_t text_len, symbol_lookup mode)
+                   idx_t text_len, symbol_lookup mode)
 {
   symbol *s;
-  char *defn = xmemdup0 (text ? text : "", text_len);
+  char *defn = ximemdup0 (text ? text : "", text_len);
 
   if (text_len > INT_MAX)
     {
@@ -1033,8 +1033,8 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
     }
   while (1)
     {
-      size_t avail = obstack_room (obs);
-      size_t len;
+      idx_t avail = obstack_room (obs);
+      idx_t len;
       if (!avail)
         {
           int ch = getc (pin);
@@ -1161,8 +1161,8 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
       digits = e - s;
     }
 
-  size_t alloc;
-  if (ckd_add (&alloc, MAX (digits, min), negative))
+  idx_t alloc;
+  if (ckd_add (&alloc, MAX (digits, min), negative) || SIZE_MAX < alloc)
     xalloc_die ();
 
   obstack_blank (obs, alloc);
@@ -1456,10 +1456,10 @@ m4_sinclude (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
    OBS.  Report errors on behalf of ME.  */
 static void
 mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
-                size_t len)
+                idx_t len)
 {
   int fd;
-  size_t i;
+  int i;
   char *name;
 
   /* Guarantee that there are six trailing 'X' characters, even if the
@@ -1946,7 +1946,7 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   if (!from[1] || !from[2])
     {
       const char *p;
-      size_t len = datalen;
+      idx_t len = datalen;
       while ((p = (char *) memchr2 (data, from[0], from[1], len)))
         {
           obstack_grow (obs, data, p - data);
@@ -2027,7 +2027,6 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
             struct re_registers *regs)
 {
   int ch;
-  __re_size_t ind;
   while (1)
     {
       const char *backslash = strchr (repl, '\\');
@@ -2064,8 +2063,8 @@ Warning: \\0 will disappear, use \\& instead in replacements")));
         case '7':
         case '8':
         case '9':
-          ind = ch -= '0';
-          if (regs->num_regs - 1 <= ind)
+          ch -= '0';
+          if (regs->num_regs <= ch + 1)
             M4ERROR ((warning_status, 0,
                       _("Warning: sub-expression %d not present"), ch));
           else if (regs->end[ch] > 0)

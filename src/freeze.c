@@ -127,7 +127,7 @@ produce_frozen_state (const char *name)
   if (! (streq (lquote.string, DEF_LQUOTE)
 	 && streq (rquote.string, DEF_RQUOTE)))
     {
-      xfprintf (file, "Q%d,%d\n", (int) lquote.length, (int) rquote.length);
+      xfprintf (file, "Q%td,%td\n", lquote.length, rquote.length);
       fputs (lquote.string, file);
       fputs (rquote.string, file);
       fputc ('\n', file);
@@ -138,7 +138,7 @@ produce_frozen_state (const char *name)
   if (! (streq (bcomm.string, DEF_BCOMM)
 	 && streq (ecomm.string, DEF_ECOMM)))
     {
-      xfprintf (file, "C%d,%d\n", (int) bcomm.length, (int) ecomm.length);
+      xfprintf (file, "C%td,%td\n", bcomm.length, ecomm.length);
       fputs (bcomm.string, file);
       fputs (ecomm.string, file);
       fputc ('\n', file);
@@ -256,10 +256,10 @@ reload_frozen_state (const char *name)
         {                                                               \
           free (string[(i)]);                                           \
           allocated[(i)] = number[(i)] + 1;                             \
-          string[(i)] = xcharalloc ((size_t) allocated[(i)]);           \
+          string[(i)] = ximalloc (allocated[(i)]);                      \
         }                                                               \
       if (number[(i)] > 0                                               \
-          && !fread (string[(i)], (size_t) number[(i)], 1, file))       \
+          && !fread (string[(i)], number[(i)], 1, file))                \
         m4_failure (0, _("premature end of frozen file"));              \
       string[(i)][number[(i)]] = '\0';                                  \
       p = string[(i)];                                                  \
@@ -277,9 +277,9 @@ reload_frozen_state (const char *name)
   current_file = name;
 
   allocated[0] = 100;
-  string[0] = xcharalloc ((size_t) allocated[0]);
+  string[0] = ximalloc (allocated[0]);
   allocated[1] = 100;
-  string[1] = xcharalloc ((size_t) allocated[1]);
+  string[1] = ximalloc (allocated[1]);
 
   /* Validate format version.  Only `1' is acceptable for now.  */
   GET_DIRECTIVE;

@@ -198,9 +198,9 @@ m4_tmpname (int divnum)
   static char *tail;
   if (buffer == NULL)
     {
-      size_t dirlen = strlen (output_temp_dir->dir_name);
+      idx_t dirlen = strlen (output_temp_dir->dir_name);
       static char const subprefix[] = "/m4-";
-      size_t size = dirlen + sizeof subprefix + INT_STRLEN_BOUND (int);
+      idx_t size = dirlen + sizeof subprefix + INT_STRLEN_BOUND (int);
       buffer = obstack_alloc (&diversion_storage, size);
       memcpy (buffer, output_temp_dir->dir_name, dirlen);
       memcpy (buffer + dirlen, subprefix, sizeof subprefix - 1);
@@ -478,7 +478,7 @@ make_room_for (int length)
 
       if (selected_diversion->used > 0)
         {
-          count = fwrite (selected_buffer, (size_t) selected_diversion->used,
+          count = fwrite (selected_buffer, selected_diversion->used,
                           1, selected_diversion->u.file);
           if (count != 1)
             m4_failure (errno,
@@ -516,7 +516,7 @@ make_room_for (int length)
       /* The current buffer may be safely reallocated.  */
       {
         char *buffer = output_diversion->u.buffer;
-        output_diversion->u.buffer = xcharalloc ((size_t) wanted_size);
+        output_diversion->u.buffer = ximalloc (wanted_size);
         if (output_diversion->used)
           memcpy (output_diversion->u.buffer, buffer, output_diversion->used);
         free (buffer);
@@ -582,7 +582,7 @@ output_text (const char *text, int length)
   else
     {
       assert (output_cursor);
-      memcpy (output_cursor, text, (size_t) length);
+      memcpy (output_cursor, text, length);
       output_cursor += length;
       output_unused -= length;
     }
@@ -839,7 +839,7 @@ void
 insert_file (FILE *file)
 {
   static char buffer[COPY_BUFFER_SIZE];
-  size_t length;
+  idx_t length;
 
   /* Optimize out inserting into a sink.  */
   if (!output_diversion)

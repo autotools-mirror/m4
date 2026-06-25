@@ -106,13 +106,8 @@ static symbol **symtab;
 void
 symtab_init (void)
 {
-  size_t i;
-  symbol **s;
-
-  s = symtab = (symbol **) xnmalloc (hash_table_size, sizeof (symbol *));
-
-  for (i = 0; i < hash_table_size; i++)
-    s[i] = NULL;
+  symbol **s = xicalloc (hash_table_size, sizeof *s);
+  symtab = s;
 
 #ifdef DEBUG_SYM
   {
@@ -124,9 +119,9 @@ symtab_init (void)
 #endif /* DEBUG_SYM */
 }
 
-/*--------------------------------------------------.
-| Return a hashvalue for a string, from GNU-emacs.  |
-`--------------------------------------------------*/
+/*----------------------------------.
+| Return a hashvalue for a string.  |
+`----------------------------------*/
 
 static size_t ATTRIBUTE_PURE
 hash (const char *s)
@@ -135,6 +130,10 @@ hash (const char *s)
 
   register const char *ptr = s;
   register char ch;
+
+  /* Check that INT_MAX < SIZE_MAX, which is true on all known platforms.
+     Otherwise, this loop could have undefined behavior on overflow.  */
+  static_assert (INT_MAX < SIZE_MAX);
 
   while ((ch = *ptr++) != '\0')
     val = (val << 7) + (val >> (sizeof (val) * CHAR_BIT - 7)) + ch;
@@ -153,8 +152,8 @@ free_symbol (symbol *sym)
       SYMBOL_DELETED (sym) = true;
       if (SYMBOL_STACK (sym))
         {
-          SYMBOL_NAME (sym) = xmemdup0 (SYMBOL_NAME (sym),
-                                        SYMBOL_NAME_LEN (sym));
+          SYMBOL_NAME (sym) = ximemdup0 (SYMBOL_NAME (sym),
+                                         SYMBOL_NAME_LEN (sym));
           SYMBOL_STACK (sym) = NULL;
         }
     }
@@ -296,7 +295,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
         }
       else
         {
-          SYMBOL_NAME (sym) = xmemdup0 (name, len);
+          SYMBOL_NAME (sym) = ximemdup0 (name, len);
           SYMBOL_NAME_LEN (sym) = len;
         }
       return sym;
@@ -345,7 +344,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
             SYMBOL_TYPE (sym) = TOKEN_VOID;
             SYMBOL_TRACED (sym) = true;
             sym->hash = h;
-            SYMBOL_NAME (sym) = xmemdup0 (name, len);
+            SYMBOL_NAME (sym) = ximemdup0 (name, len);
             SYMBOL_NAME_LEN (sym) = len;
             SYMBOL_MACRO_ARGS (sym) = false;
             SYMBOL_BLIND_NO_ARGS (sym) = false;
@@ -381,16 +380,13 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
 void
 hack_all_symbols (hack_symbol *func, void *data)
 {
-  size_t h;
-  symbol *sym;
-  symbol *next;
-
-  for (h = 0; h < hash_table_size; h++)
+  for (idx_t h = 0; h < hash_table_size; h++)
     {
       /* We allow func to call SYMBOL_POPDEF, which can invalidate
          sym, so we must grab the next element to traverse before
          calling func.  */
-      for (sym = symtab[h]; sym != NULL; sym = next)
+      symbol *next;
+      for (symbol *sym = symtab[h]; sym != NULL; sym = next)
         {
           next = sym->next;
           func (sym, data);
@@ -438,15 +434,11 @@ symtab_debug (void)
 static void
 symtab_print_list (int i)
 {
-  symbol *sym;
-  symbol *bucket;
-  size_t h;
-
   xprintf ("Symbol dump #%d:\n", i);
-  for (h = 0; h < hash_table_size; h++)
-    for (bucket = symtab[h]; bucket != NULL; bucket = bucket->next)
-      for (sym = bucket; sym; sym = sym->stack)
-        xprintf ("\tname %s, len %i, hash %zu, bucket %zu, addr %p, "
+  for (idx_t h = 0; h < hash_table_size; h++)
+    for (symbol *bucket = symtab[h]; bucket != NULL; bucket = bucket->next)
+      for (symbol *sym = bucket; sym; sym = sym->stack)
+        xprintf ("\tname %s, len %i, hash %zu, bucket %tu, addr %p, "
                  "stack %p, next %p, flags%s%s, pending %d\n",
                  SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym),
                  sym->hash, h, sym, SYMBOL_STACK (sym),

@@ -145,7 +145,7 @@ expand_argument (struct obstack *obs, token_data *argp, bool groks_macro)
   int paren_level;
   const char *file = current_file;
   int line = current_line;
-  size_t len;
+  idx_t len;
 
   TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
 
@@ -321,7 +321,7 @@ static void
 expand_macro (symbol *sym)
 {
   struct obstack arguments;     /* Alternate obstack if argc_stack is busy.  */
-  size_t argv_base;             /* Size of argv_stack on entry.  */
+  idx_t argv_base;              /* Size of argv_stack on entry.  */
   bool use_argc_stack = true;   /* Whether argc_stack is safe.  */
   token_data **argv;
   int argc;

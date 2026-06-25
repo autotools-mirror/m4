@@ -285,7 +285,7 @@ push_string_finish (void)
 
   if (obstack_object_size (current_input) > 0)
     {
-      size_t len = obstack_object_size (current_input);
+      idx_t len = obstack_object_size (current_input);
       obstack_1grow (current_input, '\0');
       next->u.u_s.string = (char *) obstack_finish (current_input);
       next->u.u_s.end = next->u.u_s.string + len;
@@ -312,7 +312,7 @@ push_string_finish (void)
 void
 push_wrapup (const char *s)
 {
-  size_t len = strlen (s);
+  idx_t len = strlen (s);
   input_block *i;
   i = (input_block *) obstack_alloc (wrapup_stack,
                                      sizeof (struct input_block));
@@ -801,7 +801,7 @@ set_word_regexp (const char *regexp)
      The fastmap can be reused between compilations, and will be freed
      by the final regfree.  */
   if (!word_regexp.fastmap)
-    word_regexp.fastmap = xcharalloc (UCHAR_MAX + 1);
+    word_regexp.fastmap = ximalloc (UCHAR_MAX + 1);
   msg = re_compile_pattern (regexp, strlen (regexp), &word_regexp);
   assert (!msg);
   re_set_registers (&word_regexp, &regs, regs.num_regs, regs.start, regs.end);
@@ -984,7 +984,7 @@ next_token (token_data *td, int *line)
                                 ? isp->u.u_s.string : NULL);
           if (buffer && *buffer)
             {
-              size_t len = isp->u.u_s.end - buffer;
+              idx_t len = isp->u.u_s.end - buffer;
               const char *p = buffer;
               do
                 {

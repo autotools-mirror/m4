@@ -46,6 +46,7 @@
 #include "dirname.h"
 #include "exitfail.h"
 #include "filenamecat.h"
+#include "idx.h"
 #include "intprops.h"
 #include "obstack.h"
 #include "stdio--.h"
@@ -104,7 +105,7 @@ _GL_INLINE_HEADER_BEGIN
 struct string
 {
   char *string;                 /* characters of the string */
-  size_t length;                /* length of the string */
+  idx_t length;                 /* length of the string */
 };
 typedef struct string STRING;
 
@@ -130,7 +131,7 @@ typedef unsigned int bool_bitfield;
 /* Option flags.  */
 extern int sync_output;         /* -s */
 extern int debug_level;         /* -d */
-extern size_t hash_table_size;  /* -H */
+extern idx_t hash_table_size;   /* -H */
 extern int no_gnu_extensions;   /* -G */
 extern int prefix_all_builtins; /* -P */
 extern int max_debug_argument_length;   /* -l */
@@ -451,7 +452,7 @@ extern void builtin_init (void);
 extern void define_builtin (const char *, const builtin *, symbol_lookup);
 extern void set_macro_sequence (const char *);
 extern void free_macro_sequence (void);
-extern void define_user_macro (const char *, int, const char *, size_t,
+extern void define_user_macro (const char *, int, const char *, idx_t,
                                symbol_lookup);
 extern void undivert_all (void);
 extern void expand_user_macro (struct obstack *, symbol *, int,

@@ -25,6 +25,7 @@
 #include <getopt.h>
 #include <limits.h>
 #include <signal.h>
+#include <stdckdint.h>
 
 #include "c-stack.h"
 #include "configmake.h"
@@ -51,7 +52,7 @@ int sync_output = 0;
 int debug_level = 0;
 
 /* Hash table size (should be a prime) (-Hsize).  */
-size_t hash_table_size = HASHMAX;
+idx_t hash_table_size = HASHMAX;
 
 /* Disable GNU extensions (-G).  */
 int no_gnu_extensions = 0;
@@ -538,9 +539,11 @@ main (int argc, char *const *argv)
         break;
 
       case 'H':
-        hash_table_size = strtol (optarg, NULL, 10);
-        if (hash_table_size == 0)
-          hash_table_size = HASHMAX;
+        {
+          long int s = strtol (optarg, NULL, 10);
+          if (!s || ckd_add (&hash_table_size, s, 0))
+            hash_table_size = HASHMAX;
+        }
         break;
 
       case 'I':
