@@ -83,7 +83,7 @@ profile_strcmp (const char *s1, const char *s2)
       s2++;
       i++;
     }
-  result = (unsigned char) *s1 - (unsigned char) *s2;
+  result = to_uchar (*s1) - to_uchar (*s2);
   profiles[current_mode].comparisons++;
   if (result != 0)
     profiles[current_mode].misses++;
@@ -446,11 +446,10 @@ symtab_print_list (int i)
   for (h = 0; h < hash_table_size; h++)
     for (bucket = symtab[h]; bucket != NULL; bucket = bucket->next)
       for (sym = bucket; sym; sym = sym->stack)
-        xprintf ("\tname %s, len %i, hash %lu, bucket %lu, addr %p, "
+        xprintf ("\tname %s, len %i, hash %zu, bucket %zu, addr %p, "
                  "stack %p, next %p, flags%s%s, pending %d\n",
                  SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym),
-                 (unsigned long int) sym->hash,
-                 (unsigned long int) h, sym, SYMBOL_STACK (sym),
+                 sym->hash, h, sym, SYMBOL_STACK (sym),
                  sym->next,
                  SYMBOL_TRACED (sym) ? " traced" : "",
                  SYMBOL_DELETED (sym) ? " deleted" : "",

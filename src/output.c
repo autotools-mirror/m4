@@ -1018,12 +1018,10 @@ freeze_diversions (FILE *file)
               diversion->u.file = m4_tmpopen (diversion->divnum, true);
               if (fstat (fileno (diversion->u.file), &file_stat) < 0)
                 m4_failure (errno, _("cannot stat diversion"));
-              if (file_stat.st_size < 0
-                  || (file_stat.st_size + 0UL
-                      != (unsigned long int) file_stat.st_size))
-                m4_failure (0, _("diversion too large"));
-              xfprintf (file, "D%d,%lu\n", diversion->divnum,
-                        (unsigned long int) file_stat.st_size);
+              if (file_stat.st_size < 0)
+                m4_failure (0, _("diversion file size is negative"));
+              xfprintf (file, "D%d,%jd\n", diversion->divnum,
+                        (intmax_t) {file_stat.st_size});
             }
 
           insert_diversion_helper (diversion);

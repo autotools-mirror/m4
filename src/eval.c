@@ -88,7 +88,7 @@ typedef enum eval_error
 eval_error;
 
 static eval_error primary (int *);
-static eval_error parse_expr (int *, eval_error, unsigned);
+static eval_error parse_expr (int *, eval_error, int);
 
 /*--------------------.
 | Lexical functions.  |
@@ -129,7 +129,7 @@ eval_lex (int *val)
 
   if (c_isdigit (*eval_text))
     {
-      unsigned int base, digit;
+      int base, digit;
       int value;
       bool seen_digit = false;
 
@@ -372,7 +372,7 @@ primary (int *v1)
 
 /* Parse binary operators with at least MIN_PREC precedence.  */
 static eval_error
-parse_expr (int *v1, eval_error er, unsigned min_prec)
+parse_expr (int *v1, eval_error er, int min_prec)
 {
   eval_token et;
   eval_token et2;
