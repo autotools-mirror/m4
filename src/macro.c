@@ -321,7 +321,7 @@ static void
 expand_macro (symbol *sym)
 {
   struct obstack arguments;     /* Alternate obstack if argc_stack is busy.  */
-  unsigned argv_base;           /* Size of argv_stack on entry.  */
+  size_t argv_base;             /* Size of argv_stack on entry.  */
   bool use_argc_stack = true;   /* Whether argc_stack is safe.  */
   token_data **argv;
   int argc;
