@@ -33,6 +33,8 @@
 
 #include "m4.h"
 #include <limits.h>
+#include <stdbit.h>
+#include <stdckdint.h>
 
 #ifdef DEBUG_SYM
 /* When evaluating hash table performance, this profiling code shows
@@ -126,17 +128,9 @@ symtab_init (void)
 static size_t ATTRIBUTE_PURE
 hash (const char *s)
 {
-  register size_t val = 0;
-
-  register const char *ptr = s;
-  register char ch;
-
-  /* Check that INT_MAX < SIZE_MAX, which is true on all known platforms.
-     Otherwise, this loop could have undefined behavior on overflow.  */
-  static_assert (INT_MAX < SIZE_MAX);
-
-  while ((ch = *ptr++) != '\0')
-    val = (val << 7) + (val >> (sizeof (val) * CHAR_BIT - 7)) + ch;
+  size_t val = 0;
+  for (; *s; s++)
+    ckd_add (&val, stdc_rotate_left (val, 7), *s);
   return val;
 }
 
