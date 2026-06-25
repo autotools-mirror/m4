@@ -1117,20 +1117,20 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   else if (evaluate (expr, &value))
     return;
 
-  /* Check that unsigned int avoids overflow when computing absolute value.
-     Although C89 did not require this to work, all known C platforms
-     so so, even ClearPath Libra where INT_MAX == UINT_MAX.  */
-  static_assert (INT_MAX <= UINT_MAX);
-  /* -INT_MIN could overflow, so check for -INT_MIN <= INT_MAX this way:  */
-  static_assert (-1 - INT_MIN < UINT_MAX);
-
   bool negative = value < 0;
-  unsigned int uvalue = value, abs_value = negative ? -uvalue : uvalue, digits;
+
+  /* Unsigned, so that 2**31 fits.  This works on all GNU targets, as
+     the GNU coding standards say that unsigned has at least 32 bits.
+     Verify the GNU assumption, but do not assume that unsigned int
+     has exactly 32 bits.  */
+  static_assert (UINT_MAX >> 31 != 0);
+  unsigned int abs_value =
+    negative ? - (unsigned int) {value} & 0xffffffff : value;
+  unsigned int digits;
 
   /* Value buffer when radix != 1.  32 bytes is enough, as the value
      is at most 32 bits and base 2 is the worst case.  */
   char valbuf[32];
-  char *e = valbuf + sizeof valbuf;
 
   /* Pacify GCC 16.1's "'s' may be used before initialized".  */
   #if _GL_GNUC_PREREQ (4, 7)
@@ -1139,23 +1139,24 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   #endif
 
   char *s;
+  char *e;
 
   if (radix == 1)
     digits = abs_value;
   else
     {
       unsigned int v = abs_value;
-      s = e;
+      s = e = valbuf + sizeof valbuf;
 
       do
-	{
-	  /* Digits for number to ASCII conversions.  */
-	  static char const _GL_ATTRIBUTE_NONSTRING digit_array[36] =
-	    "0123456789abcdefghijklmnopqrstuvwxyz";
+        {
+          /* Digits for number to ASCII conversions.  */
+          static char const _GL_ATTRIBUTE_NONSTRING digit_array[36] =
+            "0123456789abcdefghijklmnopqrstuvwxyz";
 
-	  *--s = digit_array[v % radix];
-	  v /= radix;
-	}
+          *--s = digit_array[v % radix];
+          v /= radix;
+        }
       while (0 < v);
 
       digits = e - s;
@@ -1188,12 +1189,12 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (radix == 1)
     {
       while (digits--)
-	*p++ = '1';
+        *p++ = '1';
     }
   else
     {
       do
-	*p++ = *s++;
+        *p++ = *s++;
       while (s < e);
     }
 
