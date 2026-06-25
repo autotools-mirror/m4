@@ -25,11 +25,16 @@
 #include "m4.h"
 
 #include "execute.h"
+#include "inttostr.h"
+#include "intprops.h"
 #include "memchr2.h"
+#include "minmax.h"
 #include "progname.h"
 #include "regex.h"
 #include "spawn-pipe.h"
 #include "wait-process.h"
+
+#include <stdckdint.h>
 
 #define ARG(i) (argc > (i) ? TOKEN_DATA_TEXT (argv[i]) : "")
 #define ARGLEN(i) (argc > (i) ? TOKEN_DATA_LEN (argv[i]) : 0)
@@ -431,7 +436,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
   else
     {
       errno = 0;
-      *valuep = strtol (arg, &endp, 10);
+      long int value = strtol (arg, &endp, 10);
       if (*endp != '\0')
         {
           M4ERROR ((warning_status, 0,
@@ -439,59 +444,18 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
                     TOKEN_DATA_TEXT (macro)));
           return false;
         }
+      bool range_error = errno == ERANGE;
       if (c_isspace (*arg))
         M4ERROR ((warning_status, 0,
                   _("leading whitespace ignored in builtin `%s'"),
                   TOKEN_DATA_TEXT (macro)));
-      else if (errno == ERANGE)
+      if (ckd_add (valuep, value, 0)
+	  || *valuep != toint32 (*valuep) || range_error)
         M4ERROR ((warning_status, 0,
                   _("numeric overflow detected in builtin `%s'"),
                   TOKEN_DATA_TEXT (macro)));
     }
   return true;
-}
-
-/*------------------------------------------------------.
-| The function ntoa () converts VALUE to a signed ASCII |
-| representation in radix RADIX.                        |
-`------------------------------------------------------*/
-
-/* Digits for number to ASCII conversions.  */
-static char const digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-const char *
-ntoa (int32_t value, int radix, const char **end)
-{
-  bool negative;
-  uint32_t uvalue;
-  static char str[256];
-  char *s = &str[sizeof str];
-
-  *--s = '\0';
-  if (end)
-    *end = s;
-
-  if (value < 0)
-    {
-      negative = true;
-      uvalue = -(uint32_t) value;
-    }
-  else
-    {
-      negative = false;
-      uvalue = (uint32_t) value;
-    }
-
-  do
-    {
-      *--s = digits[uvalue % radix];
-      uvalue /= radix;
-    }
-  while (uvalue > 0);
-
-  if (negative)
-    *--s = '-';
-  return s;
 }
 
 /*---------------------------------------------------------------.
@@ -502,10 +466,9 @@ ntoa (int32_t value, int radix, const char **end)
 static void
 shipout_int (struct obstack *obs, int val)
 {
-  const char *s;
-  const char *e;
-
-  s = ntoa ((int32_t) val, 10, &e);
+  char buf[INT_BUFSIZE_BOUND (int)];
+  char const *s = inttostr (toint32 (val), buf);
+  char const *e = buf + sizeof buf - 1;
   obstack_grow (obs, s, e - s);
 }
 
@@ -1120,11 +1083,9 @@ m4_sysval (struct obstack *obs, int argc MAYBE_UNUSED,
 static void
 m4_eval (struct obstack *obs, int argc, token_data **argv)
 {
-  int32_t value = 0;
+  int value = 0;
   int radix = 10;
   int min = 1;
-  const char *s;
-  const char *e;
   const char *expr = ARG (1);
   const char *base = ARG (2);
 
@@ -1156,33 +1117,89 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   else if (evaluate (expr, &value))
     return;
 
+  /* Check that unsigned int avoids overflow when computing absolute value.
+     Although C89 did not require this to work, all known C platforms
+     so so, even ClearPath Libra where INT_MAX == UINT_MAX.  */
+  static_assert (INT_MAX <= UINT_MAX);
+  /* -INT_MIN could overflow, so check for -INT_MIN <= INT_MAX this way:  */
+  static_assert (-1 - INT_MIN < UINT_MAX);
+
+  bool negative = value < 0;
+  unsigned int uvalue = value, abs_value = negative ? -uvalue : uvalue, digits;
+
+  /* Value buffer when radix != 1.  32 bytes is enough, as the value
+     is at most 32 bits and base 2 is the worst case.  */
+  char valbuf[32];
+  char *e = valbuf + sizeof valbuf;
+
+  /* Pacify GCC 16.1's "'s' may be used before initialized".  */
+  #if _GL_GNUC_PREREQ (4, 7)
+  # pragma GCC diagnostic push
+  # pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+  #endif
+
+  char *s;
+
+  if (radix == 1)
+    digits = abs_value;
+  else
+    {
+      unsigned int v = abs_value;
+      s = e;
+
+      do
+	{
+	  /* Digits for number to ASCII conversions.  */
+	  static char const _GL_ATTRIBUTE_NONSTRING digit_array[36] =
+	    "0123456789abcdefghijklmnopqrstuvwxyz";
+
+	  *--s = digit_array[v % radix];
+	  v /= radix;
+	}
+      while (0 < v);
+
+      digits = e - s;
+    }
+
+  size_t alloc;
+  if (ckd_add (&alloc, MAX (digits, min), negative))
+    xalloc_die ();
+
+  obstack_blank (obs, alloc);
+  char *p = obstack_next_free (obs) - alloc;
+
+  /* Copy sign, leading zeros, digits, and trailing NUL byte into the
+     newly allocated area.  Do not call memset or memcpy, as this
+     would likely make performance worse as the number of bytes is
+     typically small.  */
+
+  if (negative)
+    *p++ = '-';
+
+  if (digits < min)
+    {
+      /* Since DIGITS < MIN, their difference fits in int.  */
+      int lz = min - digits;
+      do
+	*p++ = '0';
+      while (--lz);
+    }
+
   if (radix == 1)
     {
-      if (value < 0)
-        {
-          obstack_1grow (obs, '-');
-          value = -value;
-        }
-      /* This assumes 2's-complement for correctly handling INT_MIN.  */
-      while (min-- - value > 0)
-        obstack_1grow (obs, '0');
-      while (value-- != 0)
-        obstack_1grow (obs, '1');
-      obstack_1grow (obs, '\0');
-      return;
+      while (digits--)
+	*p++ = '1';
     }
-
-  s = ntoa (value, radix, &e);
-
-  if (*s == '-')
+  else
     {
-      obstack_1grow (obs, '-');
-      s++;
+      do
+	*p++ = *s++;
+      while (s < e);
     }
-  for (min -= e - s; --min >= 0;)
-    obstack_1grow (obs, '0');
 
-  obstack_grow (obs, s, e - s);
+  #if _GL_GNUC_PREREQ (4, 7)
+  # pragma GCC diagnostic pop
+  #endif
 }
 
 static void
@@ -1196,12 +1213,8 @@ m4_incr (struct obstack *obs, int argc, token_data **argv)
   if (!numeric_arg (argv[0], ARG (1), &value))
     return;
 
-  /* Minimize undefined C behavior on overflow.  This code assumes
-     that the implementation-defined overflow when casting unsigned to
-     signed is a silent twos-complement wrap-around.  */
-  uint32_t v = value;
-  int32_t w = v + 1;
-  shipout_int (obs, w);
+  ckd_add (&value, value, 1);
+  shipout_int (obs, value);
 }
 
 static void
@@ -1215,12 +1228,8 @@ m4_decr (struct obstack *obs, int argc, token_data **argv)
   if (!numeric_arg (argv[0], ARG (1), &value))
     return;
 
-  /* Minimize undefined C behavior on overflow.  This code assumes
-     that the implementation-defined overflow when casting unsigned to
-     signed is a silent twos-complement wrap-around.  */
-  uint32_t v = value;
-  int32_t w = v - 1;
-  shipout_int (obs, w);
+  ckd_sub (&value, value, 1);
+  shipout_int (obs, value);
 }
 
 /* This section contains the macros "divert", "undivert" and "divnum" for
@@ -1487,13 +1496,15 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
     return;
   if (no_gnu_extensions)
     {
-      /* POSIX states "any trailing 'X' characters [are] replaced with
+      /* POSIX.1-2017 states "any trailing 'X' characters [are] replaced with
          the current process ID as a string", without referencing the
          file system.  Horribly insecure, but we have to do it when we
          are in traditional mode.
 
+	 POSIX.1-2024 removed this function; perhaps GNU m4 should too.
+
          For reference, Solaris m4 does:
-         maketemp() -> `'
+         maketemp() -> `' in Solaris 10, core dump in Solaris 11
          maketemp(X) -> `X'
          maketemp(XX) -> `Xn', where n is last digit of pid
          maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
@@ -1502,6 +1513,7 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
       int len = ARGLEN (1);
       int i;
       int len2;
+      char pidbuf[INT_BUFSIZE_BOUND (intmax_t)];
       const char *e;
 
       M4ERROR ((warning_status, 0, _("recommend using mkstemp instead")));
@@ -1509,7 +1521,8 @@ m4_maketemp (struct obstack *obs, int argc, token_data **argv)
         if (str[i - 1] != 'X')
           break;
       obstack_grow (obs, str, i);
-      str = ntoa ((int32_t) getpid (), 10, &e);
+      str = imaxtostr (getpid (), pidbuf);
+      e = pidbuf + sizeof pidbuf - 1;
       len2 = e - str;
       if (len2 > len - i)
         obstack_grow0 (obs, str + len2 - (len - i), len - i);

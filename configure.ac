@@ -108,10 +108,13 @@ if test "$gl_gcc_warnings" = yes; then
     gl_WARN_ADD([$w])
   done
 
-  # Gnulib turns on -Wformat=2, which implies -Wformat-nonliteral, but
-  # we temporarily override it in format.c if possible.
+  gl_WARN_ADD([-Wno-sign-compare])     # Too many warnings for now
+
+  # Gnulib enables -Wformat-nonliteral and -Wmaybe-uninitialized,
+  # and we temporarily suppress them with pragma push.
   if test $M4_cv_gcc_pragma_push_works = no; then
     gl_WARN_ADD([-Wno-format-nonliteral])
+    gl_WARN_ADD([-Wno-maybe-uninitialized])
   fi
 
   AC_SUBST([WARN_CFLAGS])

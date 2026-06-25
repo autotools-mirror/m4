@@ -26,6 +26,7 @@
 
 #include "gl_avltree_oset.h"
 #include "gl_xoset.h"
+#include "inttostr.h"
 
 /* Work around a bogus GCC warning
    <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=116426>.  */
@@ -689,13 +690,14 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
 
           if (output_current_line != line)
             {
+              char linebuf[INT_BUFSIZE_BOUND (int)];
               OUTPUT_CHARACTER ('#');
               OUTPUT_CHARACTER ('l');
               OUTPUT_CHARACTER ('i');
               OUTPUT_CHARACTER ('n');
               OUTPUT_CHARACTER ('e');
               OUTPUT_CHARACTER (' ');
-              for (cursor = ntoa (line, 10, NULL); *cursor; cursor++)
+              for (cursor = inttostr (line, linebuf); *cursor; cursor++)
                 OUTPUT_CHARACTER (*cursor);
               if (output_current_line < 1 && current_file[0] != '\0')
                 {

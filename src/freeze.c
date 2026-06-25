@@ -23,6 +23,8 @@
 
 #include "m4.h"
 
+#include <stdckdint.h>
+
 /*-------------------------------------------------------------------.
 | Destructively reverse a symbol list and return the reversed list.  |
 `-------------------------------------------------------------------*/
@@ -203,17 +205,19 @@ reload_frozen_state (const char *name)
     }                                                           \
   while (0)
 
-#define GET_NUMBER(Number, AllowNeg)                            \
+#define GET_NUMBER(Number, Neg)                                 \
   do                                                            \
     {                                                           \
-      unsigned int n = 0;                                       \
-      while (c_isdigit (character) && n <= INT_MAX / 10U)       \
+      int n = 0;                                                \
+      bool v = false;                                           \
+      while (c_isdigit (character))                             \
         {                                                       \
-          n = 10 * n + character - '0';                         \
+          v |= ckd_mul (&n, n, 10);                             \
+          int d = character - '0';                              \
+          v |= (Neg) ? ckd_sub (&n, n, d) : ckd_add (&n, n, d); \
           GET_CHARACTER;                                        \
         }                                                       \
-      if (((AllowNeg) ? INT_MIN : INT_MAX) + 0U < n             \
-          || c_isdigit (character))                             \
+      if (v)                                                    \
         m4_failure (0, _("integer overflow in frozen file"));   \
       (Number) = n;                                             \
     }                                                           \
@@ -312,7 +316,6 @@ reload_frozen_state (const char *name)
             {
               GET_CHARACTER;
               GET_NUMBER (number[0], true);
-              number[0] = -number[0];
             }
           else
             GET_NUMBER (number[0], false);

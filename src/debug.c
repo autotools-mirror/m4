@@ -24,6 +24,8 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 
+#include "inttostr.h"
+
 /* File for debugging output.  */
 FILE *debug = NULL;
 
@@ -263,6 +265,8 @@ trace_format (const char *fmt, ...)
 
   while (true)
     {
+      char sbuf[INT_BUFSIZE_BOUND (int)];
+
       while ((ch = *fmt++) != '\0' && ch != '%')
         obstack_1grow (&trace, ch);
 
@@ -289,7 +293,7 @@ trace_format (const char *fmt, ...)
 
         case 'd':
           d = va_arg (args, int);
-          s = ntoa (d, 10, NULL);
+          s = inttostr (d, sbuf);
           break;
 
         default:

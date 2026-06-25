@@ -464,7 +464,6 @@ extern void m4_placeholder (struct obstack *, int, token_data **)
 
 extern void init_pattern_buffer (struct re_pattern_buffer *,
                                  struct re_registers *);
-extern const char *ntoa (int32_t, int, const char **);
 
 extern const builtin *find_builtin_by_addr (builtin_func *);
 extern const builtin *find_builtin_by_name (const char *);
@@ -478,7 +477,7 @@ extern FILE *m4_path_search (const char *, bool, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-extern bool evaluate (const char *, int32_t *);
+extern bool evaluate (const char *, int *);
 
 /* File: format.c  --- printf like formatting.  */
 
@@ -514,6 +513,20 @@ M4_INLINE unsigned char
 to_uchar (char ch)
 {
   return ch;
+}
+
+/* The low-order 31 bits of a nonnegative m4 integer.
+   This equals INT32_MAX in the usual case where INT32_MAX is defined.  */
+enum { int32_max = 0x7fffffff };
+
+/* Convert an int to its low order 32 bits.  On typical platforms
+   this is the identity function and is optimized away.  */
+M4_INLINE int
+toint32 (int val)
+{
+  return (0 <= val ? val & int32_max
+          : INT_MIN < -INT_MAX ? val | (-1 - int32_max)
+          : -(-val & int32_max));
 }
 
 _GL_INLINE_HEADER_END

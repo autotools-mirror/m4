@@ -26,6 +26,8 @@
 
 #include "m4.h"
 
+#include <stdckdint.h>
+
 /* Evaluates token types.  */
 
 #define MIN_PREC 1
@@ -85,8 +87,8 @@ typedef enum eval_error
 }
 eval_error;
 
-static eval_error primary (int32_t *);
-static eval_error parse_expr (int32_t *, eval_error, unsigned);
+static eval_error primary (int *);
+static eval_error parse_expr (int *, eval_error, unsigned);
 
 /*--------------------.
 | Lexical functions.  |
@@ -115,7 +117,7 @@ eval_undo (void)
 /* VAL is numerical value, if any.  */
 
 static eval_token
-eval_lex (int32_t *val)
+eval_lex (int *val)
 {
   while (c_isspace (*eval_text))
     eval_text++;
@@ -128,10 +130,7 @@ eval_lex (int32_t *val)
   if (c_isdigit (*eval_text))
     {
       unsigned int base, digit;
-      /* The documentation says that "overflow silently results in wraparound".
-         Therefore use an unsigned integer type to avoid undefined behaviour
-         when parsing '-2147483648'.  */
-      uint32_t value;
+      int value;
       bool seen_digit = false;
 
       if (*eval_text == '0')
@@ -185,7 +184,7 @@ eval_lex (int32_t *val)
           if (base == 1)
             {
               if (digit == 1)
-                value++;
+                ckd_add (&value, value, 1);
               else if (digit == 0 && value == 0)
                 continue;
               else
@@ -194,9 +193,12 @@ eval_lex (int32_t *val)
           else if (digit >= base)
             return BADNUM;
           else
-            value = value * base + digit;
+            {
+              ckd_mul (&value, value, base);
+              ckd_add (&value, value, digit);
+            }
         }
-      *val = value;
+      *val = toint32 (value);
       if (!seen_digit)
         return BADNUM;
       return NUMBER;
@@ -308,10 +310,10 @@ eval_lex (int32_t *val)
 
 /* Parse `(expr)', unary operators, and numbers.  */
 static eval_error
-primary (int32_t *v1)
+primary (int *v1)
 {
   eval_error er;
-  int32_t v2;
+  int v2;
 
   switch (eval_lex (v1))
     {
@@ -348,7 +350,8 @@ primary (int32_t *v1)
       return primary (v1);
     case MINUS:
       er = primary (v1);
-      *v1 = (int32_t) -(uint32_t) *v1;
+      ckd_sub (v1, 0, *v1);
+      *v1 = toint32 (*v1);
       return er;
     case NOT:
       er = primary (v1);
@@ -356,7 +359,7 @@ primary (int32_t *v1)
       return er;
     case LNOT:
       er = primary (v1);
-      *v1 = *v1 == 0 ? 1 : 0;
+      *v1 = *v1 == 0;
       return er;
 
       /* Anything else */
@@ -373,16 +376,13 @@ primary (int32_t *v1)
 
 /* Parse binary operators with at least MIN_PREC precedence.  */
 static eval_error
-parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
+parse_expr (int *v1, eval_error er, unsigned min_prec)
 {
   eval_token et;
   eval_token et2;
   eval_error er2;
-  int32_t v2;
-  int32_t v3;
-  uint32_t u1;
-  uint32_t u2;
-  uint32_t u3;
+  int v2;
+  int v3;
 
   if (er >= SYNTAX_ERROR)
     return er;
@@ -414,29 +414,31 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
             er = DIVIDE_ZERO;
           else
             {
-              u1 = *v1;
-              u2 = v2;
-              u3 = 1;
+              int u1 = *v1, u2 = v2, u3 = 1;
               while (u2)
                 {
                   if (u2 & 1)
-                    u3 *= u1;
-                  u1 *= u1;
+                    ckd_mul (&u3, u3, u1);
+                  ckd_mul (&u1, u1, u1);
                   u2 >>= 1;
                 }
-              *v1 = u3;
+              *v1 = toint32 (u3);
             }
           break;
 
         case TIMES:
-          *v1 = (int32_t) ((uint32_t) *v1 * (uint32_t) v2);
+          ckd_mul (v1, *v1, v2);
+          *v1 = toint32 (*v1);
           break;
         case DIVIDE:
           if (v2 == 0)
             er = DIVIDE_ZERO;
           else if (v2 == -1)
-            /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
-            *v1 = (int32_t) -(uint32_t) *v1;
+            {
+              /* Avoid overflow, and the x86 SIGFPE on INT_MIN / -1.  */
+              ckd_sub (v1, 0, *v1);
+              *v1 = toint32 (*v1);
+            }
           else
             *v1 /= v2;
           break;
@@ -451,21 +453,20 @@ parse_expr (int32_t *v1, eval_error er, unsigned min_prec)
           break;
 
         case PLUS:
-          *v1 = (int32_t) ((uint32_t) *v1 + (uint32_t) v2);
+          ckd_add (v1, *v1, v2);
+          *v1 = toint32 (*v1);
           break;
         case MINUS:
-          *v1 = (int32_t) ((uint32_t) *v1 - (uint32_t) v2);
+          ckd_sub (v1, *v1, v2);
+          *v1 = toint32 (*v1);
           break;
 
         case LSHIFT:
-          u1 = *v1;
-          u1 <<= (uint32_t) (v2 & 0x1f);
-          *v1 = u1;
+          ckd_add (v1, (unsigned int) {*v1} << (v2 & 0x1f), 0);
+          *v1 = toint32 (*v1);
           break;
         case RSHIFT:
-          u1 = *v1 < 0 ? ~*v1 : *v1;
-          u1 >>= (uint32_t) (v2 & 0x1f);
-          *v1 = *v1 < 0 ? ~u1 : u1;
+          *v1 = *v1 < 0 ? ~(~*v1 >> (v2 & 0x1f)) : *v1 >> (v2 & 0x1f);
           break;
 
         case GT:
@@ -536,7 +537,7 @@ Warning: recommend ==, not =, for equality operator")));
 `---------------------------------------*/
 
 bool
-evaluate (const char *expr, int32_t *val)
+evaluate (const char *expr, int *val)
 {
   eval_error err;
 
