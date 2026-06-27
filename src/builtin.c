@@ -1923,7 +1923,6 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
   const char *from = ARG (2);
   const char *to;
   char map[UCHAR_MAX + 1];
-  char found[UCHAR_MAX + 1];
   unsigned char ch;
 
   if (bad_argc (argv[0], argc, 3, 4) || !*data || !*from)
@@ -1976,27 +1975,18 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
      from-to mapping in one pass of from, then use that map in one
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
-     hence the found map.  */
-  memset (map, 0, sizeof map);
-  memset (found, 0, sizeof found);
-  for (; (ch = *from) != '\0'; from++)
-    {
-      if (!found[ch])
-        {
-          found[ch] = 1;
-          map[ch] = *to;
-        }
-      if (*to != '\0')
-        to++;
-    }
+     hence the traversal backward from MIN (fromlen, tolen).  */
+  for (int i = 0; i < sizeof map; i++)
+    map[i] = i;
+  int fromlen = strlen (from), tolen = strlen (to);
+  for (int i = tolen; i < fromlen; i++)
+    map[to_uchar (from[i])] = '\0';
+  for (int i = MIN (fromlen, tolen); 0 <= --i; )
+    map[to_uchar (from[i])] = to[i];
 
   for (data = ARG (1); (ch = *data) != '\0'; data++)
-    {
-      if (!found[ch])
-        obstack_1grow (obs, ch);
-      else if (map[ch])
-        obstack_1grow (obs, map[ch]);
-    }
+    if (map[ch])
+      obstack_1grow (obs, map[ch]);
 }
 
 /*-------------------------------------------------------------------.
