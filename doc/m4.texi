@@ -6284,10 +6284,13 @@ see the C Library Manual, or the POSIX specification (for
 example, @samp{%a} is supported even on platforms that haven't yet
 implemented C99 hexadecimal floating point output natively).
 
+Numeric overflows result in a warning.  Numeric arguments, widths, and
+precisions are subject to machine limits instead of to the 32-bit limit
+of @code{eval} (@pxref{Eval}).
+
 Unrecognized specifiers result in a warning.  It is anticipated that a
-future release of GNU @code{m4} will support more specifiers,
-and give better warnings when various problems such as overflow are
-encountered.  Likewise, escape sequences are not yet recognized.
+future release of GNU @code{m4} will support more specifiers.
+Likewise, escape sequences are not yet recognized.
 
 @example
 format(`%p', `0')
@@ -7681,8 +7684,8 @@ results.
 @item
 POSIX requires an application to exit with non-zero status if
 it wrote an error message to stderr.  This has not yet been consistently
-implemented for the various builtins that are required to issue an error
-(such as @code{eval} (@pxref{Eval}) when an argument cannot be parsed).
+implemented for the various builtins that are required to issue an error,
+such as @code{eval} (@pxref{Eval}) when an argument cannot be parsed.
 
 @item
 Some traditional implementations only allow reading standard input

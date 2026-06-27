@@ -25,6 +25,8 @@
 
 #include "minmax.h"
 
+#include <stdckdint.h>
+
 /* Simple varargs substitute.  We assume int and unsigned int are the
    same size; likewise for long and unsigned long.  */
 
@@ -42,13 +44,16 @@ arg_int (const char *str)
     }
   errno = 0;
   value = strtol (str, &endp, 10);
+  bool overflow = errno == ERANGE;
   if (*endp)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
-  else if (errno == ERANGE || (int) value != value)
+  int result;
+  overflow |= ckd_add (&result, value, 0);
+  if (overflow)
     M4ERROR ((warning_status, 0, _("numeric overflow detected")));
-  return value;
+  return result;
 }
 
 /* Parse STR as a long, reporting warnings.  */
@@ -65,11 +70,12 @@ arg_long (const char *str)
     }
   errno = 0;
   value = strtol (str, &endp, 10);
+  bool overflow = errno == ERANGE;
   if (*endp)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
-  else if (errno == ERANGE)
+  if (overflow)
     M4ERROR ((warning_status, 0, _("numeric overflow detected")));
   return value;
 }
@@ -88,11 +94,12 @@ arg_double (const char *str)
     }
   errno = 0;
   value = strtod (str, &endp);
+  bool overflow = errno == ERANGE;
   if (*endp)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
-  else if (errno == ERANGE)
+  if (overflow)
     M4ERROR ((warning_status, 0, _("numeric overflow detected")));
   return value;
 }

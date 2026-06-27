@@ -2,6 +2,9 @@ GNU M4 NEWS - User visible changes.
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Calls to `format' now diagnose numeric overflow more reliably,
+   without possibly trapping or missing a diagnostic (present since 0.75).
+
 ** With -G/--traditional, the insecure `maketemp' macro has been removed.
    This conforms to POSIX, which removed `maketemp' in its 2024 edition.
    Without -G/--traditional, this behavior has not changed:
