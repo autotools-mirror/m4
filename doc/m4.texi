@@ -266,7 +266,7 @@ Fast loading of frozen state
 Compatibility with other versions of @code{m4}
 
 * Extensions::                  Extensions in GNU M4
-* Incompatibilities::           Facilities in System V m4 not in GNU M4
+* Incompatibilities::           Facilities in POSIX but not in GNU M4
 * Other Incompatibilities::     Other incompatibilities
 
 Correct version of some examples
@@ -328,14 +328,14 @@ etc.@dots{}  @code{m4} can be used either as a front-end to a compiler,
 or as a macro processor in its own right.
 
 The @code{m4} macro processor is widely available on all UNIXes, and has
-been standardized by POSIX.
+been standardized by POSIX@.
 Usually, only a small percentage of users are aware of its existence.
 However, those who find it often become committed users.  The
 popularity of GNU Autoconf, which requires GNU
 @code{m4} for @emph{generating} @file{configure} scripts, is an incentive
 for many to install it, while these people will not themselves
-program in @code{m4}.  GNU @code{m4} is mostly compatible with the
-System V, Release 4 version, except for some minor differences.
+program in @code{m4}.  GNU @code{m4} is mostly compatible with POSIX and
+with the System V Release 4 version, except for some minor differences.
 @xref{Compatibility}, for more details.
 
 Some people find @code{m4} to be fairly addictive.  They first use
@@ -788,7 +788,7 @@ environment.
 @item -G
 @itemx --traditional
 Suppress all the extensions made in this implementation, compared to the
-System V version.  @xref{Compatibility}, for a list of these.
+POSIX specification.  @xref{Compatibility}, for a list of these.
 
 @item -H @var{num}
 @itemx --hashsize=@var{num}
@@ -7011,30 +7011,28 @@ Expands to the quoted name of a new, empty file, made from the string
 @var{template}, which should end with the string @samp{XXXXXX}.  The six
 @samp{X} characters are then replaced with random characters matching
 the regular expression @samp{[a-zA-Z0-9._-]}, in order to make the file
-name unique.  If fewer than six @samp{X} characters are found at the end
-of @code{template}, the result will be longer than the template.  The
+name unique.  The
 created file will have access permissions as if by @kbd{chmod =rw,go=},
 meaning that the current umask of the @code{m4} process is taken into
 account, and at most only the current user can read and write the file.
 
-The traditional behavior, standardized by POSIX, is that
-@code{maketemp} merely replaces the trailing @samp{X} with the process
-id, without creating a file or quoting the expansion, and without
-ensuring that the resulting
-string is a unique file name.  In part, this means that using the same
-@var{template} twice in the same input file will result in the same
-expansion.  This behavior is a security hole, as it is very easy for
-another process to guess the name that will be generated, and thus
-interfere with a subsequent use of @code{syscmd} trying to manipulate
-that file name.  Hence, POSIX has recommended that all new
-implementations of @code{m4} provide the secure @code{mkstemp} builtin,
-and that users of @code{m4} check for its existence.
-
 The expansion is void and an error issued if a temporary file could
 not be created.
 
-The macros @code{mkstemp} and @code{maketemp} are recognized only with
-parameters.
+@cindex GNU extensions
+Unless the @option{--traditional} (@option{-G}) command line option is
+in effect (@pxref{Limits control, , Invoking m4}),
+the GNU version of @code{mkstemp} is forgiving if its argument ends
+in fewer than six @samp{X} characters:
+it replaces the smaller number of @samp{X} characters that it does find.
+However, the result will be longer than the template.
+
+Unless @option{--traditional} (@option{-G}) is in effect, the
+@code{maketemp} macro is an alias for @code{mkstemp}.
+It is present for partial compatibility with older @code{m4} versions.
+New programs should not use @code{maketemp}.
+
+The @code{mkstemp} macro is recognized only with parameters.
 @end deffn
 
 If you try this next example, you will most likely get different output
@@ -7046,29 +7044,11 @@ chosen:
 $ @kbd{m4}
 define(`tmp', `oops')
 @result{}
-maketemp(`/tmp/fooXXXXXX')
+mkstemp(`/tmp/fooXXXXXX')
 @result{}/tmp/fooa07346
-ifdef(`mkstemp', `define(`maketemp', defn(`mkstemp'))',
-      `define(`mkstemp', defn(`maketemp'))dnl
-errprint(`warning: potentially insecure maketemp implementation
-')')
-@result{}
 mkstemp(`doc')
 @result{}docQv83Uw
 @end example
-
-@cindex GNU extensions
-Unless you use the @option{--traditional} command line option (or
-@option{-G}, @pxref{Limits control, , Invoking m4}), the GNU
-version of @code{maketemp} is secure.  This means that using the same
-template to multiple calls will generate multiple files.  However, we
-recommend that you use the new @code{mkstemp} macro, introduced in
-GNU M4 1.4.8, which is secure even in traditional mode.  Also,
-as of M4 1.4.11, the secure implementation quotes the resulting file
-name, so that you are guaranteed to know what file was created even if
-the random file name happens to match an existing macro.  Notice that
-this example is careful to use @code{defn} to avoid unintended expansion
-of @samp{foo}.
 
 @example
 $ @kbd{m4}
@@ -7076,11 +7056,11 @@ define(`foo', `errprint(`oops')')
 @result{}
 syscmd(`rm -f foo-??????')sysval
 @result{}0
-define(`file1', maketemp(`foo-XXXXXX'))dnl
+define(`file1', mkstemp(`foo-XXXXXX'))dnl
 ifelse(esyscmd(`echo \` foo-?????? \''), ` foo-?????? ',
        `no file', `created')
 @result{}created
-define(`file2', maketemp(`foo-XX'))dnl
+define(`file2', mkstemp(`foo-XX'))dnl
 define(`file3', mkstemp(`foo-XXXXXX'))dnl
 ifelse(len(defn(`file1')), len(defn(`file2')),
        `same length', `different')
@@ -7110,25 +7090,6 @@ len(mkstemp(`foodir/fooXXXXX'))
 @result{}16
 syscmd(`rm -r foodir')sysval
 @result{}0
-@end example
-
-@c Likewise, and ensure that traditional mode leaves the result unquoted
-@c without creating a file.
-
-@comment options: -G
-@example
-syscmd(`rm -f foo-*')sysval
-@result{}0
-len(maketemp(`foo-XXXXX'))
-@error{}m4:stdin:2: recommend using mkstemp instead
-@result{}9
-define(`abc', `def')
-@result{}
-maketemp(`foo-abc')
-@result{}foo-def
-@error{}m4:stdin:4: recommend using mkstemp instead
-syscmd(`test -f foo-*')ifelse(sysval, `0', `0', `1')
-@result{}1
 @end example
 @end ignore
 
@@ -7572,22 +7533,19 @@ once.
 
 @cindex compatibility
 This chapter describes the many of the differences between this
-implementation of @code{m4}, and of other implementations found under
-UNIX, such as System V Release 4, Solaris, and BSD flavors.
+implementation of @code{m4}, and of other implementations
+such as BSD flavors, Solaris, and AIX@.
 In particular, it lists the known differences and extensions to
-POSIX.  However, the list is not necessarily comprehensive.
+POSIX@.  However, the list is not comprehensive.
 
-At the time of this writing, POSIX 2001 (also known as IEEE
-Std 1003.1-2001) is the latest standard, although a new version of
-POSIX is under development and includes several proposals for
-modifying what @code{m4} is required to do.  The requirements for
-@code{m4} are shared between SUSv3 and POSIX, and
-can be viewed at
-@uref{https://www.opengroup.org/onlinepubs/@/000095399/@/utilities/@/m4.html}.
+At the time of this writing, POSIX.1-2024 (also known as IEEE
+Std 1003.1-2024) is the latest standard for @code{m4}.
+It can be viewed at
+@uref{https://pubs.opengroup.org/@/onlinepubs/@/9799919799/@/utilities/@/m4.html}.
 
 @menu
 * Extensions::                  Extensions in GNU M4
-* Incompatibilities::           Facilities in System V m4 not in GNU M4
+* Incompatibilities::           Facilities in POSIX m4 not in GNU M4
 * Other Incompatibilities::     Other incompatibilities
 @end menu
 
@@ -7596,15 +7554,15 @@ can be viewed at
 
 @cindex GNU extensions
 @cindex POSIX
-This version of @code{m4} contains a few facilities that do not exist
-in System V @code{m4}.  These extra facilities are all suppressed by
+This version of @code{m4} contains a few facilities not specified
+by POSIX@.  These extra facilities are all suppressed by
 using the @option{-G} command line option (@pxref{Limits control, ,
 Invoking m4}), unless overridden by other command line options.
 
 @itemize @bullet
 @item
 In the @code{$@var{n}} notation for macro arguments, @var{n} can contain
-several digits, while the System V @code{m4} only accepts one digit.
+several digits, while POSIX @code{m4} accepts only one digit.
 This allows macros in GNU @code{m4} to take any number of
 arguments, and not only nine (@pxref{Arguments}).
 
@@ -7686,9 +7644,9 @@ The destination of trace and debug output can be controlled with
 @code{debugfile} (@pxref{Debug Output}).
 
 @item
-The @code{maketemp} (@pxref{Mkstemp}) macro behaves like @code{mkstemp},
-creating a new file with a unique name on every invocation, rather than
-following the insecure behavior of replacing the trailing @samp{X}
+The @code{maketemp} (@pxref{Mkstemp}) macro is an alias for @code{mkstemp}.
+In some older @code{m4} implementations, this macro instead
+follows the insecure behavior of replacing the trailing @samp{X}
 characters with the @code{m4} process id.
 
 @item
@@ -7702,10 +7660,8 @@ more extensive than in most other versions of @code{m4}.
 @end itemize
 
 @node Incompatibilities
-@section Facilities in System V @code{m4} not in GNU @code{m4}
+@section Facilities in POSIX @code{m4} not in GNU @code{m4}
 
-The version of @code{m4} from System V contains a few facilities that
-have not been implemented in GNU @code{m4} yet.  Additionally,
 POSIX requires some behaviors that GNU @code{m4} has not
 implemented yet.  Relying on these behaviors is non-portable, as a
 future release of GNU @code{m4} may change.
@@ -7759,7 +7715,7 @@ definition on the stack, as if doing @code{popdef(`f')} followed by
 @item
 POSIX 2001 requires @code{syscmd} (@pxref{Syscmd}) to evaluate
 command output for macro expansion, but this was a mistake that is
-anticipated to be corrected in the next version of POSIX.
+anticipated to be corrected in the next version of POSIX@.
 GNU @code{m4} follows traditional behavior in @code{syscmd}
 where output is not rescanned, and provides the extension @code{esyscmd}
 that does scan the output.
@@ -7784,7 +7740,7 @@ that using empty strings is unspecified.  Meanwhile, the GNU
 @code{m4} behavior of treating an empty end-comment delimiter as newline
 is not portable, as BSD treats it as leaving the previous end-comment
 delimiter unchanged.  It is also impossible in BSD implementations to
-disable comments, even though that is required by POSIX.  For
+disable comments, even though that is required by POSIX@.  For
 predictable results, never call changecom with empty strings for
 arguments.
 
@@ -7868,7 +7824,7 @@ tradition and ignores all leading unquoted whitespace.
 @item
 @cindex @env{POSIXLY_CORRECT}
 A strictly-compliant POSIX client is not allowed to use
-command-line arguments not specified by POSIX.  However, since
+command-line arguments not specified by POSIX@.  However, since
 this version of M4 ignores @env{POSIXLY_CORRECT} and enables the option
 @code{--gnu} by default (@pxref{Limits control, , Invoking m4}), a
 client desiring to be strictly compliant has no way to disable
@@ -7962,7 +7918,7 @@ traditional programming languages.
 @node Answers
 @chapter Correct version of some examples
 
-Some of the examples in this manuals are buggy or not very robust, for
+Some of the examples in this manual are buggy or not very robust, for
 demonstration purposes.  Improved versions of these composite macros are
 presented here.
 

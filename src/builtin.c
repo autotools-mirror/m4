@@ -77,7 +77,6 @@ DECLARE (m4_indir);
 DECLARE (m4_len);
 DECLARE (m4_m4exit);
 DECLARE (m4_m4wrap);
-DECLARE (m4_maketemp);
 DECLARE (m4_mkstemp);
 DECLARE (m4_patsubst);
 DECLARE (m4_popdef);
@@ -131,7 +130,7 @@ static builtin const builtin_tab[] = {
   {"len", false, false, true, m4_len},
   {"m4exit", false, false, false, m4_m4exit},
   {"m4wrap", false, false, true, m4_m4wrap},
-  {"maketemp", false, false, true, m4_maketemp},
+  {"maketemp", true, false, true, m4_mkstemp},
   {"mkstemp", false, false, true, m4_mkstemp},
   {"patsubst", true, false, true, m4_patsubst},
   {"popdef", false, false, true, m4_popdef},
@@ -1445,7 +1444,7 @@ m4_sinclude (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
   include (argc, argv, true);
 }
 
-/* More miscellaneous builtins -- "maketemp", "errprint", "__file__",
+/* More miscellaneous builtins -- "mkstemp", "errprint", "__file__",
    "__line__", and "__program__".  The last three are GNU specific.  */
 
 /*------------------------------------------------------------------.
@@ -1460,18 +1459,22 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
                 idx_t len)
 {
   int fd;
-  int i;
   char *name;
 
-  /* Guarantee that there are six trailing 'X' characters, even if the
-     user forgot to supply them.  Output must be quoted if
-     successful.  */
   obstack_grow (obs, lquote.string, lquote.length);
   obstack_grow (obs, pattern, len);
-  for (i = 0; len > 0 && i < 6; i++)
-    if (pattern[len - i - 1] != 'X')
-      break;
-  obstack_grow0 (obs, "XXXXXX", 6 - i);
+
+  if (!no_gnu_extensions)
+    {
+      /* Guarantee that there are six trailing 'X' characters, even if the
+         user forgot to supply them.  */
+      int i;
+      for (i = 0; i < MIN (6, len) && pattern[len - 1 - i] == 'X'; i++)
+        continue;
+      static char const _GL_ATTRIBUTE_NONSTRING XXXXXX[6] = "XXXXXX";
+      obstack_grow0 (obs, XXXXXX, 6 - i);
+    }
+
   name = (char *) obstack_base (obs) + lquote.length;
 
   errno = 0;
@@ -1488,54 +1491,6 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
       obstack_blank_fast (obs, -1);
       obstack_grow (obs, rquote.string, rquote.length);
     }
-}
-
-static void
-m4_maketemp (struct obstack *obs, int argc, token_data **argv)
-{
-  if (bad_argc (argv[0], argc, 2, 2))
-    return;
-  if (no_gnu_extensions)
-    {
-      /* POSIX.1-2017 states "any trailing 'X' characters [are] replaced with
-         the current process ID as a string", without referencing the
-         file system.  Horribly insecure, but we have to do it when we
-         are in traditional mode.
-
-	 POSIX.1-2024 removed this function; perhaps GNU m4 should too.
-
-         For reference, Solaris m4 does:
-         maketemp() -> `' in Solaris 10, core dump in Solaris 11
-         maketemp(X) -> `X'
-         maketemp(XX) -> `Xn', where n is last digit of pid
-         maketemp(XXXXXXXX) -> `X00nnnnn', where nnnnn is 16-bit pid
-       */
-      const char *str = ARG (1);
-      int len = ARGLEN (1);
-      int i;
-      int len2;
-      char pidbuf[INT_BUFSIZE_BOUND (intmax_t)];
-      const char *e;
-
-      M4ERROR ((warning_status, 0, _("recommend using mkstemp instead")));
-      for (i = len; i > 1; i--)
-        if (str[i - 1] != 'X')
-          break;
-      obstack_grow (obs, str, i);
-      str = imaxtostr (getpid (), pidbuf);
-      e = pidbuf + sizeof pidbuf - 1;
-      len2 = e - str;
-      if (len2 > len - i)
-        obstack_grow0 (obs, str + len2 - (len - i), len - i);
-      else
-        {
-          while (i++ < len - len2)
-            obstack_1grow (obs, '0');
-          obstack_grow0 (obs, str, len2);
-        }
-    }
-  else
-    mkstemp_helper (obs, ARG (0), ARG (1), ARGLEN (1));
 }
 
 static void

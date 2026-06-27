@@ -2,6 +2,17 @@ GNU M4 NEWS - User visible changes.
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** With -G/--traditional, the insecure `maketemp' macro has been removed.
+   This conforms to POSIX, which removed `maketemp' in its 2024 edition.
+   Without -G/--traditional, this behavior has not changed:
+   `maketemp' is still a deprecated alias for the more-secure `mkstemp'.
+
+** With -G/--traditional, `mkstemp' now fails if its argument does not
+   end in at least six `X's, as required by POSIX.
+
+** `mkstemp' no longer reads outside buffer bounds when its argument
+   consists of 5 or fewer `X's (present since 1.4.11).
+
 
 * Noteworthy changes in release 1.4.21 (2026-02-06) [stable]
 
