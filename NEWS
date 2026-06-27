@@ -13,6 +13,12 @@ GNU M4 NEWS - User visible changes.
 ** `mkstemp' no longer reads outside buffer bounds when its argument
    consists of 5 or fewer `X's (present since 1.4.11).
 
+** With -G/--traditional, `undivert' no longer diagnoses non-numeric
+   arguments, as POSIX stopped requiring diagnostics in its 2017 edition.
+
+** `undivert' no longer can trap when given a large integer argument
+   (present since 1.4.5).
+
 
 * Noteworthy changes in release 1.4.21 (2026-02-06) [stable]
 

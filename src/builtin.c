@@ -1276,7 +1276,7 @@ m4_divnum (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
-  int i, file;
+  int i;
   FILE *fp;
   char *endp;
 
@@ -1286,12 +1286,14 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
     for (i = 1; i < argc; i++)
       {
         const char *arg = ARG (i);
-        file = strtol (arg, &endp, 10);
+        errno = 0;
+        long int file = strtol (arg, &endp, 10);
         if (*endp == '\0' && !c_isspace (*arg))
-          insert_diversion (file);
-        else if (no_gnu_extensions)
-          M4ERROR ((warning_status, 0,
-                    _("non-numeric argument to builtin `%s'"), ARG (0)));
+          {
+            int ifile;
+            if (errno == 0 && !ckd_add (&ifile, file, 0))
+              insert_diversion (ifile);
+          }
         else
           {
             fp = m4_path_search (arg, false, NULL);
