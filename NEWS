@@ -22,6 +22,9 @@ GNU M4 NEWS - User visible changes.
 ** `undivert' no longer can trap when given a large integer argument
    (present since 1.4.5).
 
+** -l/--arglength and -L/--nesting-limit, when combined with a large
+   integer argument, can no longer trap (present since 1.4.14).
+
 
 * Noteworthy changes in release 1.4.21 (2026-02-06) [stable]
 

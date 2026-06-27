@@ -551,7 +551,11 @@ main (int argc, char *const *argv)
         break;
 
       case 'L':
-        nesting_limit = strtol (optarg, NULL, 10);
+        {
+          long int lim = strtol (optarg, NULL, 10);
+          if (ckd_add (&nesting_limit, lim, 0))
+            nesting_limit = 0;
+        }
         break;
 
       case 'P':
@@ -593,9 +597,11 @@ main (int argc, char *const *argv)
         break;
 
       case 'l':
-        max_debug_argument_length = strtol (optarg, NULL, 10);
-        if (max_debug_argument_length <= 0)
-          max_debug_argument_length = 0;
+        {
+          long int len = strtol (optarg, NULL, 10);
+          if (len < 0 || ckd_add (&max_debug_argument_length, len, 0))
+            max_debug_argument_length = 0;
+        }
         break;
 
       case 'o':
