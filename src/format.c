@@ -23,6 +23,8 @@
 
 #include "m4.h"
 
+#include "minmax.h"
+
 /* Simple varargs substitute.  We assume int and unsigned int are the
    same size; likewise for long and unsigned long.  */
 
@@ -147,10 +149,11 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
   int prec;                     /* precision */
   char lflag;                   /* long flag */
 
-  /* Specifiers we are willing to accept.  ok['x'] implies %x is ok.
+  /* Specifiers we are willing to accept.  ok['x' - OKMIN] implies %x is ok.
      Various modifiers reduce the set, in order to avoid undefined
      behavior in printf.  */
-  char ok[128];
+  enum { OKMIN = MIN ('a', 'A'), OKMAX = MAX ('x', 'X') };
+  char ok[OKMAX - OKMIN + 1] = {0};
 
   /* Buffer and stuff.  */
   char *str;                    /* malloc'd buffer of formatted text */
@@ -158,7 +161,6 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
   { CHAR, INT, LONG, DOUBLE, STR } datatype;
 
   f = fmt = ARG_STR (argc, argv);
-  memset (ok, 0, sizeof ok);
   while (1)
     {
       const char *percent = strchr (fmt, '%');
@@ -179,9 +181,11 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
 
       p = fstart + 1;           /* % */
       lflag = 0;
-      ok['a'] = ok['A'] = ok['c'] = ok['d'] = ok['e'] = ok['E']
-        = ok['f'] = ok['F'] = ok['g'] = ok['G'] = ok['i'] = ok['o']
-        = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 1;
+      ok['a' - OKMIN] = ok['A' - OKMIN] = ok['c' - OKMIN] = ok['d' - OKMIN]
+        = ok['e' - OKMIN] = ok['E' - OKMIN] = ok['f' - OKMIN] = ok['F' - OKMIN]
+        = ok['g' - OKMIN] = ok['G' - OKMIN] = ok['i' - OKMIN] = ok['o' - OKMIN]
+        = ok['s' - OKMIN] = ok['u' - OKMIN] = ok['x' - OKMIN] = ok['X' - OKMIN]
+        = 1;
 
       /* Parse flags.  */
       flags = 0;
@@ -190,28 +194,36 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
           switch (*fmt)
             {
             case '\'':         /* thousands separator */
-              ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E']
-                = ok['o'] = ok['s'] = ok['x'] = ok['X'] = 0;
+              ok['a' - OKMIN] = ok['A' - OKMIN] = ok['c' - OKMIN]
+                = ok['e' - OKMIN] = ok['E' - OKMIN] = ok['o' - OKMIN]
+                = ok['s' - OKMIN] = ok['x' - OKMIN] = ok['X' - OKMIN]
+                = 0;
               flags |= THOUSANDS;
               break;
 
             case '+':          /* mandatory sign */
-              ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
+              ok['c' - OKMIN] = ok['o' - OKMIN] = ok['s' - OKMIN]
+                = ok['u' - OKMIN] = ok['x' - OKMIN] = ok['X' - OKMIN]
+                = 0;
               flags |= PLUS;
               break;
 
             case ' ':          /* space instead of positive sign */
-              ok['c'] = ok['o'] = ok['s'] = ok['u'] = ok['x'] = ok['X'] = 0;
+              ok['c' - OKMIN] = ok['o' - OKMIN] = ok['s' - OKMIN]
+                = ok['u' - OKMIN] = ok['x' - OKMIN] = ok['X' - OKMIN]
+                = 0;
               flags |= SPACE;
               break;
 
             case '0':          /* zero padding */
-              ok['c'] = ok['s'] = 0;
+              ok['c' - OKMIN] = ok['s' - OKMIN] = 0;
               flags |= ZERO;
               break;
 
             case '#':          /* alternate output */
-              ok['c'] = ok['d'] = ok['i'] = ok['s'] = ok['u'] = 0;
+              ok['c' - OKMIN] = ok['d' - OKMIN] = ok['i' - OKMIN]
+                = ok['s' - OKMIN] = ok['u' - OKMIN]
+                = 0;
               flags |= ALT;
               break;
 
@@ -261,7 +273,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
       *p++ = '*';
       if (*fmt == '.')
         {
-          ok['c'] = 0;
+          ok['c' - OKMIN] = 0;
           if (*(++fmt) == '*')
             {
               prec = ARG_INT (argc, argv);
@@ -284,7 +296,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
           *p++ = 'l';
           lflag = 1;
           fmt++;
-          ok['c'] = ok['s'] = 0;
+          ok['c' - OKMIN] = ok['s' - OKMIN] = 0;
         }
       else if (*fmt == 'h')
         {
@@ -295,12 +307,14 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
               *p++ = 'h';
               fmt++;
             }
-          ok['a'] = ok['A'] = ok['c'] = ok['e'] = ok['E'] = ok['f'] = ok['F']
-            = ok['g'] = ok['G'] = ok['s'] = 0;
+          ok['a' - OKMIN] = ok['A' - OKMIN] = ok['c' - OKMIN] = ok['e' - OKMIN]
+            = ok['E' - OKMIN] = ok['f' - OKMIN] = ok['F' - OKMIN]
+            = ok['g' - OKMIN] = ok['G' - OKMIN] = ok['s' - OKMIN]
+            = 0;
         }
 
       c = *fmt++;
-      if (sizeof ok <= c || !ok[c])
+      if (! (OKMIN <= c && c <= OKMAX && ok[c - OKMIN]))
         {
           M4ERROR ((warning_status, 0,
                     _("Warning: unrecognized specifier in `%s'"), f));
