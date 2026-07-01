@@ -168,6 +168,8 @@ static const char *token_type_string (token_type);
 #endif
 
 static void pop_input (void);
+
+static char const stdin_name[] = N_("stdin");
 
 
 
@@ -175,12 +177,12 @@ static void pop_input (void);
 | push_file () pushes an input file on the input stack, saving the   |
 | current file name and line number.  If next is non-NULL, this push |
 | invalidates a call to push_string_init (), whose storage is        |
-| consequently released.  If CLOSE_WHEN_DONE, then close FP after    |
-| EOF is detected.                                                   |
+| consequently released.  If !TITLE it is standard input; otherwise, |
+| close FP after EOF is detected.                                    |
 `-------------------------------------------------------------------*/
 
 void
-push_file (FILE *fp, const char *title, bool close_when_done)
+push_file (FILE *fp, const char *title)
 {
   input_block *i;
 
@@ -191,18 +193,27 @@ push_file (FILE *fp, const char *title, bool close_when_done)
     }
 
   if (debug_level & DEBUG_TRACE_INPUT)
-    DEBUG_MESSAGE1 ("input read from %s", title);
+    DEBUG_MESSAGE1 ("input read from %s",
+                    title ? shquote (title) : _(stdin_name));
 
   i = (input_block *) obstack_alloc (current_input,
                                      sizeof (struct input_block));
   i->type = INPUT_FILE;
-  i->file = (char *) obstack_copy0 (&file_names, title, strlen (title));
+  i->file = (title
+             ? obstack_copy0 (&file_names, title, strlen (title))
+             : stdin_name);
   i->line = 1;
   input_change = true;
 
   i->u.u_f.fp = fp;
   i->u.u_f.end = false;
-  i->u.u_f.close = close_when_done;
+
+  /* If stdin is a terminal, we want to allow 'm4 - file -' to read
+     input from stdin twice, like GNU cat.  Besides, there is no point
+     closing stdin before wrapped text, to minimize bugs in syscmd
+     called from wrapped text.  */
+  i->u.u_f.close = !!title;
+
   i->u.u_f.advance = start_of_input_line;
   output_current_line = -1;
 
@@ -349,7 +360,10 @@ pop_input (void)
         {
           if (tmp)
             DEBUG_MESSAGE2 ("input reverted to %s, line %d",
-                            tmp->file, tmp->line);
+                            (tmp->file == stdin_name
+                             ? _(stdin_name)
+                             : shquote (tmp->file)),
+                            tmp->line);
           else
             DEBUG_MESSAGE ("input exhausted");
         }
@@ -792,7 +806,7 @@ set_word_regexp (const char *regexp)
   if (msg != NULL)
     {
       M4ERROR ((warning_status, 0,
-                _("bad regular expression `%s': %s"), regexp, msg));
+                _("bad regular expression %s: %s"), squote (regexp), msg));
       return;
     }
 

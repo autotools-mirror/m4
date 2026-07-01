@@ -2,6 +2,15 @@ GNU M4 NEWS - User visible changes.
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Diagnostic messages now quote strings more carefully.
+   Previously, unusual strings, perhaps derived from file names, could
+   generate diagnostics that were ambiguous or that messed up terminals.
+   Now, these strings are quoted and unusual characters escaped.
+   For example, a newline is represented by '\' followed by 'n'.
+   File names and shell commands are quoted appropriately for the shell,
+   and other m4 strings are quoted for m4 except that unusual characters
+   are escaped as for C.
+
 ** Calls to `format' now diagnose numeric overflow more reliably,
    without possibly trapping or missing a diagnostic (present since 0.75).
 

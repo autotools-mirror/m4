@@ -176,7 +176,8 @@ m4_path_search (const char *file, bool binary, char **result)
       if (fp != NULL)
         {
           if (debug_level & DEBUG_TRACE_PATH)
-            DEBUG_MESSAGE2 ("path search for `%s' found `%s'", file, name);
+            DEBUG_MESSAGE2 ("path search for %s found %s",
+                            shquote_n (0, file), shquote_n (1, name));
           if (result)
             *result = name;
           else

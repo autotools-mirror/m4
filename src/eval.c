@@ -560,42 +560,49 @@ evaluate (const char *expr, int *val)
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
                 _("bad expression in eval (missing right parenthesis): %s"),
-                expr));
+                squote (expr)));
       break;
 
     case SYNTAX_ERROR:
-      M4ERROR ((warning_status, 0, _("bad expression in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("bad expression in eval: %s"),
+                squote (expr)));
       break;
 
     case UNKNOWN_INPUT:
       M4ERROR ((warning_status, 0,
-                _("bad expression in eval (bad input): %s"), expr));
+                _("bad expression in eval (bad input): %s"), squote (expr)));
       break;
 
     case EXCESS_INPUT:
       M4ERROR ((warning_status, 0,
-                _("bad expression in eval (excess input): %s"), expr));
+                _("bad expression in eval (excess input): %s"),
+                squote (expr)));
       break;
 
     case INVALID_NUMBER:
-      M4ERROR ((warning_status, 0, _("invalid number in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("invalid number in eval: %s"),
+                squote (expr)));
       break;
 
     case INVALID_OPERATOR:
-      M4ERROR ((warning_status, 0, _("invalid operator in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("invalid operator in eval: %s"),
+                squote (expr)));
       retcode = EXIT_FAILURE;
       break;
 
     case DIVIDE_ZERO:
-      M4ERROR ((warning_status, 0, _("divide by zero in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("divide by zero in eval: %s"),
+                squote (expr)));
       break;
 
     case MODULO_ZERO:
-      M4ERROR ((warning_status, 0, _("modulo by zero in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("modulo by zero in eval: %s"),
+                squote (expr)));
       break;
 
     case NEGATIVE_EXPONENT:
-      M4ERROR ((warning_status, 0, _("negative exponent in eval: %s"), expr));
+      M4ERROR ((warning_status, 0, _("negative exponent in eval: %s"),
+                squote (expr)));
       break;
 
     default:

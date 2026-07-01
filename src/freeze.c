@@ -114,7 +114,7 @@ produce_frozen_state (const char *name)
 
   file = fopen (name, O_BINARY ? "wbe" : "we");
   if (!file)
-    m4_failure (errno, _("cannot open `%s'"), name);
+    m4_failure (errno, _("cannot open %s"), shquote (name));
 
   /* Write a recognizable header.  */
 
@@ -273,7 +273,7 @@ reload_frozen_state (const char *name)
 
   file = m4_path_search (name, !!O_BINARY, NULL);
   if (file == NULL)
-    m4_failure (errno, _("cannot open %s"), name);
+    m4_failure (errno, _("cannot open %s"), shquote (name));
   current_file = name;
 
   allocated[0] = 100;

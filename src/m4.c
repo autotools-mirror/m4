@@ -33,6 +33,7 @@
 #include "minmax.h"
 #include "progname.h"
 #include "propername.h"
+#include "quotearg.h"
 #include "version-etc.h"
 
 #ifdef DEBUG_STKOVF
@@ -147,6 +148,68 @@ m4_failure_at_line (int errnum, const char *file, int line,
   assume (false);
 }
 
+/* "Colon quote" ARG for colon-delimited diagnostics only when necessary,
+   when the quoted string is delimited with colons and/or newlines.  */
+char *
+cquote (char const *arg)
+{
+  return quotearg_n_style_colon (0, shell_escape_quoting_style, arg);
+}
+
+/* "Shell quote" for diagnostics, when the quoted string is a file
+   name or other string from the shell, and when the quoted string
+   is not delimited by colons and/or newlinews.
+   N specifies the quoting slot, ARG the string to quote.  */
+char *
+shquote_n (int n, char const *arg)
+{
+  return quotearg_n_style (n, shell_escape_always_quoting_style, arg);
+}
+char *
+shquote (char const *arg)
+{
+  return shquote_n (0, arg);
+}
+
+/* "Single quote" for diagnostics with white space around the quoted string.
+   Use the current m4 quoting if nonempty, otherwise ` and '.
+   N (which is 0 or 1) specifies the quoting slot, ARG the string to quote.  */
+static struct quoting_options *squote_opts;
+char *
+squote_n (int n, char const *arg)
+{
+  char default_quotes[] = "`'";
+  char const *lq = &default_quotes[0];
+  char const *rq = &default_quotes[1];
+  idx_t lqlen = 1, rqlen = 1;
+  if (lquote.length)
+    {
+      lq = lquote.string;
+      rq = rquote.string;
+      lqlen = lquote.length;
+      rqlen = rquote.length;
+    }
+  static struct slotvec { char *slot; idx_t size; } buf[2];
+  size_t s = quotearg_buffer (lqlen < buf[n].size ? buf[n].slot + lqlen : NULL,
+                              lqlen < buf[n].size ? buf[n].size - lqlen : 0,
+                              arg, -1, squote_opts);
+  if (buf[n].size <= lqlen + s + rqlen)
+    {
+      free (buf[n].slot);
+      buf[n].slot = xpalloc (NULL, &buf[n].size,
+                             lqlen + s + rqlen + 1 - buf[n].size, -1, 1);
+      s = quotearg_buffer (buf[n].slot + lqlen, buf[n].size - lqlen,
+                           arg, -1, squote_opts);
+    }
+  memcpy (buf[n].slot + lqlen + s, rq, rqlen + 1);
+  return memcpy (buf[n].slot, lq, lqlen);
+}
+char *
+squote (char const *arg)
+{
+  return squote_n (0, arg);
+}
+
 #ifndef SIGBUS
 # define SIGBUS SIGILL
 #endif
@@ -201,7 +264,7 @@ usage (int status)
 {
   if (status != EXIT_SUCCESS)
     {
-      xfprintf (stderr, _("Try `%s --help' for more information."),
+      xfprintf (stderr, _("Try '%s --help' for more information."),
                 program_name);
       fputs ("\n", stderr);
     }
@@ -209,7 +272,7 @@ usage (int status)
     {
       xprintf (_("Usage: %s [OPTION]... [FILE]...\n"), program_name);
       fputs (_("\
-Process macros in FILEs.  If no FILE or if FILE is `-', standard input\n\
+Process macros in FILEs.  If no FILE or if FILE is '-', standard input\n\
 is read.\n\
 "), stdout);
       puts ("");
@@ -227,7 +290,7 @@ Operation modes:\n\
   -E, --fatal-warnings         once: warnings become errors, twice: stop\n\
                                  execution at first error\n\
   -i, --interactive            unbuffer output, ignore interrupts\n\
-  -P, --prefix-builtins        force a `m4_' prefix to all builtins\n\
+  -P, --prefix-builtins        force an 'm4_' prefix to all builtins\n\
   -Q, --quiet, --silent        suppress some warnings for builtins\n\
 "), stdout);
       xprintf (_("\
@@ -245,7 +308,7 @@ Operation modes:\n\
 Preprocessor features:\n\
   -D, --define=NAME[=VALUE]    define NAME as having VALUE, or empty\n\
   -I, --include=DIRECTORY      append DIRECTORY to include path\n\
-  -s, --synclines              generate `#line NUM \"FILE\"' lines\n\
+  -s, --synclines              generate '#line NUM \"FILE\"' lines\n\
   -U, --undefine=NAME          undefine NAME\n\
 "), stdout);
       puts ("");
@@ -265,7 +328,7 @@ Frozen state files:\n\
       puts ("");
       fputs (_("\
 Debugging:\n\
-  -d, --debug[=FLAGS]          set debug level (no FLAGS implies `aeq')\n\
+  -d, --debug[=FLAGS]          set debug level (no FLAGS implies 'aeq')\n\
       --debugfile[=FILE]       redirect debug and trace output to FILE\n\
                                  (default stderr, discard if empty string)\n\
   -l, --arglength=NUM          restrict macro tracing size\n\
@@ -290,8 +353,8 @@ FLAGS is any of:\n\
 "), stdout);
       puts ("");
       fputs (_("\
-If defined, the environment variable `M4PATH' is a colon-separated list\n\
-of directories included after any specified by `-I'.\n\
+If defined, the environment variable 'M4PATH' is a colon-separated list\n\
+of directories included after any specified by '-I'.\n\
 "), stdout);
       puts ("");
       fputs (_("\
@@ -363,26 +426,20 @@ static void
 process_file (const char *name)
 {
   if (streq (name, "-"))
-    {
-      /* If stdin is a terminal, we want to allow 'm4 - file -'
-         to read input from stdin twice, like GNU cat.  Besides,
-         there is no point closing stdin before wrapped text, to
-         minimize bugs in syscmd called from wrapped text.  */
-      push_file (stdin, "stdin", false);
-    }
+    push_file (stdin, NULL);
   else
     {
       char *full_name;
       FILE *fp = m4_path_search (name, false, &full_name);
       if (fp == NULL)
         {
-          error (0, errno, _("cannot open `%s'"), name);
+          error (0, errno, _("cannot open %s"), shquote (name));
           /* Set the status to EXIT_FAILURE, even though we
              continue to process files after a missing file.  */
           retcode = EXIT_FAILURE;
           return;
         }
-      push_file (fp, full_name, true);
+      push_file (fp, full_name);
       free (full_name);
     }
   expand_input ();
@@ -425,6 +482,8 @@ main (int argc, char *const *argv)
   setlocale (LC_NUMERIC, "C");
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
+  squote_opts = clone_quoting_options (NULL);
+  set_quoting_style (squote_opts, escape_quoting_style);
   atexit (close_stdin);
 
   include_init ();
@@ -498,7 +557,7 @@ main (int argc, char *const *argv)
       case 'N':
       case DIVERSIONS_OPTION:
         /* -N became an obsolete no-op in 1.4.x.  */
-        error (0, 0, _("warning: `m4 %s' is deprecated"),
+        error (0, 0, _("warning: 'm4 %s' is deprecated"),
                optchar == 'N' ? "-N" : "--diversions");
         break;
 
@@ -580,7 +639,7 @@ main (int argc, char *const *argv)
         debug_level = debug_decode (optarg);
         if (debug_level < 0)
           {
-            error (0, 0, _("bad debug flags: `%s'"), optarg);
+            error (0, 0, _("bad debug flags: %s"), cquote (optarg));
             debug_level = 0;
           }
         break;
@@ -635,8 +694,8 @@ main (int argc, char *const *argv)
 
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (debugfile))
-    M4ERROR ((warning_status, errno, _("cannot set debug file `%s'"),
-              debugfile));
+    M4ERROR ((warning_status, errno, _("cannot set debug file %s"),
+              shquote (debugfile)));
 
   input_init ();
   output_init ();
@@ -702,8 +761,8 @@ main (int argc, char *const *argv)
 
         case DEBUGFILE_OPTION:
           if (!debug_set_output (defines->arg))
-            M4ERROR ((warning_status, errno, _("cannot set debug file `%s'"),
-                      debugfile ? debugfile : _("stderr")));
+            M4ERROR ((warning_status, errno, _("cannot set debug file %s"),
+                      debugfile ? shquote (debugfile) : _("stderr")));
           break;
 
         default:

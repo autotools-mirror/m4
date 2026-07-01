@@ -46,7 +46,7 @@ arg_int (const char *str)
   value = strtol (str, &endp, 10);
   bool overflow = errno == ERANGE;
   if (*endp)
-    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
+    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), squote (str)));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
   int result;
@@ -72,7 +72,7 @@ arg_long (const char *str)
   value = strtol (str, &endp, 10);
   bool overflow = errno == ERANGE;
   if (*endp)
-    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
+    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), squote (str)));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
   if (overflow)
@@ -96,7 +96,7 @@ arg_double (const char *str)
   value = strtod (str, &endp);
   bool overflow = errno == ERANGE;
   if (*endp)
-    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), str));
+    M4ERROR ((warning_status, 0, _("non-numeric argument %s"), squote (str)));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
   if (overflow)
@@ -324,7 +324,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
       if (! (OKMIN <= c && c <= OKMAX && ok[c - OKMIN]))
         {
           M4ERROR ((warning_status, 0,
-                    _("Warning: unrecognized specifier in `%s'"), f));
+                    _("Warning: unrecognized specifier in %s"), squote (f)));
           if (c == '\0')
             fmt--;
           continue;

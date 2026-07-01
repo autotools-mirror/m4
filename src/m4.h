@@ -94,6 +94,7 @@
 #endif
 
 #define _(msgid) gettext (msgid)
+#define N_(msgid) msgid
 
 _GL_INLINE_HEADER_BEGIN
 #ifndef M4_INLINE
@@ -156,6 +157,11 @@ extern _Noreturn void m4_failure (int, const char *, ...)
 extern _Noreturn void m4_failure_at_line (int, const char *, int,
                                           const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 4, 5));
+extern char *cquote (char const *);
+extern char *shquote (char const *);
+extern char *shquote_n (int, char const *);
+extern char *squote (char const *);
+extern char *squote_n (int, char const *);
 /* *INDENT-ON* */
 
 #define M4ERROR(Arglist) (m4_error Arglist)
@@ -319,7 +325,7 @@ extern token_type next_token (token_data *, int *);
 extern void skip_line (void);
 
 /* push back input */
-extern void push_file (FILE *, const char *, bool);
+extern void push_file (FILE *, const char *);
 extern void push_macro (builtin_func *);
 extern struct obstack *push_string_init (void);
 extern const char *push_string_finish (void);
