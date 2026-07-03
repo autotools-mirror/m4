@@ -1849,9 +1849,7 @@ m4_substr (struct obstack *obs, int argc, token_data **argv)
   if (start < 0 || length <= 0 || start >= avail)
     return;
 
-  if (start + length > avail)
-    length = avail - start;
-  obstack_grow (obs, ARG (1) + start, length);
+  obstack_grow (obs, ARG (1) + start, MIN (length, avail - start));
 }
 
 /*------------------------------------------------------------------.
