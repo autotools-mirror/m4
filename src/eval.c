@@ -454,11 +454,26 @@ parse_expr (int *v1, eval_error er, int min_prec)
           break;
 
         case LSHIFT:
-          ckd_add (v1, (unsigned int) {*v1} << (v2 & 0x1f), 0);
-          *v1 = toint32 (*v1);
+          if (v2 < 0)
+            *v1 = (*v1 < 0
+                   ? ~(-32 < v2 ? ~*v1 >> -v2 : 0)
+                   :  (-32 < v2 ?  *v1 >> -v2 : 0));
+          else
+            {
+              ckd_add (v1, v2 < 32 ? (unsigned int) {*v1} << v2 : 0, 0);
+              *v1 = toint32 (*v1);
+            }
           break;
         case RSHIFT:
-          *v1 = *v1 < 0 ? ~(~*v1 >> (v2 & 0x1f)) : *v1 >> (v2 & 0x1f);
+          if (v2 < 0)
+            {
+              ckd_add (v1, -32 < v2 ? (unsigned int) {*v1} << -v2 : 0, 0);
+              *v1 = toint32 (*v1);
+            }
+          else
+            *v1 = (*v1 < 0
+                   ? ~(v2 < 32 ? ~*v1 >> v2 : 0)
+                   :  (v2 < 32 ?  *v1 >> v2 : 0));
           break;
 
         case GT:

@@ -6628,9 +6628,11 @@ passed to @code{eval}.
 
 Some calculations are not portable to other implementations, since they
 have undefined semantics in C, but GNU @code{m4} has
-well-defined behavior on overflow.  When shifting, an out-of-range shift
-amount is implicitly brought into the range of 32-bit signed integers
-using an implicit bit-wise and with 0x1f).
+well-defined behavior on overflow.  When shifting,
+a left shift of a negative number loses the sign bit,
+a right shift of a negative number propagates the sign bit right,
+a shift by a negative count goes in the opposite direction,
+and a shift by the word size or greater shifts all the word's bits.
 
 @example
 define(`max_int', eval(`0x7fffffff'))
@@ -6649,8 +6651,10 @@ eval(`0x80000000 % -1')
 @result{}0
 eval(`-4 >> 1')
 @result{}-2
-eval(`-4 >> 33')
-@result{}-2
+eval(`-4 >> -6')
+@result{}-256
+eval(`-4 >> 1024')
+@result{}-1
 @end example
 
 If @var{radix} is specified, it specifies the radix to be used in the
