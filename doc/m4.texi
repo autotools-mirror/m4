@@ -5941,7 +5941,8 @@ Substrings are extracted with @code{substr}:
 @deffn Builtin substr (@var{string}, @var{from}, @ovar{length})
 Expands to the substring of @var{string}, which starts at index
 @var{from}, and extends for @var{length} characters, or to the end of
-@var{string}, if @var{length} is omitted.  The starting index of a string
+@var{string}, if @var{length} is omitted or would extend past string end.
+The starting index of a string
 is always 0.  The expansion is empty if there is an error parsing
 @var{from} or @var{length}, if @var{from} is beyond the end of
 @var{string}, or if @var{length} is negative.
