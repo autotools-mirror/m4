@@ -1130,14 +1130,9 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
 
   bool negative = value < 0;
 
-  /* Unsigned, so that 2**31 fits.  This works on all GNU targets, as
-     the GNU coding standards say that unsigned has at least 32 bits.
-     Verify the GNU assumption, but do not assume that unsigned int
-     has exactly 32 bits.  */
-  static_assert (UINT_MAX >> 31 != 0);
-  unsigned int abs_value =
-    negative ? - (unsigned int) {value} & 0xffffffff : value;
-  unsigned int digits;
+  /* The negative of the number of value digits to output.  Making it
+     negative avoids overflow if VALUE == INT_MIN && RADIX == 1.  */
+  int negdigits;
 
   /* Value buffer when radix != 1.  32 bytes is enough, as the value
      is at most 32 bits and base 2 is the worst case.  */
@@ -1153,28 +1148,61 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   char *e;
 
   if (radix == 1)
-    digits = abs_value;
+    negdigits = negative ? value : -value;
   else
     {
-      unsigned int v = abs_value;
       s = e = valbuf + sizeof valbuf;
+      int v = value;
 
-      do
+      if (radix == 10)
+        {
+          /* Special-case base 10, the most common case.
+             For more comments, see the general case below.  */
+          if (0 <= v && v < 10)
+            {
+              *--s = '0' + v;
+              v = 0;
+            }
+          else if (v < 0)
+            {
+              *--s = '0' - v % radix;
+              v = - (v / radix);
+            }
+
+          for (; 0 < v; v /= radix)
+            *--s = '0' + v % radix;
+        }
+      else
         {
           /* Digits for number to ASCII conversions.  */
           static char const _GL_ATTRIBUTE_NONSTRING digit_array[36] =
             "0123456789abcdefghijklmnopqrstuvwxyz";
 
-          *--s = digit_array[v % radix];
-          v /= radix;
-        }
-      while (0 < v);
+          if (0 <= v && v < radix)
+            {
+              /* Store the only digit; this avoids the need for
+                 dividing, or for special-casing 0 in the loop.  */
+              *--s = digit_array[v];
+              v = 0;
+            }
+          else if (v < 0)
+            {
+              /* Store the low-order digit and set V = abs (V / RADIX);
+                 this cannot overflow.  */
+              *--s = digit_array[-(v % radix)];
+              v = - (v / radix);
+            }
 
-      digits = e - s;
+          /* Store remaining digits, if any.  */
+          for (; 0 < v; v /= radix)
+            *--s = digit_array[v % radix];
+        }
+
+      negdigits = s - e;
     }
 
   idx_t alloc;
-  if (ckd_add (&alloc, MAX (digits, min), negative) || SIZE_MAX < alloc)
+  if (ckd_sub (&alloc, negative, MIN (negdigits, -min)) || SIZE_MAX < alloc)
     xalloc_die ();
 
   obstack_blank (obs, alloc);
@@ -1188,18 +1216,12 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (negative)
     *p++ = '-';
 
-  if (digits < min)
-    {
-      /* Since DIGITS < MIN, their difference fits in int.  */
-      int lz = min - digits;
-      do
-	*p++ = '0';
-      while (--lz);
-    }
+  for (int lz = min + negdigits; 0 < lz; lz--)
+    *p++ = '0';
 
   if (radix == 1)
     {
-      while (digits--)
+      while (negdigits++ < 0)
         *p++ = '1';
     }
   else
