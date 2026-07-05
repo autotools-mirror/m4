@@ -105,20 +105,20 @@ arg_double (const char *str)
 }
 
 #define ARG_INT(argc, argv) \
-        ((argc == 0) ? 0 : \
-         (--argc, argv++, arg_int (TOKEN_DATA_TEXT (argv[-1]))))
+  (((argc) == 0) ? 0 : \
+   ((argc)--, arg_int (TOKEN_DATA_TEXT (*(argv)++))))
 
 #define ARG_LONG(argc, argv) \
-        ((argc == 0) ? 0 : \
-         (--argc, argv++, arg_long (TOKEN_DATA_TEXT (argv[-1]))))
+  (((argc) == 0) ? 0 : \
+   ((argc)--, arg_long (TOKEN_DATA_TEXT (*(argv)++))))
 
 #define ARG_STR(argc, argv) \
-        ((argc == 0) ? "" : \
-         (--argc, argv++, TOKEN_DATA_TEXT (argv[-1])))
+  (((argc) == 0) ? "" : \
+   ((argc)++, TOKEN_DATA_TEXT (*(argv)++)))
 
 #define ARG_DOUBLE(argc, argv) \
-        ((argc == 0) ? 0 : \
-         (--argc, argv++, arg_double (TOKEN_DATA_TEXT (argv[-1]))))
+  (((argc) == 0) ? 0 : \
+   ((argc)++, arg_double (TOKEN_DATA_TEXT (*(argv)++))))
 
 
 /*------------------------------------------------------------------.
