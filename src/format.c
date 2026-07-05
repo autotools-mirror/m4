@@ -119,6 +119,45 @@ arg_double (const char *str)
 #define ARG_DOUBLE(argc, argv) \
   (((argc) == 0) ? 0 : \
    ((argc)++, arg_double (TOKEN_DATA_TEXT (*(argv)++))))
+
+/* Parse a width or precision from FMT's prefix.
+   If FMT[-1] == '.' this is a precision instead of a width.
+   If FMT[0] == '*', get it from the next arg specified by *ARGC and *ARGV;
+   otherwise, parse an optional unsigned decimal prefix of FMT.
+   If the integer is too large, warn about overflow.
+   Set *N to the value, or to zero if the prefix is empty.
+   Return the address of the first byte after the prefix.  */
+static char const *
+parse_width (char const *fmt, int *argc, token_data ***argv, int *n)
+{
+  if (*fmt == '*')
+    {
+      *n = ARG_INT (*argc, *argv);
+      return fmt + 1;
+    }
+  else
+    {
+      char const *f = fmt;
+      *n = 0;
+      bool v = false;
+      for (; c_isdigit (*f); f++)
+        {
+          v |= ckd_mul (n, *n, 10);
+          v |= ckd_add (n, *n, *f - '0');
+        }
+      if (v)
+        {
+          int w = ckd_add (&w, f - fmt, 0) ? INT_MAX : w;
+          M4ERROR ((warning_status, 0,
+                    _(fmt[-1] == '.'
+                      ? "integer overflow in format precision %.*s"
+                      : "integer overflow in format width %.*s"),
+                    w, fmt));
+          *n = INT_MAX;
+        }
+      return f;
+    }
+}
 
 
 /*------------------------------------------------------------------.
@@ -259,43 +298,20 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
 
       /* Minimum field width; an explicit 0 is the same as not giving
          the width.  */
-      width = 0;
       *p++ = '*';
-      if (*fmt == '*')
-        {
-          width = ARG_INT (argc, argv);
-          fmt++;
-        }
-      else
-        while (c_isdigit (*fmt))
-          {
-            width = 10 * width + *fmt - '0';
-            fmt++;
-          }
+      fmt = parse_width (fmt, &argc, &argv, &width);
 
       /* Maximum precision; an explicit negative precision is the same
          as not giving the precision.  A lone '.' is a precision of 0.  */
-      prec = -1;
       *p++ = '.';
       *p++ = '*';
       if (*fmt == '.')
         {
           ok['c' - OKMIN] = 0;
-          if (*(++fmt) == '*')
-            {
-              prec = ARG_INT (argc, argv);
-              ++fmt;
-            }
-          else
-            {
-              prec = 0;
-              while (c_isdigit (*fmt))
-                {
-                  prec = 10 * prec + *fmt - '0';
-                  fmt++;
-                }
-            }
+          fmt = parse_width (fmt + 1, &argc, &argv, &prec);
         }
+      else
+        prec = -1;
 
       /* Length modifiers.  We don't yet recognize ll, j, t, or z.  */
       if (*fmt == 'l')
