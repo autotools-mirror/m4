@@ -186,7 +186,7 @@ reload_frozen_state (const char *name)
   int character;
   int operation;
   char *string[2];
-  int allocated[2];
+  idx_t allocated[2];
   int number[2];
   const builtin *bp;
   bool advance_line = true;
@@ -252,10 +252,11 @@ reload_frozen_state (const char *name)
     {                                                                   \
       void *tmp;                                                        \
       char *p;                                                          \
-      if (number[(i)] + 1 > allocated[(i)])                             \
+      if (allocated[(i)] <= number[(i)])                                \
         {                                                               \
           free (string[(i)]);                                           \
-          allocated[(i)] = number[(i)] + 1;                             \
+          if (ckd_add (&allocated[(i)], number[(i)], 1))                \
+            xalloc_die ();                                              \
           string[(i)] = ximalloc (allocated[(i)]);                      \
         }                                                               \
       if (number[(i)] > 0                                               \
