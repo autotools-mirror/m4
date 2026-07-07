@@ -2294,14 +2294,17 @@ expand_user_macro (struct obstack *obs, symbol *sym,
         case '7':
         case '8':
         case '9':
-          if (no_gnu_extensions)
+          i = *text++ - '0';
+          if (!no_gnu_extensions)
             {
-              i = *text++ - '0';
-            }
-          else
-            {
-              for (i = 0; c_isdigit (*text); text++)
-                i = i * 10 + (*text - '0');
+              bool v = false;
+              for (; c_isdigit (*text); text++)
+                {
+                  v |= ckd_mul (&i, i, 10);
+                  v |= ckd_add (&i, i, *text - '0');
+                }
+              if (v)
+                break;
             }
           obstack_grow (obs, ARG (i), ARGLEN (i));
           break;

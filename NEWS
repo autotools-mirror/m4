@@ -21,6 +21,10 @@ GNU M4 NEWS - User visible changes.
    eval(`2 << (-1 & 31)') and yielding 0, and eval(`-2 >> 256') now yields
    -1 instead of acting like eval(`-2 << (256 & 31)') and yielding -2.
 
+** Macro argument references out of range, e.g., `$999999999999999999999',
+   now expand to the empty string even if the integer modulo 2**32 would
+   correspond to a nonempty macro argument (present since "the beginning").
+
 ** With -G/--traditional, the insecure `maketemp' macro has been removed.
    This conforms to POSIX, which removed `maketemp' in its 2024 edition.
    Without -G/--traditional, this behavior has not changed:

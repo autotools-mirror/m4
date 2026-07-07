@@ -7600,12 +7600,18 @@ define(`_9', `$9')define(`eleventh', `_9(shift(shift($@@)))')
 dnl Eleventh argument, GNU style
 define(`Eleventh', `$11')
 @result{}
+dnl (2**64 + 1)st argument, GNU style
+define(`Two64plus1st', `$18446744073709551617')
+@result{}
 first1(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
 @result{}A1
 eleventh(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
 @result{}k
 Eleventh(`a', `b', `c', `d', `e', `f', `g', `h', `i', `j', `k')
 @result{}k
+dnl Missing arguments are taken to be empty.
+Two64plus1st(`a', `b', `c')
+@result{}
 @end example
 
 @noindent
