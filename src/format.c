@@ -56,12 +56,11 @@ arg_int (const char *str)
   return result;
 }
 
-/* Parse STR as a long, reporting warnings.  */
-static long
+/* Parse STR as an ival, reporting warnings.  */
+static ival
 arg_long (const char *str)
 {
   char *endp;
-  long value;
 
   if (!*str)
     {
@@ -69,15 +68,17 @@ arg_long (const char *str)
       return 0L;
     }
   errno = 0;
-  value = strtol (str, &endp, 10);
+  iival value = strtoiival (str, &endp, 10);
   bool overflow = errno == ERANGE;
   if (*endp)
     M4ERROR ((warning_status, 0, _("non-numeric argument %s"), squote (str)));
   else if (c_isspace (*str))
     M4ERROR ((warning_status, 0, _("leading whitespace ignored")));
+  ival result;
+  overflow |= ckd_add (&result, value, 0);
   if (overflow)
     M4ERROR ((warning_status, 0, _("numeric overflow detected")));
-  return value;
+  return result;
 }
 
 /* Parse STR as a double, reporting warnings.  */
@@ -173,7 +174,7 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
 {
   const char *f;                /* format control string */
   const char *fmt;              /* position within f */
-  char fstart[] = "%'+- 0#*.*hhd";      /* current format spec */
+  char fstart[sizeof "%'+- 0#*.*"PRIdIVAL"d"]; /* current format spec */
   char *p;                      /* position within fstart */
   unsigned char c;              /* a simple character */
 
@@ -193,7 +194,6 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
   /* Precision specifiers.  */
   int width;                    /* minimum field width */
   int prec;                     /* precision */
-  char lflag;                   /* long flag */
 
   /* Specifiers we are willing to accept.  ok['x' - OKMIN] implies %x is ok.
      Various modifiers reduce the set, in order to avoid undefined
@@ -203,9 +203,8 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
 
   /* Buffer and stuff.  */
   char *str;                    /* malloc'd buffer of formatted text */
-  enum
-  { CHAR, INT, LONG, DOUBLE, STR } datatype;
 
+  fstart[0] = '%';
   f = fmt = ARG_STR (argc, argv);
   while (1)
     {
@@ -226,7 +225,6 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
         }
 
       p = fstart + 1;           /* % */
-      lflag = 0;
       ok['a' - OKMIN] = ok['A' - OKMIN] = ok['c' - OKMIN] = ok['d' - OKMIN]
         = ok['e' - OKMIN] = ok['E' - OKMIN] = ok['f' - OKMIN] = ok['F' - OKMIN]
         = ok['g' - OKMIN] = ok['G' - OKMIN] = ok['i' - OKMIN] = ok['o' - OKMIN]
@@ -313,28 +311,11 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
       else
         prec = -1;
 
-      /* Length modifiers.  We don't yet recognize ll, j, t, or z.  */
-      if (*fmt == 'l')
-        {
-          *p++ = 'l';
-          lflag = 1;
-          fmt++;
-          ok['c' - OKMIN] = ok['s' - OKMIN] = 0;
-        }
-      else if (*fmt == 'h')
-        {
-          *p++ = 'h';
-          fmt++;
-          if (*fmt == 'h')
-            {
-              *p++ = 'h';
-              fmt++;
-            }
-          ok['a' - OKMIN] = ok['A' - OKMIN] = ok['c' - OKMIN] = ok['e' - OKMIN]
-            = ok['E' - OKMIN] = ok['f' - OKMIN] = ok['F' - OKMIN]
-            = ok['g' - OKMIN] = ok['G' - OKMIN] = ok['s' - OKMIN]
-            = 0;
-        }
+      /* For partial backward compatibility, quietly ignore the rarely used
+         length modifiers "h", "hh" and "l", which were accepted by m4
+         1.4.21 and earlier but had undefined behavior on picky platforms.
+         This compatibility hack is undocumented.  */
+      fmt += fmt[0] == 'h' ? 1 + (fmt[1] == 'h') : fmt[0] == 'l';
 
       c = *fmt++;
       if (! (OKMIN <= c && c <= OKMAX && ok[c - OKMIN]))
@@ -346,16 +327,26 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
           continue;
         }
 
-      /* Specifiers.  We don't yet recognize C, S, n, or p.  */
+      /* Our constructed format string in fstart is safe.  */
+#if _GL_GNUC_PREREQ (4, 3) || defined __clang__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
+
+      /* Specifiers.  We don't recognize C, S, n, or p.  */
       switch (c)
         {
         case 'c':
-          datatype = CHAR;
           p -= 2;               /* %.*c is undefined, so undo the '.*'.  */
+          *p++ = 'c';
+          *p = '\0';
+          str = xasprintf (fstart, width, ARG_INT (argc, argv));
           break;
 
         case 's':
-          datatype = STR;
+          *p++ = 's';
+          *p = '\0';
+          str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
           break;
 
         case 'd':
@@ -364,7 +355,10 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
         case 'x':
         case 'X':
         case 'u':
-          datatype = lflag ? LONG : INT;
+          p = mempcpy (p, PRIdIVAL, sizeof PRIdIVAL - 2);
+          *p++ = c;
+          *p = '\0';
+          str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
           break;
 
         case 'a':
@@ -375,41 +369,9 @@ expand_format (struct obstack *obs, int argc, token_data **argv)
         case 'F':
         case 'g':
         case 'G':
-          datatype = DOUBLE;
-          break;
-
-        default:
-          abort ();
-        }
-      *p++ = c;
-      *p = '\0';
-
-      /* Our constructed format string in fstart is safe.  */
-#if _GL_GNUC_PREREQ (4, 3) || defined __clang__
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif
-
-      switch (datatype)
-        {
-        case CHAR:
-          str = xasprintf (fstart, width, ARG_INT (argc, argv));
-          break;
-
-        case INT:
-          str = xasprintf (fstart, width, prec, ARG_INT (argc, argv));
-          break;
-
-        case LONG:
-          str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
-          break;
-
-        case DOUBLE:
+          *p++ = c;
+          *p = '\0';
           str = xasprintf (fstart, width, prec, ARG_DOUBLE (argc, argv));
-          break;
-
-        case STR:
-          str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
           break;
 
         default:

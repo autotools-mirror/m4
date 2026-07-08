@@ -6262,18 +6262,11 @@ example shows how @code{format} can be used to produce tabular output.
 $ @kbd{m4 -I examples}
 include(`forloop.m4')
 @result{}
-forloop(`i', `1', `10', `format(`%6d squared is %10d
-', i, eval(i**2))')
-@result{}     1 squared is          1
-@result{}     2 squared is          4
-@result{}     3 squared is          9
-@result{}     4 squared is         16
-@result{}     5 squared is         25
-@result{}     6 squared is         36
-@result{}     7 squared is         49
-@result{}     8 squared is         64
-@result{}     9 squared is         81
-@result{}    10 squared is        100
+forloop(`i', `7', `9', `format(`100**%d = %19d
+', i, eval(100**i))')
+@result{}100**7 =     100000000000000
+@result{}100**8 =   10000000000000000
+@result{}100**9 = 1000000000000000000
 @result{}
 @end example
 
@@ -6282,24 +6275,20 @@ function, and supports these @samp{%} specifiers: @samp{c}, @samp{s},
 @samp{d}, @samp{o}, @samp{x}, @samp{X}, @samp{u}, @samp{a}, @samp{A},
 @samp{e}, @samp{E}, @samp{f}, @samp{F}, @samp{g}, @samp{G}, and
 @samp{%}; it supports field widths and precisions, and the flags
-@samp{+}, @samp{-}, @samp{ }, @samp{0}, @samp{#}, and @samp{'}.  For
-integer specifiers, the width modifiers @samp{hh}, @samp{h}, and
-@samp{l} are recognized, and for floating point specifiers, the width
-modifier @samp{l} is recognized.  Items not yet supported include
+@samp{+}, @samp{-}, @samp{ }, @samp{0}, @samp{#}, and @samp{'}.
+Items not supported include length modifiers,
 positional arguments, the @samp{n}, @samp{p}, @samp{S}, and @samp{C}
-specifiers, the @samp{z}, @samp{t}, @samp{j}, @samp{L} and @samp{ll}
-modifiers, and any platform extensions available in the native
+specifiers, and any platform extensions available in the native
 @code{printf}.  For more details on the functioning of @code{printf},
-see the C Library Manual, or the POSIX specification (for
-example, @samp{%a} is supported even on platforms that haven't yet
-implemented C99 hexadecimal floating point output natively).
+see the C Library Manual, or the POSIX specification.
 
-Numeric overflows result in a warning.  Numeric arguments, widths, and
-precisions are subject to machine limits that may differ from the limit
-of @code{eval} (@pxref{Eval}).
+Integers to be formatted should fall in the same range as that of @code{eval}.
+@xref{Eval}.
+Widths, precisions and floating point arguments are subject to machine limits
+that may differ from that of @code{eval}.
+Numeric overflows result in a warning.
 
-Unrecognized specifiers result in a warning.  It is anticipated that a
-future release of GNU @code{m4} will support more specifiers.
+Unrecognized specifiers also result in a warning.
 Likewise, escape sequences are not yet recognized.
 
 @example

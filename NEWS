@@ -27,6 +27,9 @@ GNU M4 NEWS - User visible changes.
    eval(`2 << (-1 & 31)') and yielding 0, and eval(`-2 >> 256') now yields
    -1 instead of acting like eval(`-2 << (256 & 31)') and yielding -2.
 
+** `format' now formats integers using the same precision as `eval',
+   silently ignoring any `hh', `h' and `l' length modifiers.
+
 ** Macro argument references out of range, e.g., `$999999999999999999999',
    now expand to the empty string even if the integer modulo 2**32 would
    correspond to a nonempty macro argument (present since "the beginning").

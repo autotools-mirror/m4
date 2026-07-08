@@ -161,6 +161,8 @@ typedef int ival;
 # define PRIdIVAL "d"
 typedef unsigned int uival;
 static_assert (INT_WIDTH == UINT_WIDTH);
+typedef long int iival;
+# define strtoiival strtol
 #else
 typedef intmax_t ival;
 # define IVAL_MAX INTMAX_MAX
@@ -169,6 +171,8 @@ typedef intmax_t ival;
 # define PRIdIVAL PRIdMAX
 typedef uintmax_t uival;
 static_assert (INTMAX_WIDTH == UINTMAX_WIDTH);
+typedef intmax_t iival;
+# define strtoiival strtoimax
 #endif
 
 /* *INDENT-OFF* */
