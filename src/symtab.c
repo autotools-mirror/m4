@@ -49,8 +49,8 @@ struct profile
   int checks;                   /* Number of times a hash is checked.  */
   int comparisons;              /* Number of times strcmp was called.  */
   int misses;                   /* Number of times strcmp did not return 0.  */
-  long long bytes_hashed;       /* Number of bytes hashed.  */
-  long long bytes_compared;     /* Number of bytes compared.  */
+  intmax_t bytes_hashed;        /* Number of bytes hashed.  */
+  intmax_t bytes_compared;      /* Number of bytes compared.  */
 };
 
 static struct profile profiles[5];
@@ -64,8 +64,8 @@ show_profile (void)
   for (i = 0; i < 5; i++)
     {
       xfprintf (stderr, "m4debug: lookup mode %d called %d times, %d hits:\n"
-                "m4debug:  symbols: %d allocs, %d checks, %lld bytes hashed\n"
-                "m4debug:  str: %d compares, %d misses, %lld bytes compared\n",
+                "m4debug:  symbols: %d allocs, %d checks, %jd bytes hashed\n"
+                "m4debug:  str: %d compares, %d misses, %jd bytes compared\n",
                 i, profiles[i].entry, profiles[i].hits,
                 profiles[i].allocations, profiles[i].checks,
                 profiles[i].bytes_hashed, profiles[i].comparisons,
