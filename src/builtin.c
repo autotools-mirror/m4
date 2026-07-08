@@ -415,14 +415,14 @@ bad_argc (token_data *name, int argc, int min, int max)
   return isbad;
 }
 
-/*-----------------------------------------------------------------.
-| The function numeric_arg () converts ARG to an int pointed to by |
-| VALUEP.  If the conversion fails, print error message for macro  |
-| MACRO.  Return true iff conversion succeeds.                     |
-`-----------------------------------------------------------------*/
+/*--------------------------------------------------------------.
+| In macro MACRO, convert ARG to an ival pointed to by VALUEP.  |
+| Diagnose any failure.                                         |
+| Return true iff conversion succeeds.                          |
+`--------------------------------------------------------------*/
 
 static bool
-numeric_arg (token_data *macro, const char *arg, int *valuep)
+numeric_arg (token_data *macro, const char *arg, ival *valuep)
 {
   char *endp;
 
@@ -436,7 +436,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
   else
     {
       errno = 0;
-      long int value = strtol (arg, &endp, 10);
+      intmax_t value = strtoimax (arg, &endp, 10);
       if (*endp != '\0')
         {
           M4ERROR ((warning_status, 0,
@@ -450,7 +450,7 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
                   _("leading whitespace ignored in builtin %s"),
                   squote (TOKEN_DATA_TEXT (macro))));
       if (ckd_add (valuep, value, 0)
-	  || *valuep != toint32 (*valuep) || range_error)
+	  || *valuep != toival (*valuep) || range_error)
         M4ERROR ((warning_status, 0,
                   _("numeric overflow detected in builtin %s"),
                   squote (TOKEN_DATA_TEXT (macro))));
@@ -458,16 +458,16 @@ numeric_arg (token_data *macro, const char *arg, int *valuep)
   return true;
 }
 
-/*---------------------------------------------------------------.
-| Format an int VAL, and stuff it into an obstack OBS.  Used for |
-| macros expanding to numbers.                                   |
-`---------------------------------------------------------------*/
+/*---------------------------------------------------.
+| Stuff into OBS the textual representation of VAL.  |
+| Used for macros expanding to numbers.              |
+`---------------------------------------------------*/
 
 static void
-shipout_int (struct obstack *obs, int val)
+shipout_int (struct obstack *obs, ival val)
 {
-  char buf[INT_BUFSIZE_BOUND (int)];
-  char const *s = inttostr (toint32 (val), buf);
+  char buf[INT_BUFSIZE_BOUND (ival)];
+  char const *s = ivaltostr (toival (val), buf);
   char const *e = buf + sizeof buf - 1;
   obstack_grow (obs, s, e - s);
 }
@@ -1093,24 +1093,31 @@ m4_sysval (struct obstack *obs, int argc MAYBE_UNUSED,
 static void
 m4_eval (struct obstack *obs, int argc, token_data **argv)
 {
-  int value = 0;
+  ival value = 0;
   int radix = 10;
-  int min = 1;
+  ival min = 1;
   const char *expr = ARG (1);
   const char *base = ARG (2);
 
   if (bad_argc (argv[0], argc, 2, 4))
     return;
 
-  if (*base && !numeric_arg (argv[0], base, &radix))
-    return;
-
-  if (radix < 1 || radix > 36)
+  if (*base)
     {
-      M4ERROR ((warning_status, 0,
-                _("radix %d in builtin %s out of range"), radix,
-                squote (ARG (0))));
-      return;
+      ival iradix;
+
+      if (!numeric_arg (argv[0], base, &iradix))
+        return;
+
+      if (! (1 <= iradix && iradix <= 36))
+        {
+          M4ERROR ((warning_status, 0,
+                    _("radix %s in builtin %s out of range"), base,
+                    squote (ARG (0))));
+          return;
+        }
+
+      radix = iradix;
     }
 
   if (argc >= 4 && !numeric_arg (argv[0], ARG (3), &min))
@@ -1131,8 +1138,8 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   bool negative = value < 0;
 
   /* The negative of the number of value digits to output.  Making it
-     negative avoids overflow if VALUE == INT_MIN && RADIX == 1.  */
-  int negdigits;
+     negative avoids overflow if VALUE is minimal && RADIX == 1.  */
+  ival negdigits;
 
   /* Value buffer when radix != 1.  32 bytes is enough, as the value
      is at most 32 bits and base 2 is the worst case.  */
@@ -1152,7 +1159,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   else
     {
       s = e = valbuf + sizeof valbuf;
-      int v = value;
+      ival v = value;
 
       if (radix == 10)
         {
@@ -1216,7 +1223,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
   if (negative)
     *p++ = '-';
 
-  for (int lz = min + negdigits; 0 < lz; lz--)
+  for (ival lz = min + negdigits; 0 < lz; lz--)
     *p++ = '0';
 
   if (radix == 1)
@@ -1239,7 +1246,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_incr (struct obstack *obs, int argc, token_data **argv)
 {
-  int value;
+  ival value;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1254,7 +1261,7 @@ m4_incr (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_decr (struct obstack *obs, int argc, token_data **argv)
 {
-  int value;
+  ival value;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1277,7 +1284,7 @@ m4_decr (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_divert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
-  int i = 0;
+  ival i = 0;
 
   if (bad_argc (argv[0], argc, 1, 2))
     return;
@@ -1321,10 +1328,10 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
       {
         const char *arg = ARG (i);
         errno = 0;
-        long int file = strtol (arg, &endp, 10);
+        intmax_t file = strtoimax (arg, &endp, 10);
         if (*endp == '\0' && !c_isspace (*arg))
           {
-            int ifile;
+            ival ifile;
             if (errno == 0 && !ckd_add (&ifile, file, 0))
               insert_diversion (ifile);
           }
@@ -1595,18 +1602,22 @@ m4___program__ (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_m4exit (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 {
-  int exit_code = EXIT_SUCCESS;
+  int exit_code;
 
   /* Warn on bad arguments, but still exit.  */
   bad_argc (argv[0], argc, 1, 2);
-  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &exit_code))
+  ival iexit_code = EXIT_SUCCESS;
+  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &iexit_code))
     exit_code = EXIT_FAILURE;
-  if (exit_code < 0 || exit_code > 255)
+  else if (0 <= iexit_code && iexit_code < 256)
+    exit_code = iexit_code;
+  else
     {
       M4ERROR ((warning_status, 0,
-                _("exit status out of range: %d"), exit_code));
+                _("exit status out of range: %s"), ARG (1)));
       exit_code = EXIT_FAILURE;
     }
+
   /* Change debug stream back to stderr, to force flushing debug stream and
      detect any errors it might have encountered.  */
   debug_set_output (NULL);
@@ -1828,8 +1839,8 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
 static void
 m4_substr (struct obstack *obs, int argc, token_data **argv)
 {
-  int start = 0;
-  int length, avail;
+  ival start = 0, length;
+  int avail;
 
   if (bad_argc (argv[0], argc, 3, 4))
     {

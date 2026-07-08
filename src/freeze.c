@@ -187,7 +187,7 @@ reload_frozen_state (const char *name)
   int operation;
   char *string[2];
   idx_t allocated[2];
-  int number[2];
+  ival number[2];
   const builtin *bp;
   bool advance_line = true;
 
@@ -208,7 +208,7 @@ reload_frozen_state (const char *name)
 #define GET_NUMBER(Number, Neg)                                 \
   do                                                            \
     {                                                           \
-      int n = 0;                                                \
+      ival n = 0;                                               \
       bool v = false;                                           \
       while (c_isdigit (character))                             \
         {                                                       \
@@ -289,7 +289,8 @@ reload_frozen_state (const char *name)
   GET_NUMBER (number[0], false);
   if (number[0] > 1)
     M4ERROR ((EXIT_MISMATCH, 0,
-              _("frozen file version %d greater than max supported of 1"),
+              _("frozen file version %"PRIdIVAL
+                " greater than max supported of 1"),
               number[0]));
   else if (number[0] < 1)
     m4_failure (0, _("ill-formed frozen file, version directive expected"));
@@ -348,7 +349,12 @@ reload_frozen_state (const char *name)
 
               make_diversion (number[0]);
               if (number[1] > 0)
-                output_text (string[1], number[1]);
+                {
+                  int n;
+                  if (ckd_add (&n, number[1], 0))
+                    m4_failure (0, _("frozen string too long"));
+                  output_text (string[1], n);
+                }
               break;
 
             case 'F':

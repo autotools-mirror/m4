@@ -29,10 +29,10 @@
 #include <c-ctype.h>
 #include <errno.h>
 #include <error.h>
+#include <inttypes.h>
 #include <limits.h>
 #include <locale.h>
 #include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -146,6 +146,30 @@ extern const char *user_word_regexp;    /* -W */
 /* Error handling.  */
 extern int retcode;
 
+/* Integers for 'eval', and their maximum value, width, and formatters.
+   Builders can compile with -DIVAL_32_BIT for traditional 32-bit behavior,
+   even when 32 < INT_WIDTH.  This is a temporary measure so that we
+   can test it both ways; the intent is drop support for IVAL_32_BIT.  */
+#ifndef IVAL_32_BIT
+# define IVAL_32_BIT 0
+#endif
+#if IVAL_32_BIT
+typedef int ival;
+# define IVAL_MAX INT_MAX
+# define IVAL_WIDTH INT_WIDTH
+# define ivaltostr inttostr
+# define PRIdIVAL "d"
+typedef unsigned int uival;
+static_assert (INT_WIDTH == UINT_WIDTH);
+#else
+typedef intmax_t ival;
+# define IVAL_MAX INTMAX_MAX
+# define IVAL_WIDTH INTMAX_WIDTH
+# define ivaltostr imaxtostr
+# define PRIdIVAL PRIdMAX
+typedef uintmax_t uival;
+static_assert (INTMAX_WIDTH == UINTMAX_WIDTH);
+#endif
 
 /* *INDENT-OFF* */
 extern void m4_error (int, int, const char *, ...)
@@ -354,15 +378,15 @@ extern void set_word_regexp (const char *);
 #endif
 
 /* File: output.c --- output functions.  */
-extern int current_diversion;
+extern ival current_diversion;
 extern int output_current_line;
 
 extern void output_init (void);
 extern void output_exit (void);
 extern void output_text (const char *, int);
 extern void shipout_text (struct obstack *, const char *, int, int);
-extern void make_diversion (int);
-extern void insert_diversion (int);
+extern void make_diversion (ival);
+extern void insert_diversion (ival);
 extern void insert_file (FILE *);
 extern void freeze_diversions (FILE *);
 
@@ -484,7 +508,7 @@ extern FILE *m4_path_search (const char *, bool, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-extern bool evaluate (const char *, int *);
+extern bool evaluate (const char *, ival *);
 
 /* File: format.c  --- printf like formatting.  */
 
@@ -522,18 +546,22 @@ to_uchar (char ch)
   return ch;
 }
 
-/* The low-order 31 bits of a nonnegative m4 integer.
-   This equals INT32_MAX in the usual case where INT32_MAX is defined.  */
-enum { int32_max = 0x7fffffff };
-
-/* Convert an int to its low order 32 bits.  On typical platforms
-   this is the identity function and is optimized away.  */
-M4_INLINE int
-toint32 (int val)
+/* Normalize VAL.  Typically calls are optimized away.  */
+M4_INLINE ival
+toival (ival val)
 {
+#if IVAL_32_BIT && INT_MAX < IVAL_MAX
+  /* On this oddball platform, silently convert VAL to its sign bit
+     and low order 31 value bits.
+     int32_max holds the low-order 31 bits of a nonnegative m4 integer,
+     and equals INT32_MAX in the usual case where INT32_MAX is defined.  */
+  enum { int32_max = 0x7fffffff };
   return (0 <= val ? val & int32_max
           : INT_MIN < -INT_MAX ? val | (-1 - int32_max)
           : -(-val & int32_max));
+#else
+  return val;
+#endif
 }
 
 _GL_INLINE_HEADER_END

@@ -17,6 +17,9 @@ GNU M4 NEWS - User visible changes.
 ** Loading from a frozen file now checks for format errors more carefully,
    without possibly undefined behavior (present since 1.3).
 
+** `eval' now computes with at least 64-bit integers, instead of
+   insisting on 32 bits only.
+
 ** `eval' no longer takes shift counts modulo 32.
    Instead, negative shift counts shift in the opposite direction,
    and shift counts greater than the word size shift the whole word.

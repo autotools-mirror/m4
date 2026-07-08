@@ -6295,7 +6295,7 @@ example, @samp{%a} is supported even on platforms that haven't yet
 implemented C99 hexadecimal floating point output natively).
 
 Numeric overflows result in a warning.  Numeric arguments, widths, and
-precisions are subject to machine limits instead of to the 32-bit limit
+precisions are subject to machine limits that may differ from the limit
 of @code{eval} (@pxref{Eval}).
 
 Unrecognized specifiers result in a warning.  It is anticipated that a
@@ -6407,8 +6407,9 @@ Expands to the value of @var{expression}.  The expansion is empty
 if a problem is encountered while parsing the arguments.  If specified,
 @var{radix} and @var{width} control the format of the output.
 
-Calculations are done with 32-bit signed numbers.  Overflow silently
-results in wraparound.  A warning is issued if division by zero is
+Calculations are done with signed integers of at least 64 bits.
+Overflow silently results in wraparound.
+A warning is issued if division by zero is
 attempted, or if @var{expression} could not be parsed.
 
 Expressions can contain the following operators, listed in order of
@@ -6555,8 +6556,8 @@ eval(`4 ** -2')
 @comment need to be displayed as-is in the manual.
 
 @example
-eval(`3**2000000000')
-@result{}632360961
+eval(`3**2000000000 & 0x7fffffffffffffff')
+@result{}4651562608559722497
 define(`loop', `ifelse(`$1', `1000', `pass',
 `loop(eval($1+!!(3**2000000000)))')')loop(0)
 @result{}pass
@@ -6636,19 +6637,17 @@ a shift by a negative count goes in the opposite direction,
 and a shift by the word size or greater shifts all the word's bits.
 
 @example
-define(`max_int', eval(`0x7fffffff'))
+define(`int64_max', eval(`0x7fffffffffffffff'))
 @result{}
-define(`min_int', incr(max_int))
+define(`int64_min', eval(`-1 - 'int64_max))
 @result{}
-eval(min_int` < 0')
+eval(int64_min` < 0')
 @result{}1
-eval(max_int` > 0')
+eval(int64_max` > 0')
 @result{}1
-ifelse(eval(min_int` / -1'), min_int, `overflow occurred')
-@result{}overflow occurred
-min_int
-@result{}-2147483648
-eval(`0x80000000 % -1')
+int64_min
+@result{}-9223372036854775808
+eval(int64_min` % -1')
 @result{}0
 eval(`-4 >> 1')
 @result{}-2

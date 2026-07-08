@@ -70,7 +70,7 @@ struct m4_diversion
     char *buffer;               /* Malloc'd diversion buffer.  */
     m4_diversion *next;         /* Free-list pointer */
   } u;
-  int divnum;                   /* Which diversion this represents.  */
+  ival divnum;                  /* Which diversion this represents.  */
   int size;                     /* Usable size before reallocation.  */
   int used;                     /* Used buffer length, or tmp file exists.  */
 };
@@ -92,7 +92,7 @@ static int total_buffer_size;
 
 /* The number of the currently active diversion.  This variable is
    maintained for the `divnum' builtin function.  */
-int current_diversion;
+ival current_diversion;
 
 /* Current output diversion, NULL if output is being currently
    discarded.  output_diversion->u is guaranteed non-NULL except when
@@ -125,8 +125,8 @@ static FILE *tmp_file1;
 static FILE *tmp_file2;
 
 /* Diversions that own tmp_file, or 0.  */
-static int tmp_file1_owner;
-static int tmp_file2_owner;
+static ival tmp_file1_owner;
+static ival tmp_file2_owner;
 
 /* True if tmp_file2 is more recently used.  */
 static bool tmp_file2_recent;
@@ -141,6 +141,8 @@ cmp_diversion_CB (const void *elt1, const void *elt2)
 {
   const m4_diversion *d1 = (const m4_diversion *) elt1;
   const m4_diversion *d2 = (const m4_diversion *) elt2;
+  if (INT_MAX < IVAL_MAX)
+    return _GL_CMP (d1->divnum, d2->divnum);
   /* No need to worry about overflow, since we don't create diversions
      with negative divnum.  */
   return d1->divnum - d2->divnum;
@@ -150,10 +152,9 @@ cmp_diversion_CB (const void *elt1, const void *elt2)
 static bool
 threshold_diversion_CB (const void *elt, const void *threshold)
 {
-  const m4_diversion *diversion = (const m4_diversion *) elt;
-  /* No need to worry about overflow, since we don't create diversions
-     with negative divnum.  */
-  return diversion->divnum >= *(const int *) threshold;
+  m4_diversion const *diversion = elt;
+  ival const *thresh = threshold;
+  return *thresh <= diversion->divnum;
 }
 
 /* Clean up any temporary directory.  Designed for use as an atexit
@@ -192,7 +193,7 @@ cleanup_tmpfile (void)
 
 /* Convert DIVNUM into a temporary file name for use in m4_tmp*.  */
 static const char *
-m4_tmpname (int divnum)
+m4_tmpname (ival divnum)
 {
   static char *buffer;
   static char *tail;
@@ -200,13 +201,15 @@ m4_tmpname (int divnum)
     {
       idx_t dirlen = strlen (output_temp_dir->dir_name);
       static char const subprefix[] = "/m4-";
-      idx_t size = dirlen + sizeof subprefix + INT_STRLEN_BOUND (int);
+      idx_t size = dirlen + sizeof subprefix + INT_STRLEN_BOUND (ival);
       buffer = obstack_alloc (&diversion_storage, size);
       tail = mempcpy (mempcpy (buffer, output_temp_dir->dir_name, dirlen),
                       subprefix, sizeof subprefix - 1);
     }
   assert (0 < divnum);
-  sprintf (tail, "%d", divnum);
+  char *t = tail;
+  for (char *p = ivaltostr (divnum, t); (*t++ = *p++); )
+    continue;
   return buffer;
 }
 
@@ -218,7 +221,7 @@ m4_tmpname (int divnum)
    m4_tmpremove.  Exits on failure, so the return value is always an
    open file.  */
 static FILE *
-m4_tmpfile (int divnum)
+m4_tmpfile (ival divnum)
 {
   const char *name;
   FILE *file;
@@ -247,7 +250,7 @@ m4_tmpfile (int divnum)
    end.  Exits on failure, so the return value is always an open
    file.  */
 static FILE *
-m4_tmpopen (int divnum, bool reread)
+m4_tmpopen (ival divnum, bool reread)
 {
   const char *name;
   FILE *file;
@@ -284,7 +287,7 @@ m4_tmpopen (int divnum, bool reread)
    On the other hand, keeping every spilled diversion open would run
    into EMFILE limits.  */
 static int
-m4_tmpclose (FILE *file, int divnum)
+m4_tmpclose (FILE *file, ival divnum)
 {
   int result = 0;
   if (divnum != tmp_file1_owner && divnum != tmp_file2_owner)
@@ -309,7 +312,7 @@ m4_tmpclose (FILE *file, int divnum)
 
 /* Delete a closed temporary FILE for diversion DIVNUM.  */
 static int
-m4_tmpremove (int divnum)
+m4_tmpremove (ival divnum)
 {
   if (divnum == tmp_file1_owner)
     {
@@ -332,7 +335,7 @@ m4_tmpremove (int divnum)
    unused diversion NEWNUM.  Return an open stream visiting the new
    temporary file, positioned at the end, or exit on failure.  */
 static FILE *
-m4_tmprename (int oldnum, int newnum)
+m4_tmprename (ival oldnum, ival newnum)
 {
   /* m4_tmpname reuses its return buffer.  */
   char *oldname = xstrdup (m4_tmpname (oldnum));
@@ -739,7 +742,7 @@ shipout_text (struct obstack *obs, const char *text, int length, int line)
    available file descriptors (each overflowing diversion uses one).  */
 
 void
-make_diversion (int divnum)
+make_diversion (ival divnum)
 {
   m4_diversion *diversion = NULL;
 
@@ -948,7 +951,7 @@ insert_diversion_helper (m4_diversion *diversion)
 `------------------------------------------------------------------*/
 
 void
-insert_diversion (int divnum)
+insert_diversion (ival divnum)
 {
   const void *elt;
 
@@ -991,8 +994,8 @@ undivert_all (void)
 void
 freeze_diversions (FILE *file)
 {
-  int saved_number;
-  int last_inserted;
+  ival saved_number;
+  ival last_inserted;
   gl_oset_iterator_t iter;
   const void *elt;
 
@@ -1008,7 +1011,8 @@ freeze_diversions (FILE *file)
       if (diversion->size || diversion->used)
         {
           if (diversion->size)
-            xfprintf (file, "D%d,%d\n", diversion->divnum, diversion->used);
+            xfprintf (file, "D%"PRIdIVAL",%d\n",
+                      diversion->divnum, diversion->used);
           else
             {
               struct stat file_stat;
@@ -1017,7 +1021,7 @@ freeze_diversions (FILE *file)
                 m4_failure (errno, _("cannot stat diversion"));
               if (file_stat.st_size < 0)
                 m4_failure (0, _("diversion file size is negative"));
-              xfprintf (file, "D%d,%jd\n", diversion->divnum,
+              xfprintf (file, "D%"PRIdIVAL",%jd\n", diversion->divnum,
                         (intmax_t) {file_stat.st_size});
             }
 
@@ -1032,5 +1036,5 @@ freeze_diversions (FILE *file)
   /* Save the active diversion number, if not already.  */
 
   if (saved_number != last_inserted)
-    xfprintf (file, "D%d,0\n\n", saved_number);
+    xfprintf (file, "D%"PRIdIVAL",0\n\n", saved_number);
 }
