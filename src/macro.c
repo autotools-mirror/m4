@@ -147,7 +147,7 @@ expand_argument (struct obstack *obs, token_data *argp, bool groks_macro)
   int line = current_line;
   idx_t len;
 
-  TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
+  set_token_data_void (argp);
 
   /* Skip leading white space.  */
   do
@@ -176,14 +176,10 @@ expand_argument (struct obstack *obs, token_data *argp, bool groks_macro)
                 {
                   M4ERROR ((warning_status, 0,
                             _("Warning: cannot concatenate builtin tokens")));
-                  TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
+                  set_token_data_void (argp);
                 }
               if (TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
-                {
-                  TOKEN_DATA_TYPE (argp) = TOKEN_TEXT;
-                  TOKEN_DATA_TEXT (argp) = text;
-                  TOKEN_DATA_LEN (argp) = len;
-                }
+                set_token_data_text (argp, text, len);
               return t == TOKEN_COMMA;
             }
           FALLTHROUGH;
@@ -215,15 +211,12 @@ expand_argument (struct obstack *obs, token_data *argp, bool groks_macro)
             {
               if (obstack_object_size (obs) == 0 &&
                   TOKEN_DATA_TYPE (argp) == TOKEN_VOID)
-                {
-                  TOKEN_DATA_TYPE (argp) = TOKEN_FUNC;
-                  TOKEN_DATA_FUNC (argp) = TOKEN_DATA_FUNC (&td);
-                }
+                set_token_data_func (argp, TOKEN_DATA_FUNC (&td));
               else
                 {
                   M4ERROR ((warning_status, 0,
                             _("Warning: cannot concatenate builtin tokens")));
-                  TOKEN_DATA_TYPE (argp) = TOKEN_VOID;
+                  set_token_data_void (argp);
                 }
             }
           break;
@@ -253,9 +246,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
   bool more_args;
   bool groks_macro = SYMBOL_MACRO_ARGS (sym);
 
-  TOKEN_DATA_TYPE (&td) = TOKEN_TEXT;
-  TOKEN_DATA_TEXT (&td) = SYMBOL_NAME (sym);
-  TOKEN_DATA_LEN (&td) = SYMBOL_NAME_LEN (sym);
+  set_token_data_text (&td, SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym));
   tdp = (token_data *) obstack_copy (arguments, &td, sizeof td);
   obstack_ptr_grow (argptr, tdp);
 

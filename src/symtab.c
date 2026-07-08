@@ -237,7 +237,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
               profiles[mode].allocations++;
 #endif
               sym = (symbol *) xmalloc (sizeof (symbol));
-              SYMBOL_TYPE (sym) = TOKEN_VOID;
+              set_token_data_void (symbol_token_data (sym));
               SYMBOL_TRACED (sym) = SYMBOL_TRACED (old);
               sym->hash = h;
               SYMBOL_NAME (sym) = SYMBOL_NAME (old);
@@ -266,7 +266,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
       profiles[mode].allocations++;
 #endif
       sym = (symbol *) xmalloc (sizeof (symbol));
-      SYMBOL_TYPE (sym) = TOKEN_VOID;
+      set_token_data_void (symbol_token_data (sym));
       SYMBOL_TRACED (sym) = false;
       sym->hash = h;
       SYMBOL_MACRO_ARGS (sym) = false;
@@ -335,7 +335,7 @@ lookup_symbol (const char *name, int len, symbol_lookup mode)
             profiles[mode].allocations++;
 #endif
             sym = (symbol *) xmalloc (sizeof (symbol));
-            SYMBOL_TYPE (sym) = TOKEN_VOID;
+            set_token_data_void (symbol_token_data (sym));
             SYMBOL_TRACED (sym) = true;
             sym->hash = h;
             SYMBOL_NAME (sym) = ximemdup0 (name, len);

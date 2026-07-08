@@ -305,24 +305,25 @@ enum token_type
   TOKEN_MACDEF                  /* a macro's definition (see "defn") */
 };
 
-/* The data for a token, a macro argument, and a macro definition.  */
+/* The data for a macro argument, a token, and a macro definition.
+   Only macro arguments have associated text.  */
 enum token_data_type
 {
-  TOKEN_VOID,
-  TOKEN_TEXT,
-  TOKEN_FUNC
+  TOKEN_TEXT = 0,
+  TOKEN_VOID = -1,
+  TOKEN_FUNC = -2,
 };
 
 struct token_data
 {
-  enum token_data_type type;
-  /* Several places in the code only work with tokens no larger than
-     2G.  Although len only matters for a text token, putting it here
-     instead of in the union allows struct token_data to be
-     smaller.  */
+  /* If nonnegative, this is the macro argument's length.
+     Otherwise, this is a negative enum token_data_type value.
+     Doing it this way makes struct token_data smaller.  */
   int len;
+
   union
   {
+    /* A macro argument's text.  */
     struct
     {
       char *text;
@@ -331,18 +332,69 @@ struct token_data
 #endif
     }
     u_t;
+
+    /* A macro definition.  */
     builtin_func *func;
+
+    /* Tokens use no members of this union.  */
   }
   u;
 };
 
-#define TOKEN_DATA_TYPE(Td)             ((Td)->type)
-#define TOKEN_DATA_LEN(Td)              ((Td)->len)
-#define TOKEN_DATA_TEXT(Td)             ((Td)->u.u_t.text)
+M4_INLINE void
+set_token_data_text (struct token_data *td, char *text, int len)
+{
+  td->len = len;
+  td->u.u_t.text = text;
+}
+M4_INLINE void
+set_token_data_void (struct token_data *td)
+{
+  td->len = TOKEN_VOID;
+}
+M4_INLINE void
+set_token_data_func (struct token_data *td, builtin_func *func)
+{
+  td->len = TOKEN_FUNC;
+  td->u.func = func;
+}
+M4_INLINE enum token_data_type
+TOKEN_DATA_TYPE (struct token_data const *td)
+{
+  if (td->len < 0)
+    {
+      assume (TOKEN_FUNC <= td->len);
+      return td->len;
+    }
+  return TOKEN_TEXT;
+}
+M4_INLINE int
+TOKEN_DATA_LEN (struct token_data const *td)
+{
+  return td->len;
+}
+M4_INLINE char *
+TOKEN_DATA_TEXT (struct token_data const *td)
+{
+  return td->u.u_t.text;
+}
 #ifdef ENABLE_CHANGEWORD
-# define TOKEN_DATA_ORIG_TEXT(Td)       ((Td)->u.u_t.original_text)
+M4_INLINE char *
+TOKEN_DATA_ORIG_TEXT (struct token_data const *td)
+{
+  return td->u.u_t.original_text;
+}
+M4_INLINE void
+set_token_data_orig_text (struct token_data *td, char *original_text)
+{
+  td->u.u_t.original_text = original_text;
+}
 #endif
-#define TOKEN_DATA_FUNC(Td)             ((Td)->u.func)
+M4_INLINE builtin_func *
+TOKEN_DATA_FUNC (struct token_data const *td)
+{
+  return td->u.func;
+}
 
 typedef enum token_type token_type;
 typedef enum token_data_type token_data_type;
@@ -435,6 +487,11 @@ struct symbol
 #define SYMBOL_TEXT(S)          (TOKEN_DATA_TEXT (&(S)->data))
 #define SYMBOL_TEXT_LEN(S)      (TOKEN_DATA_LEN (&(S)->data))
 #define SYMBOL_FUNC(S)          (TOKEN_DATA_FUNC (&(S)->data))
+M4_INLINE struct token_data *
+symbol_token_data (struct symbol *s)
+{
+  return &s->data;
+}
 
 typedef enum symbol_lookup symbol_lookup;
 typedef struct symbol symbol;

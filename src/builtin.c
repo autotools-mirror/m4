@@ -217,10 +217,9 @@ define_builtin (const char *name, const builtin *bp, symbol_lookup mode)
   symbol *sym;
 
   sym = lookup_symbol (name, strlen (name), mode);
-  SYMBOL_TYPE (sym) = TOKEN_FUNC;
+  set_token_data_func (symbol_token_data (sym), bp->func);
   SYMBOL_MACRO_ARGS (sym) = bp->groks_macro_args;
   SYMBOL_BLIND_NO_ARGS (sym) = bp->blind_if_no_args;
-  SYMBOL_FUNC (sym) = bp->func;
 }
 
 /* Storage for the compiled regular expression of
@@ -308,9 +307,7 @@ define_user_macro (const char *name, int name_len, const char *text,
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
     free (SYMBOL_TEXT (s));
 
-  SYMBOL_TYPE (s) = TOKEN_TEXT;
-  SYMBOL_TEXT (s) = defn;
-  SYMBOL_TEXT_LEN (s) = text_len;
+  set_token_data_text (symbol_token_data (s), defn, text_len);
 
   /* Implement --warn-macro-sequence.  */
   if (macro_sequence_inuse && text)
@@ -805,11 +802,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
       if (!bp->groks_macro_args)
         for (i = 2; i < argc; i++)
           if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
-            {
-              TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
-              TOKEN_DATA_TEXT (argv[i]) = (char *) "";
-              TOKEN_DATA_LEN (argv[i]) = 0;
-            }
+            set_token_data_text (argv[i], (char *) "", 0);
       bp->func (obs, argc - 1, argv + 1);
     }
 }
@@ -847,11 +840,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
       if (!SYMBOL_MACRO_ARGS (s))
         for (i = 2; i < argc; i++)
           if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
-            {
-              TOKEN_DATA_TYPE (argv[i]) = TOKEN_TEXT;
-              TOKEN_DATA_TEXT (argv[i]) = (char *) "";
-              TOKEN_DATA_LEN (argv[i]) = 0;
-            }
+            set_token_data_text (argv[i], (char *) "", 0);
       call_macro (s, argc - 1, argv + 1, obs);
     }
 }

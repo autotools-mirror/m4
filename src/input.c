@@ -450,8 +450,7 @@ init_macro_token (token_data *td)
       abort ();
     }
 
-  TOKEN_DATA_TYPE (td) = TOKEN_FUNC;
-  TOKEN_DATA_FUNC (td) = isp->u.func;
+  set_token_data_func (td, isp->u.func);
 }
 
 
@@ -1055,13 +1054,12 @@ next_token (token_data *td, int *line)
 
   obstack_1grow (&token_stack, '\0');
 
-  TOKEN_DATA_TYPE (td) = TOKEN_TEXT;
-  TOKEN_DATA_LEN (td) = obstack_object_size (&token_stack) - 1;
-  TOKEN_DATA_TEXT (td) = (char *) obstack_finish (&token_stack);
+  int len = obstack_object_size (&token_stack) - 1;
+  set_token_data_text (td, obstack_finish (&token_stack), len);
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)
     orig_text = TOKEN_DATA_TEXT (td);
-  TOKEN_DATA_ORIG_TEXT (td) = orig_text;
+  set_token_data_orig_text (td, orig_text);
 #endif
 #ifdef DEBUG_INPUT
   xfprintf (stderr, "next_token -> %s (%s)\n",
