@@ -71,8 +71,8 @@ struct m4_diversion
     m4_diversion *next;         /* Free-list pointer */
   } u;
   ival divnum;                  /* Which diversion this represents.  */
-  int size;                     /* Usable size before reallocation.  */
-  int used;                     /* Used buffer length, or tmp file exists.  */
+  idx_t size;                   /* Usable size before reallocation.  */
+  idx_t used;                   /* Used buffer length, or tmp file exists.  */
 };
 
 /* Table of diversions 1 through INT_MAX.  */
@@ -88,7 +88,7 @@ static m4_diversion *free_list;
 static struct obstack diversion_storage;
 
 /* Total size of all in-memory buffer sizes.  */
-static int total_buffer_size;
+static intmax_t total_buffer_size;
 
 /* The number of the currently active diversion.  This variable is
    maintained for the `divnum' builtin function.  */
@@ -112,7 +112,7 @@ static char *output_cursor;
 
 /* Cache of output_diversion->size - output_diversion->used, only
    valid when output_diversion->size is non-zero.  */
-static int output_unused;
+static idx_t output_unused;
 
 /* Number of input line we are generating output for.  */
 int output_current_line;
@@ -418,9 +418,9 @@ output_exit (void)
 `----------------------------------------------------------------*/
 
 static void
-make_room_for (int length)
+make_room_for (idx_t length)
 {
-  int wanted_size;
+  idx_t wanted_size;
   m4_diversion *selected_diversion = NULL;
 
   /* Compute needed size for in-memory buffer.  Diversions in-memory
@@ -439,10 +439,9 @@ make_room_for (int length)
   if (total_buffer_size - output_diversion->size + wanted_size
       > MAXIMUM_TOTAL_SIZE)
     {
-      int selected_used;
+      idx_t selected_used;
       char *selected_buffer;
       m4_diversion *diversion;
-      int count;
       gl_oset_iterator_t iter;
       const void *elt;
 
@@ -480,6 +479,7 @@ make_room_for (int length)
 
       if (selected_diversion->used > 0)
         {
+          idx_t count;
           count = fwrite (selected_buffer, selected_diversion->used,
                           1, selected_diversion->u.file);
           if (count != 1)
@@ -565,10 +565,8 @@ output_character_helper (int character)
 `-------------------------------------------------------------------*/
 
 void
-output_text (const char *text, int length)
+output_text (const char *text, idx_t length)
 {
-  int count;
-
   if (!output_diversion || !length)
     return;
 
@@ -577,6 +575,7 @@ output_text (const char *text, int length)
 
   if (output_file)
     {
+      idx_t count;
       count = fwrite (text, length, 1, output_file);
       if (count != 1)
         m4_failure (errno, _("ERROR: copying inserted file"));
@@ -604,7 +603,7 @@ output_text (const char *text, int length)
 `--------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, const char *text, int length, int line)
+shipout_text (struct obstack *obs, const char *text, idx_t length, int line)
 {
   static bool start_of_output_line = true;
   const char *cursor;
@@ -1011,7 +1010,7 @@ freeze_diversions (FILE *file)
       if (diversion->size || diversion->used)
         {
           if (diversion->size)
-            xfprintf (file, "D%"PRIdIVAL",%d\n",
+            xfprintf (file, "D%"PRIdIVAL",%td\n",
                       diversion->divnum, diversion->used);
           else
             {

@@ -129,7 +129,7 @@ arg_double (const char *str)
    Set *N to the value, or to zero if the prefix is empty.
    Return the address of the first byte after the prefix.  */
 static char const *
-parse_width (char const *fmt, int *argc, token_data ***argv, int *n)
+parse_width (char const *fmt, idx_t *argc, token_data ***argv, int *n)
 {
   if (*fmt == '*')
     {
@@ -170,7 +170,7 @@ parse_width (char const *fmt, int *argc, token_data ***argv, int *n)
 `------------------------------------------------------------------*/
 
 void
-expand_format (struct obstack *obs, int argc, token_data **argv)
+expand_format (struct obstack *obs, idx_t argc, token_data **argv)
 {
   const char *f;                /* format control string */
   const char *fmt;              /* position within f */

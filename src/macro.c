@@ -28,10 +28,10 @@ static void expand_macro (symbol *);
 static void expand_token (struct obstack *, token_type, token_data *, int);
 
 /* Current recursion level in expand_macro ().  */
-int expansion_level = 0;
+intmax_t expansion_level = 0;
 
 /* The number of the current call of expand_macro ().  */
-static int macro_call_id = 0;
+static intmax_t macro_call_id = 0;
 
 /* The shared stack of collected arguments for macro calls; as each
    argument is collected, it is finished and its location stored in
@@ -142,7 +142,7 @@ expand_argument (struct obstack *obs, token_data *argp, bool groks_macro)
   token_type t;
   token_data td;
   char *text;
-  int paren_level;
+  idx_t paren_level;
   const char *file = current_file;
   int line = current_line;
   idx_t len;
@@ -275,7 +275,7 @@ collect_arguments (symbol *sym, struct obstack *argptr,
 `-------------------------------------------------------------------*/
 
 void
-call_macro (symbol *sym, int argc, token_data **argv,
+call_macro (symbol *sym, idx_t argc, token_data **argv,
             struct obstack *expansion)
 {
   switch (SYMBOL_TYPE (sym))
@@ -315,11 +315,11 @@ expand_macro (symbol *sym)
   idx_t argv_base;              /* Size of argv_stack on entry.  */
   bool use_argc_stack = true;   /* Whether argc_stack is safe.  */
   token_data **argv;
-  int argc;
+  idx_t argc;
   struct obstack *expansion;
   const char *expanded;
   bool traced;
-  int my_call_id;
+  intmax_t my_call_id;
 
   /* Report errors at the location where the open parenthesis (if any)
      was found, but after expansion, restore global state back to the
@@ -334,9 +334,9 @@ expand_macro (symbol *sym)
 
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   expansion_level++;
-  if (nesting_limit > 0 && expansion_level > nesting_limit)
+  if (nesting_limit < expansion_level)
     m4_failure (0,
-                _("recursion limit of %d exceeded, use -L<N> to change it"),
+                _("recursion limit of %jd exceeded, use -L<N> to change it"),
                 nesting_limit);
 
   macro_call_id++;

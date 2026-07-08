@@ -116,7 +116,7 @@ typedef struct string STRING;
 
 /* Those must come first.  */
 typedef struct token_data token_data;
-typedef void builtin_func (struct obstack *, int, token_data **);
+typedef void builtin_func (struct obstack *, idx_t, token_data **);
 
 /* Gnulib's stdbool doesn't work with bool bitfields.  For nicer
    debugging, use bool when we know it works, but use the more
@@ -135,10 +135,10 @@ extern int debug_level;         /* -d */
 extern idx_t hash_table_size;   /* -H */
 extern int no_gnu_extensions;   /* -G */
 extern int prefix_all_builtins; /* -P */
-extern int max_debug_argument_length;   /* -l */
+extern idx_t max_debug_argument_length;   /* -l */
 extern int suppress_warnings;   /* -Q */
 extern int warning_status;      /* -E */
-extern int nesting_limit;       /* -L */
+extern intmax_t nesting_limit;  /* -L */
 #ifdef ENABLE_CHANGEWORD
 extern const char *user_word_regexp;    /* -W */
 #endif
@@ -286,9 +286,9 @@ extern void debug_flush_files (void);
 extern bool debug_set_output (const char *);
 extern void debug_message_prefix (void);
 
-extern void trace_prepre (const char *, int);
-extern void trace_pre (const char *, int, int, token_data **);
-extern void trace_post (const char *, int, int, const char *);
+extern void trace_prepre (const char *, intmax_t);
+extern void trace_pre (const char *, intmax_t, idx_t, token_data **);
+extern void trace_post (const char *, intmax_t, idx_t, const char *);
 
 /* File: input.c  --- lexical definitions.  */
 
@@ -319,7 +319,7 @@ struct token_data
   /* If nonnegative, this is the macro argument's length.
      Otherwise, this is a negative enum token_data_type value.
      Doing it this way makes struct token_data smaller.  */
-  int len;
+  ptrdiff_t len;
 
   union
   {
@@ -342,7 +342,7 @@ struct token_data
 };
 
 M4_INLINE void
-set_token_data_text (struct token_data *td, char *text, int len)
+set_token_data_text (struct token_data *td, char *text, idx_t len)
 {
   td->len = len;
   td->u.u_t.text = text;
@@ -368,7 +368,7 @@ TOKEN_DATA_TYPE (struct token_data const *td)
     }
   return TOKEN_TEXT;
 }
-M4_INLINE int
+M4_INLINE idx_t
 TOKEN_DATA_LEN (struct token_data const *td)
 {
   return td->len;
@@ -439,8 +439,8 @@ extern int output_current_line;
 
 extern void output_init (void);
 extern void output_exit (void);
-extern void output_text (const char *, int);
-extern void shipout_text (struct obstack *, const char *, int, int);
+extern void output_text (const char *, idx_t);
+extern void shipout_text (struct obstack *, const char *, idx_t, int);
 extern void make_diversion (ival);
 extern void insert_diversion (ival);
 extern void insert_file (FILE *);
@@ -467,11 +467,11 @@ struct symbol
   bool_bitfield macro_args:1;
   bool_bitfield blind_no_args:1;
   bool_bitfield deleted:1;
-  int pending_expansions;
+  intmax_t pending_expansions;
 
   size_t hash;
   char *name;
-  int namelen;
+  idx_t namelen;
   token_data data;
 };
 
@@ -501,15 +501,15 @@ typedef void hack_symbol (symbol *, void *);
 
 extern void free_symbol (symbol * sym);
 extern void symtab_init (void);
-extern symbol *lookup_symbol (const char *, int, symbol_lookup);
+extern symbol *lookup_symbol (const char *, idx_t, symbol_lookup);
 extern void hack_all_symbols (hack_symbol *, void *);
 
 /* File: macro.c  --- macro expansion.  */
 
-extern int expansion_level;
+extern intmax_t expansion_level;
 
 extern void expand_input (void);
-extern void call_macro (symbol *, int, token_data **, struct obstack *);
+extern void call_macro (symbol *, idx_t, token_data **, struct obstack *);
 
 /* File: builtin.c  --- builtins.  */
 
@@ -543,14 +543,14 @@ extern void builtin_init (void);
 extern void define_builtin (const char *, const builtin *, symbol_lookup);
 extern void set_macro_sequence (const char *);
 extern void free_macro_sequence (void);
-extern void define_user_macro (const char *, int, const char *, idx_t,
+extern void define_user_macro (const char *, idx_t, const char *, idx_t,
                                symbol_lookup);
 extern void undivert_all (void);
-extern void expand_user_macro (struct obstack *, symbol *, int,
+extern void expand_user_macro (struct obstack *, symbol *, idx_t,
                                token_data **);
 
 /* *INDENT-OFF* */
-extern void m4_placeholder (struct obstack *, int, token_data **)
+extern void m4_placeholder (struct obstack *, idx_t, token_data **)
   ATTRIBUTE_COLD;
 /* *INDENT-ON* */
 
@@ -573,7 +573,7 @@ extern bool evaluate (const char *, ival *);
 
 /* File: format.c  --- printf like formatting.  */
 
-extern void expand_format (struct obstack *, int, token_data **);
+extern void expand_format (struct obstack *, idx_t, token_data **);
 
 /* File: freeze.c --- frozen state files.  */
 

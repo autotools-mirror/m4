@@ -62,7 +62,7 @@ int no_gnu_extensions = 0;
 int prefix_all_builtins = 0;
 
 /* Max length of arguments in trace output (-lsize).  */
-int max_debug_argument_length = 0;
+idx_t max_debug_argument_length = IDX_MAX;
 
 /* Suppress warnings about missing arguments.  */
 int suppress_warnings = 0;
@@ -74,7 +74,7 @@ static bool fatal_warnings = false;
 int warning_status = 0;
 
 /* Artificial limit for expansion_level in macro.c.  */
-int nesting_limit = 1024;
+intmax_t nesting_limit = 1024;
 
 #ifdef ENABLE_CHANGEWORD
 /* User provided regexp for describing m4 words.  */
@@ -317,7 +317,7 @@ Limits control:\n\
   -g, --gnu                    override -G to re-enable GNU extensions\n\
   -G, --traditional            suppress all GNU extensions\n\
   -H, --hashsize=PRIME         set symbol lookup hash table size [%d]\n\
-  -L, --nesting-limit=NUMBER   change nesting limit, 0 for unlimited [%d]\n\
+  -L, --nesting-limit=NUMBER   change nesting limit, 0 for unlimited [%jd]\n\
 "), HASHMAX, nesting_limit);
       puts ("");
       fputs (_("\
@@ -515,7 +515,7 @@ main (int argc, char *const *argv)
   sigaction (SIGFPE, &act, NULL);
   sigaction (SIGBUS, &act, NULL);
   if (c_stack_action (fault_handler) == 0)
-    nesting_limit = 0;
+    nesting_limit = INTMAX_MAX;
 
 #ifdef DEBUG_STKOVF
   /* Make it easier to test our fault handlers.  Exporting M4_CRASH=0
@@ -610,11 +610,7 @@ main (int argc, char *const *argv)
         break;
 
       case 'L':
-        {
-          long int lim = strtol (optarg, NULL, 10);
-          if (ckd_add (&nesting_limit, lim, 0))
-            nesting_limit = 0;
-        }
+        nesting_limit = strtoimax (optarg, NULL, 10);
         break;
 
       case 'P':
@@ -657,9 +653,9 @@ main (int argc, char *const *argv)
 
       case 'l':
         {
-          long int len = strtol (optarg, NULL, 10);
+          intmax_t len = strtoimax (optarg, NULL, 10);
           if (len < 0 || ckd_add (&max_debug_argument_length, len, 0))
-            max_debug_argument_length = 0;
+            max_debug_argument_length = IDX_MAX;
         }
         break;
 

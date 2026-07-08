@@ -622,7 +622,7 @@ skip_line (void)
 static bool
 match_input (const char *s, bool consume)
 {
-  int n;                        /* number of characters matched */
+  idx_t n;                      /* number of characters matched */
   int ch;                       /* input character */
   const char *t;
   bool result = false;
@@ -860,10 +860,10 @@ token_type
 next_token (token_data *td, int *line)
 {
   int ch;
-  int quote_level;
+  idx_t quote_level;
   token_type type;
 #ifdef ENABLE_CHANGEWORD
-  int startpos;
+  ptrdiff_t startpos;
   char *orig_text = NULL;
 #endif
   const char *file;
@@ -1054,7 +1054,7 @@ next_token (token_data *td, int *line)
 
   obstack_1grow (&token_stack, '\0');
 
-  int len = obstack_object_size (&token_stack) - 1;
+  idx_t len = obstack_object_size (&token_stack) - 1;
   set_token_data_text (td, obstack_finish (&token_stack), len);
 #ifdef ENABLE_CHANGEWORD
   if (orig_text == NULL)

@@ -44,7 +44,7 @@
    builtin.  */
 
 #define DECLARE(name) \
-  static void name (struct obstack *, int, token_data **)
+  static void name (struct obstack *, idx_t, token_data **)
 
 DECLARE (m4___file__);
 DECLARE (m4___line__);
@@ -289,19 +289,11 @@ free_macro_sequence (void)
 `-----------------------------------------------------------------*/
 
 void
-define_user_macro (const char *name, int name_len, const char *text,
+define_user_macro (const char *name, idx_t name_len, const char *text,
                    idx_t text_len, symbol_lookup mode)
 {
   symbol *s;
   char *defn = ximemdup0 (text ? text : "", text_len);
-
-  if (text_len > INT_MAX)
-    {
-      M4ERROR ((warning_status, 0,
-                _("truncating macro %s definition to INT_MAX bytes"),
-                squote (name)));
-      text_len = INT_MAX;
-    }
 
   s = lookup_symbol (name, name_len, mode);
   if (SYMBOL_TYPE (s) == TOKEN_TEXT)
@@ -387,16 +379,15 @@ builtin_init (void)
 | Give friendly warnings if a builtin macro is passed an             |
 | inappropriate number of arguments.  NAME is the macro name for     |
 | messages, ARGC is actual number of arguments, MIN is the minimum   |
-| number of acceptable arguments, negative if not applicable, MAX is |
-| the maximum number, negative if not applicable.                    |
+| number of acceptable arguments, MAX is the maximum number.         |
 `-------------------------------------------------------------------*/
 
 static bool
-bad_argc (token_data *name, int argc, int min, int max)
+bad_argc (token_data *name, idx_t argc, idx_t min, idx_t max)
 {
   bool isbad = false;
 
-  if (min > 0 && argc < min)
+  if (argc < min)
     {
       if (!suppress_warnings)
         M4ERROR ((warning_status, 0,
@@ -404,7 +395,7 @@ bad_argc (token_data *name, int argc, int min, int max)
                   squote (TOKEN_DATA_TEXT (name))));
       isbad = true;
     }
-  else if (max > 0 && argc > max && !suppress_warnings)
+  else if (max < argc && !suppress_warnings)
     M4ERROR ((warning_status, 0,
               _("Warning: excess arguments to builtin %s ignored"),
               squote (TOKEN_DATA_TEXT (name))));
@@ -475,10 +466,10 @@ shipout_int (struct obstack *obs, ival val)
 `-------------------------------------------------------------------*/
 
 static void
-dump_args (struct obstack *obs, int argc, token_data **argv,
+dump_args (struct obstack *obs, idx_t argc, token_data **argv,
            char sep, bool quoted)
 {
-  int i;
+  idx_t i;
 
   for (i = 1; i < argc; i++)
     {
@@ -495,7 +486,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
 /* The rest of this file is code for builtins and expansion of user
    defined macros.  All the functions for builtins have a prototype as:
 
-        void m4_MACRONAME (struct obstack *obs, int argc, char *argv[]);
+        void m4_MACRONAME (struct obstack *obs, idx_t argc, char *argv[]);
 
    The function are expected to leave their expansion on the obstack OBS,
    as an unfinished object.  ARGV is a table of ARGC pointers to the
@@ -513,7 +504,7 @@ dump_args (struct obstack *obs, int argc, token_data **argv,
 `-------------------------------------------------------------------*/
 
 static void
-define_macro (int argc, token_data **argv, symbol_lookup mode)
+define_macro (idx_t argc, token_data **argv, symbol_lookup mode)
 {
   const builtin *bp;
 
@@ -557,32 +548,32 @@ define_macro (int argc, token_data **argv, symbol_lookup mode)
 }
 
 static void
-m4_define (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_define (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   define_macro (argc, argv, SYMBOL_INSERT);
 }
 
 static void
-m4_undefine (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_undefine (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
-  int i;
-  if (bad_argc (argv[0], argc, 2, -1))
+  idx_t i;
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   for (i = 1; i < argc; i++)
     lookup_symbol (ARG (i), ARGLEN (i), SYMBOL_DELETE);
 }
 
 static void
-m4_pushdef (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_pushdef (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   define_macro (argc, argv, SYMBOL_PUSHDEF);
 }
 
 static void
-m4_popdef (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_popdef (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
-  int i;
-  if (bad_argc (argv[0], argc, 2, -1))
+  idx_t i;
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   for (i = 1; i < argc; i++)
     lookup_symbol (ARG (i), ARGLEN (i), SYMBOL_POPDEF);
@@ -593,7 +584,7 @@ m4_popdef (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `---------------------*/
 
 static void
-m4_ifdef (struct obstack *obs, int argc, token_data **argv)
+m4_ifdef (struct obstack *obs, idx_t argc, token_data **argv)
 {
   symbol *s;
   int result = 0;
@@ -612,7 +603,7 @@ m4_ifdef (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_ifelse (struct obstack *obs, int argc, token_data **argv)
+m4_ifelse (struct obstack *obs, idx_t argc, token_data **argv)
 {
   int result;
   token_data *me = argv[0];
@@ -620,11 +611,11 @@ m4_ifelse (struct obstack *obs, int argc, token_data **argv)
   if (argc == 2)
     return;
 
-  if (bad_argc (me, argc, 4, -1))
+  if (bad_argc (me, argc, 4, IDX_MAX))
     return;
   else
     /* Diagnose excess arguments if 5, 8, 11, etc., actual arguments.  */
-    bad_argc (me, (argc + 2) % 3, -1, 1);
+    bad_argc (me, (argc - 1) % 3, 0, 1);
 
   argv++;
   argc--;
@@ -666,7 +657,7 @@ struct dump_symbol_data
 {
   struct obstack *obs;          /* obstack for table */
   symbol **base;                /* base of table */
-  int size;                     /* size of table */
+  idx_t size;                   /* size of table */
 };
 
 static void
@@ -698,10 +689,10 @@ dumpdef_cmp (const void *s1, const void *s2)
 `-------------------------------------------------------------*/
 
 static void
-m4_dumpdef (struct obstack *obs, int argc, token_data **argv)
+m4_dumpdef (struct obstack *obs, idx_t argc, token_data **argv)
 {
   symbol *s;
-  int i;
+  idx_t i;
   struct dump_symbol_data data;
   const builtin *bp;
 
@@ -777,12 +768,12 @@ INTERNAL ERROR: builtin not found in builtin table"));
 `-----------------------------------------------------------------*/
 
 static void
-m4_builtin (struct obstack *obs, int argc, token_data **argv)
+m4_builtin (struct obstack *obs, idx_t argc, token_data **argv)
 {
   const builtin *bp;
   const char *name;
 
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
     {
@@ -798,7 +789,7 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
     M4ERROR ((warning_status, 0, _("undefined builtin %s"), squote (name)));
   else
     {
-      int i;
+      idx_t i;
       if (!bp->groks_macro_args)
         for (i = 2; i < argc; i++)
           if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
@@ -815,12 +806,12 @@ m4_builtin (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------*/
 
 static void
-m4_indir (struct obstack *obs, int argc, token_data **argv)
+m4_indir (struct obstack *obs, idx_t argc, token_data **argv)
 {
   symbol *s;
   const char *name;
 
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   if (TOKEN_DATA_TYPE (argv[1]) != TOKEN_TEXT)
     {
@@ -836,7 +827,7 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
     M4ERROR ((warning_status, 0, _("undefined macro %s"), squote (name)));
   else
     {
-      int i;
+      idx_t i;
       if (!SYMBOL_MACRO_ARGS (s))
         for (i = 2; i < argc; i++)
           if (TOKEN_DATA_TYPE (argv[i]) != TOKEN_TEXT)
@@ -852,13 +843,13 @@ m4_indir (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------*/
 
 static void
-m4_defn (struct obstack *obs, int argc, token_data **argv)
+m4_defn (struct obstack *obs, idx_t argc, token_data **argv)
 {
   symbol *s;
   builtin_func *b;
-  int i;
+  idx_t i;
 
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
 
   assert (0 < argc);
@@ -913,7 +904,7 @@ m4_defn (struct obstack *obs, int argc, token_data **argv)
 static int sysval;
 
 static void
-m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_syscmd (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   const char *cmd = ARG (1);
   char *xcmd = NULL;
@@ -966,7 +957,7 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 }
 
 static void
-m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
+m4_esyscmd (struct obstack *obs, idx_t argc, token_data **argv)
 {
   const char *cmd = ARG (1);
   char *xcmd = NULL;
@@ -1067,7 +1058,7 @@ m4_esyscmd (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_sysval (struct obstack *obs, int argc MAYBE_UNUSED,
+m4_sysval (struct obstack *obs, idx_t argc MAYBE_UNUSED,
            token_data **argv MAYBE_UNUSED)
 {
   shipout_int (obs, sysval);
@@ -1080,7 +1071,7 @@ m4_sysval (struct obstack *obs, int argc MAYBE_UNUSED,
 `------------------------------------------------------------------*/
 
 static void
-m4_eval (struct obstack *obs, int argc, token_data **argv)
+m4_eval (struct obstack *obs, idx_t argc, token_data **argv)
 {
   ival value = 0;
   int radix = 10;
@@ -1233,7 +1224,7 @@ m4_eval (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_incr (struct obstack *obs, int argc, token_data **argv)
+m4_incr (struct obstack *obs, idx_t argc, token_data **argv)
 {
   ival value;
 
@@ -1248,7 +1239,7 @@ m4_incr (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4_decr (struct obstack *obs, int argc, token_data **argv)
+m4_decr (struct obstack *obs, idx_t argc, token_data **argv)
 {
   ival value;
 
@@ -1271,7 +1262,7 @@ m4_decr (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------*/
 
 static void
-m4_divert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_divert (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   ival i = 0;
 
@@ -1289,7 +1280,7 @@ m4_divert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `-----------------------------------------------------*/
 
 static void
-m4_divnum (struct obstack *obs, int argc, token_data **argv)
+m4_divnum (struct obstack *obs, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -1304,9 +1295,9 @@ m4_divnum (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------*/
 
 static void
-m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_undivert (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
-  int i;
+  idx_t i;
   FILE *fp;
   char *endp;
 
@@ -1351,7 +1342,7 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `-----------------------------------------------------------*/
 
 static void
-m4_dnl (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_dnl (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -1365,9 +1356,9 @@ m4_dnl (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 static void
-m4_shift (struct obstack *obs, int argc, token_data **argv)
+m4_shift (struct obstack *obs, idx_t argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   dump_args (obs, argc - 1, argv + 1, ',', true);
 }
@@ -1377,7 +1368,8 @@ m4_shift (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------------*/
 
 static void
-m4_changequote (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_changequote (struct obstack *obs MAYBE_UNUSED,
+                idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 3))
     return;
@@ -1393,7 +1385,7 @@ m4_changequote (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `-----------------------------------------------------------------*/
 
 static void
-m4_changecom (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_changecom (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 3))
     return;
@@ -1411,7 +1403,7 @@ m4_changecom (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `---------------------------------------------------------------*/
 
 static void
-m4_changeword (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_changeword (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1432,7 +1424,7 @@ m4_changeword (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `---------------------------------------------------------------*/
 
 static void
-include (int argc, token_data **argv, bool silent)
+include (idx_t argc, token_data **argv, bool silent)
 {
   FILE *fp;
   char *name;
@@ -1462,7 +1454,7 @@ include (int argc, token_data **argv, bool silent)
 `------------------------------------------------*/
 
 static void
-m4_include (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_include (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   include (argc, argv, false);
 }
@@ -1472,7 +1464,7 @@ m4_include (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `----------------------------------*/
 
 static void
-m4_sinclude (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_sinclude (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   include (argc, argv, true);
 }
@@ -1528,7 +1520,7 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
 }
 
 static void
-m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
+m4_mkstemp (struct obstack *obs, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1540,9 +1532,9 @@ m4_mkstemp (struct obstack *obs, int argc, token_data **argv)
 `----------------------------------------*/
 
 static void
-m4_errprint (struct obstack *obs, int argc, token_data **argv)
+m4_errprint (struct obstack *obs, idx_t argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   dump_args (obs, argc, argv, ' ', false);
   obstack_1grow (obs, '\0');
@@ -1552,7 +1544,7 @@ m4_errprint (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4___file__ (struct obstack *obs, int argc, token_data **argv)
+m4___file__ (struct obstack *obs, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -1562,7 +1554,7 @@ m4___file__ (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4___line__ (struct obstack *obs, int argc, token_data **argv)
+m4___line__ (struct obstack *obs, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -1570,7 +1562,7 @@ m4___line__ (struct obstack *obs, int argc, token_data **argv)
 }
 
 static void
-m4___program__ (struct obstack *obs, int argc, token_data **argv)
+m4___program__ (struct obstack *obs, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 1))
     return;
@@ -1589,7 +1581,7 @@ m4___program__ (struct obstack *obs, int argc, token_data **argv)
 `----------------------------------------------------------*/
 
 static void
-m4_m4exit (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_m4exit (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   int exit_code;
 
@@ -1626,9 +1618,9 @@ m4_m4exit (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `------------------------------------------------------------------*/
 
 static void
-m4_m4wrap (struct obstack *obs, int argc, token_data **argv)
+m4_m4wrap (struct obstack *obs, idx_t argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   if (no_gnu_extensions)
     obstack_grow (obs, ARG (1), ARGLEN (1));
@@ -1658,10 +1650,10 @@ set_trace (symbol *sym, void *data)
 }
 
 static void
-m4_traceon (struct obstack *obs, int argc, token_data **argv)
+m4_traceon (struct obstack *obs, idx_t argc, token_data **argv)
 {
   symbol *s;
-  int i;
+  idx_t i;
 
   if (argc == 1)
     hack_all_symbols (set_trace, obs);
@@ -1680,10 +1672,10 @@ m4_traceon (struct obstack *obs, int argc, token_data **argv)
 `------------------------------------------------------------------------*/
 
 static void
-m4_traceoff (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_traceoff (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   symbol *s;
-  int i;
+  idx_t i;
 
   if (argc == 1)
     hack_all_symbols (set_trace, NULL);
@@ -1704,10 +1696,10 @@ m4_traceoff (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `------------------------------------------------------------------*/
 
 static void
-m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_debugmode (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   int new_debug_level;
-  int change_flag;
+  char change_flag;
   const char *str = ARG (1);
 
   if (bad_argc (argv[0], argc, 1, 2))
@@ -1762,7 +1754,7 @@ m4_debugmode (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `-------------------------------------------------------------------------*/
 
 static void
-m4_debugfile (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_debugfile (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 1, 2))
     return;
@@ -1783,7 +1775,7 @@ m4_debugfile (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 `---------------------------------------------*/
 
 static void
-m4_len (struct obstack *obs, int argc, token_data **argv)
+m4_len (struct obstack *obs, idx_t argc, token_data **argv)
 {
   if (bad_argc (argv[0], argc, 2, 2))
     return;
@@ -1796,11 +1788,11 @@ m4_len (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------*/
 
 static void
-m4_index (struct obstack *obs, int argc, token_data **argv)
+m4_index (struct obstack *obs, idx_t argc, token_data **argv)
 {
   const char *haystack;
   const char *result;
-  int retval;
+  ptrdiff_t retval;
 
   if (bad_argc (argv[0], argc, 3, 3))
     {
@@ -1826,10 +1818,10 @@ m4_index (struct obstack *obs, int argc, token_data **argv)
 `-----------------------------------------------------------------*/
 
 static void
-m4_substr (struct obstack *obs, int argc, token_data **argv)
+m4_substr (struct obstack *obs, idx_t argc, token_data **argv)
 {
   ival start = 0, length;
-  int avail;
+  idx_t avail;
 
   if (bad_argc (argv[0], argc, 3, 4))
     {
@@ -1907,10 +1899,10 @@ expand_ranges (const char *s, struct obstack *obs)
 `-----------------------------------------------------------------*/
 
 static void
-m4_translit (struct obstack *obs, int argc, token_data **argv)
+m4_translit (struct obstack *obs, idx_t argc, token_data **argv)
 {
   const char *data = ARG (1);
-  int datalen = ARGLEN (1);
+  idx_t datalen = ARGLEN (1);
   const char *from = ARG (2);
   const char *to;
   char map[UCHAR_MAX + 1];
@@ -1967,12 +1959,12 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
      pass of data, for linear behavior.  Traditional behavior is that
      only the first instance of a character in from is consulted,
      hence the traversal backward from MIN (fromlen, tolen).  */
-  for (int i = 0; i < sizeof map; i++)
+  for (idx_t i = 0; i < sizeof map; i++)
     map[i] = i;
-  int fromlen = strlen (from), tolen = strlen (to);
-  for (int i = tolen; i < fromlen; i++)
+  idx_t fromlen = strlen (from), tolen = strlen (to);
+  for (idx_t i = tolen; i < fromlen; i++)
     map[to_uchar (from[i])] = '\0';
-  for (int i = MIN (fromlen, tolen); 0 <= --i; )
+  for (ptrdiff_t i = MIN (fromlen, tolen); 0 <= --i; )
     map[to_uchar (from[i])] = to[i];
 
   for (data = ARG (1); (ch = *data) != '\0'; data++)
@@ -1986,9 +1978,9 @@ m4_translit (struct obstack *obs, int argc, token_data **argv)
 `-------------------------------------------------------------------*/
 
 static void
-m4_format (struct obstack *obs, int argc, token_data **argv)
+m4_format (struct obstack *obs, idx_t argc, token_data **argv)
 {
-  if (bad_argc (argv[0], argc, 2, -1))
+  if (bad_argc (argv[0], argc, 2, IDX_MAX))
     return;
   expand_format (obs, argc - 1, argv + 1);
 }
@@ -2094,7 +2086,7 @@ init_pattern_buffer (struct re_pattern_buffer *buf, struct re_registers *regs)
 `------------------------------------------------------------------*/
 
 static void
-m4_regexp (struct obstack *obs, int argc, token_data **argv)
+m4_regexp (struct obstack *obs, idx_t argc, token_data **argv)
 {
   const char *victim;           /* first argument */
   const char *regexp;           /* regular expression */
@@ -2103,8 +2095,8 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
   struct re_pattern_buffer buf; /* compiled regular expression */
   struct re_registers regs;     /* for subexpression matches */
   const char *msg;              /* error message from re_compile_pattern */
-  int startpos;                 /* start position of match */
-  int length;                   /* length of first argument */
+  ptrdiff_t startpos;           /* start position of match */
+  idx_t length;                 /* length of first argument */
 
   if (bad_argc (argv[0], argc, 3, 4))
     {
@@ -2155,7 +2147,7 @@ m4_regexp (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------------*/
 
 static void
-m4_patsubst (struct obstack *obs, int argc, token_data **argv)
+m4_patsubst (struct obstack *obs, idx_t argc, token_data **argv)
 {
   const char *victim;           /* first argument */
   const char *regexp;           /* regular expression */
@@ -2163,9 +2155,9 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
   struct re_pattern_buffer buf; /* compiled regular expression */
   struct re_registers regs;     /* for subexpression matches */
   const char *msg;              /* error message from re_compile_pattern */
-  int matchpos;                 /* start position of match */
-  int offset;                   /* current match offset */
-  int length;                   /* length of first argument */
+  ptrdiff_t matchpos;           /* start position of match */
+  idx_t offset;                 /* current match offset */
+  idx_t length;                 /* length of first argument */
 
   if (bad_argc (argv[0], argc, 3, 4))
     {
@@ -2250,7 +2242,7 @@ m4_patsubst (struct obstack *obs, int argc, token_data **argv)
 `--------------------------------------------------------------------*/
 
 void
-m4_placeholder (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
+m4_placeholder (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
 {
   M4ERROR ((warning_status, 0,
             _("builtin %s requested by frozen file is not supported"),
@@ -2267,11 +2259,11 @@ m4_placeholder (struct obstack *obs MAYBE_UNUSED, int argc, token_data **argv)
 
 void
 expand_user_macro (struct obstack *obs, symbol *sym,
-                   int argc, token_data **argv)
+                   idx_t argc, token_data **argv)
 {
   const char *text = SYMBOL_TEXT (sym);
   const char *end = text + SYMBOL_TEXT_LEN (sym);
-  int i;
+  idx_t i;
   while (1)
     {
       const char *dollar = strchr (text, '$');

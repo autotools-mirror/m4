@@ -63,9 +63,9 @@ freeze_symbol (symbol *sym, void *arg)
       switch (SYMBOL_TYPE (sym))
         {
         case TOKEN_TEXT:
-          xfprintf (file, "T%d,%d\n",
-                    (int) strlen (SYMBOL_NAME (sym)),
-                    (int) strlen (SYMBOL_TEXT (sym)));
+          xfprintf (file, "T%zu,%zu\n",
+                    strlen (SYMBOL_NAME (sym)),
+                    strlen (SYMBOL_TEXT (sym)));
           fputs (SYMBOL_NAME (sym), file);
           fputs (SYMBOL_TEXT (sym), file);
           fputc ('\n', file);
@@ -79,9 +79,9 @@ freeze_symbol (symbol *sym, void *arg)
 INTERNAL ERROR: builtin not found in builtin table!"));
               abort ();
             }
-          xfprintf (file, "F%d,%d\n",
-                    (int) strlen (SYMBOL_NAME (sym)),
-                    (int) strlen (bp->name));
+          xfprintf (file, "F%zu,%zu\n",
+                    strlen (SYMBOL_NAME (sym)),
+                    strlen (bp->name));
           fputs (SYMBOL_NAME (sym), file);
           fputs (bp->name, file);
           fputc ('\n', file);
@@ -350,7 +350,7 @@ reload_frozen_state (const char *name)
               make_diversion (number[0]);
               if (number[1] > 0)
                 {
-                  int n;
+                  idx_t n;
                   if (ckd_add (&n, number[1], 0))
                     m4_failure (0, _("frozen string too long"));
                   output_text (string[1], n);

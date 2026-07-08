@@ -42,13 +42,13 @@
 
 struct profile
 {
-  int entry;                    /* Number of times lookup_symbol called with
+  intmax_t entry;               /* Number of times lookup_symbol called with
                                    this mode.  */
-  int allocations;              /* Number of times a symbol is malloc'd.  */
-  int hits;                     /* Number of times a symbol is found.  */
-  int checks;                   /* Number of times a hash is checked.  */
-  int comparisons;              /* Number of times strcmp was called.  */
-  int misses;                   /* Number of times strcmp did not return 0.  */
+  intmax_t allocations;         /* Number of times a symbol is malloc'd.  */
+  intmax_t hits;                /* Number of times a symbol is found.  */
+  intmax_t checks;              /* Number of times a hash is checked.  */
+  intmax_t comparisons;         /* Number of times strcmp was called.  */
+  intmax_t misses;              /* Number of times strcmp did not return 0.  */
   intmax_t bytes_hashed;        /* Number of bytes hashed.  */
   intmax_t bytes_compared;      /* Number of bytes compared.  */
 };
@@ -63,9 +63,9 @@ show_profile (void)
   int i;
   for (i = 0; i < 5; i++)
     {
-      xfprintf (stderr, "m4debug: lookup mode %d called %d times, %d hits:\n"
-                "m4debug:  symbols: %d allocs, %d checks, %jd bytes hashed\n"
-                "m4debug:  str: %d compares, %d misses, %jd bytes compared\n",
+      xfprintf (stderr, "m4debug: lookup mode %d called %jd times, %jd hits:\n"
+                "m4debug:  symbols: %jd allocs, %jd checks, %jd bytes hashed\n"
+                "m4debug:  str: %jd compares, %jd misses, %jd bytes compared\n",
                 i, profiles[i].entry, profiles[i].hits,
                 profiles[i].allocations, profiles[i].checks,
                 profiles[i].bytes_hashed, profiles[i].comparisons,
@@ -77,19 +77,15 @@ show_profile (void)
 static int
 profile_strcmp (const char *s1, const char *s2)
 {
-  int i = 1;
+  idx_t i = 0;
   int result;
-  while (*s1 && *s1 == *s2)
-    {
-      s1++;
-      s2++;
-      i++;
-    }
-  result = to_uchar (*s1) - to_uchar (*s2);
+  for (; s1[i] && s1[i] == s2[i]; i++)
+    continue;
+  result = to_uchar (s1[i]) - to_uchar (s2[i]);
   profiles[current_mode].comparisons++;
   if (result != 0)
     profiles[current_mode].misses++;
-  profiles[current_mode].bytes_compared += i;
+  profiles[current_mode].bytes_compared += i + 1;
   return result;
 }
 
@@ -175,7 +171,7 @@ free_symbol (symbol *sym)
 `-------------------------------------------------------------------*/
 
 symbol *
-lookup_symbol (const char *name, int len, symbol_lookup mode)
+lookup_symbol (const char *name, idx_t len, symbol_lookup mode)
 {
   size_t h;
   int cmp = 1;
@@ -390,7 +386,7 @@ hack_all_symbols (hack_symbol *func, void *data)
 
 #ifdef DEBUG_SYM
 
-static void symtab_print_list (int i);
+static void symtab_print_list (intmax_t i);
 
 static void MAYBE_UNUSED
 symtab_debug (void)
@@ -399,8 +395,8 @@ symtab_debug (void)
   const char *text;
   symbol *s;
   int delete;
-  static int i;
-  int len;
+  static intmax_t i;
+  idx_t len;
 
   while (next_token (&td, NULL) == TOKEN_WORD)
     {
@@ -426,14 +422,14 @@ symtab_debug (void)
 }
 
 static void
-symtab_print_list (int i)
+symtab_print_list (intmax_t i)
 {
-  xprintf ("Symbol dump #%d:\n", i);
+  xprintf ("Symbol dump #%jd:\n", i);
   for (idx_t h = 0; h < hash_table_size; h++)
     for (symbol *bucket = symtab[h]; bucket != NULL; bucket = bucket->next)
       for (symbol *sym = bucket; sym; sym = sym->stack)
-        xprintf ("\tname %s, len %i, hash %zu, bucket %tu, addr %p, "
-                 "stack %p, next %p, flags%s%s, pending %d\n",
+        xprintf ("\tname %s, len %td, hash %zu, bucket %td, addr %p, "
+                 "stack %p, next %p, flags%s%s, pending %jd\n",
                  SYMBOL_NAME (sym), SYMBOL_NAME_LEN (sym),
                  sym->hash, h, sym, SYMBOL_STACK (sym),
                  sym->next,
