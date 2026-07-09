@@ -599,8 +599,8 @@ main (int argc, char *const *argv)
 
       case 'H':
         {
-          long int s = strtol (optarg, NULL, 10);
-          if (!s || ckd_add (&hash_table_size, s, 0))
+          intmax_t s = strtoimax (optarg, NULL, 10);
+          if (s <= 0 || ckd_add (&hash_table_size, s, 0))
             hash_table_size = HASHMAX;
         }
         break;
