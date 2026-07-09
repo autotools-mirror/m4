@@ -424,7 +424,7 @@ numeric_arg (token_data *macro, const char *arg, ival *valuep)
   else
     {
       errno = 0;
-      intmax_t value = strtoimax (arg, &endp, 10);
+      iival value = strtoiival (arg, &endp, 10);
       if (*endp != '\0')
         {
           M4ERROR ((warning_status, 0,
@@ -1308,7 +1308,7 @@ m4_undivert (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
       {
         const char *arg = ARG (i);
         errno = 0;
-        intmax_t file = strtoimax (arg, &endp, 10);
+        iival file = strtoiival (arg, &endp, 10);
         if (*endp == '\0' && !c_isspace (*arg))
           {
             ival ifile;
