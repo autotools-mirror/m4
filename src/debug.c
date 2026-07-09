@@ -233,7 +233,7 @@ debug_message_prefix (void)
       if (debug_level & DEBUG_TRACE_FILE)
         xfprintf (debug, "%s:", cquote (current_file));
       if (debug_level & DEBUG_TRACE_LINE)
-        xfprintf (debug, "%d:", current_line);
+        xfprintf (debug, "%"PRIdIVAL":", current_line);
     }
   putc (' ', debug);
 }

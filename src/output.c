@@ -119,7 +119,7 @@ static char *output_cursor;
 static idx_t output_unused;
 
 /* Number of input line we are generating output for.  */
-int output_current_line;
+ival output_current_line;
 
 /* Temporary directory holding all spilled diversion files.  */
 static m4_temp_dir *output_temp_dir;
@@ -605,7 +605,7 @@ output_text (const char *text, idx_t length)
 `--------------------------------------------------------------------*/
 
 void
-shipout_text (struct obstack *obs, const char *text, idx_t length, int line)
+shipout_text (struct obstack *obs, const char *text, idx_t length, ival line)
 {
   static bool start_of_output_line = true;
   const char *cursor;
@@ -681,7 +681,9 @@ shipout_text (struct obstack *obs, const char *text, idx_t length, int line)
           start_of_output_line = false;
           output_current_line++;
 #ifdef DEBUG_OUTPUT
-          xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+          xfprintf (stderr,
+                    ("DEBUG: line %"PRIdIVAL", cur %"PRIdIVAL
+                     ", cur out %"PRIdIVAL"\n"),
                     line, current_line, output_current_line);
 #endif
 
@@ -691,14 +693,14 @@ shipout_text (struct obstack *obs, const char *text, idx_t length, int line)
 
           if (output_current_line != line)
             {
-              char linebuf[INT_BUFSIZE_BOUND (int)];
+              char linebuf[INT_BUFSIZE_BOUND (ival)];
               OUTPUT_CHARACTER ('#');
               OUTPUT_CHARACTER ('l');
               OUTPUT_CHARACTER ('i');
               OUTPUT_CHARACTER ('n');
               OUTPUT_CHARACTER ('e');
               OUTPUT_CHARACTER (' ');
-              for (cursor = inttostr (line, linebuf); *cursor; cursor++)
+              for (cursor = ivaltostr (line, linebuf); *cursor; cursor++)
                 OUTPUT_CHARACTER (*cursor);
               if (output_current_line < 1 && current_file[0] != '\0')
                 {
@@ -721,7 +723,9 @@ shipout_text (struct obstack *obs, const char *text, idx_t length, int line)
               start_of_output_line = false;
               output_current_line++;
 #ifdef DEBUG_OUTPUT
-              xfprintf (stderr, "DEBUG: line %d, cur %d, cur out %d\n",
+              xfprintf (stderr,
+                        ("DEBUG: line %"PRIdIVAL", cur %"PRIdIVAL
+                         ", cur out %"PRIdIVAL"\n"),
                         line, current_line, output_current_line);
 #endif
             }

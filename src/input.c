@@ -78,7 +78,7 @@ struct input_block
   struct input_block *prev;     /* previous input_block on the input stack */
   input_type type;              /* see enum values */
   const char *file;             /* file where this input is from */
-  int line;                     /* line where this input is from */
+  ival line;                    /* line where this input is from */
   union
   {
     struct
@@ -107,7 +107,7 @@ typedef struct input_block input_block;
 const char *current_file;
 
 /* Current input line number.  */
-int current_line;
+ival current_line;
 
 /* Obstack for storing individual tokens.  */
 static struct obstack token_stack;
@@ -359,7 +359,7 @@ pop_input (void)
       if (debug_level & DEBUG_TRACE_INPUT)
         {
           if (tmp)
-            DEBUG_MESSAGE2 ("input reverted to %s, line %d",
+            DEBUG_MESSAGE2 ("input reverted to %s, line %"PRIdIVAL,
                             (tmp->file == stdin_name
                              ? _(stdin_name)
                              : shquote (tmp->file)),
@@ -592,7 +592,7 @@ skip_line (void)
 {
   int ch;
   const char *file = current_file;
-  int line = current_line;
+  ival line = current_line;
 
   while ((ch = next_char ()) != CHAR_EOF && ch != '\n')
     ;
@@ -857,7 +857,7 @@ set_word_regexp (const char *regexp)
 `--------------------------------------------------------------------*/
 
 token_type
-next_token (token_data *td, int *line)
+next_token (token_data *td, ival *line)
 {
   int ch;
   idx_t quote_level;
@@ -867,7 +867,7 @@ next_token (token_data *td, int *line)
   char *orig_text = NULL;
 #endif
   const char *file;
-  int dummy;
+  ival dummy;
 
   obstack_free (&token_stack, token_bottom);
   if (!line)

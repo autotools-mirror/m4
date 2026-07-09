@@ -95,6 +95,22 @@ typedef struct macro_definition macro_definition;
 
 /* Error handling functions.  */
 
+/* Return LINE modulo (UINT_MAX + 1), warning the first time truncation occurs.
+   This is for verror_at_line, which wants 'unsigned'.  */
+static unsigned int
+modline (ival line)
+{
+  static bool wraparound_warned;
+  if (UINT_MAX < line && !wraparound_warned)
+    {
+      wraparound_warned = true;
+      M4ERROR ((warning_status, 0,
+                _("large line numbers are displayed modulo 2**%d"),
+                UINT_WIDTH));
+    }
+  return line;
+}
+
 /*-----------------------.
 | Wrapper around error.  |
 `-----------------------*/
@@ -105,7 +121,7 @@ m4_error (int status, int errnum, const char *format, ...)
   va_list args;
   va_start (args, format);
   verror_at_line (status, errnum, current_line ? current_file : NULL,
-                  current_line, format, args);
+                  modline (current_line), format, args);
   if (fatal_warnings && !retcode)
     retcode = EXIT_FAILURE;
   va_end (args);
@@ -117,7 +133,7 @@ m4_failure (int errnum, const char *format, ...)
   va_list args;
   va_start (args, format);
   verror_at_line (EXIT_FAILURE, errnum, current_line ? current_file : NULL,
-                  current_line, format, args);
+                  modline (current_line), format, args);
   assume (false);
 }
 
@@ -126,25 +142,26 @@ m4_failure (int errnum, const char *format, ...)
 `-------------------------------*/
 
 void
-m4_error_at_line (int status, int errnum, const char *file, int line,
+m4_error_at_line (int status, int errnum, const char *file, ival line,
                   const char *format, ...)
 {
   va_list args;
   va_start (args, format);
-  verror_at_line (status, errnum, line ? file : NULL, line, format, args);
+  verror_at_line (status, errnum, line ? file : NULL,
+                  modline (line), format, args);
   if (fatal_warnings && !retcode)
     retcode = EXIT_FAILURE;
   va_end (args);
 }
 
 void
-m4_failure_at_line (int errnum, const char *file, int line,
+m4_failure_at_line (int errnum, const char *file, ival line,
                     const char *format, ...)
 {
   va_list args;
   va_start (args, format);
   verror_at_line (EXIT_FAILURE, errnum, line ? file : NULL,
-                  line, format, args);
+                  modline (line), format, args);
   assume (false);
 }
 

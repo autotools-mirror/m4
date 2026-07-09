@@ -178,11 +178,11 @@ typedef intmax_t iival;
 /* *INDENT-OFF* */
 extern void m4_error (int, int, const char *, ...)
   ATTRIBUTE_COLD ATTRIBUTE_FORMAT ((__printf__, 3, 4));
-extern void m4_error_at_line (int, int, const char *, int, const char *, ...)
+extern void m4_error_at_line (int, int, const char *, ival, const char *, ...)
   ATTRIBUTE_COLD ATTRIBUTE_FORMAT ((__printf__, 5, 6));
 extern _Noreturn void m4_failure (int, const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 2, 3));
-extern _Noreturn void m4_failure_at_line (int, const char *, int,
+extern _Noreturn void m4_failure_at_line (int, const char *, ival,
                                           const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 4, 5));
 extern char *cquote (char const *);
@@ -401,7 +401,7 @@ typedef enum token_data_type token_data_type;
 
 extern void input_init (void);
 extern token_type peek_token (void);
-extern token_type next_token (token_data *, int *);
+extern token_type next_token (token_data *, ival *);
 extern void skip_line (void);
 
 /* push back input */
@@ -414,7 +414,7 @@ extern bool pop_wrapup (void);
 
 /* current input file, and line */
 extern const char *current_file;
-extern int current_line;
+extern ival current_line;
 
 /* left and right quote, begin and end comment */
 extern STRING bcomm;
@@ -435,12 +435,12 @@ extern void set_word_regexp (const char *);
 
 /* File: output.c --- output functions.  */
 extern ival current_diversion;
-extern int output_current_line;
+extern ival output_current_line;
 
 extern void output_init (void);
 extern void output_exit (void);
 extern void output_text (const char *, idx_t);
-extern void shipout_text (struct obstack *, const char *, idx_t, int);
+extern void shipout_text (struct obstack *, const char *, idx_t, ival);
 extern void make_diversion (ival);
 extern void insert_diversion (ival);
 extern void insert_file (FILE *);

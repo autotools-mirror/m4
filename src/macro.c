@@ -25,7 +25,7 @@
 #include "m4.h"
 
 static void expand_macro (symbol *);
-static void expand_token (struct obstack *, token_type, token_data *, int);
+static void expand_token (struct obstack *, token_type, token_data *, ival);
 
 /* Current recursion level in expand_macro ().  */
 intmax_t expansion_level = 0;
@@ -59,7 +59,7 @@ expand_input (void)
 {
   token_type t;
   token_data td;
-  int line;
+  ival line;
 
   obstack_init (&argc_stack);
   obstack_init (&argv_stack);
@@ -80,7 +80,7 @@ expand_input (void)
 `----------------------------------------------------------------*/
 
 static void
-expand_token (struct obstack *obs, token_type t, token_data *td, int line)
+expand_token (struct obstack *obs, token_type t, token_data *td, ival line)
 {
   symbol *sym;
 
@@ -144,7 +144,7 @@ expand_argument (struct obstack *obs, token_data *argp, bool groks_macro)
   char *text;
   idx_t paren_level;
   const char *file = current_file;
-  int line = current_line;
+  ival line = current_line;
   idx_t len;
 
   set_token_data_void (argp);
@@ -328,9 +328,9 @@ expand_macro (symbol *sym)
      current_file/current_line (dnl, include, and sinclude are special
      cased in the input engine to ensure this fact).  */
   const char *loc_open_file = current_file;
-  int loc_open_line = current_line;
+  ival loc_open_line = current_line;
   const char *loc_close_file;
-  int loc_close_line;
+  ival loc_close_line;
 
   SYMBOL_PENDING_EXPANSIONS (sym)++;
   if (nesting_limit <= expansion_level)

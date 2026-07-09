@@ -17,6 +17,9 @@ GNU M4 NEWS - User visible changes.
 ** Loading from a frozen file now checks for format errors more carefully,
    without possibly undefined behavior (present since 1.3).
 
+** m4 no longer has undefined behavior if input has 2**31 lines
+   (present since "the beginning").
+
 ** On 64-bit hosts, macro names, arguments and contents no longer
    must be less than 2**31 bytes long (present since "the beginning").
 
