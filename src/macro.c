@@ -333,11 +333,11 @@ expand_macro (symbol *sym)
   int loc_close_line;
 
   SYMBOL_PENDING_EXPANSIONS (sym)++;
-  expansion_level++;
-  if (nesting_limit < expansion_level)
+  if (nesting_limit <= expansion_level)
     m4_failure (0,
                 _("recursion limit of %jd exceeded, use -L<N> to change it"),
                 nesting_limit);
+  expansion_level++;
 
   macro_call_id++;
   my_call_id = macro_call_id;
