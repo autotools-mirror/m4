@@ -1994,8 +1994,6 @@ m4_format (struct obstack *obs, idx_t argc, token_data **argv)
 | Nth parenthesized sub-expression, taken from REGS[N].             |
 `------------------------------------------------------------------*/
 
-static int substitute_warned = 0;
-
 static void
 substitute (struct obstack *obs, const char *victim, const char *repl,
             struct re_registers *regs)
@@ -2015,12 +2013,15 @@ substitute (struct obstack *obs, const char *victim, const char *repl,
       switch (ch)
         {
         case '0':
-          if (!substitute_warned)
-            {
-              M4ERROR ((warning_status, 0, _("\
+          {
+            static bool substitute_warned;
+            if (!substitute_warned)
+              {
+                substitute_warned = true;
+                M4ERROR ((warning_status, 0, _("\
 Warning: \\0 will disappear, use \\& instead in replacements")));
-              substitute_warned = 1;
-            }
+              }
+          }
           FALLTHROUGH;
         case '&':
           obstack_grow (obs, victim + regs->start[0],
