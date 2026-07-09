@@ -6286,6 +6286,10 @@ Integers to be formatted should fall in the same range as that of @code{eval}.
 @xref{Eval}.
 Widths, precisions and floating point arguments are subject to machine limits
 that may differ from that of @code{eval}.
+Output might be rounded incorrectly for floating point arguments that
+do not have exact machine equivalents.
+Integer overflows result in output that is numerically correct but might
+use the wrong format.
 Numeric overflows result in a warning.
 
 Unrecognized specifiers also result in a warning.
@@ -6306,6 +6310,14 @@ format(`%p', `0')
 @example
 format(`%'format(`%c', `128'))
 @result{}
+@end example
+
+@comment Check that overflowing integers are formatted as strings.
+
+@comment xerr: ignore
+@example
+format(`%d', `-999999999999999999999999999999999999999999999999999999999999')
+@result{}-999999999999999999999999999999999999999999999999999999999999
 @end example
 @end ignore
 

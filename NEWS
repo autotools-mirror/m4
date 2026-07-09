@@ -35,6 +35,8 @@ GNU M4 NEWS - User visible changes.
 
 ** `format' now formats integers using the same precision as `eval',
    silently ignoring any `hh', `h' and `l' length modifiers.
+   If an integer overflows, it now formats it as a string, to be more
+   useful when debugging.
 
 ** Macro argument references out of range, e.g., `$999999999999999999999',
    now expand to the empty string even if the integer modulo 2**32 would

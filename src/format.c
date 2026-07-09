@@ -52,12 +52,19 @@ arg_int (const char *str)
   int result;
   overflow |= ckd_add (&result, value, 0);
   if (overflow)
-    M4ERROR ((warning_status, 0, _("numeric overflow detected")));
+    {
+      M4ERROR ((warning_status, 0, _("numeric overflow detected")));
+      /* Return the closest extremum: this is the most useful when debugging
+         width and precision overflow, and is good enough for %c.  */
+      return value < 0 ? INT_MIN : INT_MAX;
+    }
   return result;
 }
 
-/* Parse STR as an ival, reporting warnings.  */
-static ival
+/* Parse STR as an ival, reporting warnings.  Return the ival and an
+   overflow indicator that is null if no overflow occurred, the end of
+   the parsed number otherwise.  */
+static struct arg_long { ival val; char const *overflow; }
 arg_long (const char *str)
 {
   char *endp;
@@ -65,7 +72,7 @@ arg_long (const char *str)
   if (!*str)
     {
       M4ERROR ((warning_status, 0, _("empty string treated as 0")));
-      return 0L;
+      return (struct arg_long) {0};
     }
   errno = 0;
   iival value = strtoiival (str, &endp, 10);
@@ -78,7 +85,7 @@ arg_long (const char *str)
   overflow |= ckd_add (&result, value, 0);
   if (overflow)
     M4ERROR ((warning_status, 0, _("numeric overflow detected")));
-  return result;
+  return (struct arg_long) {result, overflow ? endp : NULL};
 }
 
 /* Parse STR as a double, reporting warnings.  */
@@ -108,10 +115,6 @@ arg_double (const char *str)
 #define ARG_INT(argc, argv) \
   (((argc) == 0) ? 0 : \
    ((argc)--, arg_int (TOKEN_DATA_TEXT (*(argv)++))))
-
-#define ARG_LONG(argc, argv) \
-  (((argc) == 0) ? 0 : \
-   ((argc)--, arg_long (TOKEN_DATA_TEXT (*(argv)++))))
 
 #define ARG_STR(argc, argv) \
   (((argc) == 0) ? "" : \
@@ -344,6 +347,7 @@ expand_format (struct obstack *obs, idx_t argc, token_data **argv)
           break;
 
         case 's':
+        case_s:
           *p++ = 's';
           *p = '\0';
           str = xasprintf (fstart, width, prec, ARG_STR (argc, argv));
@@ -355,10 +359,24 @@ expand_format (struct obstack *obs, idx_t argc, token_data **argv)
         case 'x':
         case 'X':
         case 'u':
+          ;
+          struct arg_long arg = {0};
+          if (argc)
+            {
+              arg = arg_long (TOKEN_DATA_TEXT (*argv));
+              if (arg.overflow)
+                {
+                  /* Numeric overflow was detected.  Format as a string;
+                     this loses less information when debugging.  */
+                  prec = MIN (INT_MAX, arg.overflow - TOKEN_DATA_TEXT (*argv));
+                  goto case_s;
+                }
+              argc--, argv++;
+            }
           p = mempcpy (p, PRIdIVAL, sizeof PRIdIVAL - 2);
           *p++ = c;
           *p = '\0';
-          str = xasprintf (fstart, width, prec, ARG_LONG (argc, argv));
+          str = xasprintf (fstart, width, prec, arg.val);
           break;
 
         case 'a':
