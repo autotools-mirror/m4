@@ -394,29 +394,29 @@ symtab_debug (void)
   token_data td;
   const char *text;
   symbol *s;
-  int delete;
   static intmax_t i;
   idx_t len;
 
   while (next_token (&td, NULL) == TOKEN_WORD)
     {
+      enum symbol_lookup mode;
       text = TOKEN_DATA_TEXT (&td);
       len = TOKEN_DATA_LEN (&td);
       if (*text == '_')
         {
-          delete = 1;
+          mode = SYMBOL_DELETE;
           text++;
           len--;
         }
       else
-        delete = 0;
+        mode = SYMBOL_INSERT;
 
       s = lookup_symbol (text, len, SYMBOL_LOOKUP);
 
       if (s == NULL)
         xprintf ("Name %s is unknown\n", squote (text));
 
-      lookup_symbol (text, len, delete ? SYMBOL_DELETE : SYMBOL_INSERT);
+      lookup_symbol (text, len, mode);
     }
   symtab_print_list (i++);
 }

@@ -156,11 +156,11 @@ STRING ecomm;
 
 static char word_start[256];
 static struct re_pattern_buffer word_regexp;
-static int default_word_regexp;
+static bool default_word_regexp;
 static struct re_registers regs;
 
 #else /* ! ENABLE_CHANGEWORD */
-# define default_word_regexp 1
+# define default_word_regexp true
 #endif /* ! ENABLE_CHANGEWORD */
 
 #ifdef DEBUG_INPUT

@@ -546,7 +546,7 @@ make_room_for (idx_t length)
     (output_unused--, *output_cursor++ = (Char))
 
 static void
-output_character_helper (int character)
+output_character_helper (char character)
 {
   make_room_for (1);
 

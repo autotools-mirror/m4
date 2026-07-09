@@ -165,7 +165,7 @@ produce_frozen_state (const char *name)
 `----------------------------------------------------------------------*/
 
 static void
-issue_expect_message (int expected)
+issue_expect_message (char expected)
 {
   if (expected == '\n')
     m4_failure (0, _("expecting line feed in frozen file"));
@@ -184,7 +184,7 @@ reload_frozen_state (const char *name)
 {
   FILE *file;
   int character;
-  int operation;
+  char operation;
   char *string[2];
   idx_t allocated[2];
   ival number[2];

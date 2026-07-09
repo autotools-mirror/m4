@@ -47,7 +47,7 @@
 static _Noreturn void usage (int);
 
 /* Enable sync output for /lib/cpp (-s).  */
-int sync_output = 0;
+bool sync_output;
 
 /* Debug (-d[flags]).  */
 int debug_level = 0;
@@ -56,16 +56,16 @@ int debug_level = 0;
 idx_t hash_table_size = HASHMAX;
 
 /* Disable GNU extensions (-G).  */
-int no_gnu_extensions = 0;
+bool no_gnu_extensions;
 
 /* Prefix all builtin functions by `m4_'.  */
-int prefix_all_builtins = 0;
+bool prefix_all_builtins;
 
 /* Max length of arguments in trace output (-lsize).  */
 idx_t max_debug_argument_length = IDX_MAX;
 
 /* Suppress warnings about missing arguments.  */
-int suppress_warnings = 0;
+bool suppress_warnings;
 
 /* If true, then warnings affect exit status.  */
 static bool fatal_warnings = false;
@@ -594,7 +594,7 @@ main (int argc, char *const *argv)
         break;
 
       case 'G':
-        no_gnu_extensions = 1;
+        no_gnu_extensions = true;
         break;
 
       case 'H':
@@ -614,11 +614,11 @@ main (int argc, char *const *argv)
         break;
 
       case 'P':
-        prefix_all_builtins = 1;
+        prefix_all_builtins = true;
         break;
 
       case 'Q':
-        suppress_warnings = 1;
+        suppress_warnings = true;
         break;
 
       case 'R':
@@ -648,7 +648,7 @@ main (int argc, char *const *argv)
         break;
 
       case 'g':
-        no_gnu_extensions = 0;
+        no_gnu_extensions = false;
         break;
 
       case 'l':
@@ -747,7 +747,7 @@ main (int argc, char *const *argv)
           break;
 
         case 's':
-          sync_output = 1;
+          sync_output = true;
           break;
 
         case '\1':

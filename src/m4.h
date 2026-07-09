@@ -130,13 +130,13 @@ typedef unsigned int bool_bitfield;
 /* File: m4.c  --- global definitions.  */
 
 /* Option flags.  */
-extern int sync_output;         /* -s */
+extern bool sync_output;        /* -s */
 extern int debug_level;         /* -d */
 extern idx_t hash_table_size;   /* -H */
-extern int no_gnu_extensions;   /* -G */
-extern int prefix_all_builtins; /* -P */
+extern bool no_gnu_extensions;  /* -G */
+extern bool prefix_all_builtins;/* -P */
 extern idx_t max_debug_argument_length;   /* -l */
-extern int suppress_warnings;   /* -Q */
+extern bool suppress_warnings;  /* -Q */
 extern int warning_status;      /* -E */
 extern intmax_t nesting_limit;  /* -L */
 #ifdef ENABLE_CHANGEWORD
