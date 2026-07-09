@@ -22,11 +22,13 @@
 #include "m4.h"
 
 #include <limits.h>
+#include <stdckdint.h>
 #include <sys/stat.h>
 
 #include "gl_avltree_oset.h"
 #include "gl_xoset.h"
 #include "inttostr.h"
+#include "minmax.h"
 
 /* Work around a bogus GCC warning
    <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=116426>.  */
@@ -38,9 +40,11 @@
    would usually fit in.  */
 #define INITIAL_BUFFER_SIZE 512
 
-/* Maximum value for the total of all in-memory buffer sizes for
-   diversions.  */
-#define MAXIMUM_TOTAL_SIZE (512 * 1024)
+/* Soft limit for the total of all in-memory buffer sizes for diversions.
+   When about to exceed the limit, go on a diet by flushing the single
+   largest buffer.  This may not suffice, which is why it is a soft
+   limit not a hard one.  */
+enum { BIG_TOTAL_SIZE = 512 * 1024 };
 
 /* Size of buffer size to use while copying files.  */
 #define COPY_BUFFER_SIZE (32 * 512)
@@ -410,9 +414,10 @@ output_exit (void)
 /*----------------------------------------------------------------.
 | Reorganize in-memory diversion buffers so the current diversion |
 | can accommodate LENGTH more characters without further          |
-| reorganization.  The current diversion buffer is made bigger if |
-| possible.  But to make room for a bigger buffer, one of the     |
-| in-memory diversion buffers might have to be flushed to a newly |
+| reorganization, where LENGTH is so large that the characters    |
+| don't fit now.  The current diversion buffer is made bigger if  |
+| possible.  But to try to make room for a bigger buffer, an      |
+| in-memory diversion buffer might have to be flushed to a newly  |
 | created temporary file.  This flushed buffer might well be the  |
 | current one.                                                    |
 `----------------------------------------------------------------*/
@@ -420,24 +425,21 @@ output_exit (void)
 static void
 make_room_for (idx_t length)
 {
-  idx_t wanted_size;
   m4_diversion *selected_diversion = NULL;
 
   /* Compute needed size for in-memory buffer.  Diversions in-memory
-     buffers start at 0 bytes, then 512, then keep doubling until it is
+     buffers start at 0 bytes, then keep growing via xpalloc until it is
      decided to flush them to disk.  */
 
-  output_diversion->used = output_diversion->size - output_unused;
+  idx_t oldsize = output_diversion->size;
+  idx_t incr_min = MAX (length - output_unused,
+                        oldsize ? 0 : INITIAL_BUFFER_SIZE);
+  output_diversion->used = oldsize - output_unused;
 
-  for (wanted_size = output_diversion->size;
-       wanted_size < output_diversion->used + length;
-       wanted_size = wanted_size == 0 ? INITIAL_BUFFER_SIZE : wanted_size * 2)
-    ;
+  /* If the new total would exceed BIG_TOTAL_SIZE,
+     flush the largest buffer to try to make room.  */
 
-  /* Check if we are exceeding the maximum amount of buffer memory.  */
-
-  if (total_buffer_size - output_diversion->size + wanted_size
-      > MAXIMUM_TOTAL_SIZE)
+  if (BIG_TOTAL_SIZE - total_buffer_size < incr_min)
     {
       idx_t selected_used;
       char *selected_buffer;
@@ -516,14 +518,14 @@ make_room_for (idx_t length)
         }
 
       /* The current buffer may be safely reallocated.  */
-      {
-        char *buffer = output_diversion->u.buffer;
-        output_diversion->u.buffer = ximalloc (wanted_size);
-        if (output_diversion->used)
-          memcpy (output_diversion->u.buffer, buffer, output_diversion->used);
-        free (buffer);
-      }
-
+      ptrdiff_t n_max = (ckd_add (&n_max, oldsize, incr_min)
+                         ? -1 /* Cause xpalloc to fail.  */
+                         : MAX (n_max,
+                                (BIG_TOTAL_SIZE - total_buffer_size
+                                 + output_diversion->size)));
+      idx_t wanted_size = oldsize;
+      output_diversion->u.buffer = xpalloc (output_diversion->u.buffer,
+                                            &wanted_size, incr_min, n_max, 1);
       total_buffer_size += wanted_size - output_diversion->size;
       output_diversion->size = wanted_size;
 
