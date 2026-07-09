@@ -28,14 +28,12 @@ struct includes
 {
   struct includes *next;        /* next directory to search */
   const char *dir;              /* directory */
-  int len;
 };
 
 typedef struct includes includes;
 
 static includes *dir_list;      /* the list of path directories */
 static includes *dir_list_end;  /* the end of same */
-static int dir_max_length;      /* length of longest directory name */
 
 
 void
@@ -43,7 +41,6 @@ include_init (void)
 {
   dir_list = NULL;
   dir_list_end = NULL;
-  dir_max_length = 0;
 }
 
 void
@@ -88,11 +85,7 @@ add_include_directory (const char *dir)
 
   incl = (includes *) xmalloc (sizeof (struct includes));
   incl->next = NULL;
-  incl->len = strlen (dir);
   incl->dir = xstrdup (dir);
-
-  if (incl->len > dir_max_length)       /* remember len of longest directory */
-    dir_max_length = incl->len;
 
   if (dir_list_end == NULL)
     dir_list = incl;
