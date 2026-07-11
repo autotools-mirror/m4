@@ -6347,7 +6347,8 @@ Increment and decrement of integers are supported using the builtins
 @deffnx Builtin decr (@var{number})
 Expand to the numerical value of @var{number}, incremented
 or decremented, respectively, by one.  Except for the empty string, the
-expansion is empty if @var{number} could not be parsed.
+expansion is empty if @var{number} could not be parsed or is outside
+the range of @code{eval} (@pxref{Eval}).
 
 The macros @code{incr} and @code{decr} are recognized only with
 parameters.
@@ -6408,10 +6409,12 @@ Expands to the value of @var{expression}.  The expansion is empty
 if a problem is encountered while parsing the arguments.  If specified,
 @var{radix} and @var{width} control the format of the output.
 
-Calculations are done with signed integers of at least 64 bits.
-Overflow silently results in wraparound.
-A warning is issued if division by zero is
-attempted, or if @var{expression} could not be parsed.
+Calculations are done with signed integers of at least 64 bits.  A
+warning is issued if @var{expression} could not be parsed, or if
+overflow occurs, or if division by zero is attempted.  If a warning is
+issued, the result is the empty string.  These behaviors are GNU
+extensions, as POSIX leaves the behavior undefined if expressions are
+ill-formed or if computation would go outside 32-bit range.
 
 Expressions can contain the following operators, listed in order of
 decreasing precedence.
@@ -6422,9 +6425,9 @@ Parentheses
 @item +  -  ~  !
 Unary plus and minus, and bitwise and logical negation
 @item **
-Exponentiation
+Exponentiation (a GNU extension)
 @item *  /  %
-Multiplication, division, and modulo
+Multiplication, division, and remainder
 @item +  -
 Addition and subtraction
 @item <<  >>
@@ -6454,10 +6457,9 @@ operators that perform variable assignment, such as @samp{+=} or
 constants, not variables.  Attempting to use them results in an error.
 However, since traditional implementations treated @samp{=} as an
 undocumented alias for @samp{==} as opposed to an assignment operator,
-this usage is supported as a special case.  Be aware that a future
-version of GNU M4 may support assignment semantics as an
-extension when POSIX mode is not requested, and that using
-@samp{=} to check equality is not portable.
+this usage is supported as a special case, albeit with a warning.
+A future version of GNU M4 may support assignment semantics as an
+extension to POSIX, so using @samp{=} to check equality is not portable.
 
 @comment status: 1
 @example
@@ -6487,8 +6489,8 @@ identical instead of lower than the relational operators such as
 1.4.9, GNU M4 correctly follows POSIX precedence
 rules.  M4 scripts designed to be portable between releases must be
 aware that parentheses may be required to enforce C precedence rules.
-Likewise, division by zero, even in the unused branch of a
-short-circuiting operator, is not always well-defined in other
+Likewise, integer overflow and division by zero, even in the unused branch
+of a short-circuiting operator, are not always well-defined in other
 implementations.
 
 Following are some examples where the current version of M4 follows C
@@ -6555,15 +6557,46 @@ eval(`4 ** -2')
 @ignore
 @comment This test makes sure the algorithm is fast, but does not
 @comment need to be displayed as-is in the manual.
+@comment The 86714325046 makes the test portable (albeit slow!)
+@comment to a hypothetical version of GNU m4 that uses libgmp for arithmetic.
+@comment libgmp goes up to 2**2**37,
+@comment and 86714325046 == ceil (2**37 * log(2)/log(3)).
 
+@comment options: -E
+@comment status: 1
 @example
-eval(`3**2000000000 & 0x7fffffffffffffff')
-@result{}4651562608559722497
+eval(`3**86714325046')
+@error{}m4:stdin:1: numeric overflow detected in eval: `3**86714325046'
+@result{}
+eval(`0**86714325046')
+@result{}0
+eval(`1**86714325046')
+@result{}1
+eval(`-1**86714325046')
+@result{}1
+eval(`-1**86714325047')
+@result{}-1
 define(`loop', `ifelse(`$1', `1000', `pass',
-`loop(eval($1+!!(3**2000000000)))')')loop(0)
+`loop(eval($1+!!(1**86714325046)))')')loop(0)
 @result{}pass
-define(`check', `ifelse(`$1', `100', `pass', `$2', eval(-3**$1),
-`check(incr($1), eval(-3*$2))', `oops')')check(0, 1)
+@end example
+
+@comment The 40 below tests that eval computes with at least 64 bits,
+@comment as 3**39 < 2**63 < 3**40.
+@comment xerr: ignore
+@comment options: -E
+@comment status: 1
+@example
+dnl libgmp goes up to 2**2**37,
+dnl and 86714325046 == ceil (2**37 * log(2)/log(3)).
+define(`check',
+  `ifelse(`$1', `86714325046', `tired of testing',
+          `$2', eval(`-3 ** $1'),
+            `ifelse(`$2',,
+                       `ifelse(eval(`$1 < 40'), `1', `oops ($1 < 40)',
+                                    `pass')',
+                    `check(incr($1), eval(`-3 * $2'))')',
+          `oops ($2 != eval(`-3 ** $1'))')')check(0, 1)
 @result{}pass
 @end example
 @end ignore
@@ -6571,7 +6604,7 @@ define(`check', `ifelse(`$1', `100', `pass', `$2', eval(-3**$1),
 Within @var{expression}, (but not @var{radix} or @var{width}), numbers
 without a special prefix are decimal.  A simple @samp{0} prefix
 introduces an octal number.  @samp{0x} introduces a hexadecimal number.
-As GNU extensions, @samp{0b} introduces a binary number.
+As GNU extensions, @samp{0b} introduces a binary number, and
 @samp{0r} introduces a number expressed in any radix between 1 and 36:
 the prefix should be immediately followed by the decimal expression of
 the radix, a colon, then the digits making the number.  For radix 1,
@@ -6579,7 +6612,7 @@ leading zeros are ignored, and all remaining digits must be @samp{1};
 for all other radices, the digits are @samp{0}, @samp{1}, @samp{2},
 @dots{}.  Beyond @samp{9}, the digits are @samp{a}, @samp{b} @dots{} up
 to @samp{z}.  Lower and upper case letters can be used interchangeably
-in numbers prefixes and as number digits.
+in number prefixes and as number digits.
 
 Parentheses may be used to group subexpressions whenever needed.  For the
 relational operators, a true relation returns @code{1}, and a false
@@ -6629,24 +6662,26 @@ names, even if they expand to a valid expression (or part of a valid
 expression).  Therefore all macros must be expanded before they are
 passed to @code{eval}.
 
-Some calculations are not portable to other implementations, since they
-have undefined semantics in C, but GNU @code{m4} has
-well-defined behavior on overflow.  When shifting,
-a left shift of a negative number loses the sign bit,
-a right shift of a negative number propagates the sign bit right,
-a shift by a negative count goes in the opposite direction,
-and a shift by the word size or greater shifts all the word's bits.
+GNU M4 has well-defined behavior for some calculations that have
+undefined behavior in C and are therefore not portable to other
+implementations, including to GNU M4 1.4.21 and earlier.
+Remaindering always yields the numerically correct answer.
+Shifts work reliably on negative numbers:
+a left shift multiplies by a power of two,
+a right shift divides by a power of two and truncates towards minus infinity,
+and a shift by a negative count goes in the opposite direction.
+Overflow in shifting is treated like any other integer overflow.
 
 @example
 define(`int64_max', eval(`0x7fffffffffffffff'))
 @result{}
-define(`int64_min', eval(`-1 - 'int64_max))
+define(`int64_min', `(-1-'int64_max`)')
 @result{}
 eval(int64_min` < 0')
 @result{}1
 eval(int64_max` > 0')
 @result{}1
-int64_min
+eval(int64_min)
 @result{}-9223372036854775808
 eval(int64_min` % -1')
 @result{}0
@@ -7818,10 +7853,10 @@ equality operators (@samp{==} and @samp{!=}) had the same precedence as
 relational operators (such as @samp{<}).  Use explicit parentheses to
 ensure proper precedence.  As extensions to POSIX,
 GNU @code{m4} gives well-defined semantics to operations that
-C leaves undefined, such as when overflow occurs, when shifting negative
-numbers, or when performing division by zero.  POSIX also
-requires @samp{=} to cause an error, but many traditional
-implementations allowed it as an alias for @samp{==}.
+POSIX leaves undefined, such as when overflow occurs, when shifting negative
+numbers, or when dividing by zero.  Many traditional
+implementations accepted @samp{=} as an alias for @samp{==};
+GNU @code{m4} issues a warning.
 
 @item
 POSIX 2001 requires @code{translit} (@pxref{Translit}) to

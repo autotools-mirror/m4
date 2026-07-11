@@ -26,6 +26,12 @@ GNU M4 NEWS - User visible changes.
 ** `eval' now computes with at least 64-bit integers, instead of
    insisting on 32 bits only.
 
+** `eval' no longer has undefined behavior on integer overflow.
+   Formerly, although `eval' usually silently returned the low-order 32
+   bits of the two's-complement result, this wasn't true on all platforms.
+   Now `eval' instead treats overflow like other numeric errors: it issues
+   a warning and returns the empty string (present since "the beginning").
+
 ** `eval' no longer takes shift counts modulo 32.
    Instead, negative shift counts shift in the opposite direction,
    and shift counts greater than the word size shift the whole word.

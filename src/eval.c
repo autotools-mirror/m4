@@ -44,6 +44,7 @@ typedef enum eval_token
   LNOT,
   NOT,
   NUMBER,
+  BIGNUM,
   LOR = 10,
   LAND = 20,
   OR = 30,
@@ -75,6 +76,7 @@ typedef enum eval_error
   DIVIDE_ZERO,
   MODULO_ZERO,
   NEGATIVE_EXPONENT,
+  INTEGER_OVERFLOW,
   /* All errors prior to SYNTAX_ERROR can be ignored in a dead
      branch of && and ||.  All errors after are just more details
      about a syntax error.  */
@@ -132,6 +134,7 @@ eval_lex (ival *val)
       int base, digit;
       ival value;
       bool seen_digit = false;
+      bool v = false;
 
       if (*eval_text == '0')
         {
@@ -184,7 +187,7 @@ eval_lex (ival *val)
           if (base == 1)
             {
               if (digit == 1)
-                ckd_add (&value, value, 1);
+                v |= ckd_add (&value, value, 1);
               else if (digit == 0 && value == 0)
                 continue;
               else
@@ -194,13 +197,15 @@ eval_lex (ival *val)
             return BADNUM;
           else
             {
-              ckd_mul (&value, value, base);
-              ckd_add (&value, value, digit);
+              v |= ckd_mul (&value, value, base);
+              v |= ckd_add (&value, value, digit);
             }
         }
       *val = toival (value);
       if (!seen_digit)
         return BADNUM;
+      if (!IVAL_32_BIT && v)
+        return BIGNUM;
       return NUMBER;
     }
 
@@ -320,6 +325,8 @@ primary (ival *v1)
       /* Number */
     case NUMBER:
       return NO_ERROR;
+    case BIGNUM:
+      return INTEGER_OVERFLOW;
 
       /* Parenthesis */
     case LEFTP:
@@ -346,7 +353,8 @@ primary (ival *v1)
       return primary (v1);
     case MINUS:
       er = primary (v1);
-      ckd_sub (v1, 0, *v1);
+      if (ckd_sub (v1, 0, *v1) && !IVAL_32_BIT)
+        er = INTEGER_OVERFLOW;
       *v1 = toival (*v1);
       return er;
     case NOT:
@@ -402,33 +410,47 @@ parse_expr (ival *v1, eval_error er, int min_prec)
         case EXPONENT:
           if (v2 < 0)
             er = NEGATIVE_EXPONENT;
-          else if (*v1 == 0 && v2 == 0)
-            er = DIVIDE_ZERO;
+          else if (v2 == 0)
+            {
+              if (!*v1)
+                er = DIVIDE_ZERO;
+              *v1 = 1;
+            }
           else
             {
               ival u1 = *v1, u2 = v2, u3 = 1;
-              while (u2)
+              bool v = false;
+              while (true)
                 {
                   if (u2 & 1)
-                    ckd_mul (&u3, u3, u1);
-                  ckd_mul (&u1, u1, u1);
+                    v |= ckd_mul (&u3, u3, u1);
                   u2 >>= 1;
+                  if (!u2)
+                    break;
+                  v |= ckd_mul (&u1, u1, u1);
                 }
+              if (v && !IVAL_32_BIT)
+                er = INTEGER_OVERFLOW;
               *v1 = toival (u3);
             }
           break;
 
         case TIMES:
-          ckd_mul (v1, *v1, v2);
-          *v1 = toival (*v1);
+          {
+            ival product;
+            if (ckd_mul (&product, *v1, v2) && !IVAL_32_BIT)
+              er = INTEGER_OVERFLOW;
+            *v1 = toival (product);
+          }
           break;
         case DIVIDE:
           if (v2 == 0)
             er = DIVIDE_ZERO;
-          else if (v2 == -1)
+          else if (v2 == -1 && *v1 < -IVAL_MAX)
             {
               /* Avoid undefined behavior on IVAL_MIN / -1.  */
-              ckd_sub (v1, 0, *v1);
+              if (ckd_sub (v1, 0, *v1) && !IVAL_32_BIT)
+                er = INTEGER_OVERFLOW;
               *v1 = toival (*v1);
             }
           else
@@ -445,35 +467,40 @@ parse_expr (ival *v1, eval_error er, int min_prec)
           break;
 
         case PLUS:
-          ckd_add (v1, *v1, v2);
+          if (ckd_add (v1, *v1, v2) && !IVAL_32_BIT)
+            er = INTEGER_OVERFLOW;
           *v1 = toival (*v1);
           break;
         case MINUS:
-          ckd_sub (v1, *v1, v2);
+          if (ckd_sub (v1, *v1, v2) && !IVAL_32_BIT)
+            er = INTEGER_OVERFLOW;
           *v1 = toival (*v1);
           break;
 
+        case RSHIFT:
+          if (ckd_sub (&v2, 0, v2))
+            v2 = IVAL_WIDTH;
+          FALLTHROUGH;
         case LSHIFT:
           if (v2 < 0)
             *v1 = (*v1 < 0
                    ? ~(-IVAL_WIDTH < v2 ? ~*v1 >> -v2 : 0)
                    :  (-IVAL_WIDTH < v2 ?  *v1 >> -v2 : 0));
-          else
+          else if (v2 < IVAL_WIDTH)
             {
-              ckd_add (v1, v2 < IVAL_WIDTH ? (uival) {*v1} << v2 : 0, 0);
-              *v1 = toival (*v1);
-            }
-          break;
-        case RSHIFT:
-          if (v2 < 0)
-            {
-              ckd_add (v1, -IVAL_WIDTH < v2 ? (uival) {*v1} << -v2 : 0, 0);
-              *v1 = toival (*v1);
+              ival shifted;
+              ckd_add (&shifted, (uival) {*v1} << v2, 0);
+              if (!IVAL_32_BIT
+                  && *v1 != (shifted < 0 ? ~(~shifted >> v2) : shifted >> v2))
+                er = INTEGER_OVERFLOW;
+              *v1 = toival (shifted);
             }
           else
-            *v1 = (*v1 < 0
-                   ? ~(v2 < IVAL_WIDTH ? ~*v1 >> v2 : 0)
-                   :  (v2 < IVAL_WIDTH ?  *v1 >> v2 : 0));
+            {
+              if (!IVAL_32_BIT && *v1)
+                er = INTEGER_OVERFLOW;
+              *v1 = 0;
+            }
           break;
 
         case GT:
@@ -543,7 +570,7 @@ Warning: recommend ==, not =, for equality operator")));
 | Main entry point, called from "eval".  |
 `---------------------------------------*/
 
-bool
+signed char
 evaluate (const char *expr, ival *val)
 {
   eval_error err;
@@ -569,8 +596,11 @@ evaluate (const char *expr, ival *val)
 
   switch (err)
     {
+    case INTEGER_OVERFLOW:
+      return -1;
+
     case NO_ERROR:
-      break;
+      return 1;
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
@@ -626,5 +656,5 @@ evaluate (const char *expr, ival *val)
       abort ();
     }
 
-  return err != NO_ERROR;
+  return 0;
 }

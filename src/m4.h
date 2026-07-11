@@ -147,7 +147,8 @@ extern const char *user_word_regexp;    /* -W */
 extern int retcode;
 
 /* Integers for 'eval', and their maximum value, width, and formatters.
-   Builders can compile with -DIVAL_32_BIT for traditional 32-bit behavior,
+   Builders can compile with -DIVAL_32_BIT for traditional 32-bit behavior
+   and wraparound arithmetic without overflow checking,
    even when 32 < INT_WIDTH.  This is a temporary measure so that we
    can test it both ways; the intent is drop support for IVAL_32_BIT.  */
 #ifndef IVAL_32_BIT
@@ -156,6 +157,7 @@ extern int retcode;
 #if IVAL_32_BIT
 typedef int ival;
 # define IVAL_MAX INT_MAX
+# define IVAL_MIN INT_MIN
 # define IVAL_WIDTH INT_WIDTH
 # define ivaltostr inttostr
 # define PRIdIVAL "d"
@@ -166,6 +168,7 @@ typedef long int iival;
 #else
 typedef intmax_t ival;
 # define IVAL_MAX INTMAX_MAX
+# define IVAL_MIN INTMAX_MIN
 # define IVAL_WIDTH INTMAX_WIDTH
 # define ivaltostr imaxtostr
 # define PRIdIVAL PRIdMAX
@@ -569,7 +572,7 @@ extern FILE *m4_path_search (const char *, bool, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-extern bool evaluate (const char *, ival *);
+extern signed char evaluate (const char *, ival *);
 
 /* File: format.c  --- printf like formatting.  */
 

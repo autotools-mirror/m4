@@ -406,10 +406,11 @@ bad_argc (token_data *name, idx_t argc, idx_t min, idx_t max)
 /*--------------------------------------------------------------.
 | In macro MACRO, convert ARG to an ival pointed to by VALUEP.  |
 | Diagnose any failure.                                         |
-| Return true iff conversion succeeds.                          |
+| Return 0 on failure, 1 on success without overflow,           |
+| -1 (setting *VALUEP to an extreme value) on overflow.         |
 `--------------------------------------------------------------*/
 
-static bool
+static signed char
 numeric_arg (token_data *macro, const char *arg, ival *valuep)
 {
   char *endp;
@@ -430,7 +431,7 @@ numeric_arg (token_data *macro, const char *arg, ival *valuep)
           M4ERROR ((warning_status, 0,
                     _("non-numeric argument to builtin %s"),
                     squote (TOKEN_DATA_TEXT (macro))));
-          return false;
+          return 0;
         }
       bool range_error = errno == ERANGE;
       if (c_isspace (*arg))
@@ -439,11 +440,15 @@ numeric_arg (token_data *macro, const char *arg, ival *valuep)
                   squote (TOKEN_DATA_TEXT (macro))));
       if (ckd_add (valuep, value, 0)
 	  || *valuep != toival (*valuep) || range_error)
-        M4ERROR ((warning_status, 0,
-                  _("numeric overflow detected in builtin %s"),
-                  squote (TOKEN_DATA_TEXT (macro))));
+        {
+          M4ERROR ((warning_status, 0,
+                    _("numeric overflow detected in builtin %s"),
+                    squote (TOKEN_DATA_TEXT (macro))));
+          *valuep = value < 0 ? IVAL_MIN : IVAL_MAX;
+          return -1;
+        }
     }
-  return true;
+  return 1;
 }
 
 /*---------------------------------------------------.
@@ -1112,8 +1117,18 @@ m4_eval (struct obstack *obs, idx_t argc, token_data **argv)
   if (!*expr)
     M4ERROR ((warning_status, 0,
               _("empty string treated as 0 in builtin %s"), squote (ARG (0))));
-  else if (evaluate (expr, &value))
-    return;
+  else
+    {
+      signed char numeric = evaluate (expr, &value);
+      if (numeric <= 0)
+        {
+          if (numeric < 0)
+            M4ERROR ((warning_status, 0,
+                      _("numeric overflow detected in eval: %s"),
+                      squote (expr)));
+          return;
+        }
+    }
 
   bool negative = value < 0;
 
@@ -1226,31 +1241,42 @@ m4_eval (struct obstack *obs, idx_t argc, token_data **argv)
 static void
 m4_incr (struct obstack *obs, idx_t argc, token_data **argv)
 {
-  ival value;
+  ival value, value1;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), &value))
-    return;
-
-  ckd_add (&value, value, 1);
-  shipout_int (obs, value);
+  signed char numeric = numeric_arg (argv[0], ARG (1), &value);
+  if (0 < numeric)
+    {
+      /* If the addition overflows, add 1 to the last digit of the
+         non-overflowed representation.  This works because IVAL_MAX % 10
+         cannot be 9, as IVAL_MAX is one less than a power of 2.  */
+      bool v = ckd_add (&value1, value, 1);
+      shipout_int (obs, v ? value : value1);
+      obstack_next_free (obs)[-1] += v;
+    }
 }
 
 static void
 m4_decr (struct obstack *obs, idx_t argc, token_data **argv)
 {
-  ival value;
+  ival value, value1;
 
   if (bad_argc (argv[0], argc, 2, 2))
     return;
 
-  if (!numeric_arg (argv[0], ARG (1), &value))
-    return;
-
-  ckd_sub (&value, value, 1);
-  shipout_int (obs, value);
+  signed char numeric = numeric_arg (argv[0], ARG (1), &value);
+  if (0 < numeric)
+    {
+      /* If the subtraction overflows, add 1 to the last digit of the
+         non-overflowed representation.  This works because IVAL_MIN % 10
+         cannot be -9, as IVAL_MIN either is the negative of a power of 2,
+         or (on unusual pre-C23 platforms) is one greater than that.  */
+      bool v = ckd_sub (&value1, value, 1);
+      shipout_int (obs, v ? value : value1);
+      obstack_next_free (obs)[-1] += v;
+    }
 }
 
 /* This section contains the macros "divert", "undivert" and "divnum" for
@@ -1269,8 +1295,14 @@ m4_divert (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
   if (bad_argc (argv[0], argc, 1, 2))
     return;
 
-  if (argc >= 2 && !numeric_arg (argv[0], ARG (1), &i))
-    return;
+  if (argc >= 2)
+    {
+      signed char numeric = numeric_arg (argv[0], ARG (1), &i);
+      if (!numeric)
+        return;
+      if (numeric < 0)
+        i = -1;
+    }
 
   make_diversion (i);
 }
