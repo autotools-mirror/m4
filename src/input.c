@@ -28,7 +28,7 @@
 /* Unread input can be either files, that should be read (eg. included
    files), strings, which should be rescanned (eg. macro expansion text),
    or quoted macro definitions (as returned by the builtin "defn").
-   Unread input are organised in a stack, implemented with an obstack.
+   Unread input is organized in a stack, implemented with an obstack.
    Each input source is described by a "struct input_block".  The obstack
    is "current_input".  The top of the input stack is "isp".
 
@@ -45,7 +45,7 @@
    Pushing new input on the input stack is done by push_file (),
    push_string (), push_wrapup () (for wrapup text), and push_macro ()
    (for macro definitions).  Because macro expansion needs direct access
-   to the current input obstack (for optimisation), push_string () are
+   to the current input obstack (for optimization), push_string () is
    split in two functions, push_string_init (), which returns a pointer
    to the current input stack, and push_string_finish (), which return a
    pointer to the final text.  The input_block *next is used to manage

@@ -161,7 +161,7 @@ _ ==> eq_a_a => T
 _
 _ If the T or F result of `eq' or other boolean-valued macro
 _ is to be juxtaposed with succeeding text, care must be
-_ taken to prevent unwanted catenation. An intervening
+_ taken to prevent unwanted concatenation. An intervening
 _ quoted empty string suffices to make the separation.
 _
 _    eq(a,b)`'eq(c,d) ==> FF
@@ -213,7 +213,7 @@ _    ==> if(eq(0,),...,`if(eq(head((0,(1,()))),0),...)')
 _    ==> iszero(tail(0,(1,())))
 _    ==> iszero((1,())) ==> F
 _
-_ Basic to all arithmeic is the successor function.
+_ Basic to all arithmetic is the successor function.
 _
 define(`succ',_
 __`if(iszero($1), one,_
@@ -388,7 +388,7 @@ _
 _ The definition of `_dim' exploits the fact that $1>$2
 _ when it is called from `dim'. Thus at every recursive
 _ level $1>=$2. The last line of `_dim', where $1=(0,...)
-_ and $2=(1,...), implements traditonal "borrowing" from
+_ and $2=(1,...), implements traditional "borrowing" from
 _ the tail of $1 by incrementing the tail of $2.
 _
 define(`dim', `if(le($1,$2), `()', `trim(_dim($1,$2))')')_
@@ -419,7 +419,7 @@ define(`_rev',_
 __`if(isempty($1), $2,_
 __`_rev(tail($1),(head($1),$2))')')_
 _
-_ `trim' deletes insignifcant zero bits from a number.
+_ `trim' deletes insignificant zero bits from a number.
 _
 define(`trim',_
 __`if(eq(head($1),`'), `()',_
@@ -561,8 +561,8 @@ _
 _ Example
 _
 _    table() ==>
-_    0	1	
-_    1	10	
+_    0	1
+_    1	10
 _
 _
 _        Comparison functions
@@ -664,7 +664,7 @@ _ of which can accumulate over multiple executions
 _ of `cmp'.
 _
 _ Ghost definitions are not only numerous; they are
-_ repeatedy redefined. If all alphanumeric pairs are
+_ repeatedly redefined. If all alphanumeric pairs are
 _ equally likely, an average of about 120 redefinitions
 _ and 60 copies of tails will occur for each execution
 _ of `cmp'.
@@ -933,7 +933,7 @@ _ cmpl          compare lists of atoms lexicographically
 _ nth           get nth element
 _ map           apply function elementwise
 _ foldr         reduce to scalar by right-associated operator
-_ foldl         reduce to scalar by left-assocciated operator
+_ foldl         reduce to scalar by left-associated operator
 _ rev           reverse
 _ length        count elements
 _ zip           apply function to combine lists elementwise

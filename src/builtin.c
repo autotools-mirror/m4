@@ -284,7 +284,7 @@ free_macro_sequence (void)
 
 /*-----------------------------------------------------------------.
 | Define a predefined or user-defined macro, with name NAME, and   |
-| expansion TEXT.  MODE destinguishes between the "define" and the |
+| expansion TEXT.  MODE distinguishes between the "define" and the |
 | "pushdef" case.  It is also used from main.                      |
 `-----------------------------------------------------------------*/
 

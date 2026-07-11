@@ -35,7 +35,7 @@ static struct obstack trace;
 static void debug_set_file (FILE *);
 
 /*----------------------------------.
-| Initialise the debugging module.  |
+| Initialize the debugging module.  |
 `----------------------------------*/
 
 void

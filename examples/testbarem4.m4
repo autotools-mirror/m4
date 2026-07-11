@@ -88,7 +88,7 @@ _ <c> in a list of characters compare low to <c> and all
 _ characters after <c> compare high. if <c> is absent, all
 _ characters are deemed to precede it. If <c> is duplicated,
 _ the second instance is deemed to come after the first. `ttab'
-_ (transition table) tells whether adjacent judgements conform
+_ (transition table) tells whether adjacent judgments conform
 _ to the specification.
 _
 switch2of2(`ttab',`$1',`$2')_

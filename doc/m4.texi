@@ -6303,7 +6303,7 @@ format(`%p', `0')
 
 @ignore
 @comment Expose a crash with a bad format string fixed in 1.4.15.
-@comment Unfortuntely, 8-bit bytes are hard to check for; but the
+@comment Unfortunately, 8-bit bytes are hard to check for; but the
 @comment exit status is enough to sniff the crash in broken versions.
 
 @comment xerr: ignore
@@ -6326,8 +6326,8 @@ format(`%d', `-999999999999999999999999999999999999999999999999999999999999')
 
 @cindex arithmetic
 @cindex integer arithmetic
-Integer arithmetic is included in @code{m4}, with a C-like syntax.  As
-convenient shorthands, there are builtins for simple increment and
+Integer arithmetic is included in @code{m4}, with a C-like syntax.
+For convenience, there are builtins for simple increment and
 decrement operations.
 
 @menu
@@ -7516,7 +7516,7 @@ exit with status 63 to indicate version mismatch.
 
 @cindex frozen file format
 @cindex file format, frozen file
-Frozen files are sharable across architectures.  It is safe to write
+Frozen files are shareable across architectures.  It is safe to write
 a frozen file on one machine and read it on another, given that the
 second machine uses the same or newer version of GNU @code{m4}.
 It is conventional, but not required, to give a frozen file the suffix

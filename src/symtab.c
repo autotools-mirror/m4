@@ -94,7 +94,7 @@ profile_strcmp (const char *s1, const char *s2)
 
 
 /*------------------------------------------------------------------.
-| Initialise the symbol table, by allocating the necessary storage, |
+| Initialize the symbol table, by allocating the necessary storage, |
 | and zeroing all the entries.                                      |
 `------------------------------------------------------------------*/
 
