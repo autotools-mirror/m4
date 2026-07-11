@@ -7765,42 +7765,27 @@ arguments, giving @code{adefineb} for the above example.
 
 @item
 Traditional implementations handle @code{define(`f',`1')} (@pxref{Define})
-by undefining the entire stack of previous definitions, and if doing
+by undefining the entire stack of previous definitions, as if doing
 @code{undefine(`f')} first.  GNU @code{m4} replaces just the top
 definition on the stack, as if doing @code{popdef(`f')} followed by
 @code{pushdef(`f',`1')}.  POSIX allows either behavior.
 
 @item
-POSIX 2001 requires @code{syscmd} (@pxref{Syscmd}) to evaluate
-command output for macro expansion, but this was a mistake that is
-anticipated to be corrected in the next version of POSIX@.
-GNU @code{m4} follows traditional behavior in @code{syscmd}
-where output is not rescanned, and provides the extension @code{esyscmd}
-that does scan the output.
-
-@item
-At one point, POSIX required @code{changequote(@var{arg})}
-(@pxref{Changequote}) to use newline as the close quote, but this was a
-bug, and the next version of POSIX is anticipated to state
-that using empty strings or just one argument is unspecified.
-Meanwhile, the GNU @code{m4} behavior of treating an empty
+POSIX states that behavior is unspecified if @code{changequote} is given
+just one argument, or if either argument is provided but empty,
+or if either argument contains letters, digits, underscore, or @samp{(}.
+The GNU @code{m4} behavior of treating an empty
 end-quote delimiter as @samp{'} is not portable, as Solaris treats it as
 repeating the start-quote delimiter, and BSD treats it as leaving the
 previous end-quote delimiter unchanged.  For predictable results, never
-call changequote with just one argument, or with empty strings for
-arguments.
+call changequote with empty strings for arguments.
+POSIX requires support only for strings containing five characters or less.
 
 @item
-At one point, POSIX required @code{changecom(@var{arg},)}
-(@pxref{Changecom}) to make it impossible to end a comment, but this is
-a bug, and the next version of POSIX is anticipated to state
-that using empty strings is unspecified.  Meanwhile, the GNU
-@code{m4} behavior of treating an empty end-comment delimiter as newline
-is not portable, as BSD treats it as leaving the previous end-comment
-delimiter unchanged.  It is also impossible in BSD implementations to
-disable comments, even though that is required by POSIX@.  For
-predictable results, never call changecom with empty strings for
-arguments.
+POSIX states that behavior is unspecified if either argument of
+@code{changecom} is provided but empty,
+or if either argument contains letters, digits, underscore, or @samp{(}.
+POSIX requires support only for strings containing five characters or less.
 
 @item
 Most implementations of @code{m4} give macros a higher precedence than
@@ -7859,25 +7844,12 @@ implementations accepted @samp{=} as an alias for @samp{==};
 GNU @code{m4} issues a warning.
 
 @item
-POSIX 2001 requires @code{translit} (@pxref{Translit}) to
-treat each character of the second and third arguments literally.
-However, it is anticipated that the next version of POSIX will
-allow the GNU @code{m4} behavior of treating @samp{-} as a
-range operator.
-
-@item
 POSIX requires @code{m4} to honor the locale environment
-variables of @env{LANG}, @env{LC_ALL}, @env{LC_CTYPE},
-@env{LC_MESSAGES}, and @env{NLSPATH}, but this has not yet been
-implemented in GNU @code{m4}.
-
-@item
-POSIX states that only unquoted leading newlines and blanks
-(that is, space and tab) are ignored when collecting macro arguments.
-However, this appears to be a bug in POSIX, since most
-traditional implementations also ignore all whitespace (formfeed,
-carriage return, and vertical tab).  GNU @code{m4} follows
-tradition and ignores all leading unquoted whitespace.
+variables @env{LANG}, @env{LC_ALL}, and @env{LC_CTYPE}
+to determining which multibyte sequences are characters,
+but this has not yet been implemented in GNU @code{m4}.
+GNU @code{m4} does support those variables, along with
+@env{LC_MESSAGES} and @env{NLSPATH}, when outputting diagnostics.
 
 @item
 @cindex @env{POSIXLY_CORRECT}
