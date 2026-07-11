@@ -31,6 +31,9 @@ SUFFIXES = .1
 # makeinfo versions ≥ 6.8.
 AM_MAKEINFOFLAGS = -c CHECK_NORMAL_MENU_STRUCTURE=1
 
+# Tell makeinfo to put everything in a single info file: <package>.info.
+AM_MAKEINFOFLAGS += --no-split
+
 HELP2MAN = $(SHELL) $(top_srcdir)/build-aux/missing --run help2man
 
 # Depend on ../.version for version, m4.c for usage text.  Do not depend on
