@@ -1204,7 +1204,7 @@ m4_eval (struct obstack *obs, idx_t argc, token_data **argv)
     }
 
   idx_t alloc;
-  if (ckd_sub (&alloc, negative, MIN (negdigits, -min)) || SIZE_MAX < alloc)
+  if (ckd_sub (&alloc, +negative, MIN (negdigits, -min)) || SIZE_MAX < alloc)
     xalloc_die ();
 
   obstack_blank (obs, alloc);

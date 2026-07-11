@@ -126,7 +126,7 @@ hash (const char *s)
 {
   size_t val = 0;
   for (; *s; s++)
-    ckd_add (&val, stdc_rotate_left (val, 7), *s);
+    ckd_add (&val, stdc_rotate_left (val, 7), +*s);
   return val;
 }
 
