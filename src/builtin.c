@@ -1117,18 +1117,8 @@ m4_eval (struct obstack *obs, idx_t argc, token_data **argv)
   if (!*expr)
     M4ERROR ((warning_status, 0,
               _("empty string treated as 0 in builtin %s"), squote (ARG (0))));
-  else
-    {
-      signed char numeric = evaluate (expr, &value);
-      if (numeric <= 0)
-        {
-          if (numeric < 0)
-            M4ERROR ((warning_status, 0,
-                      _("numeric overflow detected in eval: %s"),
-                      squote (expr)));
-          return;
-        }
-    }
+  else if (evaluate (expr, &value))
+    return;
 
   bool negative = value < 0;
 

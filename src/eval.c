@@ -570,7 +570,7 @@ Warning: recommend ==, not =, for equality operator")));
 | Main entry point, called from "eval".  |
 `---------------------------------------*/
 
-signed char
+bool
 evaluate (const char *expr, ival *val)
 {
   eval_error err;
@@ -596,11 +596,8 @@ evaluate (const char *expr, ival *val)
 
   switch (err)
     {
-    case INTEGER_OVERFLOW:
-      return -1;
-
     case NO_ERROR:
-      return 1;
+      return false;
 
     case MISSING_RIGHT:
       M4ERROR ((warning_status, 0,
@@ -650,11 +647,16 @@ evaluate (const char *expr, ival *val)
                 squote (expr)));
       break;
 
+    case INTEGER_OVERFLOW:
+      M4ERROR ((warning_status, 0, _("numeric overflow detected in eval: %s"),
+                squote (expr)));
+      break;
+
     default:
       M4ERROR ((warning_status, 0,
                 "INTERNAL ERROR: bad error code in evaluate ()"));
       abort ();
     }
 
-  return 0;
+  return true;
 }

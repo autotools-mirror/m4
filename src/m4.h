@@ -572,7 +572,7 @@ extern FILE *m4_path_search (const char *, bool, char **);
 
 /* File: eval.c  --- expression evaluation.  */
 
-extern signed char evaluate (const char *, ival *);
+extern bool evaluate (const char *, ival *);
 
 /* File: format.c  --- printf like formatting.  */
 
