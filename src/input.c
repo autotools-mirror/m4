@@ -194,7 +194,7 @@ push_file (FILE *fp, const char *title)
 
   if (debug_level & DEBUG_TRACE_INPUT)
     DEBUG_MESSAGE1 ("input read from %s",
-                    title ? shquote (title) : _(stdin_name));
+                    title ? sh_quote (title) : _(stdin_name));
 
   i = (input_block *) obstack_alloc (current_input,
                                      sizeof (struct input_block));
@@ -362,7 +362,7 @@ pop_input (void)
             DEBUG_MESSAGE2 ("input reverted to %s, line %"PRIdIVAL,
                             (tmp->file == stdin_name
                              ? _(stdin_name)
-                             : shquote (tmp->file)),
+                             : sh_quote (tmp->file)),
                             tmp->line);
           else
             DEBUG_MESSAGE ("input exhausted");

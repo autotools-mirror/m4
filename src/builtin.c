@@ -955,7 +955,7 @@ m4_syscmd (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
     {
       if (status == 127 && errno)
         M4ERROR ((warning_status, errno, _("cannot run command %s"),
-                  shquote (cmd)));
+                  sh_quote (cmd)));
       sysval = status;
     }
   free (xcmd);
@@ -1006,7 +1006,7 @@ m4_esyscmd (struct obstack *obs, idx_t argc, token_data **argv)
   if (child == -1)
     {
       M4ERROR ((warning_status, errno, _("cannot run command %s"),
-                shquote (cmd)));
+                sh_quote (cmd)));
       sysval = 127;
       return;
     }
@@ -1020,7 +1020,7 @@ m4_esyscmd (struct obstack *obs, idx_t argc, token_data **argv)
   if (pin == NULL)
     {
       M4ERROR ((warning_status, errno, _("cannot run command %s"),
-                shquote (cmd)));
+                sh_quote (cmd)));
       sysval = 127;
       close (fd);
       return;
@@ -1056,7 +1056,7 @@ m4_esyscmd (struct obstack *obs, idx_t argc, token_data **argv)
     {
       if (status == 127 && errno)
         M4ERROR ((warning_status, errno, _("cannot run command %s"),
-                  shquote (cmd)));
+                  sh_quote (cmd)));
       sysval = status;
     }
   free (xcmd);
@@ -1471,7 +1471,7 @@ include (idx_t argc, token_data **argv, bool silent)
       if (!silent)
         {
           M4ERROR ((warning_status, errno, _("cannot open %s"),
-                    shquote (arg)));
+                    sh_quote (arg)));
           retcode = EXIT_FAILURE;
         }
       return;
@@ -1539,7 +1539,7 @@ mkstemp_helper (struct obstack *obs, const char *me, const char *pattern,
   if (fd < 0)
     {
       M4ERROR ((0, errno, _("%s cannot create tempfile %s"),
-                shquote_n (0, me), shquote_n (1, pattern)));
+                sh_quote_n (0, me), sh_quote_n (1, pattern)));
       obstack_free (obs, obstack_finish (obs));
     }
   else
@@ -1795,7 +1795,7 @@ m4_debugfile (struct obstack *obs MAYBE_UNUSED, idx_t argc, token_data **argv)
     debug_set_output (NULL);
   else if (!debug_set_output (ARG (1)))
     M4ERROR ((warning_status, errno,
-              _("cannot set debug file %s"), shquote (ARG (1))));
+              _("cannot set debug file %s"), sh_quote (ARG (1))));
 }
 
 /* This section contains text processing macros: "len", "index",

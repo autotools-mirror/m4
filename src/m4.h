@@ -189,8 +189,8 @@ extern _Noreturn void m4_failure_at_line (int, const char *, ival,
                                           const char *, ...)
   ATTRIBUTE_FORMAT ((__printf__, 4, 5));
 extern char *cquote (char const *);
-extern char *shquote (char const *);
-extern char *shquote_n (int, char const *);
+extern char *sh_quote (char const *);
+extern char *sh_quote_n (int, char const *);
 extern char *squote (char const *);
 extern char *squote_n (int, char const *);
 /* *INDENT-ON* */

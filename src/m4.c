@@ -178,14 +178,14 @@ cquote (char const *arg)
    is not delimited by colons and/or newlinews.
    N specifies the quoting slot, ARG the string to quote.  */
 char *
-shquote_n (int n, char const *arg)
+sh_quote_n (int n, char const *arg)
 {
   return quotearg_n_style (n, shell_escape_always_quoting_style, arg);
 }
 char *
-shquote (char const *arg)
+sh_quote (char const *arg)
 {
-  return shquote_n (0, arg);
+  return sh_quote_n (0, arg);
 }
 
 /* "Single quote" for diagnostics with white space around the quoted string.
@@ -450,7 +450,7 @@ process_file (const char *name)
       FILE *fp = m4_path_search (name, false, &full_name);
       if (fp == NULL)
         {
-          error (0, errno, _("cannot open %s"), shquote (name));
+          error (0, errno, _("cannot open %s"), sh_quote (name));
           /* Set the status to EXIT_FAILURE, even though we
              continue to process files after a missing file.  */
           retcode = EXIT_FAILURE;
@@ -708,7 +708,7 @@ main (int argc, char *const *argv)
   /* Do the basic initializations.  */
   if (debugfile && !debug_set_output (debugfile))
     M4ERROR ((warning_status, errno, _("cannot set debug file %s"),
-              shquote (debugfile)));
+              sh_quote (debugfile)));
 
   input_init ();
   output_init ();
@@ -775,7 +775,7 @@ main (int argc, char *const *argv)
         case DEBUGFILE_OPTION:
           if (!debug_set_output (defines->arg))
             M4ERROR ((warning_status, errno, _("cannot set debug file %s"),
-                      debugfile ? shquote (debugfile) : _("stderr")));
+                      debugfile ? sh_quote (debugfile) : _("stderr")));
           break;
 
         default:
