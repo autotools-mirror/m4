@@ -118,11 +118,11 @@ arg_double (const char *str)
 
 #define ARG_STR(argc, argv) \
   (((argc) == 0) ? "" : \
-   ((argc)++, TOKEN_DATA_TEXT (*(argv)++)))
+   ((argc)--, TOKEN_DATA_TEXT (*(argv)++)))
 
 #define ARG_DOUBLE(argc, argv) \
   (((argc) == 0) ? 0 : \
-   ((argc)++, arg_double (TOKEN_DATA_TEXT (*(argv)++))))
+   ((argc)--, arg_double (TOKEN_DATA_TEXT (*(argv)++))))
 
 /* Parse a width or precision from FMT's prefix.
    If FMT[-1] == '.' this is a precision instead of a width.
